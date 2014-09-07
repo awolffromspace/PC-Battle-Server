@@ -214,7 +214,7 @@ exports.commands = {
 				alreadyAdded.push(tarUser);
 				continue;
 			}
-			this.say(con, room, '/roomban ' + tarUser + ', Blacklisted user');
+			this.say(con, room, '/ban ' + tarUser + ', Blacklisted user');
 			this.say(con,room, '/modnote ' + tarUser + ' was added to the blacklist by ' + by + '.');
 			added.push(tarUser);
 		}
