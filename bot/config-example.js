@@ -48,7 +48,7 @@ exports.autoReloginDelay = 60 * 1000;
 * Rooms to join
 */
 
-exports.rooms = ['lobby', 'worldofpc', 'mariokart', 'darkalley', 'spanish', 'french', 'portuguese', 'hindi'];
+exports.rooms = ['lobby', 'worldofpc', 'mariokart', 'darkalley', 'franais', 'johtoleagueshowdown', 'kamehouse'];
 /*
 * exports.rooms = 'all'; //For joining all rooms
 * exports.rooms = 'official'; //For joining official rooms
