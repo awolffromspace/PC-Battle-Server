@@ -91,7 +91,7 @@ function canTalk(user, room, connection, message, targetUser) {
 			this.errorReply("You are locked from talking in chat.");
 			return false;
 		}
-		if (room && user.namelocked) {
+		if (room && user.nameLocked) {
 			this.errorReply("You are locked from talking in chat.");
 			return false;
 		}
