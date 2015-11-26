@@ -1943,7 +1943,7 @@ exports.commands = {
 		if (!this.canBroadcast()) return;
 		this.sendReplyBox(
 			"+ <b>Voices</b> - Respected regulars. They can create and moderate tournaments; start and end polls; use /html, /declare, /showimage, /announce; and talk during moderated chat.<br />" +
-			'\u2605 <b>Players</b> - Members who have won a notable competition or bought a black star through the "/shop" (temporary).<br />' +
+			"\u2605 <b>Players</b> - Members who have won a notable competition or bought a black star through the /shop (temporary).<br />" +
 			"@ <b>Moderators</b> - Moderate the battle server and provide feedback on staff decisions. They can use most commands.<br />" +
 			"~ <b>Administrators</b> - Manage the battle server. They can use all commands.<br />" +
 			"# <b>Room Owners</b> - Manage rooms and can almost totally control them."
