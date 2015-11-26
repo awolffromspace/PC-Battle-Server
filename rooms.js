@@ -134,6 +134,9 @@ let Room = (function () {
 		}
 		this.bannedUsers[userid] = userid;
 		if (user.autoconfirmed) this.bannedUsers[user.autoconfirmed] = userid;
+		if (global.Tournaments && Tournaments.get(this.id)) {
+			Tournaments.get(this.id).removeBannedUser(user);
+		}
 		for (let ip in user.ips) {
 			this.bannedIps[ip] = userid;
 		}
@@ -894,6 +897,7 @@ let BattleRoom = (function () {
 
 	BattleRoom.prototype.resetTimer = null;
 	BattleRoom.prototype.resetUser = '';
+	BattleRoom.prototype.modchatUser = '';
 	BattleRoom.prototype.expireTimer = null;
 	BattleRoom.prototype.active = false;
 
@@ -1273,6 +1277,17 @@ let BattleRoom = (function () {
 
 		return false;
 	};
+	BattleRoom.prototype.requestModchat = function (user) {
+		if (user === null) {
+			this.modchatUser = '';
+			return;
+		} else if (user.can('modchat') || !this.modchatUser || this.modchatUser === user.userid) {
+			this.modchatUser = user.userid;
+			return;
+		} else {
+			return "Only the user who set modchat and global staff can change modchat levels in battle rooms";
+		}
+	};
 	BattleRoom.prototype.decision = function (user, choice, data) {
 		this.battle.sendFor(user, choice, data);
 		if (this.active !== this.battle.active) {
@@ -1460,6 +1475,7 @@ let ChatRoom = (function () {
 			this.rollLogFile(true);
 			this.logEntry = function (entry, date) {
 				let timestamp = (new Date()).format('{HH}:{mm}:{ss} ');
+				entry = entry.replace(/<img[^>]* src="data:image\/png;base64,[^">]+"[^>]*>/g, '');
 				this.logFile.write(timestamp + entry + '\n');
 			};
 			this.logEntry('NEW CHATROOM: ' + this.id);

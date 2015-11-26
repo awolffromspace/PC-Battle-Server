@@ -473,6 +473,7 @@ exports.commands = {
 		} else {
 			if (!this.can('makeroom')) return;
 		}
+		if (room.tour && !room.tour.tour.modjoin) return this.errorReply("You can't do this in tournaments where modjoin is prohibited.");
 		if (target === 'off' || target === 'false') {
 			delete room.modjoin;
 			this.addModCommand("" + user.name + " turned off modjoin.");
@@ -508,11 +509,13 @@ exports.commands = {
 			return this.errorReply("/officialroom - This room can't be made official");
 		}
 		if (target === 'off') {
+			if (!room.isOfficial) return this.errorReply("This chat room is already unofficial.");
 			delete room.isOfficial;
 			this.addModCommand("" + user.name + " made this chat room unofficial.");
 			delete room.chatRoomData.isOfficial;
 			Rooms.global.writeChatRoomData();
 		} else {
+			if (room.isOfficial) return this.errorReply("This chat room is already official.");
 			room.isOfficial = true;
 			this.addModCommand("" + user.name + " made this chat room official.");
 			room.chatRoomData.isOfficial = true;
@@ -745,6 +748,12 @@ exports.commands = {
 				return this.errorReply("/" + cmd + " - Access denied for promoting/demoting to " + Config.groups[nextGroup].name + ".");
 			}
 		}
+		if (targetUser && targetUser.locked && !room.isPrivate && !room.battle && !room.isPersonal && (nextGroup === '%' || nextGroup === '@')) {
+			Monitor.log("[CrisisMonitor] " + user.name + " was automatically demoted in " + room.id + " for trying to promote locked user: " + targetUser.name + ".");
+			room.auth[user.userid] = '@';
+			user.updateIdentity(room.id);
+			return this.errorReply("You have been automatically deauthed for trying to promote locked user: '" + name + "'.");
+		}
 
 		if (nextGroup === ' ') {
 			delete room.auth[userid];
@@ -857,7 +866,7 @@ exports.commands = {
 	rb: 'roomban',
 	roomban: function (target, room, user, connection) {
 		if (!target) return this.parse('/help roomban');
-		if (room.isMuted(user) && !user.can('bypassall')) return this.errorReply("You cannot do this while unable to talk.");
+		if (!this.canTalk()) return this.errorReply("You cannot do this while unable to talk.");
 
 		target = this.splitTarget(target);
 		let targetUser = this.targetUser;
@@ -892,7 +901,9 @@ exports.commands = {
 				this.privateModCommand("(" + targetUser.name + "'s ac account: " + acAccount + ")");
 			}
 		}
-		this.add('|unlink|' + this.getLastIdOf(targetUser));
+		let lastid = this.getLastIdOf(targetUser);
+		this.add('|unlink|' + lastid);
+		if (lastid !== toId(this.inputUsername)) this.add('|unlink|' + toId(this.inputUsername));
 	},
 	roombanhelp: ["/roomban [username] - Bans the user from the room you are in. Requires: @ # & ~"],
 
@@ -902,7 +913,7 @@ exports.commands = {
 		if (!room.bannedUsers || !room.bannedIps) {
 			return this.errorReply("Room bans are not meant to be used in room " + room.id + ".");
 		}
-		if (room.isMuted(user) && !user.can('bypassall')) return this.errorReply("You cannot do this while unable to talk.");
+		if (!this.canTalk()) return this.errorReply("You cannot do this while unable to talk.");
 
 		this.splitTarget(target, true);
 		let targetUser = this.targetUser;
@@ -988,7 +999,7 @@ exports.commands = {
 
 	warn: function (target, room, user) {
 		if (!target) return this.parse('/help warn');
-		if (room.isMuted(user) && !user.can('bypassall')) return this.errorReply("You cannot do this while unable to talk.");
+		if (!this.canTalk()) return this.errorReply("You cannot do this while unable to talk.");
 		if (room.isPersonal && !user.can('warn')) return this.errorReply("Warning is unavailable in group chats.");
 
 		target = this.splitTarget(target);
@@ -1004,7 +1015,9 @@ exports.commands = {
 
 		this.addModCommand("|raw|" + targetUser.name + " was warned by " + user.name + ". <a href=http://www.pokecommunity.com/showthread.php?t=289012#rules>Please follow the PC Battle Server rules</a>, and not those in the pop-up." + (target ? " (" + target + ")" : ""));
 		targetUser.send('|c|~|/warn ' + target);
-		this.add('|unlink|' + this.getLastIdOf(targetUser));
+		let userid = this.getLastIdOf(targetUser);
+		this.add('|unlink|' + userid);
+		if (userid !== toId(this.inputUsername)) this.add('|unlink|' + toId(this.inputUsername));
 	},
 	warnhelp: ["/warn OR /k [username], [reason] - Warns a user showing them the Pok\u00e9mon Showdown Rules and [reason] in an overlay. Requires: % @ # & ~"],
 
@@ -1042,7 +1055,7 @@ exports.commands = {
 	m: 'mute',
 	mute: function (target, room, user, connection, cmd) {
 		if (!target) return this.parse('/help mute');
-		if (room.isMuted(user) && !user.can('bypassall')) return this.errorReply("You cannot do this while unable to talk.");
+		if (!this.canTalk()) return this.errorReply("You cannot do this while unable to talk.");
 
 		target = this.splitTarget(target);
 		let targetUser = this.targetUser;
@@ -1082,7 +1095,9 @@ exports.commands = {
 		if (targetUser in room.users) targetUser.popup("|modal|" + user.name + " has muted you in " + room.id + " for " + muteDuration.duration() + ". " + target);
 		this.addModCommand("" + targetUser.name + " was muted by " + user.name + " for " + muteDuration.duration() + "." + (target ? " (" + target + ")" : ""));
 		if (targetUser.autoconfirmed && targetUser.autoconfirmed !== targetUser.userid) this.privateModCommand("(" + targetUser.name + "'s ac account: " + targetUser.autoconfirmed + ")");
-		this.add('|unlink|' + this.getLastIdOf(targetUser));
+		let userid = this.getLastIdOf(targetUser);
+		this.add('|unlink|' + userid);
+		if (userid !== toId(this.inputUsername)) this.add('|unlink|' + toId(this.inputUsername));
 
 		room.mute(targetUser, muteDuration, false);
 	},
@@ -1106,7 +1121,7 @@ exports.commands = {
 	unmute: function (target, room, user) {
 		if (!target) return this.parse('/help unmute');
 		target = this.splitTarget(target);
-		if (room.isMuted(user) && !user.can('bypassall')) return this.errorReply("You cannot do this while unable to talk.");
+		if (!this.canTalk()) return this.errorReply("You cannot do this while unable to talk.");
 		if (!this.can('mute', null, room)) return false;
 
 		let targetUser = this.targetUser;
@@ -1359,6 +1374,7 @@ exports.commands = {
 		for (let userid in room.auth) {
 			if (room.auth[userid] === '+') {
 				delete room.auth[userid];
+				if (userid in room.users) room.users[userid].updateIdentity(room.id);
 				count++;
 			}
 		}
@@ -1430,7 +1446,7 @@ exports.commands = {
 	mn: 'modnote',
 	modnote: function (target, room, user, connection) {
 		if (!target) return this.parse('/help modnote');
-		if ((user.locked || user.nameLocked || room.isMuted(user)) && !user.can('bypassall')) return this.errorReply("You cannot do this while unable to talk.");
+		if (!this.canTalk()) return this.errorReply("You cannot do this while unable to talk.");
 
 		if (target.length > MAX_REASON_LENGTH) {
 			return this.errorReply("The note is too long. It cannot exceed " + MAX_REASON_LENGTH + " characters.");
@@ -1523,11 +1539,15 @@ exports.commands = {
 	mc: 'modchat',
 	modchat: function (target, room, user) {
 		if (!target) return this.sendReply("Moderated chat is currently set to: " + room.modchat);
-		if ((user.locked || user.nameLocked || room.isMuted(user)) && !user.can('bypassall')) return this.errorReply("You cannot do this while unable to talk.");
+		if (!this.canTalk()) return this.errorReply("You cannot do this while unable to talk.");
 		if (!this.can('modchat', null, room)) return false;
 
 		if (room.modchat && room.modchat.length <= 1 && Config.groupsranking.indexOf(room.modchat) > 1 && !user.can('modchatall', null, room)) {
 			return this.errorReply("/modchat - Access denied for removing a setting higher than " + Config.groupsranking[1] + ".");
+		}
+		if (room.requestModchat) {
+			let error = room.requestModchat(user);
+			if (error) return this.errorReply(error);
 		}
 
 		target = target.toLowerCase();
@@ -1554,6 +1574,9 @@ exports.commands = {
 			if (Config.groupsranking.indexOf(target) > 1 && !user.can('modchatall', null, room)) {
 				return this.errorReply("/modchat - Access denied for setting higher than " + Config.groupsranking[1] + ".");
 			}
+			if (Config.groupsranking.indexOf(target) > Math.max(1, Config.groupsranking.indexOf(room.auth[user.userid])) && !user.can('makeroom')) {
+				return this.errorReply("/modchat - Access denied for setting higher than " + Config.groupsranking[1] + ".");
+			}
 			room.modchat = target;
 			break;
 		}
@@ -1566,6 +1589,7 @@ exports.commands = {
 			let modchat = Tools.escapeHTML(room.modchat);
 			this.add("|raw|<div class=\"broadcast-red\"><b>Moderated chat was set to " + modchat + "!</b><br />Only users of rank " + modchat + " and higher can talk.</div>");
 		}
+		if (room.battle && !room.modchat && !user.can('modchat')) room.requestModchat(null);
 		this.logModCommand(user.name + " set modchat to " + room.modchat);
 
 		if (room.chatRoomData) {
@@ -2548,17 +2572,17 @@ exports.commands = {
 			connection.popup("Due to high load, you are limited to 6 team validations every 3 minutes.");
 			return;
 		}
-		let format = Tools.getFormat(target);
-		if (format.effectType !== 'Format') format = Tools.getFormat('Anything Goes');
-		if (format.effectType !== 'Format') {
-			connection.popup("Please provide a valid format.");
-			return;
-		}
+		if (!target) return this.errorReply("Provide a valid format.");
+		let originalFormat = Tools.getFormat(target);
+		let format = originalFormat.effectType === 'Format' ? originalFormat : Tools.getFormat('Anything Goes');
+		if (format.effectType !== 'Format') return this.popupReply("Please provide a valid format.");
+
 		TeamValidator.validateTeam(format.id, user.team, function (success, details) {
+			let matchMessage = (originalFormat === format ? "" : "The format '" + originalFormat.name + "' was not found.");
 			if (success) {
-				connection.popup("Your team is valid for " + format.name + ".");
+				connection.popup("" + (matchMessage ? matchMessage + "\n\n" : "") + "Your team is valid for " + format.name + ".");
 			} else {
-				connection.popup("Your team was rejected for the following reasons:\n\n- " + details.replace(/\n/g, '\n- '));
+				connection.popup("" + (matchMessage ? matchMessage + "\n\n" : "") + "Your team was rejected for the following reasons:\n\n- " + details.replace(/\n/g, '\n- '));
 			}
 		});
 	},
