@@ -190,6 +190,7 @@ exports.Formats = [
 
 	{
 		name: "Random",
+		desc: ["Randomized teams of level-balanced Pok&eacute;mon with sets that are generated to be competitively viable."],
 		section: "Random Battles (aka Randbats)",
 
 		team: 'random',
@@ -3654,6 +3655,7 @@ exports.Formats = [
 	},
 	{
 		name: "Hackmons Cup",
+		desc: ["Randomized teams of level-balanced Pok&eacute;mon with absolutely any ability, moves, and item."],
 		section: "Random Battles (aka Randbats)",
 
 		team: 'randomHC',
