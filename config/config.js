@@ -559,6 +559,11 @@ exports.customavatars = {
 	'noatan': 'noatan.png',
 	'nakasu': 'nakasu.gif',
 	'pmseth': 'pmseth.gif',
+	'dedenne1': 'dedenne1.gif',
+	'nidokingdra44': 'nidokingdra44.png',
+	'nidohorsea': 'nidokingdra44.png',
+	'kingfeebas': 'nidokingdra44.png',
+	'tn44': 'nidokingdra44.png',
 };
 
 // custom avatars appear in profile by specifiying server url.
