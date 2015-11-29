@@ -946,7 +946,7 @@ let BattleRoom = (function () {
 				// Battle Point Winnings
 				//
 
-				if (this.format === 'lotw4colorrandom') {
+				if (this.format === 'lotw5balancedhackmons') {
 					let wid = toId(winner);
 					Database.read('bp', wid, function (err, initial) {
 						if (err) throw err;
