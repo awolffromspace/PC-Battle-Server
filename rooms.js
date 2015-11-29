@@ -993,6 +993,11 @@ let BattleRoom = (function () {
 				this.push("|raw|<b><font color='" + color + "'>" + Tools.escapeHTML(winner) + "</font> has won " + "<font color='" + color + "'>1</font> Battle Point for winning the tournament battle!</b>");
 			}
 		}
+		let p1test = this.p1.userid;
+		let p2test = this.p2.userid;
+		if (p1test.latestIp === p2test.latestIp) {
+			this.push("|raw|test message please ignore");
+		}
 		rooms.global.battleCount += 0 - (this.active ? 1 : 0);
 		this.active = false;
 		this.update();
