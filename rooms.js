@@ -995,7 +995,7 @@ let BattleRoom = (function () {
 		}
 		let p1 = this.p1;
 		let p2 = this.p2;
-		if (p1test.latestIp !== p2test.latestIp) {
+		if (p1.latestIp !== p2.latestIp) {
 			if (this.format === '1v1random' || this.format === '1v1challengecup' || this.format === '1v1') {
 				let wid = toId(winner);
 				Database.read('gt', wid, function (err, initial) {
