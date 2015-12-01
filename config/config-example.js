@@ -146,7 +146,7 @@ exports.watchconfig = true;
 exports.logchat = true;
 
 // logchallenges - whether to log challenge battles. Useful for tournament servers.
-exports.logchallenges = false;
+exports.logchallenges = true;
 
 // loguserstats - how often (in milliseconds) to write user stats to the
 // lobby log. This has no effect if `logchat` is disabled.
