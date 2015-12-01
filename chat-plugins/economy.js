@@ -44,14 +44,6 @@ function isBP(bp) {
 	return numBP;
 }
 
-function isGT(gt) {
-	var numBP = Number(gt);
-	if (isNaN(gt)) return "Must be a number.";
-	if (String(gt).includes('.')) return "Cannot contain a decimal.";
-	if (numGT < 1) return "Cannot be less than one Get-Together point.";
-	return numGT;
-}
-
 /**
  * Log money to logs/money.txt file.
  *
@@ -584,7 +576,7 @@ exports.commands = {
 
 		var parts = target.split(',');
 		var username = parts[0];
-		var amount = isGT(parts[1]);
+		var amount = isBP(parts[1]);
 
 		if (typeof amount === 'string') return this.sendReply(amount);
 
@@ -607,7 +599,7 @@ exports.commands = {
 
 		var parts = target.split(',');
 		var username = parts[0];
-		var amount = isGT(parts[1]);
+		var amount = isBP(parts[1]);
 
 		if (typeof amount === 'string') return this.sendReply(amount);
 
