@@ -620,11 +620,11 @@ exports.commands = {
 		if (!this.can('forcewin')) return false;
 		Database.write('gt', 0, toId(target), function (err, total) {
 			if (err) throw err;
-			this.sendReply(target + " now has " + total + " Get-Together point(s).");
-			logGT(user.name + " reset the Get-Together point(s) of " + target + ".");
+			this.sendReply(target + " now has " + total + " Get-Together points.");
+			logGT(user.name + " reset the Get-Together points of " + target + ".");
 		}.bind(this));
 	},
-	resetgthelp: ["/resetgt [user] - Reset user's Get-Together point(s) to zero."],
+	resetgthelp: ["/resetgt [user] - Reset user's Get-Together points to zero."],
 
 	gtlog: function (target, room, user, connection) {
 		if (!this.can('modlog')) return;
