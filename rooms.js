@@ -1001,31 +1001,31 @@ let BattleRoom = (function () {
 				Database.read('gt', wid, function (err, initial) {
 					if (err) throw err;
 					if (!initial) initial = 0;
-					Database.write('gt', initial + 10, wid, function (err) {
+					Database.write('gt', initial + 1, wid, function (err) {
 						if (err) throw err;
 					});
 				});
-				this.push("|raw|<b><font color='" + color + "'>" + Tools.escapeHTML(winner) + "</font> has won " + "<font color='" + color + "'>10</font> Get-Together points for winning the battle!</b>");
+				this.push("|raw|<b><font color='" + color + "'>" + Tools.escapeHTML(winner) + "</font> has won " + "<font color='" + color + "'>1</font> Get-Together point for winning the battle!</b>");
 			} else if (this.format === 'random' || this.format === 'unratedrandom' || this.format === 'randomnopotd' || this.format === 'uberrandom' || this.format === 'hightierrandom' || this.format === 'lowtierrandom' || this.format === 'lcrandom' || this.format === 'monotyperandom' || this.format === 'generationalrandom' || this.format === 'colorrandom' || this.format === 'inverserandom' || this.format === 'communityrandom' || this.format === 'halloweenrandom' || this.format === 'summersendoffrandom' || this.format === 'springrandom' || this.format === 'orbrandom' || this.format === 'hoennrandom' || this.format === 'hoennweatherrandom' || this.format === 'supersmashbrosrandom' || this.format === 'winterwonderland' || this.format === 'superstaffbros' || this.format === 'swagplayrandom' || this.format === 'metronome3v3random' || this.format === 'metronome6v6random' || this.format === 'doublesrandom' || this.format === 'triplesrandom' || this.format === 'battlefactory' || this.format === 'hackmonscup' || this.format === 'doubleshackmonscup' || this.format === 'tripleshackmonscup' || this.format === 'seasonalsupersquadsmackdown' || this.format === 'gen2randombattle' || this.format === 'gen1randombattle') {
 				let wid = toId(winner);
 				Database.read('gt', wid, function (err, initial) {
 					if (err) throw err;
 					if (!initial) initial = 0;
-					Database.write('gt', initial + 150, wid, function (err) {
+					Database.write('gt', initial + 15, wid, function (err) {
 						if (err) throw err;
 					});
 				});
-				this.push("|raw|<b><font color='" + color + "'>" + Tools.escapeHTML(winner) + "</font> has won " + "<font color='" + color + "'>150</font> Get-Together points for winning the battle!</b>");
+				this.push("|raw|<b><font color='" + color + "'>" + Tools.escapeHTML(winner) + "</font> has won " + "<font color='" + color + "'>15</font> Get-Together points for winning the battle!</b>");
 			} else {
 				let wid = toId(winner);
 				Database.read('gt', wid, function (err, initial) {
 					if (err) throw err;
 					if (!initial) initial = 0;
-					Database.write('gt', initial + 400, wid, function (err) {
+					Database.write('gt', initial + 40, wid, function (err) {
 						if (err) throw err;
 					});
 				});
-				this.push("|raw|<b><font color='" + color + "'>" + Tools.escapeHTML(winner) + "</font> has won " + "<font color='" + color + "'>400</font> Get-Together points for winning the battle!</b>");
+				this.push("|raw|<b><font color='" + color + "'>" + Tools.escapeHTML(winner) + "</font> has won " + "<font color='" + color + "'>40</font> Get-Together points for winning the battle!</b>");
 			}
 		}
 		rooms.global.battleCount += 0 - (this.active ? 1 : 0);
