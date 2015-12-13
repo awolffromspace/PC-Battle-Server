@@ -4,8 +4,7 @@ const os = require('os');
 
 module.exports = {
 	"env": {
-		"node": true,
-		"es6": true
+		"node": true
 	},
 	"globals": {
 		"Config": false, "Monitor": false, "toId": false, "Tools": false, "LoginServer": false,
@@ -147,7 +146,7 @@ module.exports = {
 		"operator-assignment": 0,
 		"operator-linebreak": [2, "after"],
 		"padded-blocks": [2, "never"],
-		"quote-props": 0,
+		"quote-props": [2, "as-needed", {"keywords": true, "unnecessary": false}],
 		"quotes": 0,
 		"require-jsdoc": 0,
 		"semi-spacing": [2, {"before": false, "after": true}],

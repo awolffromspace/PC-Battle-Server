@@ -314,8 +314,48 @@ let Context = exports.Context = (function () {
 		let innerRoom = (relevantRoom !== undefined) ? relevantRoom : this.room;
 		return canTalk.call(this, this.user, innerRoom, this.connection, message, targetUser);
 	};
+	Context.prototype.canEmbedURI = function (uri, isRelative) {
+		if (uri.startsWith('https://')) return uri;
+		if (uri.startsWith('//')) return uri;
+		if (uri.startsWith('data:')) return uri;
+		if (!uri.startsWith('http://')) {
+			if (/^[a-z]+\:\/\//.test(uri) || isRelative) {
+				return this.errorReply("URIs must begin with 'https://' or 'http://' or 'data:'");
+			}
+		} else {
+			uri = uri.slice(7);
+		}
+		let slashIndex = uri.indexOf('/');
+		let domain = (slashIndex >= 0 ? uri.slice(0, slashIndex) : uri);
+
+		// heuristic that works for all the domains we care about
+		let secondLastDotIndex = domain.lastIndexOf('.', domain.length - 5);
+		if (secondLastDotIndex >= 0) domain = domain.slice(secondLastDotIndex + 1);
+
+		let approvedDomains = {
+			'imgur.com': 1,
+			'gyazo.com': 1,
+			'puu.sh': 1,
+			'rotmgtool.com': 1,
+			'pokemonshowdown.com': 1,
+			'nocookie.net': 1,
+			'blogspot.com': 1,
+			'imageshack.us': 1,
+			'deviantart.net': 1,
+			'pokefans.net': 1
+		};
+		if (domain in approvedDomains) {
+			return '//' + uri;
+		}
+		if (domain === 'bit.ly') {
+			return this.errorReply("Please don't use URL shorteners.");
+		}
+		// unknown URI, allow HTTP to be safe
+		return 'http://' + uri;
+	};
 	Context.prototype.canHTML = function (html) {
-		html = '' + (html || '');
+		html = ('' + (html || '')).trim();
+		if (!html) return '';
 		let images = html.match(/<img\b[^<>]*/ig);
 		if (images) {
 			if (this.room.isPersonal && !this.user.can('announce')) {
@@ -330,6 +370,12 @@ let Context = exports.Context = (function () {
 					// messes up autoscrolling.
 					this.errorReply('All images must have a width and height attribute');
 					return false;
+				}
+				let match = /src\w*\=\w*"?([^ "]+)(\w*")?/i.exec(images[i]);
+				if (match) {
+					let uri = this.canEmbedURI(match[1], true);
+					if (!uri) return false;
+					html = html.slice(0, match.index) + 'src="' + uri + '"' + html.slice(match.index + match[0].length);
 				}
 			}
 		}
@@ -363,7 +409,7 @@ let Context = exports.Context = (function () {
 			}
 		}
 
-		return true;
+		return html;
 	};
 	Context.prototype.targetUserOrSelf = function (target, exactName) {
 		if (!target) {
