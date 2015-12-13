@@ -9,15 +9,16 @@ exports.Formats = [
 	///////////////////////////////////////////////////////////////////
 
 	{
-		name: "[LotW 6] 1v1 Random",
+		name: "[LotW 6] STABmons",
+		desc: [
+			"Pok&eacute;mon can use any move of their typing, in addition to the moves they can normally learn.",
+			"&bullet; <a href=\"https://www.smogon.com/forums/threads/3547279/\">STABmons</a>",
+			"&bullet; <a href=\"https://www.smogon.com/forums/threads/3558034/\">STABmons Viability Ranking</a>"
+		],
 		section: "ORAS Singles",
 
-		teamLength: {
-			validate: [1, 6],
-			battle: 1
-		},
-		team: 'random',
-		ruleset: ['Random (no PotD)'],
+		ruleset: ['OU'],
+		banlist: ['Ignore STAB Moves'],
 		onBegin: function () {
 			this.add('raw|This is the Ladder of the Week! Use the "Battle!" button to try and win the LotW. The winner is the user who is #1 on the ladder by 10 PM ET on Saturday. They receive a <img src="http://cbc.pokecommunity.com/config/user-list-images/trophy.png" /> beside their name for a week.');
 		}
