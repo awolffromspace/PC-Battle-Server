@@ -2226,6 +2226,7 @@ exports.commands = {
 			"<br />" +
 			"Room owners (#) can also use:<br />" +
 			"- /roomintro <em>intro</em>: sets the room introduction that will be displayed for all users joining the room<br />" +
+			"- /roomdesc <em>description</em>: sets the room description that will be displayed on the room list<br />" +
 			"- /rules <em>rules link</em>: set the room rules link seen when using /rules<br />" +
 			"- /roommod, /roomdriver <em>username</em>: appoint a room moderator/driver<br />" +
 			"- /roomdemod, /roomdedriver <em>username</em>: remove a room moderator/driver<br />" +
