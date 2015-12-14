@@ -47,6 +47,10 @@ const f4n = [
 	"evoluciona a Pichu Tipo Hada."
 ];
 
+const gloom = [
+	"ya even ugly for a naga"
+];
+
 const hannumikkola = [
 	"is stealing your food now."
 ];
@@ -266,6 +270,16 @@ exports.commands = {
 				message = '{{user}} ' + message;
 			}
 			message = message.replace(/{{user}}/g, user.name);
+
+			var colour = '#' + [1, 1, 1].map(function () {
+				var part = Math.floor(Math.random() * 0xaa);
+				return (part < 0x10 ? '0' : '') + part.toString(16);
+			}).join('');
+
+			room.addRaw('<center><strong><font color="' + colour + '">~~ ' + Tools.escapeHTML(message) + ' ~~</font></strong></center>');
+			user.leaveRoom(room);
+		} else if (userid.toUpperCase() === 'GLOOM') {
+			var message = target || gloom[Math.floor(Math.random() * gloom.length)];
 
 			var colour = '#' + [1, 1, 1].map(function () {
 				var part = Math.floor(Math.random() * 0xaa);
