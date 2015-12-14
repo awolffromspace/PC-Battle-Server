@@ -17,7 +17,7 @@ exports.port = 8000;
 
 exports.serverid = 'showdown';
 ```
- - Maybe you want to use a [Registered Server](http://pokemonshowdown.com/servers/), then open a shell console, use cd to reach the directory of your bot and run `node serverconfig.js` to get the **server**, **port** and **serverid** paramenters.
+ - Maybe you want to use a [Registered Server](http://pokemonshowdown.com/servers/), then open a shell console, use cd to reach the directory of your bot and run `node getserver.js` to get the **server**, **port** and **serverid** paramenters.
  - Or, you want to use an unregistered server, then you must edit manually the parameters.
 
 
@@ -34,7 +34,7 @@ Keep `exports.watchconfig = true;` if you want `config.js` to be automatically r
 Login Deatails
 ------------
 
-Choose Bot's nickname and, if it is registered, specify the password. If you do not specify a nickname or the password is wrong, the bot will log in a randon username starded by `bot`
+Choose Bot's nickname and, if it is registered, specify the password. If you do not specify a nickname or the password is wrong, the bot will log in a random username started by `bot`
 
 Example:
 ```js
@@ -73,11 +73,14 @@ Giving yourself full access is a crucial step, because only if you have full acc
 To do this, in `exports.exceptions` you must add your user id (Your PS name without any character except numbers and lowercase letters), like in this example:
 ```js
 exports.exceptions = {
-	'ecuacion': true
+	'ecuacion': true,
+	'excepteduser': true
 };
 ```
 
 If the Pokemon Showdown server for your bot has custom ranks, edit `exports.ranks` adding them. If a symbol is not in that array, it is interpreted as regular user.
+
+Edit `exports.globalPermissions` if the server has custom symbols for basic groups (Administrator, Room Owner, Moderator, Driver, Voice)
 
 Commands configuration
 ------------
@@ -86,18 +89,24 @@ Commands configuration
 
 `exports.defaultPermission` is the default rank for configurable commands permissions.
 
-You can also configure that permissions adding exceptions for each command in `exports.permissionExceptions`
+You can configure that permissions adding exceptions for each command in `exports.permissionExceptions`
+
+You can use a custom botguide (for `guide` command) editting `exports.botguide` option
+
+When you pm the bot but don't use a command, it replies you the string `exports.pmhelp`, useful for moderation bots because the users may not know that it's a bot. Example:
+```js
+exports.pmhelp = "Hi, I'm a bot. Use .help to view a command guide. Contact other staff member for any request";
+```
 
 Language
 ------------
 
-You can change bot language changing `exports.language`. Note that the language file in `./languages/` must exist.
+You can change bot language changing `exports.language`. Note that the language folder in `./languages/` must exist.
 
 Configuration for console messages
 ------------
 
-With `exports.debug` you can choose which console messages are shown and which are not. Anyway there are 4 basic modes for this:
- - Producction mode (only show important messages)
+With `exports.debug` you can choose which console messages are shown and which are not.
 ```js
 exports.debug = {
 	/* Basic messages - Production Mode */
@@ -121,78 +130,6 @@ exports.debug = {
 	sent: false
 };
 ```
- - Monitoring mode (also show monitor and status messages)
-```js
-exports.debug = {
-	/* Basic messages - Production Mode */
-	error: true,
-	ok: true,
-	errlog: true,
-	info: true,
-	room: true,
-
-	/* Monitoring */
-	monitor: true,
-	battle: true,
-	status: true,
-
-	/* Debug Mode */
-	debug: false,
-	cmdr: false,
-
-	/* Low Level */
-	recv: false,
-	sent: false
-};
-```
- - Debug mode (recommended for deveopment)
-```js
-exports.debug = {
-	/* Basic messages - Production Mode */
-	error: true,
-	ok: true,
-	errlog: true,
-	info: true,
-	room: true,
-
-	/* Monitoring */
-	monitor: true,
-	battle: true,
-	status: true,
-
-	/* Debug Mode */
-	debug: true,
-	cmdr: true,
-
-	/* Low Level */
-	recv: false,
-	sent: false
-};
-```
- - Low level mode (show all messages)
-```js
-exports.debug = {
-	/* Basic messages - Production Mode */
-	error: true,
-	ok: true,
-	errlog: true,
-	info: true,
-	room: true,
-
-	/* Monitoring */
-	monitor: true,
-	battle: true,
-	status: true,
-
-	/* Debug Mode */
-	debug: true,
-	cmdr: true,
-
-	/* Low Level */
-	recv: true,
-	sent: true
-};
-```
 
 Moderation (Optional)
 ------------
@@ -202,6 +139,7 @@ With `exports.moderation` you can configure the moderation feature
 - **allowmute**: Enable or disable automated moderation feature
 - **disableModNote**: Disable `/modnote` for autoban commands
 - **MOD_CONSTS**: Constants for caps, flodding and stretching
+- **values**: Mod values for each infraction (corresponding to punishments levels)
 - **modDefault**: Default config for moderation options. `true` or `1` to enable and `false` or `0` to disable them.
 - **punishments**: Array of punishments commands, for example `warn`, `mute`, `hourmute` and `roomban`.
 - **psServersExcepts**: Servers ids excepted from Pokemon showdown private servers moderation. Include your server id if you are uning the bot in other server.
@@ -213,7 +151,9 @@ Battles (Optional)
 
 `exports.aceptAll` if true, the bot will acept all battle, without limits. It is not recommended, keep it to false, so you can specify max number of battles at the same time in `exports.maxBattles`.
 
-Specify in `exports.winmsg` all possible phrases for saying when bot wins, same with `exports.losemsg` but when bot loses. You can also specify other messages in `exports.battleMessages`.
+Specify in `exports.winmsg` all possible phrases for saying when bot wins, same with `exports.losemsg` but when bot loses, the same with `exports.initBattleMsg` but when the bot joins the battle. You can also specify other messages in `exports.battleMessages`.
+
+Set `exports.abandonedBattleAutojoin = true;` if you want to store battle ids in a JSON file to rejoin them in case of crash or forced restart.
 
 Configure the ladder feature with `exports.ladderCheckInterval` (the time to check for battles) and `exports.ladderNumberOfBattles` (Max number of ladder battles at the same time when you use `ladderstart` command).
 
@@ -222,7 +162,7 @@ Configure the ladder feature with `exports.ladderCheckInterval` (the time to che
 Tournaments (Optional)
 ------------
 
-You can specify tournament values by default, so if you don't specify them in `` command, it will be taken from this values.
+You can specify tournament values by default, so if you don't specify them in `tour` command, it will be taken from this values.
 
 ```js
 exports.tourDefault = {
@@ -231,6 +171,17 @@ exports.tourDefault = {
 	maxUsers: null,
 	timeToStart: 30 * 1000,
 	autodq: 1.5
+};
+```
+
+Optionally you can enable the leaderboards system for one or more rooms.
+
+```js
+exports.leaderboards['tournaments'] = {
+	winnerPoints: 5,
+	finalistPoints: 3,
+	semiFinalistPoints: 1,
+	battlePoints: 0
 };
 ```
 
@@ -282,3 +233,22 @@ exports.autoInvite = [
 ];
 ```
 In this example, in a server there is a private room with modjoin called `Admins Room` where all admins are room owners. With that feature if the bot is in both rooms, when an admin join lobby, it is automatically invited to Admins Room.
+
+GoupChats (Optional)
+------------
+
+You can use this feature to set events (arrays of commands to be sent on certain circunstances). For example:
+
+```js
+exports.groupchats['groupchat-ecuacion-test'] = {
+	toJoin: ['/join groupchat-ecuacion-test'],
+	onJoin: ['Hi guys!'],
+	onLeave: []
+};
+```
+
+**toJoin:** This is sent every 60 seconds if the bot is not in the room. You can use it to create a groupchat with `/makegroupchat` or joining an existing one after it expires.
+
+**onJoin:** This is sent when the bot joins the room. For example for setting the modchat, roomintro, etc or just a greeting.
+
+**toJoin:** This is sent when the bot leaves the room. For example for recreating the groupchat after it expires.

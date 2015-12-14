@@ -28,8 +28,65 @@
 				'Non contarci.'
 			]
 		},
+		regdate: {
+			'inv': 'Nome utente non valido',
+			'busy': 'Al momento di scaricare i dati, provare di nuovo in pochi secondi',
+			'err': 'Impossibile ottenere i dati da',
+			'user': 'Utente',
+			'not': 'non è registrato',
+			'regtime1': 'è stato registrato',
+			'regtime2': 'fa',
+			'regdate': 'è stato registrato su'
+		},
+		/*
+		* Smogon
+		*/
 		usage: {
-			'stats': 'Usage stats'
+			'in': 'in',
+			'stats': 'Statistiche di utilizzo',
+			'data': 'Dati di utilizzo',
+			'usage': 'Uso corretto',
+			'tiererr1': 'Tier o formato',
+			'tiererr2': 'non trovato',
+			'tiererr3': 'non disponibile',
+			'err': 'Impossibile ottenere i dati di utilizzo di',
+			'busy': 'Download dei dati di utilizzo. Riprovare in pochi secondi',
+			'pokeerr1': 'Pokemon',
+			'pokeerr2': 'non disponibile in',
+			'pokeerr3': 'dati di utilizzo',
+			'pokeerr4': 'statistiche di utilizzo',
+			'notfound': 'I dati non trovato per',
+			'usagedata1': '#NAME di ',
+			'usagedata2': '',
+			'pokeusage': 'Uso',
+			'pokeraw': 'Raw',
+			'abilities': 'Abilità',
+			'items': 'Strumenti',
+			'moves': 'Mosse',
+			'spreads': 'Spreads',
+			'teammates': 'Compagne'
+		},
+		suspect: {
+			'tiererr1': 'Tier',
+			'tiererr2': 'non trovato',
+			'in': 'in',
+			'nosuspect': 'Non ci sono dati suspect test data trovato per tier',
+			'aux1': 'Usa',
+			'aux2': 'per impostare i dati sospetti'
+		},
+		setsuspect: {
+			'usage': 'Uso corretto',
+			'tier': 'Tier',
+			'notfound': 'non trovato',
+			'd1': 'Suspect test i dati di secondo tier',
+			'd2': 'è stato rimosso'
+		},
+		deftier: {
+			'usage': 'Uso corretto',
+			'notchat': 'Questo comando è solo disponibile nelle chat room',
+			'tiererr1': 'Tier',
+			'tiererr2': 'non trovato',
+			'set': 'Tier di default per questa room è ora'
 		},
 		/*
 		* Quotes & Jokes

@@ -146,15 +146,25 @@ exports.commands = {
 				this.reply('Data files reloaded');
 				break;
 			case 'config':
-				reloadConfig();
-				this.reply('config.js reloaded');
-				info('config.js reloaded');
+				try {
+					Tools.uncacheTree(AppOptions.config);
+					global.Config = require(AppOptions.config);
+					Tools.checkConfig();
+					Settings.applyConfig();
+					CommandParser.reloadTokens();
+					this.reply(AppOptions.config + ' reloaded');
+					info(AppOptions.config + ' reloaded');
+				} catch (e) {
+					error('could not reload ' + AppOptions.config);
+					errlog(e.stack);
+					this.reply("Error: " + 'could not reload ' + AppOptions.config);
+				}
 				break;
 			case 'lang':
 			case 'languages':
-				var errs = Tools.loadTranslations(true) || [];
-				if (!errs.length) return this.reply('Languages hotpatched');
-				this.reply('Some languages crashed: ' + errs.join(", "));
+				var _errs = Tools.loadTranslations(true) || [];
+				if (!_errs.length) return this.reply('Languages hotpatched');
+				this.reply('Some languages crashed: ' + _errs.join(", "));
 				break;
 			default:
 				 this.reply('Valid arguments are: commands, feature, features, parser, tools, data, config, languages');
@@ -223,7 +233,8 @@ exports.commands = {
 			for (var f in Features) {
 				if (typeof Features[f].readyToDie === "function") {
 					try {
-						Features[f].readyToDie();
+						var err = Features[f].readyToDie();
+						if (err) return this.reply("Feature \"" + f + "\" not ready | " + err + " | Use ``" + this.cmdToken + "forcekill`` if you want to kill the process anyway");
 					} catch (e) {
 						return this.reply("Feature \"" + f + "\" not ready | " + sys.inspect(e) + " | Use ``" + this.cmdToken + "forcekill`` if you want to kill the process anyway");
 					}

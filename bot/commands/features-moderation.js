@@ -590,6 +590,7 @@ exports.commands = {
 				'normal': 'n',
 				'high': 'h'
 			};
+			var text;
 			switch (toId(args[0])) {
 				case 'add':
 					if (args.length < 2) return this.reply(this.trad('u1') + ': ' + this.cmdToken + cmd + ' ' + this.trad('u2'));
@@ -613,7 +614,7 @@ exports.commands = {
 							alreadyAdded.push(user);
 						}
 					}
-					var text = '';
+					text = '';
 					if (added.length) {
 						text += this.trad('users') + ' "' + added.join('", "') + '" ' + this.trad('add') + '. ';
 						Settings.save();
@@ -641,7 +642,7 @@ exports.commands = {
 							notFound.push(user);
 						}
 					}
-					var text = '';
+					text = '';
 					if (removed.length) {
 						text += this.trad('users') + ' "' + removed.join('", "') + '" ' + this.trad('removed') + '. ';
 						Settings.save();

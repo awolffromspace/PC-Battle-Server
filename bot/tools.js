@@ -507,7 +507,7 @@ var teamToJSON = exports.teamToJSON = function (text) {
 		if (line === '' || line === '---') {
 			curSet = null;
 		} else if (!curSet) {
-			curSet = {name: '', species: '', gender: ''};
+			curSet = {name: '', species: '', gender: '', item: '', ability: '', nature: ''};
 			team.push(curSet);
 			var atIndex = line.lastIndexOf(' @ ');
 			if (atIndex !== -1) {
@@ -890,7 +890,7 @@ exports.exportTeam = function (team) {
 		if (curSet.nature) {
 			text += '' + curSet.nature + ' Nature' + "\n";
 		}
-		var first = true;
+		first = true;
 		if (curSet.ivs) {
 			var defaultIvs = true;
 			var hpType = false;

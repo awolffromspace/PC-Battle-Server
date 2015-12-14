@@ -203,6 +203,7 @@ exports.commands = {
 	sb: 'searchbattle',
 	searchbattle: function (arg, by, room, cmd) {
 		if (!this.can('searchbattle')) return false;
+		if (Settings.lockdown) return;
 		if (!arg || !arg.length) return this.reply(this.trad('e1'));
 		var format = Tools.parseAliases(arg);
 		if (!Formats[format] || !Formats[format].ladder) return this.reply(this.trad('e21') + ' ' + format + ' ' + this.trad('e22'));
@@ -233,6 +234,7 @@ exports.commands = {
 	chall: 'challenge',
 	challenge: function (arg, by, room, cmd) {
 		if (!this.can('challenge')) return false;
+		if (Settings.lockdown) return;
 		var args = arg.split(",");
 		if (cmd in {'challme': 1, 'challengeme': 1}) {
 			args = [by, arg];
@@ -253,6 +255,7 @@ exports.commands = {
 	jt: 'jointour',
 	jointour: function (arg, by, room, cmd) {
 		if (!this.can('jointour')) return false;
+		if (Settings.lockdown) return;
 		if (this.roomType !== 'chat') return this.reply(this.trad('notchat'));
 		if (!Features['battle'].TourManager.tourData[room] || !Features['battle'].TourManager.tourData[room].format) return this.reply(this.trad('e1'));
 		if (cmd === 'checktour') return this.say(room, '/tour getupdate');
@@ -278,11 +281,12 @@ exports.commands = {
 		if (!arg) return this.reply(this.trad('u1') + ': ' + this.cmdToken + cmd + ' ' + this.trad('u2'));
 		arg = arg.split(',');
 		var opt = toId(arg[0]);
+		var id, name;
 		switch (opt) {
 			case 'add':
 			case 'new':
 				if (arg.length < 4) return this.reply(this.trad('u1') + ': ' + this.cmdToken + cmd + ' ' + this.trad('u3'));
-				var name = toId(arg[1]);
+				name = toId(arg[1]);
 				var format = Tools.parseAliases(arg[2]);
 				var link = arg[3].trim();
 				if (!link) return this.reply(this.trad('u1') + ': ' + this.cmdToken + cmd + ' ' + this.trad('u2'));
@@ -326,7 +330,7 @@ exports.commands = {
 				break;
 			case 'get':
 				if (arg.length < 2) return this.reply(this.trad('u1') + ': ' + this.cmdToken + cmd + ' ' + this.trad('u5'));
-				var id = toId(arg[1]);
+				id = toId(arg[1]);
 				if (!Features['battle'].TeamBuilder.dynTeams[id]) return this.reply(this.trad('team') + " __" + name + "__ " + this.trad('notexists'));
 				try {
 					var data = Tools.exportTeam(Features['battle'].TeamBuilder.dynTeams[id].packed);
@@ -341,7 +345,7 @@ exports.commands = {
 				break;
 			case 'check':
 				if (arg.length < 2) return this.reply(this.trad('u1') + ': ' + this.cmdToken + cmd + ' ' + this.trad('u6'));
-				var id = toId(arg[1]);
+				id = toId(arg[1]);
 				if (!Features['battle'].TeamBuilder.dynTeams[id]) return this.reply(this.trad('team') + " __" + name + "__ " + this.trad('notexists'));
 				var cmds = [];
 				var team = Features['battle'].TeamBuilder.dynTeams[id].packed;
@@ -352,7 +356,7 @@ exports.commands = {
 			case 'delete':
 			case 'remove':
 				if (arg.length < 2) return this.reply(this.trad('u1') + ': ' + this.cmdToken + cmd + ' ' + this.trad('u4'));
-				var name = toId(arg[1]);
+				name = toId(arg[1]);
 				if (Features['battle'].TeamBuilder.removeTeam(name)) {
 					this.reply(this.trad('team') + " __" + name + "__ " + this.trad('removed'));
 				} else {

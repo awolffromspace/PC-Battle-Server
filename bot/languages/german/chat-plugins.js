@@ -28,8 +28,65 @@
 				'Darauf solltest du dich nicht verlassen.'
 			]
 		},
+		regdate: {
+			'inv': 'Ungültiger Benutzername',
+			'busy': 'Derzeit Herunterladen der Daten, versuchen Sie es erneut in ein paar Sekunden',
+			'err': 'Daten konnten nicht abgerufen werden',
+			'user': 'Benutzer',
+			'not': 'ist nicht registriert',
+			'regtime1': 'wurde vor',
+			'regtime2': 'registered',
+			'regdate': 'wurde am eingetragenen'
+		},
+		/*
+		* Smogon
+		*/
 		usage: {
-			'stats': 'Verwendungsstatisiken'
+			'in': 'im',
+			'stats': 'Nutzungsstatistiken',
+			'data': 'Nutzungsdaten',
+			'usage': 'Verwendung',
+			'tiererr1': 'Tier oder Format',
+			'tiererr2': 'nicht gefunden',
+			'tiererr3': 'nicht verfügbar',
+			'err': 'Nutzungsdaten von konnte nicht abgerufen werden',
+			'busy': 'Herunterladen der Nutzungsdaten. Versuchen Sie es erneut in ein paar Sekunden',
+			'pokeerr1': 'Pokemon',
+			'pokeerr2': 'in nicht verfügbar',
+			'pokeerr3': 'nutzungsdaten',
+			'pokeerr4': 'nutzungsstatistiken',
+			'notfound': 'Daten nicht gefunden',
+			'usagedata1': '',
+			'usagedata2': ' #NAME',
+			'pokeusage': 'Verwendung',
+			'pokeraw': 'Raw',
+			'abilities': 'Abilities',
+			'items': 'Items',
+			'moves': 'Moves',
+			'spreads': 'Spreads',
+			'teammates': 'Teammates'
+		},
+		suspect: {
+			'tiererr1': 'Tier',
+			'tiererr2': 'nicht gefunden',
+			'in': 'im',
+			'nosuspect': 'Keine suspect test daten gefunden',
+			'aux1': 'Verwenden',
+			'aux2': 'ir die suspect datensatz'
+		},
+		setsuspect: {
+			'usage': 'Verwendung',
+			'tier': 'Tier',
+			'notfound': 'nicht gefunden',
+			'd1': 'Suspect test daten für tier',
+			'd2': 'wurde entfernt'
+		},
+		deftier: {
+			'usage': 'Verwendung',
+			'notchat': 'Dieser Befehl kann nur in Chaträumen verwendet werden',
+			'tiererr1': 'Tier',
+			'tiererr2': 'nicht gefunden',
+			'set': 'Standard tier für dieses Chaträumen ist jetzt'
 		},
 		/*
 		* Quotes & Jokes

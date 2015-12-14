@@ -1,4 +1,6 @@
-﻿module.exports = {
+﻿const battleAutojoinFile = AppOptions.data + "_temp/" + "battle-autojoin-tmp.json";
+
+module.exports = {
 	/* Data and modules */
 	battlesCount: 0,
 	data: {},
@@ -35,6 +37,9 @@
 				this.aiModules[i] = require(this.aiModList[i]);
 			} catch (e) {error(e.stack);}
 		}
+		try {
+			this.autoJoinData = this.autojoinFFM.readObj();
+		} catch (e) {error(e.stack);}
 		return;
 	},
 
@@ -45,6 +50,36 @@
 
 	send: function (room, text) {
 		Bot.send(room + "|" + text);
+	},
+
+	autojoinFFM: new Settings.FlatFileManager(battleAutojoinFile),
+	autoJoinData: {},
+
+	tryJoinAbandonedBattles: function () {
+		debug("Try");
+		if (!Config.abandonedBattleAutojoin) return;
+		var cmds = [];
+		for (var i in this.autoJoinData) {
+			if (!this.data[i]) {
+				cmds.push('|/join ' + i);
+				cmds.push(i + '|/joinbattle');
+			}
+			delete this.autoJoinData[i];
+		}
+		this.autojoinFFM.writeObj(this.autoJoinData);
+		debug(JSON.stringify(cmds));
+		return cmds;
+	},
+
+	updateBattleAutojoin: function () {
+		if (!Config.abandonedBattleAutojoin) return;
+		for (var i in this.autoJoinData) {
+			delete this.autoJoinData[i];
+		}
+		for (var room in this.data) {
+			if (this.data[room].playing) this.autoJoinData[room] = 1;
+		}
+		this.autojoinFFM.writeObj(this.autoJoinData);
 	},
 
 	rejoin: function (room) {
@@ -216,14 +251,20 @@
 		}
 	},
 
+	sendWelcomeMessage: function (room) {
+		if (!this.data[room] || !this.data[room].playing) return;
+		var wmsg = Config.initBattleMsg;
+		if (wmsg && wmsg.length) this.send(room, wmsg[Math.floor(Math.random() * wmsg.length)]);
+	},
+
 	finishBattle: function (room, win) {
 		if (!this.data[room] || !this.data[room].playing) return;
 		if (win) {
 			var winmsg = Config.winmsg;
-			this.send(room, winmsg[Math.floor(Math.random() * winmsg.length)]);
+			if (winmsg && winmsg.length) this.send(room, winmsg[Math.floor(Math.random() * winmsg.length)]);
 		} else {
 			var losemsg = Config.losemsg;
-			this.send(room, losemsg[Math.floor(Math.random() * losemsg.length)]);
+			if (losemsg && losemsg.length) this.send(room, losemsg[Math.floor(Math.random() * losemsg.length)]);
 		}
 		this.send(room, '/leave');
 	},
@@ -320,6 +361,8 @@
 		}
 		//DATA = args, kwargs
 		//run minors and majors
+		var ident, identA, identB, poke, pokeId, pokeIndex, dataPoke, argPoke,
+			side, sideId, sideA, sideB, hpAux, volTarget, hazardId, fieldId;
 		switch (args[0]) {
 			/*----------------------------------
 				Run majors
@@ -330,13 +373,13 @@
 			case 'title':
 				if (!this.data[room]) this.data[room] = {};
 				this.data[room].title = args[1];
-				//welcome message if needed
 				break;
 			case 'deinit':
 				//deallocate
 				if (this.data[room]) delete this.data[room];
 				this.battlesCount--;
 				if (this.battlesCount < 0) this.battlesCount = 0;
+				this.updateBattleAutojoin();
 				break;
 			case 'player':
 				if (!args[1] || !args[2]) return;
@@ -344,6 +387,7 @@
 					//self
 					this.data[room].self = {id: args[1], name: args[2], avatar: args[3]};
 					this.data[room].playing = true;
+					this.updateBattleAutojoin();
 				} else {
 					//opponent
 					this.data[room].opponent = {id: args[1], name: args[2], avatar: args[3]};
@@ -412,6 +456,7 @@
 				break;
 			case 'tier':
 				this.data[room].tier = args[1];
+				this.sendWelcomeMessage(room);
 				break;
 			case 'rule':
 				if (!this.data[room].rules) this.data[room].rules = {};
@@ -458,7 +503,7 @@
 				break;
 			case 'callback':
 				if (args[1] === 'cant') {
-					var ident = this.getPokemonId(args[2]);
+					ident = this.getPokemonId(args[2]);
 					var moveDisabled = args[4];
 					if (moveDisabled) {
 						try {
@@ -498,10 +543,10 @@
 			case 'poke':
 				if (args[2] && this.data[room].opponent && this.data[room].opponent.id === args[1]) {
 					if (!this.data[room].oppTeam) this.data[room].oppTeam = [];
-					var poke = {};
-					var dataPoke = args[2].split(',');
+					poke = {};
+					dataPoke = args[2].split(',');
 					poke.species = dataPoke[0].trim();
-					var argPoke = '';
+					argPoke = '';
 					for (var i = 1; i < dataPoke.length; i++) {
 						argPoke = dataPoke[i].trim();
 						if (argPoke.charAt(0) === 'L') poke.level = parseInt(argPoke.substr(1));
@@ -516,16 +561,16 @@
 			case 'replace':
 				if (!this.data[room].statusData) return; //no gametype (bug)
 				if (args.length < 4) return;
-				var ident = this.getPokemonId(args[1]);
-				var pokeId = ident.pokeId;
-				var sideId = ident.sideId;
-				var pokeIndex = ident.pokeIndex;
+				ident = this.getPokemonId(args[1]);
+				pokeId = ident.pokeId;
+				sideId = ident.sideId;
+				pokeIndex = ident.pokeIndex;
 				//get pokemon  basicdata
-				var poke = {};
+				poke = {};
 				poke.name = pokeId;
-				var dataPoke = args[2].split(',');
+				dataPoke = args[2].split(',');
 				poke.species = dataPoke[0].trim();
-				var argPoke = '';
+				argPoke = '';
 				for (var i = 1; i < dataPoke.length; i++) {
 					argPoke = dataPoke[i].trim();
 					if (argPoke.charAt(0) === 'L') poke.level = parseInt(argPoke.substr(1));
@@ -534,7 +579,7 @@
 				}
 				//get status and hp
 				dataPoke = args[3].split(' ');
-				var hpAux = dataPoke[0].split('/');
+				hpAux = dataPoke[0].split('/');
 				if (!hpAux[1]) {
 					poke.hp = 0;
 				} else {
@@ -570,15 +615,15 @@
 			case 'detailschange':
 				if (!this.data[room].statusData) return; //no gametype (bug)
 				if (args.length < 3) return;
-				var ident = this.getPokemonId(args[1]);
-				var pokeId = ident.pokeId;
-				var sideId = ident.sideId;
-				var pokeIndex = ident.pokeIndex;
+				ident = this.getPokemonId(args[1]);
+				pokeId = ident.pokeId;
+				sideId = ident.sideId;
+				pokeIndex = ident.pokeIndex;
 				//get pokemon  basicdata
-				var poke = {};
-				var dataPoke = args[2].split(',');
+				poke = {};
+				dataPoke = args[2].split(',');
 				poke.species = dataPoke[0].trim();
-				var argPoke = '';
+				argPoke = '';
 				for (var i = 1; i < dataPoke.length; i++) {
 					argPoke = dataPoke[i].trim();
 					if (argPoke.charAt(0) === 'L') poke.level = parseInt(argPoke.substr(1));
@@ -601,10 +646,10 @@
 			case 'faint':
 				if (!this.data[room].statusData) return; //no gametype (bug)
 				if (args.length < 2) return;
-				var ident = this.getPokemonId(args[1]);
-				var pokeId = ident.pokeId;
-				var sideId = ident.sideId;
-				var pokeIndex = ident.pokeIndex;
+				ident = this.getPokemonId(args[1]);
+				pokeId = ident.pokeId;
+				sideId = ident.sideId;
+				pokeIndex = ident.pokeIndex;
 				if (this.data[room].opponent.id === sideId) {
 					if (!this.data[room].oppTeamOffSet) this.data[room].oppTeamOffSet = {};
 					if (!this.data[room].oppTeamOffSet[pokeId]) this.data[room].oppTeamOffSet[pokeId] = {};
@@ -617,10 +662,10 @@
 			case 'swap':
 				if (!this.data[room].statusData) return; //no gametype (bug)
 				if (args.length < 3) return;
-				var ident = this.getPokemonId(args[1]);
-				var pokeId = ident.pokeId;
-				var sideId = ident.sideId;
-				var pokeIndex = ident.pokeIndex;
+				ident = this.getPokemonId(args[1]);
+				pokeId = ident.pokeId;
+				sideId = ident.sideId;
+				pokeIndex = ident.pokeIndex;
 				var swapPos = parseInt(args[2]);
 				if (this.data[room].opponent.id === sideId) {
 					var aux = this.data[room].statusData.foe.pokemon[pokeIndex];
@@ -635,10 +680,10 @@
 			case 'move':
 				if (!this.data[room].statusData) return; //no gametype (bug)
 				if (args.length < 3) return;
-				var ident = this.getPokemonId(args[1]);
-				var pokeId = ident.pokeId;
-				var sideId = ident.sideId;
-				var pokeIndex = ident.pokeIndex;
+				ident = this.getPokemonId(args[1]);
+				pokeId = ident.pokeId;
+				sideId = ident.sideId;
+				pokeIndex = ident.pokeIndex;
 				if (this.data[room].opponent.id === sideId) {
 					if (!this.data[room].oppTeamOffSet) this.data[room].oppTeamOffSet = {};
 					if (!this.data[room].oppTeamOffSet[pokeId]) this.data[room].oppTeamOffSet[pokeId] = {};
@@ -660,10 +705,10 @@
 			case '-damage':
 			case '-heal':
 			case '-sethp':
-				var ident = this.getPokemonId(args[1]);
-				var poke = {};
+				ident = this.getPokemonId(args[1]);
+				poke = {};
 				dataPoke = args[2].split(' ');
-				var hpAux = dataPoke[0].split('/');
+				hpAux = dataPoke[0].split('/');
 				if (!hpAux[1]) {
 					poke.hp = 0;
 				} else {
@@ -706,7 +751,7 @@
 
 			case '-boost':
 			case '-setboost':
-				var ident = this.getPokemonId(args[1]);
+				ident = this.getPokemonId(args[1]);
 				if (this.data[room].opponent.id === ident.sideId) {
 					if (!this.data[room].statusData.foe.pokemon[ident.pokeIndex]['boost']) this.data[room].statusData.foe.pokemon[ident.pokeIndex]['boost'] = {};
 					if (!this.data[room].statusData.foe.pokemon[ident.pokeIndex]['boost'][args[2]]) this.data[room].statusData.foe.pokemon[ident.pokeIndex]['boost'][args[2]] = 0;
@@ -736,7 +781,7 @@
 				}
 				break;
 			case '-unboost':
-				var ident = this.getPokemonId(args[1]);
+				ident = this.getPokemonId(args[1]);
 				if (this.data[room].opponent.id === ident.sideId) {
 					if (!this.data[room].statusData.foe.pokemon[ident.pokeIndex]['boost']) this.data[room].statusData.foe.pokemon[ident.pokeIndex]['boost'] = {};
 					if (!this.data[room].statusData.foe.pokemon[ident.pokeIndex]['boost'][args[2]]) this.data[room].statusData.foe.pokemon[ident.pokeIndex]['boost'][args[2]] = 0;
@@ -748,10 +793,10 @@
 				}
 				break;
 			case '-swapboost':
-				var identA = this.getPokemonId(args[1]);
-				var sideA = (this.data[room].opponent.id === identA.sideId) ? 'foe' : 'self';
-				var identB = this.getPokemonId(args[2]);
-				var sideB = (this.data[room].opponent.id === identB.sideId) ? 'foe' : 'self';
+				identA = this.getPokemonId(args[1]);
+				sideA = (this.data[room].opponent.id === identA.sideId) ? 'foe' : 'self';
+				identB = this.getPokemonId(args[2]);
+				sideB = (this.data[room].opponent.id === identB.sideId) ? 'foe' : 'self';
 				var stats = args[3];
 				if (!stats) {
 					var aux = this.data[room].statusData[sideB].pokemon[identB.pokeIndex]['boost'];
@@ -771,31 +816,31 @@
 				}
 				break;
 			case '-restoreboost':
-				var ident = this.getPokemonId(args[1]);
-				var side = (this.data[room].opponent.id === ident.sideId) ? 'foe' : 'self';
+				ident = this.getPokemonId(args[1]);
+				side = (this.data[room].opponent.id === ident.sideId) ? 'foe' : 'self';
 				if (!this.data[room].statusData[side].pokemon[ident.pokeIndex]['boost']) return;
 				for (var i in this.data[room].statusData[side].pokemon[ident.pokeIndex]['boost']) {
 					if (this.data[room].statusData[side].pokemon[ident.pokeIndex]['boost'] < 0) this.data[room].statusData[side].pokemon[ident.pokeIndex]['boost'] = 0;
 				}
 				break;
 			case '-copyboost':
-				var identA = this.getPokemonId(args[1]);
-				var sideA = (this.data[room].opponent.id === identA.sideId) ? 'foe' : 'self';
-				var identB = this.getPokemonId(args[2]);
-				var sideB = (this.data[room].opponent.id === identB.sideId) ? 'foe' : 'self';
+				identA = this.getPokemonId(args[1]);
+				sideA = (this.data[room].opponent.id === identA.sideId) ? 'foe' : 'self';
+				identB = this.getPokemonId(args[2]);
+				sideB = (this.data[room].opponent.id === identB.sideId) ? 'foe' : 'self';
 				this.data[room].statusData[sideA].pokemon[identA.pokeIndex]['boost'] = this.data[room].statusData[sideB].pokemon[identB.pokeIndex]['boost'];
 				break;
 			case '-clearboost':
-				var ident = this.getPokemonId(args[1]);
-				var side = (this.data[room].opponent.id === ident.sideId) ? 'foe' : 'self';
+				ident = this.getPokemonId(args[1]);
+				side = (this.data[room].opponent.id === ident.sideId) ? 'foe' : 'self';
 				if (!this.data[room].statusData[side].pokemon[ident.pokeIndex]['boost']) return;
 				for (var i in this.data[room].statusData[side].pokemon[ident.pokeIndex]['boost']) {
 					this.data[room].statusData[side].pokemon[ident.pokeIndex]['boost'] = 0;
 				}
 				break;
 			case '-invertboost':
-				var ident = this.getPokemonId(args[1]);
-				var side = (this.data[room].opponent.id === ident.sideId) ? 'foe' : 'self';
+				ident = this.getPokemonId(args[1]);
+				side = (this.data[room].opponent.id === ident.sideId) ? 'foe' : 'self';
 				if (!this.data[room].statusData[side].pokemon[ident.pokeIndex]['boost']) return;
 				for (var i in this.data[room].statusData[side].pokemon[ident.pokeIndex]['boost']) {
 					this.data[room].statusData[side].pokemon[ident.pokeIndex]['boost'] *= (-1);
@@ -809,7 +854,7 @@
 				break;
 
 			case '-status':
-				var ident = this.getPokemonId(args[1]);
+				ident = this.getPokemonId(args[1]);
 				if (this.data[room].opponent.id === ident.sideId) {
 					this.data[room].oppTeamOffSet[ident.pokeId]['status'] = args[2];
 					this.data[room].statusData.foe.pokemon[ident.pokeIndex]['status'] = args[2];
@@ -818,7 +863,7 @@
 				}
 				break;
 			case '-curestatus':
-				var ident = this.getPokemonId(args[1]);
+				ident = this.getPokemonId(args[1]);
 				if (this.data[room].opponent.id === ident.sideId) {
 					this.data[room].oppTeamOffSet[ident.pokeId]['status'] = false;
 					this.data[room].statusData.foe.pokemon[ident.pokeIndex]['status'] = false;
@@ -827,7 +872,7 @@
 				}
 				break;
 			case '-cureteam':
-				var ident = this.getPokemonId(args[1]);
+				ident = this.getPokemonId(args[1]);
 				if (this.data[room].opponent.id === ident.sideId) {
 					for (var i in this.data[room].oppTeamOffSet)
 						this.data[room].oppTeamOffSet[i]['status'] = false;
@@ -840,7 +885,7 @@
 				break;
 
 			case '-item':
-				var ident = this.getPokemonId(args[1]);
+				ident = this.getPokemonId(args[1]);
 				if (this.data[room].opponent.id === ident.sideId) {
 					this.data[room].oppTeamOffSet[ident.pokeId]['item'] = args[2];
 					this.data[room].statusData.foe.pokemon[ident.pokeIndex]['item'] = args[2];
@@ -849,7 +894,7 @@
 				}
 				break;
 			case '-enditem':
-				var ident = this.getPokemonId(args[1]);
+				ident = this.getPokemonId(args[1]);
 				if (this.data[room].opponent.id === ident.sideId) {
 					this.data[room].oppTeamOffSet[ident.pokeId]['item'] = false;
 					this.data[room].statusData.foe.pokemon[ident.pokeIndex]['item'] = false;
@@ -859,7 +904,7 @@
 				break;
 
 			case '-ability':
-				var ident = this.getPokemonId(args[1]);
+				ident = this.getPokemonId(args[1]);
 				if (this.data[room].opponent.id === ident.sideId) {
 					this.data[room].oppTeamOffSet[ident.pokeId]['ability'] = args[2];
 					this.data[room].statusData.foe.pokemon[ident.pokeIndex]['ability'] = args[2];
@@ -868,7 +913,7 @@
 				}
 				break;
 			case '-endability':
-				var ident = this.getPokemonId(args[1]);
+				ident = this.getPokemonId(args[1]);
 				if (this.data[room].opponent.id === ident.sideId) {
 					this.data[room].oppTeamOffSet[ident.pokeId]['ability'] = false;
 					this.data[room].statusData.foe.pokemon[ident.pokeIndex]['ability'] = false;
@@ -878,27 +923,27 @@
 				break;
 
 			case '-transform':
-				var identA = this.getPokemonId(args[1]);
-				var sideA = (this.data[room].opponent.id === identA.sideId) ? 'foe' : 'self';
-				var identB = this.getPokemonId(args[2]);
-				var sideB = (this.data[room].opponent.id === identB.sideId) ? 'foe' : 'self';
+				identA = this.getPokemonId(args[1]);
+				sideA = (this.data[room].opponent.id === identA.sideId) ? 'foe' : 'self';
+				identB = this.getPokemonId(args[2]);
+				sideB = (this.data[room].opponent.id === identB.sideId) ? 'foe' : 'self';
 				this.data[room].statusData[sideA].pokemon[identA.pokeIndex] = this.data[room].statusData[sideB].pokemon[identB.pokeIndex];
 				this.data[room].statusData[sideA].pokemon[identA.pokeIndex].name = identA.pokeId;
 				break;
 
 			case '-start':
-				var ident = this.getPokemonId(args[1]);
-				var side = (this.data[room].opponent.id === ident.sideId) ? 'foe' : 'self';
-				var volTarget = args[2].split(":");
+				ident = this.getPokemonId(args[1]);
+				side = (this.data[room].opponent.id === ident.sideId) ? 'foe' : 'self';
+				volTarget = args[2].split(":");
 				if (volTarget[1]) volTarget = volTarget[1].trim();
 				else volTarget = args[2];
 				if (!this.data[room].statusData[side].pokemon[ident.pokeIndex]['volatiles']) this.data[room].statusData[side].pokemon[ident.pokeIndex]['volatiles'] = {};
 				this.data[room].statusData[side].pokemon[ident.pokeIndex]['volatiles'][volTarget] = true;
 				break;
 			case '-end':
-				var ident = this.getPokemonId(args[1]);
-				var side = (this.data[room].opponent.id === ident.sideId) ? 'foe' : 'self';
-				var volTarget = args[2].split(":");
+				ident = this.getPokemonId(args[1]);
+				side = (this.data[room].opponent.id === ident.sideId) ? 'foe' : 'self';
+				volTarget = args[2].split(":");
 				if (volTarget[1]) volTarget = volTarget[1].trim();
 				else volTarget = args[2];
 				if (!this.data[room].statusData[side].pokemon[ident.pokeIndex]['volatiles']) this.data[room].statusData[side].pokemon[ident.pokeIndex]['volatiles'] = {};
@@ -906,8 +951,8 @@
 				break;
 
 			case '-sidestart':
-				var sideId = args[1].split(":")[0];
-				var hazardId = args[2].split(": ");
+				sideId = args[1].split(":")[0];
+				hazardId = args[2].split(": ");
 				if (hazardId[1]) hazardId = hazardId[1];
 				else hazardId = hazardId[0];
 				if (this.data[room].opponent.id === sideId) {
@@ -919,8 +964,8 @@
 				}
 				break;
 			case '-sideend':
-				var sideId = args[1].split(":")[0];
-				var hazardId = args[2];
+				sideId = args[1].split(":")[0];
+				hazardId = args[2];
 				if (this.data[room].opponent.id === sideId) {
 					this.data[room].statusData.foe.side[hazardId] = false;
 				} else {
@@ -933,14 +978,14 @@
 				break;
 			case '-fieldstart':
 				if (!this.data[room].fields) this.data[room].fields = {};
-				var fieldId = args[1].split(": ");
+				fieldId = args[1].split(": ");
 				if (fieldId[1]) fieldId = fieldId[1];
 				else fieldId = fieldId[0];
 				this.data[room].fields[fieldId] = true;
 				break;
 			case '-fieldend':
 				if (!this.data[room].fields) this.data[room].fields = {};
-				var fieldId = args[1].split(": ");
+				fieldId = args[1].split(": ");
 				if (fieldId[1]) fieldId = fieldId[1];
 				else fieldId = fieldId[0];
 				this.data[room].fields[fieldId] = false;

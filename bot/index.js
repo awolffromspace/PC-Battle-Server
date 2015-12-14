@@ -51,6 +51,11 @@ if (!fs.existsSync(AppOptions.data)) {
 	fs.mkdirSync(AppOptions.data);
 }
 
+if (!fs.existsSync(AppOptions.data + "_temp/")) {
+	console.log(AppOptions.data + "_temp/" + " does not exist - creating temp directory...");
+	fs.mkdirSync(AppOptions.data + "_temp/");
+}
+
 if (!fs.existsSync(AppOptions.config)) {
 	console.log(AppOptions.config + " does not exist - creating one with default settings...");
 	fs.writeFileSync(AppOptions.config, fs.readFileSync('./config-example.js'));
@@ -58,13 +63,6 @@ if (!fs.existsSync(AppOptions.config)) {
 
 global.Config = require(AppOptions.config);
 Tools.checkConfig();
-
-global.reloadConfig = function () {
-	Tools.uncacheTree(AppOptions.config);
-	global.Config = require(AppOptions.config);
-	Tools.checkConfig();
-	CommandParser.reloadTokens();
-};
 
 if (AppOptions.debugmode) info((['Debug', 'Monitor', 'Production'])[AppOptions.debugmode - 1] + ' mode');
 
@@ -144,11 +142,22 @@ function botAfterConnect () {
 		joinByQueryRequest(Config.rooms);
 	} else {
 		var cmds = [];
+		var featureInitCmds;
 		for (var i = 0; i < Config.rooms.length; i++) {
 			cmds.push('|/join ' + Config.rooms[i]);
 		}
 		for (var i = 0; i < Config.initCmds.length; i++) {
 			cmds.push(Config.initCmds[i]);
+		}
+		for (var f in Features) {
+			if (typeof Features[f].getInitCmds === "function") {
+				try {
+					featureInitCmds = Features[f].getInitCmds();
+					if (featureInitCmds) cmds = cmds.concat(featureInitCmds);
+				} catch (e) {
+					errlog(e.stack);
+				}
+			}
 		}
 		Bot.send(cmds, 2000);
 	}
@@ -163,8 +172,19 @@ function joinByQueryRequest(target) {
 	} else {
 		error('Config.rooms, as a string must be "official", "public" or "all"');
 		var cmds = [];
+		var featureInitCmds;
 		for (var i = 0; i < Config.initCmds.length; i++) {
 			cmds.push(Config.initCmds[i]);
+		}
+		for (var f in Features) {
+			if (typeof Features[f].getInitCmds === "function") {
+				try {
+					featureInitCmds = Features[f].getInitCmds();
+					if (featureInitCmds) cmds = cmds.concat(featureInitCmds);
+				} catch (e) {
+					errlog(e.stack);
+				}
+			}
 		}
 		Bot.send(cmds, 2000);
 		return;
@@ -175,6 +195,7 @@ function joinByQueryRequest(target) {
 			data.splice(0, 1);
 			var str = data.join('|');
 			var cmds = [];
+			var featureInitCmds;
 			try {
 				var rooms = JSON.parse(str);
 				var offRooms = [], publicRooms = [];
@@ -197,6 +218,16 @@ function joinByQueryRequest(target) {
 			} catch (e) {}
 			for (var i = 0; i < Config.initCmds.length; i++) {
 				cmds.push(Config.initCmds[i]);
+			}
+			for (var f in Features) {
+				if (typeof Features[f].getInitCmds === "function") {
+					try {
+						featureInitCmds = Features[f].getInitCmds();
+						if (featureInitCmds) cmds = cmds.concat(featureInitCmds);
+					} catch (e) {
+						errlog(e.stack);
+					}
+				}
 			}
 			Bot.send(cmds, 2000);
 			Bot.on('queryresponse', function () {return;});
@@ -480,7 +511,11 @@ if (!AppOptions.testmode && Config.watchconfig) {
 	Tools.watchFile(AppOptions.config, function (curr, prev) {
 		if (curr.mtime <= prev.mtime) return;
 		try {
-			reloadConfig();
+			Tools.uncacheTree(AppOptions.config);
+			global.Config = require(AppOptions.config);
+			Tools.checkConfig();
+			Settings.applyConfig();
+			CommandParser.reloadTokens();
 			info(AppOptions.config + ' reloaded');
 		} catch (e) {
 			error('could not reload ' + AppOptions.config);

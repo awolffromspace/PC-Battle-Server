@@ -28,8 +28,65 @@ exports.translations = {
 				'Don\'t count on it.'
 			]
 		},
+		regdate: {
+			'inv': 'Invalid username',
+			'busy': 'Currently downloading the data, try again in a few seconds',
+			'err': 'Could not get data from',
+			'user': 'User',
+			'not': 'is not registered',
+			'regtime1': 'was registered',
+			'regtime2': 'ago',
+			'regdate': 'was registered on'
+		},
+		/*
+		* Smogon
+		*/
 		usage: {
-			'stats': 'Usage stats'
+			'in': 'in',
+			'stats': 'Usage stats',
+			'data': 'Usage data',
+			'usage': 'Usage',
+			'tiererr1': 'Tier or format',
+			'tiererr2': 'not found',
+			'tiererr3': 'not available',
+			'err': 'Could not get usage data from',
+			'busy': 'Downloading the usage data. Try again in a few seconds',
+			'pokeerr1': 'Pokemon',
+			'pokeerr2': 'not available in',
+			'pokeerr3': 'usage data',
+			'pokeerr4': 'usage stats',
+			'notfound': 'Data not found for',
+			'usagedata1': '',
+			'usagedata2': '\'s #NAME',
+			'pokeusage': 'Usage',
+			'pokeraw': 'Raw',
+			'abilities': 'Abilities',
+			'items': 'Items',
+			'moves': 'Moves',
+			'spreads': 'Spreads',
+			'teammates': 'Teammates'
+		},
+		suspect: {
+			'tiererr1': 'Tier',
+			'tiererr2': 'not found',
+			'in': 'in',
+			'nosuspect': 'No suspect test data found for tier',
+			'aux1': 'Use',
+			'aux2': 'to set the suspect data'
+		},
+		setsuspect: {
+			'usage': 'Usage',
+			'tier': 'Tier',
+			'notfound': 'not found',
+			'd1': 'Suspect test data for tier',
+			'd2': 'has been removed'
+		},
+		deftier: {
+			'usage': 'Usage',
+			'notchat': 'This command is only available for chat rooms',
+			'tiererr1': 'Tier',
+			'tiererr2': 'not found',
+			'set': 'Default tier for this room is now'
 		},
 		/*
 		* Quotes & Jokes
