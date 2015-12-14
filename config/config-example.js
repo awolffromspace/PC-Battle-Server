@@ -222,6 +222,7 @@ exports.customavatars = {
 	'pachy': 'pachy.png',
 	'eldy': 'pachy.png',
 	'elod': 'pachy.png',
+	'mlod': 'pachy.png',
 	'ladygunner': 'ladygunner.gif',
 	'queenofshipping': 'ladygunner.gif',
 	'starrywindy': 'starrywindy.gif',
@@ -564,6 +565,12 @@ exports.customavatars = {
 	'nidohorsea': 'nidokingdra44.png',
 	'kingfeebas': 'nidokingdra44.png',
 	'tn44': 'nidokingdra44.png',
+	'nakuzami': 'nakuzami.png',
+	'an7hony': 'an7hony.png',
+	'squeetz': 'squeetz.png',
+	'whatagimmick': 'squeetz.png',
+	'lailahtan': 'lailahtan.png',
+	'bellssm': 'lailahtan.png',
 };
 
 // custom avatars appear in profile by specifiying server url.
