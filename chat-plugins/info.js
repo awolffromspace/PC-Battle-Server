@@ -1992,7 +1992,7 @@ exports.commands = {
 			"- Aslan (Rainbow Arcanine, TOP PERCENTAGE)<br />" +
 			"- Aurora<br />" +
 			"- Christos<br />" +
-			"- Dragon (Aura Blackquill, bellossom, Captain Syrup, Dragii, Emeruade, Erika Senpai, Iris, Kjelle, Miss Fortune, Mitsuruu, Nabooru, Tharja)<br />" +
+			"- Dragon (Aura Blackquill, bellossom, Captain Syrup, Dragii, Emeruade, Erika Senpai, Iris, Kjelle, Lailah-tan, Miss Fortune, Mitsuruu, Nabooru, Tharja)<br />" +
 			"- Omicron (Megido, omicronhuh)<br />" +
 			"- Peitharchia (Adrastia, nymph)<br />" +
 			"- Sanguine (Natalya)<br />" +
