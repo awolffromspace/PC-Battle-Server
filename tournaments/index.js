@@ -1142,7 +1142,7 @@ CommandParser.commands.tournament = function (paramString, room, user) {
 		}
 
 		if (commands.globalmoderation[cmd]) {
-			if (user.can('tournamentsmoderation')) {
+			if (user.can('voicetourmoderation')) {
 				commandHandler = typeof commands.globalmoderation[cmd] === 'string' ? commands.globalmoderation[commands.globalmoderation[cmd]] : commands.globalmoderation[cmd];
 			} else {
 				return this.errorReply(cmd + " -  Access denied.");
