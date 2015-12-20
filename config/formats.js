@@ -129,6 +129,13 @@ exports.Formats = [
 		}
 	},
 	{
+		name: "Fortune Cup",
+		section: "ORAS Singles",
+
+		ruleset: ['Pokemon', 'Standard', 'Swagger Clause', 'Team Preview'],
+		banlist: []
+	},
+	{
 		name: "OU",
 		desc: [
 			"&bullet; <a href=\"https://www.smogon.com/forums/threads/3521201/\">OU Metagame Discussion</a>",
