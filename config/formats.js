@@ -132,8 +132,8 @@ exports.Formats = [
 		name: "Fortune Cup",
 		section: "ORAS Singles",
 
-		ruleset: ['Pokemon', 'Standard', 'Swagger Clause', 'Team Preview'],
-		banlist: []
+		ruleset: ['Pokemon', 'Swagger Clause', 'Team Preview', 'Sleep Clause Mod', 'Nickname Clause', 'OHKO Clause', 'Moody Clause', 'Evasion Moves Clause', 'Endless Battle Clause', 'HP Percentage Mod', 'Cancel Mod'],
+		banlist: ['Unreleased', 'Illegal']
 	},
 	{
 		name: "OU",
