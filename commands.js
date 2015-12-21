@@ -558,7 +558,6 @@ exports.commands = {
 		}
 		target = target.trim();
 		if (!this.can('roommod', null, room)) return false;
-		if (!this.canHTML(target)) return;
 		if (!/</.test(target)) {
 			// not HTML, do some simple URL linking
 			let re = /(https?:\/\/(([-\w\.]+)+(:\d+)?(\/([\w/_\.]*(\?\S+)?)?)?))/g;
