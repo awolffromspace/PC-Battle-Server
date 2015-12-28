@@ -230,7 +230,7 @@ exports.commands = {
 		Database.write('bp', 0, toId(target), function (err, total) {
 			if (err) throw err;
 			this.sendReply(target + " now has " + total + currencyName(total) + ".");
-			logBP(user.name + " reset the bp of " + target + ".");
+			logBP(user.name + " reset the BP of " + target + ".");
 		}.bind(this));
 	},
 	resetbphelp: ["/resetbp [user] - Reset user's Battle Points to zero."],
@@ -378,7 +378,7 @@ exports.commands = {
 	richestuser: function (target, room, user) {
 		if (!this.canBroadcast()) return;
 		var _this = this;
-		var display = '<center><u><b>Richest Users</b></u></center><br><table border="1" cellspacing="0" cellpadding="5" width="100%"><tbody><tr><th>Rank</th><th>Username</th><th>bp</th></tr>';
+		var display = '<center><u><b>BP Ladder</b></u></center><br><table border="1" cellspacing="0" cellpadding="5" width="100%"><tbody><tr><th>Rank</th><th>Username</th><th>bp</th></tr>';
 		Database.sortDesc('bp', 10, function (err, users) {
 			if (err) throw err;
 			if (!users.length) {
@@ -558,6 +558,35 @@ exports.commands = {
 				output += "The average user has " + average + currencyName(average) + ".";
 				_this.sendReplyBox(output);
 			});
+			room.update();
+		});
+	},
+
+	resetgt: function (target, room, user) {
+		if (!this.can('forcewin')) return false;
+		Database.write('gt', 0, toId(target), function (err, total) {
+			if (err) throw err;
+			this.sendReply(target + " now has " + total + " Get-Together points.");
+			logGT(user.name + " reset the Get-Together points of " + target + ".");
+		}.bind(this));
+	},
+	resetgthelp: ["/resetgt [user] - Reset user's Get-Together points to zero."],
+
+	gtladder: function (target, room, user) {
+		if (!this.canBroadcast()) return;
+		var _this = this;
+		var display = '<center><u><b>Get-Together Ladder</b></u></center><br><table border="1" cellspacing="0" cellpadding="5" width="100%"><tbody><tr><th>Rank</th><th>Username</th><th>GT Points</th></tr>';
+		Database.sortDesc('gt', 10, function (err, users) {
+			if (err) throw err;
+			if (!users.length) {
+				_this.sendReplyBox("Get-Together ladder is empty.");
+			} else {
+				users.forEach(function (user, index) {
+					display += "<tr><td>" + (index + 1) + "</td><td>" + user.username + "</td><td>" + user.gt + "</td></tr>";
+				});
+				display += "</tbody></table>";
+				_this.sendReply("|raw|" + display);
+			}
 			room.update();
 		});
 	}
