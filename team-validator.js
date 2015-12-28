@@ -110,26 +110,8 @@ if (!process.send) {
 		});
 	}
 
-	/**
-	 * Converts anything to an ID. An ID must have only lowercase alphanumeric
-	 * characters.
-	 * If a string is passed, it will be converted to lowercase and
-	 * non-alphanumeric characters will be stripped.
-	 * If an object with an ID is passed, its ID will be returned.
-	 * Otherwise, an empty string will be returned.
-	 */
-	global.toId = function (text) {
-		if (text && text.id) {
-			text = text.id;
-		} else if (text && text.userid) {
-			text = text.userid;
-		}
-
-		if (typeof text !== 'string' && typeof text !== 'number') return '';
-		return ('' + text).toLowerCase().replace(/[^a-z0-9]+/g, '');
-	};
-
 	global.Tools = require('./tools.js').includeMods();
+	global.toId = Tools.getId;
 
 	require('./repl.js').start('team-validator-', process.pid, function (cmd) { return eval(cmd); });
 
@@ -343,12 +325,12 @@ Validator = (function () {
 		setHas[check] = true;
 		if (banlistTable[check]) {
 			clause = typeof banlistTable[check] === 'string' ? " by " + banlistTable[check] : '';
-			problems.push(set.species + ' is banned' + clause + '.');
+			return [set.species + " is banned" + clause + "."];
 		} else if (!tools.data.FormatsData[check] || !tools.data.FormatsData[check].tier) {
 			check = toId(template.baseSpecies);
 			if (banlistTable[check]) {
 				clause = typeof banlistTable[check] === 'string' ? " by " + banlistTable[check] : '';
-				problems.push(template.baseSpecies + ' is banned' + clause + '.');
+				return [template.baseSpecies + " is banned" + clause + "."];
 			}
 		}
 
@@ -506,7 +488,7 @@ Validator = (function () {
 					legal = true;
 					if (eventData.gender) set.gender = eventData.gender;
 				}
-				if (!legal) problems.push(template.species + " is only obtainable via event - it needs to match one of its events.");
+				if (!legal) problems.push(template.species + (template.eventOnlyHidden ? "'s hidden ability" : "") + " is only obtainable via event - it needs to match one of its events.");
 			}
 			if (isHidden && lsetData.sourcesBefore) {
 				if (!lsetData.sources && lsetData.sourcesBefore < 5) {
@@ -637,7 +619,7 @@ Validator = (function () {
 		do {
 			alreadyChecked[template.speciesid] = true;
 			// STABmons hack to avoid copying all of validateSet to formats
-			if (format.banlistTable && format.banlistTable['ignorestabmoves'] && !(move in {'bellydrum':1, 'chatter':1, 'shellsmash':1})) {
+			if (format.banlistTable && format.banlistTable['ignorestabmoves'] && !(move in {'bellydrum':1, 'chatter':1, 'darkvoid':1, 'geomancy':1, 'shellsmash':1})) {
 				let types = template.types;
 				if (template.species === 'Shaymin') types = ['Grass', 'Flying'];
 				if (template.baseSpecies === 'Hoopa') types = ['Psychic', 'Ghost', 'Dark'];
@@ -737,8 +719,8 @@ Validator = (function () {
 							// unless it's supposed to be self-breedable, can't inherit from self, prevos, etc
 							// only basic pokemon have egg moves, so by now all evolutions should be in alreadyChecked
 							if (!fromSelf && alreadyChecked[dexEntry.speciesid]) continue;
-							// father must be able to learn the move
-							if (!dexEntry.learnset[move] && !dexEntry.learnset['sketch']) continue;
+							// father must be able to learn the move, unless this is chainbreeding
+							if (!fromSelf && !dexEntry.learnset[move] && !dexEntry.learnset['sketch']) continue;
 
 							// must be able to breed with father
 							if (!dexEntry.eggGroups.intersect(eggGroups).length) continue;

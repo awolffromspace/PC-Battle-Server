@@ -756,7 +756,7 @@ let GlobalRoom = (function () {
 		connection.send(initdata + this.formatListText);
 		if (this.chatRooms.length > 2) connection.send('|queryresponse|rooms|null'); // should display room list
 	};
-	GlobalRoom.prototype.onJoin = function (user, connection, merging) {
+	GlobalRoom.prototype.onJoin = function (user, connection) {
 		if (!user) return false; // ???
 		if (this.users[user.userid]) return user;
 
@@ -1680,7 +1680,7 @@ let ChatRoom = (function () {
 	ChatRoom.prototype.onConnect = function (user, connection) {
 		let userList = this.userList ? this.userList : this.getUserList();
 		this.sendUser(connection, '|init|chat\n|title|' + this.title + '\n' + userList + '\n' + this.getLogSlice(-100).join('\n') + this.getIntroMessage(user));
-		if (this.poll) this.poll.display(user, false);
+		if (this.poll) this.poll.onConnect(user, connection);
 		if (this.game && this.game.onConnect) this.game.onConnect(user, connection);
 	};
 	ChatRoom.prototype.onJoin = function (user, connection) {

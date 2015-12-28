@@ -10,6 +10,7 @@ exports.BattleAliases = {
 	"underused": "UU",
 	"rarelyused": "RU",
 	"neverused": "NU",
+	"pu": "PU (suspect test)",
 	"dubs": "Doubles OU",
 	"dou": "Doubles OU",
 	"doubles": "Doubles OU",
@@ -217,18 +218,6 @@ exports.BattleAliases = {
 	"sitrus": "Sitrus Berry",
 	"specs": "Choice Specs",
 	"yache": "Yache Berry",
-
-	// gen 1-2 berries
-	"berry": "Oran Berry",
-	"bitterberry": "Persim Berry",
-	"burntberry": "Aspear Berry",
-	"goldberry": "Sitrus Berry",
-	"iceberry": "Rawst Berry",
-	"mintberry": "Chesto Berry",
-	"miracleberry": "Lum Berry",
-	"mysteryberry": "Leppa Berry",
-	"przcureberry": "Cheri Berry",
-	"psncureberry": "Pecha Berry",
 
 	// pokemon
 	"aboma": "Abomasnow",
