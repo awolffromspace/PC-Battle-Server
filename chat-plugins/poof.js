@@ -23,6 +23,10 @@ const bidoofftw = [
 	"was forced onto bed by Kingdom of Tea."
 ];
 
+const brcklesnar = [
+	"F5! 1, 2, 3!"
+];
+
 const ctfrm = [
 	"is better than Christos."
 ];
@@ -194,6 +198,16 @@ exports.commands = {
 				message = '{{user}} ' + message;
 			}
 			message = message.replace(/{{user}}/g, user.name);
+
+			var colour = '#' + [1, 1, 1].map(function () {
+				var part = Math.floor(Math.random() * 0xaa);
+				return (part < 0x10 ? '0' : '') + part.toString(16);
+			}).join('');
+
+			room.addRaw('<center><strong><font color="' + colour + '">~~ ' + Tools.escapeHTML(message) + ' ~~</font></strong></center>');
+			user.leaveRoom(room);
+		} else if (userid.toUpperCase() === 'BRCKLESNAR') {
+			var message = target || brcklesnar[Math.floor(Math.random() * brcklesnar.length)];
 
 			var colour = '#' + [1, 1, 1].map(function () {
 				var part = Math.floor(Math.random() * 0xaa);
