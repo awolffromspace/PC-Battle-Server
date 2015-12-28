@@ -1976,8 +1976,10 @@ exports.commands = {
 		if (!this.canBroadcast()) return;
 		this.sendReplyBox(
 			"<b>~ Administrators</b><br />" +
+			"- Anti (Papa Anti)<br />" +
 			"- Ausaudriel (Audy)<br />" +
 			"- Castform (Chase, Chaseform, orb castform)<br />" +
+			"- Dragon (Aura Blackquill, bellossom, Captain Syrup, Dragii, Emeruade, Erika Senpai, Iris, Kjelle, Lailah-tan, Miss Fortune, Mitsuruu, Nabooru, Tharja)<br />" +
 			"- Hiroshi Sotomura (Sotomura, Sotomura606)<br />" +
 			"- Lance (Livewire)<br />" +
 			"- Nolafus<br />" +
@@ -1986,13 +1988,11 @@ exports.commands = {
 			"- shenanigans (razor leaf, unkempt harold)<br />" +
 			"- Sylphiel<br />" +
 			"- wolf (wofl)<br />" +
-			"- Zeffy (Wizard of Judaism)<br /><br />" +
 			"<b>@ Moderators</b><br />" +
 			"- Archy<br />" +
 			"- Aslan (Rainbow Arcanine, TOP PERCENTAGE)<br />" +
 			"- Aurora<br />" +
 			"- Christos<br />" +
-			"- Dragon (Aura Blackquill, bellossom, Captain Syrup, Dragii, Emeruade, Erika Senpai, Iris, Kjelle, Lailah-tan, Miss Fortune, Mitsuruu, Nabooru, Tharja)<br />" +
 			"- Omicron (Megido, omicronhuh)<br />" +
 			"- Peitharchia (Adrastia, nymph)<br />" +
 			"- Sanguine (Natalya)<br />" +
