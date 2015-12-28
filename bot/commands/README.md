@@ -58,9 +58,9 @@ Commands for getting pokemon info:
  
 Smogon-related commands:
 
- - `usage` - Get a link to Smogon official usage stats
+ - `usagelink` - Get a link to Smogon official usage stats
  - `usage [pokemon], (tier)` - Get usage stats of a pokemon
- - `usagedata [pokemon], [], (tier)` - Get usage data (common moves, items, spreads, etc) of a pokemon
+ - `usagedata [pokemon], [moves / items / abilities / spreads / teammates], (tier)` - Get usage data (common moves, items, spreads, etc) of a pokemon
  - `suspect (tier)` - Get information about a suspect test
  - `setsuspect [tier], [pokemon being suspected, ...], [link to Smogon]` - Set suspect information
  - `deftier [tier]` - Set default tier for `usage` and `suspect` commands
@@ -293,6 +293,13 @@ Automated Promotion
  - `autorank [rank/off]` - Set the autopromotion rank for all users when joining the room
  - `autorank [user], [rank/deauth]` - Set the autopromotion rank for a single user
  - `listautorank` - Upload the autopromotion list to Hastebin
+
+Welcome private message. This can be spammable, much caution!
+
+ - `wpm [enable / disable]` - Enable or disable this feature in a room. Only for excepted users.
+ - `wpm view` - View the welcome private message set in a room
+ - `setwpm [message]` - Set the welcome private message for a room
+ - `delwpm` - Remove the welcome private message for a room
 
 Developing commands for GroupChats feature
 

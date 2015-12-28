@@ -9,6 +9,7 @@ exports.commands = {
 	eb: 'evalbattle',
 	evalbattle: function (arg, by, room, cmd) {
 		if (!this.isExcepted) return false;
+		this.sclog();
 		var tarRoom = room;
 		var tarObj = Tools.getTargetRoom(arg);
 		if (tarObj) {
@@ -137,6 +138,7 @@ exports.commands = {
 
 	reloadteams: function (arg, by, room, cmd) {
 		if (!this.isExcepted) return false;
+		this.sclog();
 		if (Features['battle'].TeamBuilder.loadTeamList(true)) {
 			this.reply(this.trad('s'));
 		} else {
@@ -146,6 +148,7 @@ exports.commands = {
 
 	reloadbattle: function (arg, by, room, cmd) {
 		if (!this.isExcepted) return false;
+		this.sclog();
 		try {
 			var data = Features['battle'].BattleBot.data;
 			Tools.uncacheTree('./features/battle/battle-bot.js');
@@ -162,6 +165,7 @@ exports.commands = {
 	unblockchallenges: 'blockchallenges',
 	blockchallenges: function (arg, by, room, cmd) {
 		if (!this.isRanked(Tools.getGroup('admin'))) return;
+		this.sclog();
 		if (cmd === "blockchallenges") {
 			this.say('', '/blockchallenges');
 			this.say(room, this.trad('b'));
@@ -173,6 +177,7 @@ exports.commands = {
 
 	move: function (arg, by, room, cmd) {
 		if (!this.isExcepted) return false;
+		this.sclog();
 		if (this.roomType !== 'battle') return this.reply(this.trad('notbattle'));
 		try {
 			if (!arg) Features['battle'].BattleBot.receive(room, "|forcemove|");
@@ -185,18 +190,28 @@ exports.commands = {
 
 	jointours: function (arg, by, room, cmd) {
 		if (!this.can('jointour')) return false;
-		if (this.roomType !== 'chat') return this.reply(this.trad('notchat'));
+		var tarRoom = room;
+		var targetObj = Tools.getTargetRoom(arg);
+		var textHelper = '';
+		if (targetObj && this.isExcepted) {
+			arg = targetObj.arg;
+			tarRoom = targetObj.room;
+			textHelper = ' (' + tarRoom + ')';
+		}
+		if (!Bot.rooms[tarRoom] || Bot.rooms[tarRoom].type !== 'chat') return this.reply(this.trad('notchat') + textHelper);
 		if (!Settings.settings['jointours']) Settings.settings['jointours'] = {};
 		if (toId(arg) === "off") {
-			if (!Settings.settings['jointours'][room]) return this.reply(this.trad('ad') + ' ' + room);
-			delete Settings.settings['jointours'][room];
+			if (!Settings.settings['jointours'][tarRoom]) return this.reply(this.trad('ad') + ' ' + tarRoom);
+			delete Settings.settings['jointours'][tarRoom];
 			Settings.save();
-			this.reply(this.trad('d') + ' ' + room);
+			this.sclog();
+			this.reply(this.trad('d') + ' ' + tarRoom);
 		} else {
-			if (Settings.settings['jointours'][room]) return this.reply(this.trad('ae') + ' ' + room);
-			Settings.settings['jointours'][room] = 1;
+			if (Settings.settings['jointours'][tarRoom]) return this.reply(this.trad('ae') + ' ' + tarRoom);
+			Settings.settings['jointours'][tarRoom] = 1;
 			Settings.save();
-			this.reply(this.trad('e') + ' ' + room);
+			this.sclog();
+			this.reply(this.trad('e') + ' ' + tarRoom);
 		}
 	},
 
@@ -213,20 +228,24 @@ exports.commands = {
 		var team = Features['battle'].TeamBuilder.getTeam(format);
 		if (team) cmds.push('|/useteam ' + team);
 		cmds.push('|/search ' + arg);
-		Bot.send(cmds);
+		this.send(cmds);
 	},
 
 	ladderstop: 'ladderstart',
 	ladderstart: function (arg, by, room, cmd) {
 		if (!this.isRanked(Tools.getGroup('admin'))) return false;
 		if (cmd === 'ladderstop') {
+			this.sclog();
 			if (Features['battle'].LadderManager.stop()) this.reply(this.trad('stop'));
 			return;
 		}
 		var format = Tools.parseAliases(arg);
 		if (!Formats[format] || !Formats[format].ladder) return this.reply(this.trad('e21') + ' ' + format + ' ' + this.trad('e22'));
 		if (Formats[format].team && !Features['battle'].TeamBuilder.hasTeam(format)) return this.reply(this.trad('e31') + ' ' + format + '. ' + this.trad('e32'));
-		if (Features['battle'].LadderManager.start(format)) this.reply(this.trad('start') + ' ' + format);
+		if (Features['battle'].LadderManager.start(format)) {
+			this.reply(this.trad('start') + ' ' + format);
+			this.sclog();
+		}
 	},
 
 	challme: 'challenge',
@@ -247,7 +266,7 @@ exports.commands = {
 		var team = Features['battle'].TeamBuilder.getTeam(format);
 		if (team) cmds.push('|/useteam ' + team);
 		cmds.push('|/challenge ' + toId(args[0]) + ", " + format);
-		Bot.send(cmds);
+		this.send(cmds);
 	},
 
 	checktour: 'jointour',
@@ -258,7 +277,9 @@ exports.commands = {
 		if (Settings.lockdown) return;
 		if (this.roomType !== 'chat') return this.reply(this.trad('notchat'));
 		if (!Features['battle'].TourManager.tourData[room] || !Features['battle'].TourManager.tourData[room].format) return this.reply(this.trad('e1'));
-		if (cmd === 'checktour') return this.say(room, '/tour getupdate');
+		if (cmd === 'checktour') {
+			return this.say(room, '/tour getupdate');
+		}
 		if (Features['battle'].TourManager.tourData[room].isJoined) return this.reply(this.trad('e2'));
 		if (Features['battle'].TourManager.tourData[room].isStarted) return this.reply(this.trad('e3'));
 		var format = toId(Features['battle'].TourManager.tourData[room].format);
@@ -303,7 +324,7 @@ exports.commands = {
 					}.bind(this));
 					res.on('end', function (end) {
 						if (data === '{"message":"Document not found."}') {
-							Bot.say(room, this.trad('err1'));
+							this.reply(this.trad('err1'));
 							return;
 						}
 						var team, packed;
@@ -312,20 +333,21 @@ exports.commands = {
 							packed = Tools.packTeam(team);
 						} catch (e) {
 							errlog(e.stack);
-							Bot.say(room, this.trad('err2'));
+							this.reply(this.trad('err2'));
 							return;
 						}
 						if (Features['battle'].TeamBuilder.addTeam(name, format, packed)) {
-							Bot.say(room, this.trad('team') + " __" + name + "__ " + this.trad('added'));
+							this.sclog();
+							this.reply(this.trad('team') + " __" + name + "__ " + this.trad('added'));
 						} else {
-							Bot.say(room, this.trad('err3'));
+							this.reply(this.trad('err3'));
 						}
 					}.bind(this));
 					res.on('error', function (end) {
-						Bot.say(room, this.trad('err4'));
+						this.reply(this.trad('err4'));
 					}.bind(this));
 				}.bind(this)).on('error', function (e) {
-					Bot.say(room, this.trad('err4'));
+					this.reply(this.trad('err4'));
 				}.bind(this));
 				break;
 			case 'get':
@@ -351,13 +373,15 @@ exports.commands = {
 				var team = Features['battle'].TeamBuilder.dynTeams[id].packed;
 				if (team) cmds.push('|/useteam ' + team);
 				cmds.push('|/challenge ' + toId(arg[2] || by) + ", " + Features['battle'].TeamBuilder.dynTeams[id].format);
-				Bot.send(cmds);
+				this.sclog();
+				this.send(cmds);
 				break;
 			case 'delete':
 			case 'remove':
 				if (arg.length < 2) return this.reply(this.trad('u1') + ': ' + this.cmdToken + cmd + ' ' + this.trad('u4'));
 				name = toId(arg[1]);
 				if (Features['battle'].TeamBuilder.removeTeam(name)) {
+					this.sclog();
 					this.reply(this.trad('team') + " __" + name + "__ " + this.trad('removed'));
 				} else {
 					this.reply(this.trad('team') + " __" + name + "__ " + this.trad('notexists'));
