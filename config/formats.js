@@ -10,7 +10,7 @@ exports.Formats = [
 
 	{
 		name: "[LotW 9] LC Random",
-		section: "Random Battles (aka Randbats)",
+		section: "ORAS Singles",
 
 		team: 'randomLC',
 		ruleset: ['Random (no PotD)'],
@@ -4217,8 +4217,8 @@ exports.Formats = [
 		section: "Other Metagames",
 
 		searchShow: false,
-		ruleset: ['Pokemon', 'Standard', 'Team Preview', 'Swagger Clause', 'Baton Pass Clause'],
-		banlist: ['OU', 'Drought', 'Sunny Day', 'Drizzle', 'Rain Dance', 'Sand Stream', 'Sandstorm'],
+		ruleset: ['OU'],
+		banlist: ['Uber', 'Shadow Tag', 'Soul Dew', 'Drought', 'Sunny Day', 'Drizzle', 'Rain Dance', 'Sand Stream', 'Sandstorm'],
 		onBegin: function() {
 			this.setWeather('Hail');
 			delete this.weatherData.duration;
