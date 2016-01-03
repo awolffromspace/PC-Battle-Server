@@ -9,14 +9,10 @@ exports.Formats = [
 	///////////////////////////////////////////////////////////////////
 
 	{
-		name: "[LotW 8] 1v1 Random",
-		section: "ORAS Singles",
+		name: "[LotW 9] LC Random",
+		section: "Random Battles (aka Randbats)",
 
-		teamLength: {
-			validate: [1, 6],
-			battle: 1
-		},
-		team: 'random',
+		team: 'randomLC',
 		ruleset: ['Random (no PotD)'],
 		onBegin: function() {
 			this.add('raw|This is the Ladder of the Week! Use the "Battle!" button to try and win the LotW. The winner is the user who is #1 on the ladder by 10 PM ET on Saturday. They receive a <img src="http://cbc.pokecommunity.com/config/user-list-images/trophy.png" /> beside their name for a week.');
