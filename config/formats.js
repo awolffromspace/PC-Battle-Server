@@ -4189,9 +4189,18 @@ exports.Formats = [
 		banlist: ['Uber']
 	},
 	{
+		name: "XY OU",
+		section: "Other Metagames",
+
+		mod: 'xy',
+		ruleset: ['Pokemon', 'Standard', 'Team Preview', 'Swagger Clause', 'Baton Pass Clause'],
+		banlist: ['Uber', 'Shadow Tag', 'Soul Dew']
+	},
+	{
 		name: "Inverse OU",
 		section: "Other Metagames",
 
+		searchShow: false,
 		ruleset: ['OU'],
 		onNegateImmunity: function (pokemon, type) {
 			if (type in this.data.TypeChart && this.runEvent('Immunity', pokemon, null, null, type)) return false;
@@ -4207,8 +4216,9 @@ exports.Formats = [
 		name: "Snowy OU",
 		section: "Other Metagames",
 
+		searchShow: false,
 		ruleset: ['Pokemon', 'Standard', 'Team Preview', 'Swagger Clause', 'Baton Pass Clause'],
-		banlist: ['Uber', 'Soul Dew', 'Drought', 'Sunny Day', 'Drizzle', 'Rain Dance', 'Sand Stream', 'Sandstorm'],
+		banlist: ['OU', 'Drought', 'Sunny Day', 'Drizzle', 'Rain Dance', 'Sand Stream', 'Sandstorm'],
 		onBegin: function() {
 			this.setWeather('Hail');
 			delete this.weatherData.duration;
