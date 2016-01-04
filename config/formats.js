@@ -4194,7 +4194,7 @@ exports.Formats = [
 
 		mod: 'xy',
 		ruleset: ['Pokemon', 'Standard', 'Team Preview', 'Swagger Clause', 'Baton Pass Clause'],
-		banlist: ['Uber', 'Shadow Tag', 'Soul Dew']
+		banlist: ['Uber', 'Shadow Tag', 'Soul Dew', 'Altarianite', 'Audinite', 'Beedrillite', 'Cameruptite', 'Diancite', 'Galladite', 'Glalitite', 'Latiasite', 'Latiosite', 'Lopunnite', 'Metagrossite', 'Pidgeotite', 'Sablenite', 'Sceptilite', 'Sharpedonite', 'Slowbronite', 'Steelixite', 'Swamperite']
 	},
 	{
 		name: "Inverse OU",
