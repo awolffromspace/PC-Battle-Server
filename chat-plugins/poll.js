@@ -16,7 +16,7 @@ var Poll = {
 			parts[len] = parts[len].trim();
 		}
 		return parts;
-	}
+	},
 };
 
 for (var id in Rooms.rooms) {
@@ -177,5 +177,5 @@ exports.commands = {
 		if (!Poll[room.id]) Poll.reset(room.id);
 		if (!Poll[room.id].question) return this.sendReply("There is no poll currently going on in this room.");
 		this.sendReply("NUMBER OF VOTES: " + Object.keys(Poll[room.id].options).length);
-	}
+	},
 };
