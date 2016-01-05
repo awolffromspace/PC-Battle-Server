@@ -651,7 +651,7 @@ exports.grouplist = [
 		id: "admin",
 		name: "Administrator",
 		root: true,
-		globalonly: true
+		globalonly: true,
 	},
 	{
 		symbol: '#',
@@ -660,7 +660,7 @@ exports.grouplist = [
 		inherit: '&',
 		jurisdiction: 'u',
 		roomleader: true,
-		roomonly: true
+		roomonly: true,
 	},
 	{
 		symbol: '&',
@@ -672,7 +672,7 @@ exports.grouplist = [
 		roomdriver: true,
 		roomsubdriver: true,
 		tournamentsmanagement: true,
-		rmall: true
+		rmall: true,
 	},
 	{
 		symbol: '-',
@@ -686,7 +686,7 @@ exports.grouplist = [
 		roomonly: true,
 		editroom: true,
 		joinbattle: true,
-		modchatall: true
+		modchatall: true,
 	},
 	{
 		symbol: '@',
@@ -701,14 +701,14 @@ exports.grouplist = [
 		modchatall: true,
 		gdeclare: true,
 		clearall: true,
-		roomplayer: true
+		roomplayer: true,
 	},
 	{
 		symbol: '%',
 		id: "driver",
 		name: "Driver",
 		inherit: '=',
-		jurisdiction: 'u'
+		jurisdiction: 'u',
 	},
 	{
 		symbol: '=',
@@ -726,7 +726,7 @@ exports.grouplist = [
 		bypassblocks: 'u%@&~',
 		receiveauthmessages: true,
 		tournamentsmoderation: true,
-		jeopardy: true
+		jeopardy: true,
 	},
 	{
 		symbol: '+',
@@ -740,18 +740,18 @@ exports.grouplist = [
 		ignorelimits: true,
 		poll: true,
 		joinbattle: true,
-		picklottery: true
+		picklottery: true,
 	},
 	{
 		symbol: '\u2605',
 		id: "player",
 		name: "Player",
-		inherit: ' '
+		inherit: ' ',
 	},
 	{
 		symbol: ' ',
 		ip: 's',
 		alts: '@u',
-		broadcast: true
-	}
+		broadcast: true,
+	},
 ];
