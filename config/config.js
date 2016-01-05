@@ -574,6 +574,7 @@ exports.customavatars = {
 	'brcklesnar': 'brcklesnar.jpg',
 	'noanoodles': 'noanoodles.png',
 	'noatan': 'noanoodles.png',
+	'elektraheart': 'elektraheart.gif',
 };
 
 // custom avatars appear in profile by specifiying server url.
