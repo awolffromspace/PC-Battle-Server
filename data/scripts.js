@@ -702,11 +702,14 @@ exports.BattleScripts = {
 			let poke = formes[i][this.random(formes[i].length)];
 			let template = this.getTemplate(poke);
 
-			// Random item
-			let item = items[this.random(items.length)];
+			// Random legal item
+			let item = '';
+			do {
+				item = items[this.random(items.length)];
+			} while (this.data.Items[item].isNonstandard);
 
 			// Make sure forme is legal
-			if (template.battleOnly || template.requiredItem && item !== template.requiredItem) {
+			if (template.battleOnly || template.requiredItem && item !== toId(template.requiredItem)) {
 				template = this.getTemplate(template.baseSpecies);
 				poke = template.name;
 			}
@@ -797,7 +800,8 @@ exports.BattleScripts = {
 			let shiny = !this.random(1024);
 
 			team.push({
-				name: poke,
+				name: template.baseSpecies,
+				species: template.species,
 				item: item,
 				ability: ability,
 				moves: moves,
@@ -806,7 +810,7 @@ exports.BattleScripts = {
 				nature: nature,
 				level: level,
 				happiness: happiness,
-				shiny: shiny
+				shiny: shiny,
 			});
 		}
 
@@ -917,7 +921,8 @@ exports.BattleScripts = {
 			let shiny = !this.random(1024);
 
 			team.push({
-				name: pokemon,
+				name: template.baseSpecies,
+				species: template.species,
 				item: item,
 				ability: ability,
 				moves: m,
@@ -926,7 +931,7 @@ exports.BattleScripts = {
 				nature: nature,
 				level: level,
 				happiness: happiness,
-				shiny: shiny
+				shiny: shiny,
 			});
 		}
 
@@ -940,7 +945,7 @@ exports.BattleScripts = {
 			physicalsetup: 0, specialsetup: 0, mixedsetup: 0, speedsetup: 0, physicalpool: 0, specialpool: 0,
 			damagingMoves: [],
 			damagingMoveIndex: {},
-			setupType: ''
+			setupType: '',
 		};
 
 		for (let type in Tools.data.TypeChart) {
@@ -954,32 +959,32 @@ exports.BattleScripts = {
 
 		// Moves that heal a fixed amount:
 		let RecoveryMove = {
-			milkdrink: 1, recover: 1, roost: 1, slackoff: 1, softboiled: 1
+			milkdrink: 1, recover: 1, roost: 1, slackoff: 1, softboiled: 1,
 		};
 		// Moves which drop stats:
 		let ContraryMove = {
-			closecombat: 1, leafstorm: 1, overheat: 1, superpower: 1, vcreate: 1
+			closecombat: 1, leafstorm: 1, overheat: 1, superpower: 1, vcreate: 1,
 		};
 		// Moves that boost Attack:
 		let PhysicalSetup = {
-			bellydrum:1, bulkup:1, coil:1, curse:1, dragondance:1, honeclaws:1, howl:1, poweruppunch:1, shiftgear:1, swordsdance:1
+			bellydrum:1, bulkup:1, coil:1, curse:1, dragondance:1, honeclaws:1, howl:1, poweruppunch:1, shiftgear:1, swordsdance:1,
 		};
 		// Moves which boost Special Attack:
 		let SpecialSetup = {
-			calmmind:1, chargebeam:1, geomancy:1, nastyplot:1, quiverdance:1, tailglow:1
+			calmmind:1, chargebeam:1, geomancy:1, nastyplot:1, quiverdance:1, tailglow:1,
 		};
 		// Moves which boost Attack AND Special Attack:
 		let MixedSetup = {
-			growth:1, shellsmash:1, workup:1
+			growth:1, shellsmash:1, workup:1,
 		};
 		// Moves which boost Speed:
 		let SpeedSetup = {
-			agility:1, autotomize:1, rockpolish:1
+			agility:1, autotomize:1, rockpolish:1,
 		};
 		// Moves that shouldn't be the only STAB moves:
 		let NoStab = {
 			aquajet:1, bounce:1, fakeout:1, flamecharge:1, iceshard:1, pursuit:1, quickattack:1, skyattack:1,
-			chargebeam:1, clearsmog:1, eruption:1, vacuumwave:1, waterspout:1
+			chargebeam:1, clearsmog:1, eruption:1, vacuumwave:1, waterspout:1,
 		};
 
 		// Iterate through all moves we've chosen so far and keep track of what they do:
@@ -1078,13 +1083,13 @@ exports.BattleScripts = {
 	randomSet: function (template, slot, teamDetails) {
 		if (slot === undefined) slot = 1;
 		let baseTemplate = (template = this.getTemplate(template));
-		let name = template.name;
+		let species = template.species;
 
 		if (!template.exists || (!template.randomBattleMoves && !template.learnset)) {
 			// GET IT? UNOWN? BECAUSE WE CAN'T TELL WHAT THE POKEMON IS
 			template = this.getTemplate('unown');
 
-			let stack = 'Template incompatible with random battles: ' + name;
+			let stack = 'Template incompatible with random battles: ' + species;
 			let fakeErr = {stack: stack};
 			require('../crashlogger.js')(fakeErr, 'The randbat set generator');
 		}
@@ -1093,7 +1098,7 @@ exports.BattleScripts = {
 
 		if (template.battleOnly) {
 			// Only change the species. The template has custom moves, and may have different typing and requirements.
-			name = template.baseSpecies;
+			species = template.baseSpecies;
 		}
 		let battleForme = this.checkBattleForme(template);
 		if (battleForme && battleForme.tier !== 'AG' && (battleForme.isMega ? !teamDetails.megaCount : this.random(2))) {
@@ -1110,7 +1115,7 @@ exports.BattleScripts = {
 			def: 85,
 			spa: 85,
 			spd: 85,
-			spe: 85
+			spe: 85,
 		};
 		let ivs = {
 			hp: 31,
@@ -1118,7 +1123,7 @@ exports.BattleScripts = {
 			def: 31,
 			spa: 31,
 			spd: 31,
-			spe: 31
+			spe: 31,
 		};
 		let hasType = {};
 		hasType[template.types[0]] = true;
@@ -1141,13 +1146,13 @@ exports.BattleScripts = {
 		// These moves can be used even if we aren't setting up to use them:
 		let SetupException = {
 			closecombat:1, extremespeed:1, suckerpunch:1, superpower:1,
-			dracometeor:1, leafstorm:1, overheat:1
+			dracometeor:1, leafstorm:1, overheat:1,
 		};
 		let counterAbilities = {
-			'Adaptability':1, 'Contrary':1, 'Hustle':1, 'Iron Fist':1, 'Sheer Force':1, 'Skill Link':1
+			'Adaptability':1, 'Contrary':1, 'Hustle':1, 'Iron Fist':1, 'Sheer Force':1, 'Skill Link':1,
 		};
 		let ateAbilities = {
-			'Aerilate':1, 'Pixilate':1, 'Refrigerate':1
+			'Aerilate':1, 'Pixilate':1, 'Refrigerate':1,
 		};
 
 		let hasMove, counter;
@@ -1207,7 +1212,7 @@ exports.BattleScripts = {
 					if (!hasMove['rest']) rejected = true;
 					if (movePool.length > 1) {
 						let rest = movePool.indexOf('rest');
-						if (rest) movePool.splice(rest, 1);
+						if (rest >= 0) movePool.splice(rest, 1);
 					}
 					break;
 				case 'storedpower':
@@ -1271,7 +1276,7 @@ exports.BattleScripts = {
 					if (counter.setupType && (hasAbility['Guts'] || hasAbility['Speed Boost']) && !hasMove['batonpass']) rejected = true;
 					if (hasMove['rest'] && hasMove['sleeptalk']) rejected = true;
 					break;
-				case 'roar':
+				case 'roar': case 'whirlwind':
 					if (counter.setupType || hasMove['dragontail']) rejected = true;
 					break;
 				case 'stealthrock':
@@ -1299,7 +1304,7 @@ exports.BattleScripts = {
 
 				// Bit redundant to have both
 				// Attacks:
-				case 'bugbite': case 'bugbuzz':
+				case 'bugbite': case 'bugbuzz': case 'signalbeam':
 					if (hasMove['uturn'] && !counter.setupType) rejected = true;
 					break;
 				case 'darkpulse':
@@ -1538,6 +1543,7 @@ exports.BattleScripts = {
 					(hasAbility['Contrary'] && !counter['contrary'] && template.species !== 'Shuckle') ||
 					(hasAbility['Dark Aura'] && !counter['Dark']) ||
 					(hasAbility['Gale Wings'] && !counter['Flying']) ||
+					(hasAbility['Guts'] && hasType['Normal'] && movePool.indexOf('facade') >= 0) ||
 					(hasType['Dark'] && hasMove['suckerpunch'] && counter.stab < template.types.length) ||
 					(hasType['Dragon'] && !counter['Dragon'] && !hasAbility['Aerilate'] && !hasAbility['Pixilate'] && !hasMove['rest'] && !hasMove['sleeptalk']) ||
 					(hasType['Electric'] && !counter['Electric']) ||
@@ -1624,7 +1630,7 @@ exports.BattleScripts = {
 				def: 31,
 				spa: 31,
 				spd: 31,
-				spe: 31
+				spe: 31,
 			};
 		}
 
@@ -1932,7 +1938,7 @@ exports.BattleScripts = {
 			Unreleased: 75,
 			CAP: 75,
 			Uber: 73,
-			AG: 71
+			AG: 71,
 		};
 		let customScale = {
 			// Between OU and Uber
@@ -1942,7 +1948,7 @@ exports.BattleScripts = {
 			Gothitelle: 74, Ninetales: 77, Politoed: 77, Wobbuffet: 74,
 
 			// Holistic judgement
-			Unown: 85
+			Unown: 85,
 		};
 		let tier = template.tier;
 		if (tier.charAt(0) === '(') {
@@ -1993,14 +1999,15 @@ exports.BattleScripts = {
 		}
 
 		return {
-			name: name,
+			name: template.baseSpecies,
+			species: species,
 			moves: moves,
 			ability: ability,
 			evs: evs,
 			ivs: ivs,
 			item: item,
 			level: level,
-			shiny: !this.random(1024)
+			shiny: !this.random(1024),
 		};
 	},
 	randomTeam: function (side) {
@@ -2337,12 +2344,12 @@ exports.BattleScripts = {
 	},
 	randomDoublesSet: function (template, slot, teamDetails) {
 		let baseTemplate = (template = this.getTemplate(template));
-		let name = template.name;
+		let species = template.species;
 
 		if (!template.exists || (!template.randomDoubleBattleMoves && !template.randomBattleMoves && !template.learnset)) {
 			template = this.getTemplate('unown');
 
-			let stack = 'Template incompatible with random battles: ' + name;
+			let stack = 'Template incompatible with random battles: ' + species;
 			let fakeErr = {stack: stack};
 			require('../crashlogger.js')(fakeErr, 'The doubles randbat set generator');
 		}
@@ -2351,7 +2358,7 @@ exports.BattleScripts = {
 
 		if (template.battleOnly) {
 			// Only change the species. The template has custom moves, and may have different typing and requirements.
-			name = template.baseSpecies;
+			species = template.baseSpecies;
 		}
 		let battleForme = this.checkBattleForme(template);
 		if (battleForme && (battleForme.isMega ? !teamDetails.megaCount : this.random(2))) {
@@ -2370,7 +2377,7 @@ exports.BattleScripts = {
 			def: 0,
 			spa: 0,
 			spd: 0,
-			spe: 0
+			spe: 0,
 		};
 		let ivs = {
 			hp: 31,
@@ -2378,7 +2385,7 @@ exports.BattleScripts = {
 			def: 31,
 			spa: 31,
 			spd: 31,
-			spe: 31
+			spe: 31,
 		};
 		let hasType = {};
 		hasType[template.types[0]] = true;
@@ -2401,14 +2408,14 @@ exports.BattleScripts = {
 		// These moves can be used even if we aren't setting up to use them:
 		let SetupException = {
 			dracometeor:1, leafstorm:1, overheat:1,
-			extremespeed:1, suckerpunch:1, superpower:1
+			extremespeed:1, suckerpunch:1, superpower:1,
 		};
 		let counterAbilities = {
-			'Adaptability':1, 'Contrary':1, 'Hustle':1, 'Iron Fist':1, 'Skill Link':1
+			'Adaptability':1, 'Contrary':1, 'Hustle':1, 'Iron Fist':1, 'Skill Link':1,
 		};
 		// -ate Abilities
 		let ateAbilities = {
-			'Aerilate':1, 'Pixilate':1, 'Refrigerate':1
+			'Aerilate':1, 'Pixilate':1, 'Refrigerate':1,
 		};
 
 		let hasMove, counter;
@@ -2832,7 +2839,7 @@ exports.BattleScripts = {
 				def: 31,
 				spa: 31,
 				spd: 31,
-				spe: 31
+				spe: 31,
 			};
 		}
 
@@ -3178,14 +3185,15 @@ exports.BattleScripts = {
 		let level = 70 + Math.floor(((600 - this.clampIntRange(bst, 300, 600)) / 10.34));
 
 		return {
-			name: name,
+			name: template.baseSpecies,
+			species: species,
 			moves: moves,
 			ability: ability,
 			evs: evs,
 			ivs: ivs,
 			item: item,
 			level: level,
-			shiny: !this.random(template.id === 'missingno' ? 4 : 1024)
+			shiny: !this.random(template.id === 'missingno' ? 4 : 1024),
 		};
 	},
 	randomFactorySets: require('./factory-sets.json'),
@@ -3202,7 +3210,7 @@ exports.BattleScripts = {
 			'hydration': 'raindance', 'swiftswim': 'raindance',
 			'leafguard': 'sunnyday', 'solarpower': 'sunnyday', 'chlorophyll': 'sunnyday',
 			'sandforce': 'sandstorm', 'sandrush': 'sandstorm', 'sandveil': 'sandstorm',
-			'snowcloak': 'hail'
+			'snowcloak': 'hail',
 		};
 		let weatherAbilitiesSet = {'drizzle':1, 'drought':1, 'snowwarning':1, 'sandstream':1};
 
@@ -3256,7 +3264,7 @@ exports.BattleScripts = {
 		}
 
 		return {
-			name: setData.set.name || setData.set.species,
+			name: setData.set.name || template.baseSpecies,
 			species: setData.set.species,
 			gender: setData.set.gender || template.gender || (this.random() ? 'M' : 'F'),
 			item: setData.set.item || '',
@@ -3267,7 +3275,7 @@ exports.BattleScripts = {
 			evs: setData.set.evs || {hp: 84, atk: 84, def: 84, spa: 84, spd: 84, spe: 84},
 			ivs: setData.set.ivs || {hp: 31, atk: 31, def: 31, spa: 31, spd: 31, spe: 31},
 			nature: setData.set.nature || 'Serious',
-			moves: moves
+			moves: moves,
 		};
 	},
 	randomFactoryTeam: function (side, depth) {
@@ -3297,7 +3305,7 @@ exports.BattleScripts = {
 			'lightningrod': ['Electric'], 'motordrive': ['Electric'], 'voltabsorb': ['Electric'],
 			'sapsipper': ['Grass'],
 			'thickfat': ['Ice', 'Fire'],
-			'levitate': ['Ground']
+			'levitate': ['Ground'],
 		};
 
 		while (pokemonPool.length && pokemonLeft < 6) {
@@ -7264,5 +7272,5 @@ exports.BattleScripts = {
 			baseFormes[template.baseSpecies] = 1;
 		}
 		return pokemon;
-	}
+	},
 };

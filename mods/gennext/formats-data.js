@@ -3,38 +3,58 @@
 exports.BattleFormatsData = {
 	aegislash: {
 		inherit: true,
-		tier: 'OU'
+		tier: 'OU',
 	},
 	blaziken: {
 		inherit: true,
-		tier: 'OU'
+		tier: 'OU',
+	},
+	blazikenmega: {
+		inherit: true,
+		tier: 'OU',
 	},
 	genesect: {
 		inherit: true,
-		tier: 'OU'
+		tier: 'OU',
+	},
+	gengarmega: {
+		inherit: true,
+		tier: 'OU',
+	},
+	kangaskhanmega: {
+		inherit: true,
+		tier: 'OU',
 	},
 	landorus: {
 		inherit: true,
-		tier: 'OU'
+		tier: 'OU',
+	},
+	mawilemega: {
+		inherit: true,
+		tier: 'OU',
+	},
+	salamencemega: {
+		inherit: true,
+		tier: 'OU',
 	},
 	deoxysdefense: {
 		inherit: true,
-		tier: 'Uber'
+		tier: 'Uber',
 	},
 	deoxysspeed: {
 		inherit: true,
-		tier: 'Uber'
+		tier: 'Uber',
 	},
 	hoopaunbound: {
 		inherit: true,
-		tier: 'Uber'
+		tier: 'Uber',
 	},
 	kyurem: {
 		inherit: true,
-		tier: 'Uber'
+		tier: 'Uber',
 	},
 	kyuremblack: {
 		inherit: true,
-		tier: 'Uber'
-	}
+		tier: 'Uber',
+	},
 };
