@@ -174,5 +174,5 @@ exports.commands = {
 			room.update();
 		}.bind(this));
 	},
-	profilehelp: ["/profile -	Shows information regarding user's name, group, Battle Points, and online/offline status."]
+	profilehelp: ["/profile -	Shows information regarding user's name, group, Battle Points, and online/offline status."],
 };
