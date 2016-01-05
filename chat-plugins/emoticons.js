@@ -100,7 +100,7 @@ var emotes = {
 	':wooper:': 'http://cbc.pokecommunity.com/config/emoticons/wooper.png',
 	':wynaut:': 'http://cbc.pokecommunity.com/config/emoticons/wynaut.png',
 	':y:': 'http://cbc.pokecommunity.com/config/emoticons/y.png',
-	':yoshi:': 'http://cbc.pokecommunity.com/config/emoticons/yoshi.png'
+	':yoshi:': 'http://cbc.pokecommunity.com/config/emoticons/yoshi.png',
 };
 
 var emotesKeys = Object.keys(emotes);
@@ -261,5 +261,5 @@ exports.commands = {
 			this.add("|raw|<div class=\"broadcast-blue\"><b>Emoticons are enabled!</b><br />Emoticons will work now.</div>");
 		}
 	},
-	toggleemoticonshelp: ["/toggleemoticons - Toggle emoticons on or off."]
+	toggleemoticonshelp: ["/toggleemoticons - Toggle emoticons on or off."],
 };
