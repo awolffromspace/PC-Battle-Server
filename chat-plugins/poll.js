@@ -5,7 +5,7 @@ var Poll = {
 			optionList: [],
 			options: {},
 			display: '',
-			topOption: ''
+			topOption: '',
 		};
 	},
 
