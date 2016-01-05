@@ -9,7 +9,7 @@ var shop = [
 	['Title', 'Buy a user title for your profile. It can be seen via "/profile username". Check "/profile wolf" for an example.', 30],
 	['BlackStar', 'Buy a \u2605 that goes in front of your name and puts you at the top of the user list. It lasts for four weeks.', 50],
 	['Avatar', 'Buy a custom avatar to be applied to your name. You supply the image. Images larger than 80px by 80px don\'t show correctly in battles.', 60],
-	['JoinPhrase', 'Buy a join phrase that the bot submits in the chat every time you join the Lobby.', 60]
+	['JoinPhrase', 'Buy a join phrase that the bot submits in the chat every time you join the Lobby.', 60],
 ];
 
 var shopDisplay = getShopDisplay(shop);
@@ -589,6 +589,6 @@ exports.commands = {
 			}
 			room.update();
 		});
-	}
+	},
 
 };
