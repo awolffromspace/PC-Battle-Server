@@ -21,6 +21,7 @@ var emotes = {
 	':cthulhu:': 'http://cbc.pokecommunity.com/config/emoticons/cthulhu.png',
 	':dedenne:': 'http://cbc.pokecommunity.com/config/emoticons/dedenne.png',
 	':diddy:': 'http://cbc.pokecommunity.com/config/emoticons/diddy.png',
+	':ditto:': 'http://cbc.pokecommunity.com/config/emoticons/ditto.png',
 	':dk:': 'http://cbc.pokecommunity.com/config/emoticons/dk.png',
 	':eevee:': 'http://cbc.pokecommunity.com/config/emoticons/eevee.png',
 	':electrode:': 'http://cbc.pokecommunity.com/config/emoticons/electrode.png',
@@ -67,6 +68,7 @@ var emotes = {
 	':pachirisu:': 'http://cbc.pokecommunity.com/config/emoticons/pachirisu.png',
 	':pancham:': 'http://cbc.pokecommunity.com/config/emoticons/pancham.png',
 	':pangoro:': 'http://cbc.pokecommunity.com/config/emoticons/pangoro.png',
+	':papi:': 'http://cbc.pokecommunity.com/config/emoticons/papi.png',
 	':pear:': 'http://cbc.pokecommunity.com/config/emoticons/pear.png',
 	':pikachu:': 'http://cbc.pokecommunity.com/config/emoticons/pikachu.png',
 	':pjsalt:': 'http://cbc.pokecommunity.com/config/emoticons/pjsalt.png',
@@ -84,6 +86,7 @@ var emotes = {
 	':snivy:': 'http://cbc.pokecommunity.com/config/emoticons/snivy.png',
 	':snorlax:': 'http://cbc.pokecommunity.com/config/emoticons/snorlax.png',
 	':spheal:': 'http://cbc.pokecommunity.com/config/emoticons/spheal.png',
+	':spinda:': 'http://cbc.pokecommunity.com/config/emoticons/spinda.png',
 	':sri:': 'http://cbc.pokecommunity.com/config/emoticons/sri.png',
 	':strut:': 'http://cbc.pokecommunity.com/config/emoticons/strut.png',
 	':suicune:': 'http://cbc.pokecommunity.com/config/emoticons/suicune.png',
@@ -156,6 +159,9 @@ function parseEmoticons(message, room, user, pm) {
 			match;
 		if (match === ':jack:') return typeof emote != 'undefined' ?
 			'<img src="' + emote + '" title="' + match + '" width="23" height="30"/>' :
+			match;
+		if (match === ':papi:') return typeof emote != 'undefined' ?
+			'<img src="' + emote + '" title="' + match + '" width="20" height="30"/>' :
 			match;
 		if (match === ':strut:') return typeof emote != 'undefined' ?
 			'<img src="' + emote + '" title="' + match + '" width="23" height="33"/>' :
