@@ -466,5 +466,5 @@ exports.commands = {
 		if (!this.can('poofoff')) return false;
 		Config.poofOff = false;
 		return this.sendReply("Poof is now enabled.");
-	}
+	},
 };
