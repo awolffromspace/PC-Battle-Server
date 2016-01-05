@@ -60,5 +60,5 @@ exports.commands = {
 
 		this.add('|raw|<div class="profile-title">' + target + '</div>');
 		this.logModCommand(user.name + " declared " + target);
-	}
+	},
 };
