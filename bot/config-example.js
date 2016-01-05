@@ -107,21 +107,21 @@ exports.globalPermissions = {
 
 exports.commandTokens = ['.']; //Array of valid command characters
 
-exports.defaultPermission = '%';
+exports.defaultPermission = '+';
 
 exports.permissionExceptions = {
 	//command: 'rank'
-	'say': '&',
+	'say': '~',
 	'info': '+',
 	'wall': '%',
-	'autoban': '&',
+	'autoban': '~',
 	'gautoban': '~',
-	'banword': '&',
-	'joinphrase': '&',
+	'banword': '~',
+	'joinphrase': '~',
 	'challenge': '%',
 	'searchbattle': '~',
 	'tournament': '@',
-	'games': '&'
+	'games': '+'
 };
 
 exports.botguide = "http://www.pokecommunity.com/showthread.php?t=289012#botguide";
@@ -170,7 +170,7 @@ exports.debug = {
 */
 
 exports.moderation = {
-	modException: '%', // Min rank for not receive moderation
+	modException: '+', // Min rank for not receive moderation
 
 	allowmute: true,
 	disableModNote: false,
