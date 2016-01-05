@@ -187,7 +187,7 @@ exports.commands = {
 		if (!this.can('lock')) return false;
 		
 		Users.get(toId(user.name)).send('|popup| Here is a list of sbanned users: \n' + JSON.stringify(Rooms.rooms.shadowbanroom.chatRoomData, null, 2));
-	}
+	},
 };
 
 Users.ShadowBan = exports;
