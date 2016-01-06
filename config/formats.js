@@ -4193,7 +4193,7 @@ exports.Formats = [
 
 		mod: 'xy',
 		ruleset: ['Pokemon', 'Standard', 'Team Preview', 'Swagger Clause', 'Baton Pass Clause'],
-		banlist: ['Uber', 'Shadow Tag', 'Soul Dew', 'Altarianite', 'Audinite', 'Beedrillite', 'Cameruptite', 'Diancite', 'Galladite', 'Glalitite', 'Latiasite', 'Latiosite', 'Lopunnite', 'Metagrossite', 'Pidgeotite', 'Sablenite', 'Sceptilite', 'Sharpedonite', 'Slowbronite', 'Steelixite', 'Swamperite'],
+		banlist: ['Uber', 'Shadow Tag', 'Soul Dew', 'Pikachu-Cosplay', 'Pikachu-Rock-Star', 'Pikachu-Belle', 'Pikachu-Pop-Star', 'Pikachu-PhD', 'Pikachu-Libre', 'Hoopa', 'Hoopa-Unbound', 'Volcanion', 'Altarianite', 'Audinite', 'Beedrillite', 'Cameruptite', 'Diancite', 'Galladite', 'Glalitite', 'Latiasite', 'Latiosite', 'Lopunnite', 'Metagrossite', 'Pidgeotite', 'Sablenite', 'Sceptilite', 'Sharpedonite', 'Slowbronite', 'Steelixite', 'Swamperite'],
 	},
 	{
 		name: "Inverse OU",
