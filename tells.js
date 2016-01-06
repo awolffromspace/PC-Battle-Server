@@ -16,7 +16,7 @@
 var fs = require('fs');
 var color = require('./config/color');
 
-var tells = {inbox: {}, outbox: {}};
+var tells = {inbox: {}, outbox: {},};
 try {
 	tells = JSON.parse(fs.readFileSync('config/tells.json'));
 } catch (e) {} // file doesn't exist (yet)
@@ -129,7 +129,7 @@ exports.addTell = function (sender, receiver, msg) {
 		'sender': sender.name,
 		time: Date.now(),
 		'msg': msg,
-		ips: sender.ips
+		ips: sender.ips,
 	};
 	Tells.inbox[receiver].push(newTell);
 	Tells.writeTells();
