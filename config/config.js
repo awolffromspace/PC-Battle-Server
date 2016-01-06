@@ -453,6 +453,7 @@ exports.customavatars = {
 	'tahliahbarnett': 'syndrome.png',
 	'theservant35': 'syndrome.png',
 	'clydedrexler': 'syndrome.png',
+	'theintrnet': 'syndrome.png',
 	'haxnyancat1': 'haxnyancat1.jpg',
 	'koha': 'koha.jpg',
 	'loliable': 'koha.jpg',
