@@ -3960,6 +3960,10 @@ exports.Formats = [
 	},
 	{
 		name: "Phoenix Rising",
+		desc: [
+			"&bullet; <a href=\"http://www.pokecommunity.com/showthread.php?t=351035\">Pok\u00E9mon: Phoenix Rising</a>",
+			"&bullet; <a href=\"https://docs.google.com/spreadsheets/d/1B3A16tppf_tOZO2e6g7ZhoaxCuj9mZsDE0tZ0RHP1B8/edit\">Phoenix Rising Pok\u00E9dex</a>",
+		],
 		section: "Other Metagames",
 
 		ruleset: ['Pokemon', 'Standard', 'Team Preview', 'Swagger Clause', 'Baton Pass Clause'],
