@@ -3677,6 +3677,7 @@ exports.Formats = [
 			"&bullet; <a href=\"https://www.smogon.com/forums/threads/3535930/\">Doubles OU Viability Ranking</a>",
 		],
 		section: "ORAS Doubles",
+		column: 2,
 
 		gameType: 'doubles',
 		ruleset: ['Pokemon', 'Standard Doubles', 'Team Preview'],
@@ -3818,6 +3819,7 @@ exports.Formats = [
 			"&bullet; <a href=\"https://www.smogon.com/forums/threads/3540390/\">Smogon Triples Viability Ranking</a>",
 		],
 		section: "ORAS Triples",
+		column: 2,
 
 		gameType: 'triples',
 		ruleset: ['Pokemon', 'Species Clause', 'OHKO Clause', 'Moody Clause', 'Evasion Moves Clause', 'Endless Battle Clause', 'HP Percentage Mod', 'Cancel Mod', 'Team Preview'],
@@ -3965,6 +3967,7 @@ exports.Formats = [
 			"&bullet; <a href=\"https://docs.google.com/spreadsheets/d/1B3A16tppf_tOZO2e6g7ZhoaxCuj9mZsDE0tZ0RHP1B8/edit\">Phoenix Rising Pok\u00E9dex</a>",
 		],
 		section: "Other Metagames",
+		column: 2,
 
 		ruleset: ['Pokemon', 'Standard', 'Team Preview', 'Swagger Clause', 'Baton Pass Clause'],
 		onValidateTeam: function (team) {
@@ -3987,7 +3990,6 @@ exports.Formats = [
 			"&bullet; <a href=\"https://www.smogon.com/forums/threads/3545628/\">CAP Viability Ranking</a>",
 		],
 		section: "Other Metagames",
-		column: 2,
 
 		ruleset: ['OU'],
 		banlist: ['Allow CAP'],
