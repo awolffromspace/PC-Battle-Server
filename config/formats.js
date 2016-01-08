@@ -3959,6 +3959,24 @@ exports.Formats = [
 		},
 	},
 	{
+		name: "Phoenix Rising",
+		section: "Other Metagames",
+
+		ruleset: ['Pokemon', 'Standard', 'Team Preview', 'Swagger Clause', 'Baton Pass Clause'],
+		banlist: ['Uber', 'Shadow Tag', 'Soul Dew'],
+		onValidateTeam: function (team) {
+			let pokedex = {'Petilil':1};
+			for (let i = 0; i < team.length; i++) {
+				let template = this.getTemplate(team[i].species).baseSpecies;
+				if (template in pokedex) {
+					return;
+				} else {
+					return ["You can only use Pok\u00E9mon from Phoenix Rising's Pok\u00E9dex."];
+				}
+			}
+		},
+	},
+	{
 		name: "CAP",
 		desc: [
 			"&bullet; <a href=\"https://www.smogon.com/forums/threads/3537407/\">CAP Metagame Discussion</a>",
