@@ -3976,8 +3976,8 @@ exports.Formats = [
 			for (let i = 0; i < team.length; i++) {
 				let template = this.getTemplate(team[i].species).baseSpecies;
 				if (template in pokedex) n++;
-				if (n < i) return ["You can only use Pok\u00E9mon from Phoenix Rising's Pok\u00E9dex."];
 			}
+			if (n < team.length) return ["You can only use Pok\u00E9mon from Phoenix Rising's Pok\u00E9dex."];
 		},
 	},
 	{
