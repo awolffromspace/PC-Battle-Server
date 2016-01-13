@@ -9,7 +9,7 @@ exports.Formats = [
 	///////////////////////////////////////////////////////////////////
 
 	{
-		name: "[LotW 10] Gen 1 Random Battle",
+		name: "[LotW 10] Gen 1 Random",
 		section: "ORAS Singles",
 
 		mod: 'gen1',
