@@ -994,10 +994,6 @@ let BattleRoom = (function () {
 				this.push("|raw|<b><font color='" + color + "'>" + Tools.escapeHTML(winner) + "</font> has won " + "<font color='" + color + "'>1</font> Battle Point for winning the tournament battle!</b>");
 			}
 		}
-		let p1 = this.p1;
-		let p2 = this.p2;
-		rooms.global.battleCount += 0 - (this.active ? 1 : 0);
-		this.active = false;
 		this.update();
 	};
 	// logNum = 0    : spectator log
@@ -1076,34 +1072,6 @@ let BattleRoom = (function () {
 		if (p2active && !p1active) return 0;
 		return this.battle.inactiveSide;
 	};
-	BattleRoom.prototype.forfeit = function (user, message, side) {
-		if (!this.battle || this.battle.ended || !this.battle.started) return false;
-
-		if (!message) message = ' forfeited.';
-
-		if (side === undefined) {
-			if (user in this.game.players) side = this.game.players[user].slotNum;
-		}
-		if (side === undefined) return false;
-
-		let ids = ['p1', 'p2'];
-		let otherids = ['p2', 'p1'];
-
-		let name = 'Player ' + (side + 1);
-		if (user) {
-			name = user.name;
-		} else if (this.rated) {
-			name = this.rated[ids[side]];
-		}
-
-		this.add('|-message|' + name + message);
-		this.battle.endType = 'forfeit';
-		this.battle.send('win', otherids[side]);
-		rooms.global.battleCount += (this.battle.active ? 1 : 0) - (this.active ? 1 : 0);
-		this.active = this.battle.active;
-		this.update();
-		return true;
-	};
 	BattleRoom.prototype.sendPlayer = function (num, message) {
 		let player = this.getPlayer(num);
 		if (!player) return false;
@@ -1166,7 +1134,7 @@ let BattleRoom = (function () {
 			}
 		}
 
-		this.forfeit(this.getPlayer(inactiveSide), ' lost due to inactivity.', inactiveSide);
+		this.battle.forfeit(this.getPlayer(inactiveSide), ' lost due to inactivity.', inactiveSide);
 		this.resetUser = '';
 	};
 	BattleRoom.prototype.requestKickInactive = function (user, force) {
@@ -1299,14 +1267,6 @@ let BattleRoom = (function () {
 			return "Only the user who set modchat and global staff can change modchat levels in battle rooms";
 		}
 	};
-	BattleRoom.prototype.decision = function (user, choice, data) {
-		this.battle.sendFor(user, choice, data);
-		if (this.active !== this.battle.active) {
-			rooms.global.battleCount += (this.battle.active ? 1 : 0) - (this.active ? 1 : 0);
-			this.active = this.battle.active;
-		}
-		this.update();
-	};
 	BattleRoom.prototype.onConnect = function (user, connection) {
 		this.sendUser(connection, '|init|battle\n|title|' + this.title + '\n' + this.getLogForUser(user).join('\n'));
 		if (this.game && this.game.onConnect) this.game.onConnect(user, connection);
@@ -1324,8 +1284,6 @@ let BattleRoom = (function () {
 
 		if (this.game && this.game.onJoin) {
 			this.game.onJoin(user, connection);
-			rooms.global.battleCount += (this.battle.active ? 1 : 0) - (this.active ? 1 : 0);
-			this.active = this.battle.active;
 		}
 		return user;
 	};
@@ -1352,8 +1310,6 @@ let BattleRoom = (function () {
 
 		if (this.game && this.game.onLeave) {
 			this.game.onLeave(user);
-			rooms.global.battleCount += (this.battle.active ? 1 : 0) - (this.active ? 1 : 0);
-			this.active = this.battle.active;
 		}
 		this.update();
 		this.kickInactiveUpdate();
@@ -1369,9 +1325,7 @@ let BattleRoom = (function () {
 			return false;
 		}
 		this.auth[user.userid] = '-';
-		rooms.global.battleCount += (this.battle.active ? 1 : 0) - (this.active ? 1 : 0);
-		this.active = this.battle.active;
-		if (this.active) {
+		if (this.game.active) {
 			this.title = "" + this.battle.p1.name + " vs. " + this.battle.p2.name;
 			this.send('|title|' + this.title);
 		}
@@ -1389,8 +1343,6 @@ let BattleRoom = (function () {
 			return false;
 		}
 		this.auth[user.userid] = '+';
-		rooms.global.battleCount += (this.battle.active ? 1 : 0) - (this.active ? 1 : 0);
-		this.active = this.battle.active;
 		this.update();
 		this.kickInactiveUpdate();
 		return true;
@@ -1416,7 +1368,6 @@ let BattleRoom = (function () {
 		this.battle = null;
 		this.game = null;
 
-		rooms.global.battleCount += 0 - (this.active ? 1 : 0);
 		this.active = false;
 
 		if (this.resetTimer) {
