@@ -947,7 +947,7 @@ let BattleRoom = (function () {
 				// Battle Point Winnings
 				//
 
-				if (this.format === 'lotw10gen1random') {
+				if (this.format === 'lotw11monotyperandom') {
 					let wid = toId(winner);
 					Database.read('bp', wid, function (err, initial) {
 						if (err) throw err;
