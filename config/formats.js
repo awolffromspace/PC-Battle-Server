@@ -4342,10 +4342,8 @@ exports.Formats = [
 		section: "BW2 Singles",
 
 		mod: 'gen5',
-		searchShow: false,
-		challengeShow: false,
 		team: 'random',
-		ruleset: ['Pokemon', 'Sleep Clause Mod', 'HP Percentage Mod', 'Cancel Mod'],
+		ruleset: ['Random (no PotD)'],
 	},
 	{
 		name: "[Gen 5] Custom Game",
@@ -4551,7 +4549,7 @@ exports.Formats = [
 
 		mod: 'gen2',
 		team: 'random',
-		ruleset: ['Pokemon', 'Standard'],
+		ruleset: ['Random (no PotD)'],
 	},
 	{
 		name: "[Gen 2] Custom Game",
@@ -4605,7 +4603,7 @@ exports.Formats = [
 
 		mod: 'gen1',
 		team: 'random',
-		ruleset: ['Pokemon', 'Sleep Clause Mod', 'Freeze Clause Mod', 'HP Percentage Mod', 'Cancel Mod'],
+		ruleset: ['Random (no PotD)'],
 	},
 	{
 		name: "[Gen 1] Challenge Cup",
