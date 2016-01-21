@@ -646,7 +646,11 @@ class Tournament {
 		if (!this.pendingChallenges.get(challenge.from)) return;
 		if (!this.pendingChallenges.get(user)) return;
 
-		let room = Rooms.global.startBattle(challenge.from, user, this.format, challenge.team, user.team, {rated: this.isRated, tour: this});
+		if (this.room.id === 'lobby') {
+			var room = Rooms.global.startBattle(challenge.from, user, this.format, challenge.team, user.team, {rated: this.isRated, tour: this, lobbyTour: this});
+		} else {
+			var room = Rooms.global.startBattle(challenge.from, user, this.format, challenge.team, user.team, {rated: this.isRated, tour: this});
+		}
 		if (!room) return;
 
 		this.pendingChallenges.set(challenge.from, null);
