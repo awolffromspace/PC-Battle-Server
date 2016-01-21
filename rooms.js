@@ -544,9 +544,9 @@ let GlobalRoom = (function () {
 
 		user.prepBattle(formatid, 'search', null, this.finishSearchBattle.bind(this, user, formatid));
 
-		if (!user.locked || !user.nameLocked) {
+		if (!user.locked && !user.nameLocked) {
 			let searcher = toId(user)
-			if (!Rooms.lobby.enableLadderMessages) return false;
+			if (Rooms.lobby.disableLadderMessages) return false;
 			if (Rooms.lobby) Rooms.lobby.addRaw(searcher + ' is searching for a battle (' + formatid + ')!');
 		}
 	};
