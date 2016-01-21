@@ -29,12 +29,12 @@ exports.commands = {
 	toggleladdermsg: function (target, room, user) {
 		if (room.id !== 'lobby') return this.errorReply('This command can only be used in Lobby.');
 		if (!this.can('warn', null, room)) return false;
-		room.enableLadderMessages = !room.enableLadderMessages;
-		this.sendReply("Allowing ladder messages is set to " + room.enableLadderMessages + " in this room.");
-		if (room.enableLadderMessages) {
-			this.add('|raw|<div class=\"broadcast-red\"><b>Ladder messages are enabled!</b><br>The "Battle!" button will send messages in the Lobby.</div>');
-		} else {
+		room.disableLadderMessages = !room.disableLadderMessages;
+		this.sendReply("Disallowing ladder messages is set to " + room.disableLadderMessages + " in this room.");
+		if (room.disableLadderMessages) {
 			this.add('|raw|<div class=\"broadcast-blue\"><b>Ladder messages are disabled!</b><br>The "Battle!" button will no longer send messages in the Lobby.</div>');
+		} else {
+			this.add('|raw|<div class=\"broadcast-red\"><b>Ladder messages are enabled!</b><br>The "Battle!" button will send messages in the Lobby.</div>');
 		}
 	},
 	toggleladdermsghelp: ["/toggleladdermsg - Toggle ladder messages on or off."],
