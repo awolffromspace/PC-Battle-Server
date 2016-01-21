@@ -2015,7 +2015,6 @@ exports.commands = {
 			"- wolf (wofl)<br />" +
 			"<b>@ Moderators</b><br />" +
 			"- Archy<br />" +
-			"- Aslan (Rainbow Arcanine, TOP PERCENTAGE)<br />" +
 			"- Aurora<br />" +
 			"- Christos<br />" +
 			"- Omicron (Megido, omicronhuh)<br />" +
