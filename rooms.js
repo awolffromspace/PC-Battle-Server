@@ -546,7 +546,7 @@ let GlobalRoom = (function () {
 
 		if (!user.locked && !user.nameLocked) {
 			let searcher = toId(user)
-			if (Rooms.lobby.disableLadderMessages) return false;
+			if (!Rooms.lobby.enableLadderMessages) return false;
 			if (Rooms.lobby) Rooms.lobby.addRaw(searcher + ' is searching for a battle (' + formatid + ')!');
 		}
 	};
@@ -812,7 +812,7 @@ let GlobalRoom = (function () {
 		newRoom.joinBattle(p2, p2team);
 		this.cancelSearch(p1);
 		this.cancelSearch(p2);
-		if (Config.reportbattles && rooms.lobby) {
+		if (Config.reportbattles && rooms.lobby && !options.lobbyTour) {
 			rooms.lobby.add('|b|' + newRoom.id + '|' + p1.getIdentity() + '|' + p2.getIdentity());
 		}
 		if (Config.logladderip && options.rated) {
