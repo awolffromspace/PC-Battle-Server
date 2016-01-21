@@ -2003,8 +2003,8 @@ exports.commands = {
 			"<b>~ Administrators</b><br />" +
 			"- Anti (Papa Anti)<br />" +
 			"- Ausaudriel (Audy)<br />" +
-			"- Castform (Chase, Chaseform, orb castform)<br />" +
-			"- Dragon (Aura Blackquill, bellossom, Captain Syrup, Dragii, Emeruade, Erika Senpai, Iris, Kjelle, Kou Noodles, Lailah-tan, Miss Fortune, Mitsuruu, Nabooru, Tharja)<br />" +
+			"- Castform (Chase, Chaseform, Michonne, Weаther Ball)<br />" +
+			"- Dragon (bellossom, Dгagon Dance, Kou Noodles, Lailah-tan)<br />" +
 			"- Hiroshi Sotomura (Sotomura, Sotomura606)<br />" +
 			"- Lance (Livewire)<br />" +
 			"- Nolafus<br />" +
@@ -2017,9 +2017,9 @@ exports.commands = {
 			"- Archy<br />" +
 			"- Aurora<br />" +
 			"- Christos<br />" +
-			"- Omicron (Megido, omicronhuh)<br />" +
+			"- Omicron (Megido, omicorn, omicronhuh)<br />" +
 			"- Peitharchia (Adrastia, nymph)<br />" +
-			"- Sanguine (Natalya)<br />" +
+			"- Sanguine<br />" +
 			"- Synerjee (Alto Mare, Autumn Reverie)<br />" +
 			"- Yoshikko (air tangela, gloom)<br /><br />" +
 			"<a href=\"http://www.pokecommunity.com/showthread.php?t=289012#staff\">Click here for more details.</a>"
