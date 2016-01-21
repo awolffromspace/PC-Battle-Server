@@ -39,6 +39,7 @@ exports.commands = {
 	},
 	toggleladdermsghelp: ["/toggleladdermsg - Toggle ladder messages on or off."],
 
+	plain: 'plaintext',
 	plaintext: function (target, room, user) {
 		if (!target) return;
 		if (!this.canBroadcast()) return;
