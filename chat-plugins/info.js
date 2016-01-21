@@ -2005,7 +2005,7 @@ exports.commands = {
 			"- Ausaudriel (Audy)<br />" +
 			"- Castform (Chase, Chaseform, Michonne, Weаther Ball)<br />" +
 			"- Dragon (bellossom, Dгagon Dance, Kou Noodles, Lailah-tan)<br />" +
-			"- Hiroshi Sotomura (Sotomura, Sotomura606)<br />" +
+			"- Hiroshi Sotomura<br />" +
 			"- Lance (Livewire)<br />" +
 			"- Nolafus<br />" +
 			"- Rukario (PPN)<br />" +
@@ -2018,9 +2018,9 @@ exports.commands = {
 			"- Aurora<br />" +
 			"- Christos<br />" +
 			"- Omicron (Megido, omicorn, omicronhuh)<br />" +
-			"- Peitharchia (Adrastia, nymph)<br />" +
+			"- Peitharchia<br />" +
 			"- Sanguine<br />" +
-			"- Synerjee (Alto Mare, Autumn Reverie)<br />" +
+			"- Synerjee<br />" +
 			"- Yoshikko (air tangela, gloom)<br /><br />" +
 			"<a href=\"http://www.pokecommunity.com/showthread.php?t=289012#staff\">Click here for more details.</a>"
 		);
