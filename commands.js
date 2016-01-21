@@ -796,6 +796,12 @@ exports.commands = {
 			user.updateIdentity(room.id);
 			return this.errorReply("You have been automatically deauthed for trying to promote locked user: '" + name + "'.");
 		}
+		if (targetUser && targetUser.nameLocked && !room.isPrivate && !room.battle && !room.isPersonal && (nextGroup === '%' || nextGroup === '@')) {
+			Monitor.log("[CrisisMonitor] " + user.name + " was automatically demoted in " + room.id + " for trying to promote locked user: " + targetUser.name + ".");
+			room.auth[user.userid] = '@';
+			user.updateIdentity(room.id);
+			return this.errorReply("You have been automatically deauthed for trying to promote locked user: '" + name + "'.");
+		}
 
 		if (nextGroup === ' ') {
 			delete room.auth[userid];
