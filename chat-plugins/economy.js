@@ -378,7 +378,7 @@ exports.commands = {
 	richestuser: function (target, room, user) {
 		if (!this.canBroadcast()) return;
 		var _this = this;
-		var display = '<center><u><b>BP Ladder</b></u></center><br><table border="1" cellspacing="0" cellpadding="5" width="100%"><tbody><tr><th>Rank</th><th>Username</th><th>bp</th></tr>';
+		var display = '<center><u><b>BP Ladder</b></u></center><br><table border="1" cellspacing="0" cellpadding="5" width="100%"><tbody><tr><th>Rank</th><th>Username</th><th>BP</th></tr>';
 		Database.sortDesc('bp', 10, function (err, users) {
 			if (err) throw err;
 			if (!users.length) {
