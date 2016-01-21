@@ -158,7 +158,7 @@ function parseEmoticons(message, room, user, pm) {
 			'<img src="' + emote + '" title="' + match + '" width="30" height="30"/>' :
 			match;
 		if (match === ':bed:') return typeof emote != 'undefined' ?
-			'<img src="' + emote + '" title="' + match + '" width="37" height="30"/>' :
+			'<img src="' + emote + '" title="' + match + '" width="39" height="32"/>' :
 			match;
 		if (match === ':bowie:') return typeof emote != 'undefined' ?
 			'<img src="' + emote + '" title="' + match + '" width="22" height="30"/>' :
