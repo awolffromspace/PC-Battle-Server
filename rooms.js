@@ -943,7 +943,7 @@ let BattleRoom = (function () {
 				// Battle Point Winnings
 				//
 
-				if (this.format === 'lotw11monotyperandom') {
+				/* if (this.format === 'lotw11monotyperandom') {
 					let wid = toId(winner);
 					Database.read('bp', wid, function (err, initial) {
 						if (err) throw err;
@@ -953,7 +953,7 @@ let BattleRoom = (function () {
 						});
 					});
 					this.push("|raw|<b><font color='" + color + "'>" + Tools.escapeHTML(winner) + "</font> has won " + "<font color='" + color + "'>2</font> Battle Points for winning the rated Ladder of the Week battle!</b>");
-				} else if (this.format !== '1v1random' && this.format !== '1v1challengecup' && this.format !== '1v1') {
+				} else */ if (this.format !== 'lotw121v1random' && this.format !== '1v1random' && this.format !== '1v1challengecup' && this.format !== '1v1') {
 					let wid = toId(winner);
 					Database.read('bp', wid, function (err, initial) {
 						if (err) throw err;
