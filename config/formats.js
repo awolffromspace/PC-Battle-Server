@@ -23,13 +23,6 @@ exports.Formats = [
 		},
 	},
 	{
-		name: "Fortune Cup",
-		section: "ORAS Singles",
-
-		ruleset: ['Pokemon', 'Swagger Clause', 'Team Preview', 'Sleep Clause Mod', 'Nickname Clause', 'OHKO Clause', 'Moody Clause', 'Evasion Moves Clause', 'Endless Battle Clause', 'HP Percentage Mod', 'Cancel Mod'],
-		banlist: ['Unreleased', 'Illegal'],
-	},
-	{
 		name: "OU",
 		desc: [
 			"&bullet; <a href=\"https://www.smogon.com/forums/threads/3521201/\">OU Metagame Discussion</a>",
