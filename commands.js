@@ -36,6 +36,12 @@ exports.commands = {
 	globalauth: 'authority',
 	authlist: 'authority',
 	authority: function (target, room, user, connection) {
+		if (target) {
+			let targetRoom = Rooms.search(target);
+			let unavailableRoom = targetRoom && (targetRoom !== room && (targetRoom.modjoin || targetRoom.staffRoom) && !user.can('makeroom'));
+			if (targetRoom && !unavailableRoom) return this.parse('/roomauth1 ' + target);
+			return this.parse('/userauth ' + target);
+		}
 		let rankLists = {};
 		let ranks = Object.keys(Config.groups);
 		for (let u in Users.usergroups) {
@@ -58,6 +64,9 @@ exports.commands = {
 		if (!buffer.length) buffer = "This server has no global authority.";
 		connection.popup(buffer.join("\n\n"));
 	},
+	authhelp: ["/auth - Show global staff for the server.",
+		"/auth [room] - Show what roomauth a room has.",
+		"/auth [user] - Show what global and roomauth a user has."],
 
 	me: function (target, room, user, connection) {
 		// By default, /me allows a blank message
@@ -826,12 +835,15 @@ exports.commands = {
 		"/roomdeauth [username] - Removes all room rank from the user. Requires: @ # & ~"],
 
 	roomstaff: 'roomauth',
-	roomauth: function (target, room, user, connection) {
+	roomauth1: 'roomauth',
+	roomauth: function (target, room, user, connection, cmd) {
+		let userLookup = '';
+		if (cmd === 'roomauth1') userLookup = '\n\nTo look up auth for a user, use /userauth ' + target;
 		let targetRoom = room;
 		if (target) targetRoom = Rooms.search(target);
 		let unavailableRoom = targetRoom && (targetRoom !== room && (targetRoom.modjoin || targetRoom.staffRoom) && !user.can('makeroom'));
 		if (!targetRoom || unavailableRoom) return this.errorReply("The room '" + target + "' does not exist.");
-		if (!targetRoom.auth) return this.sendReply("/roomauth - The room '" + (targetRoom.title ? targetRoom.title : target) + "' isn't designed for per-room moderation and therefore has no auth list.");
+		if (!targetRoom.auth) return this.sendReply("/roomauth - The room '" + (targetRoom.title ? targetRoom.title : target) + "' isn't designed for per-room moderation and therefore has no auth list." + userLookup);
 
 		let rankLists = {};
 		for (let u in targetRoom.auth) {
@@ -849,11 +861,11 @@ exports.commands = {
 		});
 
 		if (!buffer.length) {
-			connection.popup("The room '" + targetRoom.title + "' has no auth.");
+			connection.popup("The room '" + targetRoom.title + "' has no auth." + userLookup);
 			return;
 		}
 		if (targetRoom !== room) buffer.unshift("" + targetRoom.title + " room auth:");
-		connection.popup(buffer.join("\n\n"));
+		connection.popup(buffer.join("\n\n") + userLookup);
 	},
 
 	userauth: function (target, room, user, connection) {
@@ -952,8 +964,8 @@ exports.commands = {
 			}
 		}
 		let lastid = this.getLastIdOf(targetUser);
-		this.add('|unlink|' + lastid);
-		if (lastid !== toId(this.inputUsername)) this.add('|unlink|' + toId(this.inputUsername));
+		this.add('|unlink|roomhide|' + lastid);
+		if (lastid !== toId(this.inputUsername)) this.add('|unlink|roomhide|' + toId(this.inputUsername));
 	},
 	roombanhelp: ["/roomban [username] - Bans the user from the room you are in. Requires: @ # & ~"],
 
@@ -2456,22 +2468,26 @@ exports.commands = {
 	},
 	addplayerhelp: ["/addplayer [username] - Allow the specified user to join the battle as a player."],
 
-	joinbattle: function (target, room, user) {
-		if (!room.joinBattle) return this.errorReply("You can only do this in battle rooms.");
-		if (!user.can('joinbattle', null, room)) return this.popupReply("You must be a set as a player to join a battle you didn't start. Ask a player to use /addplayer on you to join this battle.");
+	joinbattle: 'joingame',
+	joingame: function (target, room, user) {
+		if (!room.game) return this.errorReply("This room doesn't have an active game.");
+		if (!room.game.joinGame) return this.errorReply("This game doesn't support /joingame");
 
-		room.joinBattle(user);
+		room.game.joinGame(user);
 	},
 
-	partbattle: 'leavebattle',
-	leavebattle: function (target, room, user) {
-		if (!room.leaveBattle) return this.errorReply("You can only do this in battle rooms.");
+	leavebattle: 'leavegame',
+	partbattle: 'leavegame',
+	leavegame: function (target, room, user) {
+		if (!room.game) return this.errorReply("This room doesn't have an active game.");
+		if (!room.game.leaveGame) return this.errorReply("This game doesn't support /leavegame");
 
-		room.leaveBattle(user);
+		room.game.leaveGame(user);
 	},
 
-	kickbattle: function (target, room, user) {
-		if (!room.leaveBattle) return this.errorReply("You can only do this in battle rooms.");
+	kickbattle: 'kickgame',
+	kickgame: function (target, room, user) {
+		if (!room.battle) return this.errorReply("You can only do this in battle rooms.");
 		if (room.battle.tour || room.battle.rated) return this.errorReply("You can only do this in unrated non-tour battles.");
 
 		target = this.splitTarget(target);
@@ -2481,7 +2497,7 @@ exports.commands = {
 		}
 		if (!this.can('kick', targetUser)) return false;
 
-		if (room.leaveBattle(targetUser)) {
+		if (room.game.leaveGame(targetUser)) {
 			this.addModCommand("" + targetUser.name + " was kicked from a battle by " + user.name + (target ? " (" + target + ")" : ""));
 		} else {
 			this.sendReply("/kickbattle - User isn't in battle.");

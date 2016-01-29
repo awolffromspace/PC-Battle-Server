@@ -443,7 +443,7 @@ exports.BattleFormatsData = {
 	politoed: {
 		randomBattleMoves: ["scald", "hypnosis", "toxic", "encore", "perishsong", "protect", "icebeam", "focusblast", "surf", "hydropump", "hiddenpowergrass"],
 		eventPokemon: [
-			{"generation": 5, "level": 50, "gender": "M", "nature": "Calm", "isHidden": true, "moves":["scald", "icebeam", "perishsong", "protect"], "pokeball": "cherishball"},
+			{"generation": 5, "level": 50, "gender": "M", "nature": "Calm", "ivs": {"hp": 31, "atk": 13, "def": 31, "spa": 5, "spd": 31, "spe": 5}, "isHidden": true, "moves":["scald", "icebeam", "perishsong", "protect"], "pokeball": "cherishball"},
 		],
 		tier: "OU",
 	},
@@ -821,7 +821,7 @@ exports.BattleFormatsData = {
 		randomBattleMoves: ["hydropump", "icebeam", "dragondance", "substitute", "outrage", "dracometeor", "waterfall", "rest", "sleeptalk"],
 		eventPokemon: [
 			{"generation": 3, "level": 50, "abilities":["swiftswim"], "moves":["leer", "watergun", "twister", "agility"]},
-			{"generation": 5, "level": 50, "gender": "M", "nature": "Timid", "isHidden": false, "abilities":["swiftswim"], "moves":["dracometeor", "muddywater", "dragonpulse", "protect"], "pokeball": "cherishball"},
+			{"generation": 5, "level": 50, "gender": "M", "nature": "Timid", "ivs": {"hp": 31, "atk": 17, "def": 8, "spa": 31, "spd": 11, "spe": 31}, "isHidden": false, "abilities":["swiftswim"], "moves":["dracometeor", "muddywater", "dragonpulse", "protect"], "pokeball": "cherishball"},
 		],
 		tier: "UU",
 	},
@@ -1143,7 +1143,7 @@ exports.BattleFormatsData = {
 		randomBattleMoves: ["psystrike", "aurasphere", "fireblast", "icebeam", "calmmind", "substitute", "recover", "thunderbolt"],
 		eventPokemon: [
 			{"generation": 5, "level": 70, "isHidden": false, "moves":["psystrike", "shadowball", "aurasphere", "electroball"], "pokeball": "cherishball"},
-			{"generation": 5, "level": 100, "nature": "Timid", "isHidden": true, "moves":["psystrike", "icebeam", "healpulse", "hurricane"], "pokeball": "cherishball"},
+			{"generation": 5, "level": 100, "nature": "Timid", "ivs": {"spa": 31, "spe": 31}, "isHidden": true, "moves":["psystrike", "icebeam", "healpulse", "hurricane"], "pokeball": "cherishball"},
 		],
 		eventOnlyHidden: true,
 		tier: "Uber",
@@ -1612,7 +1612,7 @@ exports.BattleFormatsData = {
 		randomBattleMoves: ["spore", "spikes", "stealthrock", "uturn", "destinybond", "whirlwind"],
 		eventPokemon: [
 			{"generation": 3, "level": 10, "gender": "M", "abilities":["owntempo"], "moves":["sketch"]},
-			{"generation": 5, "level": 50, "gender": "F", "nature": "Jolly", "abilities":["technician"], "moves":["falseswipe", "spore", "odorsleuth", "meanlook"], "pokeball": "cherishball"},
+			{"generation": 5, "level": 50, "gender": "F", "nature": "Jolly", "ivs": {"atk": 31, "spe": 31}, "isHidden": false, "abilities":["technician"], "moves":["falseswipe", "spore", "odorsleuth", "meanlook"], "pokeball": "cherishball"},
 		],
 		tier: "RU",
 	},
@@ -2570,6 +2570,15 @@ exports.BattleFormatsData = {
 		randomBattleMoves: ["bodyslam", "ironhead", "firepunch", "thunderwave", "stealthrock", "wish", "uturn", "calmmind", "psychic", "thunder", "icepunch", "flashcannon", "meteormash"],
 		eventPokemon: [
 			{"generation": 3, "level": 5, "moves":["wish", "confusion", "rest"]},
+			{"generation": 3, "level": 5, "shiny": true, "nature": "Bashful", "moves":["wish", "confusion", "rest"]},
+			{"generation": 3, "level": 5, "shiny": true, "nature": "Careful", "moves":["wish", "confusion", "rest"]},
+			{"generation": 3, "level": 5, "shiny": true, "nature": "Docile", "moves":["wish", "confusion", "rest"]},
+			{"generation": 3, "level": 5, "shiny": true, "nature": "Hasty", "moves":["wish", "confusion", "rest"]},
+			{"generation": 3, "level": 5, "shiny": true, "nature": "Jolly", "moves":["wish", "confusion", "rest"]},
+			{"generation": 3, "level": 5, "shiny": true, "nature": "Lonely", "moves":["wish", "confusion", "rest"]},
+			{"generation": 3, "level": 5, "shiny": true, "nature": "Naughty", "moves":["wish", "confusion", "rest"]},
+			{"generation": 3, "level": 5, "shiny": true, "nature": "Serious", "moves":["wish", "confusion", "rest"]},
+			{"generation": 3, "level": 5, "shiny": true, "nature": "Timid", "moves":["wish", "confusion", "rest"]},
 			{"generation": 3, "level": 30, "moves":["helpinghand", "psychic", "refresh", "rest"]},
 			{"generation": 4, "level": 5, "moves":["wish", "confusion", "rest"], "pokeball": "cherishball"},
 			{"generation": 4, "level": 5, "moves":["wish", "confusion", "rest", "dracometeor"], "pokeball": "cherishball"},
@@ -3079,6 +3088,7 @@ exports.BattleFormatsData = {
 			{"generation": 4, "level": 50, "moves":["darkvoid", "darkpulse", "shadowball", "doubleteam"]},
 			{"generation": 4, "level": 50, "moves":["nightmare", "hypnosis", "roaroftime", "spacialrend"], "pokeball": "cherishball"},
 			{"generation": 4, "level": 50, "moves":["doubleteam", "nightmare", "feintattack", "hypnosis"]},
+			{"generation": 4, "level": 50, "shiny": true, "moves":["doubleteam", "nightmare", "feintattack", "hypnosis"]},
 			{"generation": 5, "level": 50, "moves":["darkvoid", "ominouswind", "feintattack", "nightmare"], "pokeball": "cherishball"},
 		],
 		eventOnly: true,
@@ -3089,6 +3099,7 @@ exports.BattleFormatsData = {
 		eventPokemon: [
 			{"generation": 4, "level": 50, "moves":["seedflare", "aromatherapy", "substitute", "energyball"], "pokeball": "cherishball"},
 			{"generation": 4, "level": 30, "moves":["growth", "magicalleaf", "leechseed", "synthesis"]},
+			{"generation": 4, "level": 30, "shiny": true, "moves":["growth", "magicalleaf", "leechseed", "synthesis"]},
 			{"generation": 5, "level": 50, "moves":["seedflare", "leechseed", "synthesis", "sweetscent"], "pokeball": "cherishball"},
 		],
 		eventOnly: true,
@@ -4016,7 +4027,7 @@ exports.BattleFormatsData = {
 		eventPokemon: [
 			{"generation": 5, "level": 50, "moves":["technoblast", "magnetbomb", "solarbeam", "signalbeam"], "pokeball": "cherishball"},
 			{"generation": 5, "level": 15, "moves":["technoblast", "magnetbomb", "solarbeam", "signalbeam"], "pokeball": "cherishball"},
-			{"generation": 5, "level": 100, "shiny": true, "nature": "Hasty", "moves":["extremespeed", "technoblast", "blazekick", "shiftgear"], "pokeball": "cherishball"},
+			{"generation": 5, "level": 100, "shiny": true, "nature": "Hasty", "ivs": {"atk": 31, "spe": 31}, "moves":["extremespeed", "technoblast", "blazekick", "shiftgear"], "pokeball": "cherishball"},
 		],
 		eventOnly: true,
 		tier: "Uber",

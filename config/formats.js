@@ -3900,7 +3900,7 @@ exports.Formats = [
 			for (let i = 1; i < team.length; i++) {
 				template = this.getTemplate(team[i].species);
 				if (template.tier === 'Uber') return [template.species + " is only allowed as the God."];
-				if (!template.types || !typeTable.intersect(template.types).length) return ["Followers must share a type with the God."];
+				if (!typeTable || !template.types || !typeTable.intersect(template.types).length) return ["Followers must share a type with the God."];
 				let item = toId(team[i].item);
 				if (item && item in {gengarite:1, kangaskhanite:1, lucarionite:1, mawilite:1, salamencite:1, souldew:1}) return [team[i].item + " is only allowed on the God."];
 				if (toId(team[i].ability) === 'shadowtag') return [team[i].ability + " is only allowed on the God."];
@@ -4133,7 +4133,10 @@ exports.Formats = [
 	},
 	{
 		name: "LC UU",
-		desc: ["&bullet; <a href=\"https://www.smogon.com/forums/threads/3523929/\">LC UU</a>"],
+		desc: [
+			"&bullet; <a href=\"https://www.smogon.com/forums/threads/3562639/\">LC UU</a>",
+			"&bullet; <a href=\"https://www.smogon.com/forums/threads/3562640/\">LC UU Viability Ranking</a>",
+		],
 		section: "Other Metagames",
 
 		maxLevel: 5,
@@ -4143,7 +4146,7 @@ exports.Formats = [
 			'Gastly', 'Gothita', 'Houndour', 'Larvesta', 'Magnemite', 'Mienfoo', 'Munchlax', 'Omanyte', 'Onix', 'Pancham',
 			'Pawniard', 'Ponyta', 'Porygon', 'Pumpkaboo-Super', 'Scraggy', 'Shellder', 'Skrelp', 'Snivy', 'Snubbull',
 			'Spritzee', 'Staryu', 'Stunky', 'Surskit', 'Timburr', 'Tirtouga', 'Vullaby', 'Vulpix', 'Zigzagoon',
-			'Shell Smash',
+			'Shell Smash', 'Sticky Web',
 		],
 	},
 	{

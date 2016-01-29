@@ -248,15 +248,31 @@ class Mafia extends Rooms.RoomGame {
 
 	forfeit(user) {
 		if (!(user.userid in this.players)) return false;
+		if (this.gamestate === 'pregame') return false;
 
-		if (this.gamestate === 'pregame') {
-			this.removePlayer(user);
-			this.updatePregame();
-		} else {
-			this.players[user.userid].eliminate();
-		}
-
+		this.players[user.userid].eliminate();
 		return true;
+	}
+
+	joinGame(user, text) {
+		if (this.gamestate !== 'pregame') return user.sendTo(this.room, "The game has started already.");
+
+		if (this.addPlayer(user)) {
+			this.updatePregame();
+			if (this.playerCount === this.playerCap) {
+				this.start();
+			}
+		} else {
+			return user.sendTo(this.room, "You're already in the game.");
+		}
+	}
+
+	leaveGame(user, text) {
+		if (!(user.userid in this.players)) return false;
+		if (this.gamestate !== 'pregame') return user.sendTo(this.room, "The game has started already. If you wish to give up, use /forfeit.");
+
+		this.removePlayer(user);
+		this.updatePregame();
 	}
 
 	choose(user, target) {
@@ -269,9 +285,9 @@ class Mafia extends Rooms.RoomGame {
 
 		if (player in this.players || player === 'none') {
 			if (cmd === 'target') {
-				this.players[user.userid].onReceiveTarget(player);
+				return this.players[user.userid].onReceiveTarget(player);
 			} else if (cmd === 'vote') {
-				this.players[user.userid].onReceiveVote(player);
+				return this.players[user.userid].onReceiveVote(player);
 			}
 		}
 
@@ -310,9 +326,9 @@ class Mafia extends Rooms.RoomGame {
 		if (this.anonVotes) output += 'Votes are anonymous. ';
 
 		if (joined) {
-			output += '<br/><button value="/forfeit" name="send">Leave</button>';
+			output += '<br/><button value="/leavegame" name="send">Leave</button>';
 		} else {
-			output += '<br/><button value="/mafia join" name="send">Join</button>';
+			output += '<br/><button value="/joingame" name="send">Join</button>';
 		}
 
 		return output + '</center></div>';
@@ -363,7 +379,7 @@ class Mafia extends Rooms.RoomGame {
 
 		for (let i in this.players) {
 			let player = this.players[i];
-			if (this.voters.indexOf(player) > -1) {
+			if (this.voters.indexOf(player) > -1 && !this.voting) {
 				player.sendRoom('|uhtmlchange|mafia' + this.room.gameNumber + 'vote' + this.gamestate + this.day + '|' + this.mafiaWindow(player.class.image, text));
 			}
 		}
@@ -395,7 +411,7 @@ class Mafia extends Rooms.RoomGame {
 		let rolesLeft = this.roles;
 
 		for (let i in this.players) {
-			let index = Math.floor(Math.random(rolesLeft.length));
+			let index = Math.floor(Math.random() * rolesLeft.length);
 			this.players[i].class = MafiaData.MafiaClasses[rolesLeft[index]];
 			rolesLeft.splice(index, 1);
 			if (!this.players[i].class.atStart) {
@@ -529,7 +545,9 @@ class Mafia extends Rooms.RoomGame {
 
 	setTimer(mins) {
 		this.timer = setTimeout((function () {
-			this.announcementWindow('', '10 seconds left!');
+			for (let i in this.players) {
+				this.players[i].sendRoom("10 seconds left!");
+			}
 			this.timer = setTimeout((function () {
 				this.progress();
 			}).bind(this), 10000);
@@ -683,21 +701,6 @@ exports.commands = {
 			}
 
 			return this.privateModCommand("(A game of mafia was started by " + user.name + ".)");
-		},
-
-		join: function (target, room, user) {
-			if (!room.game || room.game.gameid !== 'mafia') return this.errorReply("There is no game of mafia running in this room.");
-			if (room.game.gamestate !== 'pregame') return this.errorReply("The game has started already.");
-			if (!this.canTalk()) return this.errorReply("You cannot do this while unable to talk.");
-
-			if (room.game.addPlayer(user)) {
-				room.game.updatePregame();
-				if (room.game.playerCount === room.game.playerCap) {
-					room.game.start();
-				}
-			} else {
-				return this.errorReply("You're already in the game.");
-			}
 		},
 
 		display: function (target, room, user) {
