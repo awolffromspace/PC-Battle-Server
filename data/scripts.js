@@ -4153,6 +4153,20 @@ exports.BattleScripts = {
 
 			let set = this.randomSet(template, pokemon.length, teamDetails);
 
+			if (template.id === 'gothitelle') {
+				set.species = 'Gothitelle';
+				set.ability = 'Frisk';
+			} else if (template.id === 'wobbuffet') {
+				set.species = 'Wobbuffet';
+				set.ability = 'Telepathy';
+			} else if (template.id === 'ninetales') {
+				set.species = 'Ninetales';
+				set.ability = 'Flash Fire';
+			} else if (template.id === 'politoed') {
+				set.species = 'Politoed';
+				set.ability = 'Water Absorb';
+			}
+
 			// Illusion shouldn't be the last Pokemon of the team
 			if (set.ability === 'Illusion' && pokemonLeft > 4) continue;
 
