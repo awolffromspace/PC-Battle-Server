@@ -78,7 +78,7 @@ exports.commands = {
 	},
 
 	jointours: function (arg, by, room, cmd) {
-		if (!this.can('jointour')) return false;
+		if (!this.isRanked(Tools.getGroup('admin'))) return;
 		var tarRoom = room;
 		var targetObj = Tools.getTargetRoom(arg);
 		var textHelper = '';
