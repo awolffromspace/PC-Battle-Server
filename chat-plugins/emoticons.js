@@ -93,7 +93,6 @@ var emotes = {
 	':snorlax:': 'http://cbc.pokecommunity.com/config/emoticons/snorlax.png',
 	':spheal:': 'http://cbc.pokecommunity.com/config/emoticons/spheal.png',
 	':spinda:': 'http://cbc.pokecommunity.com/config/emoticons/spinda.png',
-	':sri:': 'http://cbc.pokecommunity.com/config/emoticons/sri.png',
 	':strut:': 'http://cbc.pokecommunity.com/config/emoticons/strut.png',
 	':suicune:': 'http://cbc.pokecommunity.com/config/emoticons/suicune.png',
 	':superman:': 'http://cbc.pokecommunity.com/config/emoticons/superman.png',
