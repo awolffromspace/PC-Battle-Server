@@ -55,6 +55,7 @@ exports.autoReloginDelay = 60 * 1000;
 */
 
 exports.rooms = ['lobby', 'worldofpc', 'mariokart', 'darkalley', 'johtoleagueshowdown', 'kamehouse', 'trl'];
+
 /*
 * exports.rooms = 'all'; //For joining all rooms
 * exports.rooms = 'official'; //For joining official rooms
@@ -83,12 +84,12 @@ exports.exceptions = {
 /*
 * 'userid': 'rank' or 'userid': true for full access
 * Example:
-
-exports.exceptions = {
-	'ecuacion': true,
-	'excepted': true
-};
-
+*
+* exports.exceptions = {
+*	'ecuacion': true,
+*	'excepted': true
+* };
+*
 */
 
 exports.ranks = ['\u2605', '+', '=', '%', '@', '-', '#', '&', '~'];
@@ -126,7 +127,9 @@ exports.permissionExceptions = {
 
 exports.botguide = "http://www.pokecommunity.com/showthread.php?t=289012#botguide";
 
-exports.pmhelp = ""; //When you pm the bot but don't use a command, it replies you this message. Example: "Hi, I'm a bot. Use .help to view a command guide"
+//When you pm the bot but don't use a command, it replies you this message. Example: "Hi, I'm a bot. Use .help to view a command guide"
+//The var #USER is replaced with the username that pms it
+exports.pmhelp = "Hi #USER! I am a robot, please PM another staff member if you need help. Command guide: https://github.com/Ecuacion/Pokemon-Showdown-Node-Bot/blob/master/commands/README.md";
 
 /*
 * Language configuration
@@ -234,7 +237,8 @@ exports.moderation = {
 	psServersExcepts: {
 		"pokecommunity": 1,
 		"showdown": 1,
-		"smogtours": 1
+		"smogtours": 1,
+		"sim": 1
 	},
 
 	zeroToleranceDefaultLevel: 'h',
@@ -261,15 +265,23 @@ exports.losemsg = ['gg', 'wp'];
 
 exports.battleMessages = {
 	/* Examples of battle messages:
-	'-crit': {
-		'self': [], //Example: ['lol that hax', 'stop haxing pls']
-		'foe': [] //Example: ['sorry', 'wow sorry for that', 'get critted']
+	'crit': {
+		'self': ['lol that hax', 'stop haxing pls'],
+		'foe': ['sorry', 'wow sorry for that', 'get critted']
 	},
-	'-miss': {
-		'self': [] //Example: ['wow hax', 'lol #poke you\'re blind']
+	'miss': {
+		'self': ['wow hax', 'lol #poke you\'re blind']
 	}
 	*/
 };
+
+exports.battleModules = {
+	/* Algorithms for use in battles */
+	"challengecup1v1": "ingame-nostatus",
+	"1v1": "ingame-nostatus"
+};
+
+//exports.battleLog = {ageOfLogs: 1}; // Days
 
 exports.abandonedBattleAutojoin = true;
 
@@ -314,7 +326,8 @@ exports.leaderboards['tournaments'] = {
 	winnerPoints: 5,
 	finalistPoints: 3,
 	semiFinalistPoints: 1,
-	battlePoints: 0
+	battlePoints: 0,
+	onlyOfficial: true // If true, only official tours (must use .official command) will be counted
 };
 */
 

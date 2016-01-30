@@ -5,13 +5,15 @@ This guide is a explanation of how to configure [Pokemon-Showdown-Node-Bot](http
 
 First of all, copy `config-example.js` to `config.js`
 
+**NOTE:** You can use `node bot-setup.js` to configure the fundamental values without editing / copying the file.
+
 Server configuration
 ------------
 
 You must choose the Pokemon Showdown server to use. There are 3 options:
  - You might want to use [Smogon Official Server (Main Server)](http://play.pokemonshowdown.com/). In that case use these parameters:
 ```js
-exports.server = 'sim.smogon.com';
+exports.server = 'sim.psim.us';
 
 exports.port = 8000;
 
@@ -181,7 +183,8 @@ exports.leaderboards['tournaments'] = {
 	winnerPoints: 5,
 	finalistPoints: 3,
 	semiFinalistPoints: 1,
-	battlePoints: 0
+	battlePoints: 0,
+	onlyOfficial: true // If true, only official tours (must use .official command) will be counted
 };
 ```
 

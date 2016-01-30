@@ -71,6 +71,10 @@ jsHintOptions.test = util._extend(util._extend({}, jsHintOptions.base), {
 	"mocha": true
 });
 
+jsHintOptions.externalScripts = util._extend(util._extend({}, jsHintOptions.base), {
+	"globals": {}
+});
+
 var jscsOptions = {};
 jscsOptions.base = "./test/.jscsrc";
 jscsOptions.config = "./test/.jscsrc";
@@ -78,7 +82,7 @@ jscsOptions.config = "./test/.jscsrc";
 
 var lintData = [
 	{
-		dirs: ['./command-parser.js', './data-downloader.js', './index.js', './security-log.js', './settings.js', './tools.js', './commands/*.js', './features/*/*.js', './languages/*/*.js'],
+		dirs: ['./command-parser.js', './data-downloader.js', './index.js', './security-log.js', './settings.js', './tools.js', './commands/*.js', './features/*/*.js', './languages/*/*.js', './features/battle/battle-ai/*.js', './features/battle/battle-ai/modules/*.js'],
 		jsHint: jsHintOptions.base,
 		jscs: jscsOptions.base
 	}, {
@@ -89,6 +93,10 @@ var lintData = [
 		dirs: ['./test/*.js', './testfiles/*.js'],
 		jsHint: jsHintOptions.test,
 		jscs: jscsOptions.config
+	}, {
+		dirs: ['./getserver.js', './bot-setup.js'],
+		jsHint: jsHintOptions.externalScripts,
+		jscs: jscsOptions.base
 	}
 ];
 
