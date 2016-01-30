@@ -219,10 +219,10 @@ exports.customavatars = {
 	'squirrel': 'ozzy.png',
 	'avogadro': 'ozzy.png',
 	'antemortem': 'ante.png',
-	'pachy': 'pachy.png',
-	'eldy': 'pachy.png',
-	'elod': 'pachy.png',
-	'mlod': 'pachy.png',
+	'pachy': 'mlod.png',
+	'eldy': 'mlod.png',
+	'elod': 'mlod.png',
+	'mlod': 'mlod.png',
 	'ladygunner': 'ladygunner.gif',
 	'queenofshipping': 'ladygunner.gif',
 	'starrywindy': 'starrywindy.gif',
@@ -558,7 +558,9 @@ exports.customavatars = {
 	'ahrmtic': 'ahrmtic.png',
 	'itssopheria': 'itssopheria.jpg',
 	'sopheria7': 'itssopheria.jpg',
-	'noatan': 'noatan.png',
+	'noatan': 'noanoodles.png',
+	'noanoodles': 'noanoodles.png',
+	'noav': 'noanoodles.png',
 	'nakasu': 'nakasu.gif',
 	'pmseth': 'pmseth.gif',
 	'savashy': 'pmseth.gif',
@@ -580,6 +582,7 @@ exports.customavatars = {
 	'elektraheart': 'elektraheart.gif',
 	'lordgrizz': 'lordgrizz.jpg',
 	'serrh': 'serrh.gif',
+	'foreverburning': 'foreverburning.png',
 };
 
 // custom avatars appear in profile by specifiying server url.
