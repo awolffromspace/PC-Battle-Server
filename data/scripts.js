@@ -4285,6 +4285,8 @@ exports.BattleScripts = {
 
 			let set = this.randomSet(template, pokemon.length, teamDetails);
 
+			set.level = 5;
+
 			// Illusion shouldn't be the last Pokemon of the team
 			if (set.ability === 'Illusion' && pokemonLeft > 4) continue;
 
