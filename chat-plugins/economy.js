@@ -520,7 +520,8 @@ exports.commands = {
 					if (!amount) amount = 0;
 					Database.write('bp', amount + winnings, winner.username, function (err, total) {
 						if (err) throw err;
-						var msg = "<center><h2>Lottery!</h2><h4><font color='red'><b>" + winner.username + "</b></font> has won the lottery with the ticket id of " + winner.ticket + "! This user has gained " + winnings + currencyName(winnings) + " and now has a total of " + total + currencyName(total) + ".</h4></center>";
+						let color = '#1f7bcc';
+						var msg = "<center><h2>Lottery!</h2><h4><font color='" + color + "'><b>" + winner.username + "</b></font> has won the lottery with the ticket id of " + winner.ticket + "! This user has gained " + winnings + currencyName(winnings) + " and now has a total of " + total + currencyName(total) + ".</h4></center>";
 						_this.parse('/declare ' + msg);
 						room.update();
 						Database.set('pot', 5, function (err) {
