@@ -9,7 +9,7 @@ var emotes = {
 	':arceus:': 'http://cbc.pokecommunity.com/config/emoticons/arceus.png',
 	':armycat:': 'http://cbc.pokecommunity.com/config/emoticons/armycat.png',
 	':azelf:': 'http://cbc.pokecommunity.com/config/emoticons/azelf.png',
-	':bed:': 'http://cbc.pokecommunity.com/config/emoticons/bed.png',
+	':bed:': 'http://cbc.pokecommunity.com/config/emoticons/bed.gif',
 	':bidoof:': 'http://cbc.pokecommunity.com/config/emoticons/bidoof.png',
 	':blastoise:': 'http://cbc.pokecommunity.com/config/emoticons/blastoise.png',
 	':blissey:': 'http://cbc.pokecommunity.com/config/emoticons/blissey.png',
