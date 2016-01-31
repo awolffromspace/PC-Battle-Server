@@ -18,7 +18,8 @@ exports.BattleFormatsData = {
 		requiredItem: "Salamencite"
 	},
 	rayquazamega: {
-		tier: "AG"
+		inherit: true,
+		requiredItem: false,
 	},
 	lucario: {
 		inherit: true,
