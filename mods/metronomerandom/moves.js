@@ -39,5 +39,5 @@ exports.BattleMovedex = {
 		secondary: false,
 		target: "self",
 		type: "Normal"
-	}
+	},
 };
