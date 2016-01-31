@@ -3,75 +3,71 @@
 exports.BattleFormatsData = {
 	charizard: {
 		inherit: true,
-		requiredItem: "Charizardite X"
+		requiredItem: "Charizardite X",
 	},
 	beedrill: {
 		inherit: true,
-		requiredItem: "Beedrillite"
+		requiredItem: "Beedrillite",
 	},
 	pidgeot: {
 		inherit: true,
-		requiredItem: "Pidgeotite"
+		requiredItem: "Pidgeotite",
 	},
 	gengarmega: {
-		tier: "Uber"
+		tier: "Uber",
 	},
 	pinsir: {
 		inherit: true,
-		requiredItem: "Pinsirite"
+		requiredItem: "Pinsirite",
 	},
 	aerodactyl: {
 		inherit: true,
-		requiredItem: "Aerodactylite"
+		requiredItem: "Aerodactylite",
 	},
 	ampharos: {
 		inherit: true,
-		requiredItem: "Ampharosite"
+		requiredItem: "Ampharosite",
 	},
 	houndoom: {
 		inherit: true,
-		requiredItem: "Houndoominite"
+		requiredItem: "Houndoominite",
 	},
 	sceptile: {
 		inherit: true,
-		requiredItem: "Sceptilite"
+		requiredItem: "Sceptilite",
 	},
 	gallade: {
 		inherit: true,
-		requiredItem: "Galladite"
+		requiredItem: "Galladite",
 	},
 	aggron: {
 		inherit: true,
-		requiredItem: "Aggronite"
+		requiredItem: "Aggronite",
 	},
 	medicham: {
 		inherit: true,
-		requiredItem: "Medichamite"
+		requiredItem: "Medichamite",
 	},
 	manectric: {
 		inherit: true,
-		requiredItem: "Manectite"
+		requiredItem: "Manectite",
 	},
 	altaria: {
 		inherit: true,
-		requiredItem: "Altarianite"
+		requiredItem: "Altarianite",
 	},
 	absol: {
 		inherit: true,
-		requiredItem: "Absolite"
+		requiredItem: "Absolite",
 	},
 	salamencemega: {
-		tier: "Uber"
+		tier: "Uber",
 	},
 	lopunny: {
 		inherit: true,
-		requiredItem: "Lopunnite"
+		requiredItem: "Lopunnite",
 	},
 	lucariomega: {
-		tier: "Uber"
+		tier: "Uber",
 	},
-	abomasnow: {
-		inherit: true,
-		requiredItem: "Abomasite"
-	}
 };
