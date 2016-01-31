@@ -3477,7 +3477,7 @@ exports.Formats = [
 		section: "Random Battles (aka Randbats)",
 
 		team: 'randomHC',
-		ruleset: ['Pokemon', 'HP Percentage Mod', 'Cancel Mod'],
+		ruleset: ['Random (no PotD)'],
 	},
 	{
 		name: "1v1 Challenge Cup",
@@ -3497,7 +3497,7 @@ exports.Formats = [
 		gameType: 'doubles',
 		team: 'randomHC',
 		searchShow: false,
-		ruleset: ['Pokemon', 'HP Percentage Mod', 'Cancel Mod'],
+		ruleset: ['Random (no PotD)'],
 	},
 	{
 		name: "Triples Hackmons Cup",
@@ -3506,23 +3506,6 @@ exports.Formats = [
 		gameType: 'triples',
 		team: 'randomHC',
 		searchShow: false,
-		ruleset: ['Pokemon', 'HP Percentage Mod', 'Cancel Mod'],
-	},
-	{
-		name: "Halloween Random",
-		section: "Random Battles (aka Randbats)",
-
-		searchShow: false,
-		mod: 'halloweenrandom',
-		team: 'randomHalloween',
-		ruleset: ['Random (no PotD)'],
-	},
-	{
-		name: "Summer Send-Off Random",
-		section: "Random Battles (aka Randbats)",
-
-		searchShow: false,
-		team: 'randomSummerSendoff',
 		ruleset: ['Random (no PotD)'],
 	},
 	{
@@ -3653,6 +3636,23 @@ exports.Formats = [
 				delete this.weatherData.duration;
 			}
 		},
+	},
+	{
+		name: "Summer Send-Off Random",
+		section: "Random Battles (aka Randbats)",
+
+		searchShow: false,
+		team: 'randomSummerSendoff',
+		ruleset: ['Random (no PotD)'],
+	},
+	{
+		name: "Halloween Random",
+		section: "Random Battles (aka Randbats)",
+
+		searchShow: false,
+		mod: 'halloweenrandom',
+		team: 'randomHalloween',
+		ruleset: ['Random (no PotD)'],
 	},
 	{
 		name: "SwagPlay Random",
