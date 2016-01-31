@@ -12,7 +12,8 @@ exports.BattleFormatsData = {
 		tier: "UU",
 	},
 	sableyemega: {
-		tier: "OU",
+		inherit: true,
+		requiredItem: false,
 	},
 	banette: {
 		randomBattleMoves: ["swagger","foulplay","substitute","thunderwave"],
