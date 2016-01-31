@@ -2,7 +2,7 @@ var fs = require('fs');
 var path = require('path');
 
 var shop = [
-	['Star', 'Buy a \u2606 that goes in front of your name and puts you at the top of the user list. It goes away whether you leave for more than one hour or the server restarts.', 3],
+	['Star', 'Buy a \u2606 that goes in front of your name and puts you at the top of the user list. It goes away whether you leave for more than one hour or the server restarts.', 2],
 	['Ticket', 'Buy a lottery ticket for a chance to win lots of Battle Points. However, if you buy too many tickets, you may not make a profit.', 5],
 	['Poof', 'Buy a poof message to be added into your pool of possible poofs. Poofs are custom leave messages that are used via "/poof".', 20],
 	['Adjustment', 'Buy a one-time change for either your avatar or your join phrase. Don\'t buy this if you haven\'t bought an avatar or join phrase before. If you have a custom avatar and would like to apply it to other usernames, contact the admin wolf and don\'t buy this.', 30],
