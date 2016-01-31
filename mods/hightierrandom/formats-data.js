@@ -1,9 +1,17 @@
 'use strict';
 
 exports.BattleFormatsData = {
+	venusaur: {
+		inherit: true,
+		requiredItem: "Venusaurite",
+	},
 	charizard: {
 		inherit: true,
 		requiredItem: "Charizardite X",
+	},
+	blastoise: {
+		inherit: true,
+		requiredItem: "Blastoisinite",
 	},
 	beedrill: {
 		inherit: true,
@@ -52,6 +60,10 @@ exports.BattleFormatsData = {
 	manectric: {
 		inherit: true,
 		requiredItem: "Manectite",
+	},
+	sharpedo: {
+		inherit: true,
+		requiredItem: "Sharpedonite",
 	},
 	altaria: {
 		inherit: true,
