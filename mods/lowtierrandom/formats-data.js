@@ -2,63 +2,83 @@
 
 exports.BattleFormatsData = {
 	charizardmegax: {
-		tier: "OU",
+		inherit: true,
+		requiredItem: false,
 	},
 	charizardmegay: {
-		tier: "OU",
+		inherit: true,
+		requiredItem: false,
 	},
 	blastoisemega: {
-		tier: "UU",
+		inherit: true,
+		requiredItem: false,
 	},
 	beedrillmega: {
-		tier: "UU",
+		inherit: true,
+		requiredItem: false,
 	},
 	kangaskhanmega: {
-		tier: "Uber",
+		inherit: true,
+		requiredItem: false,
 	},
 	pinsirmega: {
-		tier: "OU",
+		inherit: true,
+		requiredItem: false,
 	},
 	aerodactylmega: {
-		tier: "UU",
+		inherit: true,
+		requiredItem: false,
 	},
 	ampharosmega: {
-		tier: "UU",
+		inherit: true,
+		requiredItem: false,
 	},
 	houndoommega: {
-		tier: "BL2",
+		inherit: true,
+		requiredItem: false,
 	},
 	sceptilemega: {
-		tier: "UU",
+		inherit: true,
+		requiredItem: false,
 	},
 	gallademega: {
-		tier: "BL",
+		inherit: true,
+		requiredItem: false,
 	},
 	mawilemega: {
-		tier: "Uber",
+		inherit: true,
+		requiredItem: false,
 	},
 	aggronmega: {
-		tier: "UU",
+		inherit: true,
+		requiredItem: false,
 	},
 	medichammega: {
-		tier: "OU",
+		inherit: true,
+		requiredItem: false,
 	},
 	manectricmega: {
-		tier: "OU",
+		inherit: true,
+		requiredItem: false,
 	},
 	sharpedomega: {
-		tier: "UU",
+		inherit: true,
+		requiredItem: false,
 	},
 	altariamega: {
-		tier: "OU",
+		inherit: true,
+		requiredItem: false,
 	},
 	absolmega: {
-		tier: "UU",
+		inherit: true,
+		requiredItem: false,
 	},
 	lopunnymega: {
-		tier: "OU",
+		inherit: true,
+		requiredItem: false,
 	},
 	dianciemega: {
-		tier: "OU",
+		inherit: true,
+		requiredItem: false,
 	},
 };
