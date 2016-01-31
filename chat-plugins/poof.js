@@ -15,6 +15,10 @@ const anrindas = [
 	"went back to the Dragon's Den."
 ];
 
+const anthny = [
+	"~(´・ω・`)~ Bye My Beautiful People ~(´・ω・`)~"
+];
+
 const axtheefrost = [
 	"went to aliment Wobbuffet."
 ];
@@ -174,6 +178,16 @@ exports.commands = {
 				message = '{{user}} ' + message;
 			}
 			message = message.replace(/{{user}}/g, user.name);
+
+			var colour = '#' + [1, 1, 1].map(function () {
+				var part = Math.floor(Math.random() * 0xaa);
+				return (part < 0x10 ? '0' : '') + part.toString(16);
+			}).join('');
+
+			room.addRaw('<center><strong><font color="' + colour + '">~~ ' + Tools.escapeHTML(message) + ' ~~</font></strong></center>');
+			user.leaveRoom(room);
+		} else if (userid.toUpperCase() === 'ANTHNY' || userid.toUpperCase() === 'AN7HONY') {
+			var message = target || anthny[Math.floor(Math.random() * anthny.length)];
 
 			var colour = '#' + [1, 1, 1].map(function () {
 				var part = Math.floor(Math.random() * 0xaa);
@@ -410,7 +424,7 @@ exports.commands = {
 
 			room.addRaw('<center><strong><font color="' + colour + '">~~ ' + Tools.escapeHTML(message) + ' ~~</font></strong></center>');
 			user.leaveRoom(room);
-		} else if (userid.toUpperCase() === 'SLATE') {
+		} else if (userid.toUpperCase() === 'EMPERR' || userid.toUpperCase() === 'SLATE') {
 			var message = target || slate[Math.floor(Math.random() * slate.length)];
 
 			var colour = '#' + [1, 1, 1].map(function () {
