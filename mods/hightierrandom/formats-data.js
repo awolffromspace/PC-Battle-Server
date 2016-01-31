@@ -73,4 +73,8 @@ exports.BattleFormatsData = {
 		inherit: true,
 		requiredItem: false,
 	},
+	diancie: {
+		inherit: true,
+		requiredItem: "Diancite",
+	},
 };
