@@ -441,7 +441,7 @@ exports.Formats = [
 		section: "Random Battles (aka Randbats)",
 
 		team: 'randomSeasonalStaff',
-		ruleset: ['Sleep Clause Mod', 'HP Percentage Mod', 'Cancel Mod'],
+		ruleset: ['Random (no PotD)'],
 		onBegin: function () {
 			// This seasonal gets a bit from Super Smash Bros., that's where the initial message comes from.
 			this.add('message', "GET READY FOR THE NEXT BATTLE!");
