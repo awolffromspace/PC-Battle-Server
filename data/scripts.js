@@ -6954,7 +6954,7 @@ exports.BattleScripts = {
 			'spiritomb', 'trevenant', 'yamask', 'absol', 'arceusdark', 'bisharp', 'cacturne', 'carvanha', 'crawdaunt', 'darkrai', 'deino', 'drapion', 'greninja', 'honchkrow', 'hoopaunbound', 'houndoom', 'houndour', 'hydreigon', 'inkay', 'krokorok', 'krookodile', 'liepard', 'malamar',
 			'mandibuzz', 'mightyena', 'murkrow', 'nuzleaf', 'pangoro', 'pawniard', 'poochyena', 'purrloin', 'sandile', 'scrafty', 'scraggy', 'sharpedo', 'shiftry', 'skuntank', 'sneasel', 'stunky', 'tyranitar', 'umbreon', 'vullaby', 'weavile', 'yveltal', 'zoroark', 'zorua', 'zweilous',
 			'abra', 'alakazam', 'arceuspsychic', 'baltoy', 'beheeyem', 'claydol', 'cresselia', 'delphox', 'deoxys', 'deoxysattack', 'deoxysdefense', 'deoxysspeed', 'drowzee', 'elgyem', 'espurr', 'girafarig', 'gothita', 'gothitelle', 'gothorita', 'grumpig', 'hypno', 'jynx', 'kadabra',
-			'lunatone', 'meowstic', 'meowsticf', 'mewtwo', 'mimejr', 'mrmime', 'natu', 'sigilyph', 'smoochum', 'solrock', 'swoobat', 'unown', 'woobat', 'xatu', 'arbok', 'ariados', 'beedrill', 'crobat', 'drapion', 'dustox', 'ekans', 'garbodor', 'golbat', 'grimer', 'koffing', 'muk',
+			'lunatone', 'meowstic', 'meowsticf', 'mewtwo', 'mimejr', 'mrmime', 'natu', 'sigilyph', 'smoochum', 'solrock', 'swoobat', 'woobat', 'xatu', 'arbok', 'ariados', 'beedrill', 'crobat', 'drapion', 'dustox', 'ekans', 'garbodor', 'golbat', 'grimer', 'koffing', 'muk',
 			'scolipede', 'seviper', 'skorupi', 'spinarak', 'tentacruel', 'trubbish', 'venipede', 'venomoth', 'venonat', 'weezing', 'whirlipede', 'zubat', 'noibat', 'noivern', 'joltik', 'galvantula']
 			let halloweenPokemon = halloweenPool[Math.floor(Math.random()*halloweenPool.length)];
 			if (pokemon.length === 0) {
