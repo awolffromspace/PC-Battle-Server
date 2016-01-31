@@ -7339,27 +7339,10 @@ exports.BattleScripts = {
 			}
 			if (skip) continue;
 
-			let dice = this.random(8);
-			if (dice < 1) {
-				var lead = 'banette';
-			} else if (dice < 2) {
-				var lead = 'klefki';
-			} else if (dice < 3) {
-				var lead = 'liepard';
-			} else if (dice < 4) {
-				var lead = 'murkrow';
-			} else if (dice < 5) {
-				var lead = 'purrloin';
-			} else if (dice < 6) {
-				var lead = 'sableye';
-			} else if (dice < 7) {
-				var lead = 'thundurus';
-			} else {
-				var lead = 'tornadus';
-			}
-
+			let leadPool = ['banette', 'klefki', 'liepard', 'murkrow', 'purrloin', 'sableye', 'thundurus', 'tornadus']
+			let leadPokemon = leadPool[Math.floor(Math.random()*leadPool.length)];
 			if (pokemon.length === 0) {
-				template = lead;
+				template = leadPokemon;
 			}
 
 			let set = this.randomSet(template, pokemon.length, teamDetails);
