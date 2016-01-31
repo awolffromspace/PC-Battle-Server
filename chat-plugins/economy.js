@@ -7,7 +7,7 @@ var shop = [
 	['Poof', 'Buy a poof message to be added into your pool of possible poofs. Poofs are custom leave messages that are used via "/poof".', 20],
 	['Adjustment', 'Buy a one-time change for either your avatar or your join phrase. Don\'t buy this if you haven\'t bought an avatar or join phrase before. If you have a custom avatar and would like to apply it to other usernames, contact the admin wolf and don\'t buy this.', 30],
 	['Title', 'Buy a user title for your profile. It can be seen via "/profile username". Check "/profile wolf" for an example.', 30],
-	['BlackStar', 'Buy a \u2605 that goes in front of your name and puts you at the top of the user list. It lasts for four weeks.', 50],
+	['BlackStar', 'Buy a \u2605 that goes in front of your name and puts you at the top of the user list. It lasts for four weeks.', 40],
 	['Avatar', 'Buy a custom avatar to be applied to your name. You supply the image. Images larger than 80px by 80px don\'t show correctly in battles.', 60],
 	['JoinPhrase', 'Buy a join phrase that the bot submits in the chat every time you join the Lobby.', 60],
 ];
@@ -520,7 +520,7 @@ exports.commands = {
 					if (!amount) amount = 0;
 					Database.write('bp', amount + winnings, winner.username, function (err, total) {
 						if (err) throw err;
-						var msg = "<center><h2>Lottery!</h2><h4><font color='#aa5544'><b>" + winner.username + "</b></font> has won the lottery with the ticket id of " + winner.ticket + "! This user has gained " + winnings + currencyName(winnings) + " and now has a total of " + total + currencyName(total) + ".</h4></center>";
+						var msg = "<center><h2>Lottery!</h2><h4><font color='#cc3b1f'><b>" + winner.username + "</b></font> has won the lottery with the ticket id of " + winner.ticket + "! This user has gained " + winnings + currencyName(winnings) + " and now has a total of " + total + currencyName(total) + ".</h4></center>";
 						_this.parse('/declare ' + msg);
 						room.update();
 						Database.set('pot', 5, function (err) {
