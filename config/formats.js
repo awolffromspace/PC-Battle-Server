@@ -2904,7 +2904,6 @@ exports.Formats = [
 				move.onTryHit = function (target, source) {
 					this.attrLastMove('[still]');
 					this.add('-anim', source, "Seismic Toss", target);
-					target.ignore['Ability'] = true;
 				};
 				move.accuracy = true;
 				move.ignoreImmunity = true;
