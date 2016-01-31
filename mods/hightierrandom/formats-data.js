@@ -14,7 +14,8 @@ exports.BattleFormatsData = {
 		requiredItem: "Pidgeotite",
 	},
 	gengarmega: {
-		tier: "Uber",
+		inherit: true,
+		requiredItem: false,
 	},
 	pinsir: {
 		inherit: true,
@@ -61,13 +62,15 @@ exports.BattleFormatsData = {
 		requiredItem: "Absolite",
 	},
 	salamencemega: {
-		tier: "Uber",
+		inherit: true,
+		requiredItem: false,
 	},
 	lopunny: {
 		inherit: true,
 		requiredItem: "Lopunnite",
 	},
 	lucariomega: {
-		tier: "Uber",
+		inherit: true,
+		requiredItem: false,
 	},
 };
