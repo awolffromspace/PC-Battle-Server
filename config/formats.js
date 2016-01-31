@@ -4221,6 +4221,13 @@ exports.Formats = [
 		banlist: ['Uber', 'Shadow Tag', 'Soul Dew', 'Pikachu-Cosplay', 'Pikachu-Rock-Star', 'Pikachu-Belle', 'Pikachu-Pop-Star', 'Pikachu-PhD', 'Pikachu-Libre', 'Hoopa', 'Hoopa-Unbound', 'Volcanion', 'Altarianite', 'Audinite', 'Beedrillite', 'Cameruptite', 'Diancite', 'Galladite', 'Glalitite', 'Latiasite', 'Latiosite', 'Lopunnite', 'Metagrossite', 'Pidgeotite', 'Sablenite', 'Sceptilite', 'Sharpedonite', 'Slowbronite', 'Steelixite', 'Swamperite'],
 	},
 	{
+		name: "OU (no Fairies)",
+		section: "ORAS Singles",
+
+		ruleset: ['Pokemon', 'Standard', 'Team Preview', 'Swagger Clause', 'Baton Pass Clause'],
+		banlist: ['Uber', 'Shadow Tag', 'Soul Dew', 'Arceus-Fairy', 'Aromatisse', 'Azumarill', 'Azurill', 'Carbink', 'Clefable', 'Clefairy', 'Cleffa', 'Cottonee', 'Dedenne', 'Diancie', 'Flabebe', 'Floette', 'Florges', 'Gardevoir', 'Granbull', 'Igglybuff', 'Jigglypuff', 'Kirlia', 'Klefki', 'Marill', 'Mawile', 'Mime Jr.', 'Mr. Mime', 'Ralts', 'Slurpuff', 'Snubbull', 'Spritzee', 'Swirlix', 'Sylveon', 'Togekiss', 'Togepi', 'Togetic', 'Whimsicott', 'Wigglytuff', 'Altarianite', 'Audinite', 'Aromatic Mist', 'Baby-Doll Eyes', 'Charm', 'Crafty Shield', 'Dazzling Gleam', 'Disarming Voice', 'Draining Kiss', 'Fairy Lock', 'Fairy Wind', 'Flower Shield', 'Geomancy', 'Light of Ruin', 'Misty Terrain', 'Moonblast', 'Moonlight', 'Play Rough', 'Sweet Kiss'],
+	},
+	{
 		name: "Inverse OU",
 		section: "Other Metagames",
 
