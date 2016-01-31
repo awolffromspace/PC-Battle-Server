@@ -3,19 +3,19 @@
 exports.BattleFormatsData = {
 	gengar: {
 		inherit: true,
-		requiredItem: "Gengarite"
+		requiredItem: "Gengarite",
 	},
 	kangaskhan: {
 		inherit: true,
-		requiredItem: "Kangaskhanite"
+		requiredItem: "Kangaskhanite",
 	},
 	mawile: {
 		inherit: true,
-		requiredItem: "Mawilite"
+		requiredItem: "Mawilite",
 	},
 	salamence: {
 		inherit: true,
-		requiredItem: "Salamencite"
+		requiredItem: "Salamencite",
 	},
 	rayquazamega: {
 		inherit: true,
@@ -23,6 +23,6 @@ exports.BattleFormatsData = {
 	},
 	lucario: {
 		inherit: true,
-		requiredItem: "Lucarionite"
+		requiredItem: "Lucarionite",
 	}
 };
