@@ -6725,6 +6725,10 @@ exports.BattleScripts = {
 
 			set.moves = ['Metronome'];
 
+			if (['Assault Vest'].indexOf(set.item) > -1) {
+				set.item = 'Leftovers';
+			}
+
 			// Illusion shouldn't be the last Pokemon of the team
 			if (set.ability === 'Illusion' && pokemonLeft > 4) continue;
 
