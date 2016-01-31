@@ -272,13 +272,6 @@ exports.Formats = [
 		},
 	},
 	{
-		name: "Orb Random",
-		section: "Random Battles (aka Randbats)",
-
-		team: 'randomOrb',
-		ruleset: ['Random (no PotD)'],
-	},
-	{
 		name: "Hoenn Random",
 		section: "Random Battles (aka Randbats)",
 
@@ -297,6 +290,33 @@ exports.Formats = [
 		section: "Random Battles (aka Randbats)",
 
 		team: 'randomSmashBros',
+		ruleset: ['Random (no PotD)'],
+	},
+	{
+		name: "Orb Random",
+		section: "Random Battles (aka Randbats)",
+
+		team: 'randomOrb',
+		ruleset: ['Random (no PotD)'],
+	},
+	{
+		name: "Metronome 3v3 Random",
+		section: "Random Battles (aka Randbats)",
+
+		teamLength: {
+			validate: [3, 6],
+			battle: 3
+		},
+		mod: 'metronomerandom',
+		team: 'randomMetronome',
+		ruleset: ['Random (no PotD)'],
+	},
+	{
+		name: "Metronome 6v6 Random",
+		section: "Random Battles (aka Randbats)",
+
+		mod: 'metronomerandom',
+		team: 'randomMetronome',
 		ruleset: ['Random (no PotD)'],
 	},
 	{
@@ -3427,26 +3447,6 @@ exports.Formats = [
 				};
 			}
 		},
-	},
-	{
-		name: "Metronome 3v3 Random",
-		section: "Random Battles (aka Randbats)",
-
-		teamLength: {
-			validate: [3, 6],
-			battle: 3
-		},
-		mod: 'metronomerandom',
-		team: 'randomMetronome',
-		ruleset: ['Random (no PotD)'],
-	},
-	{
-		name: "Metronome 6v6 Random",
-		section: "Random Battles (aka Randbats)",
-
-		mod: 'metronomerandom',
-		team: 'randomMetronome',
-		ruleset: ['Random (no PotD)'],
 	},
 	{
 		name: "Doubles Random",
