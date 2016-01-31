@@ -12,8 +12,9 @@ exports.BattleFormatsData = {
 		tier: "UU",
 	},
 	sableyemega: {
-		inherit: true,
-		requiredItem: false,
+		randomBattleMoves: ["swagger","foulplay","substitute","recover"],
+		requiredItem: "Leftovers",
+		tier: "UU",
 	},
 	banette: {
 		randomBattleMoves: ["swagger","foulplay","substitute","thunderwave"],
