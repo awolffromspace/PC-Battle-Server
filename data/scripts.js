@@ -3795,7 +3795,7 @@ exports.BattleScripts = {
 		let pokemonLeft = 0;
 		let pokemon = [];
 
-		let pokemonPool = ['altaria', 'azumarill', 'bisharp', 'breloom', 'celebi', 'chansey', 'charizard', 'clefable', 'conkeldurr', 'diancie', 'dragonite', 'excadrill', 'ferrothorn', 'gallade', 'garchomp', 'gardevoir', 'gengar', 'gliscor', 'gothitelle', 'gyarados', 'heatraa',
+		let pokemonPool = ['altaria', 'azumarill', 'bisharp', 'breloom', 'celebi', 'chansey', 'charizard', 'clefable', 'conkeldurr', 'diancie', 'dragonite', 'excadrill', 'ferrothorn', 'gallade', 'garchomp', 'gardevoir', 'gengar', 'gliscor', 'gothitelle', 'gyarados', 'heatran',
 		'jirachi', 'keldeo', 'kyuremblack', 'landorustherian', 'latias', 'latios', 'lopunny', 'magnezone', 'mamoswine', 'manaphy', 'mandibuzz', 'manectric', 'metagross', 'mew', 'raikou', 'rotomwash', 'sableye', 'scizor', 'skarmory', 'slowbro', 'starmie', 'sylveon', 'talonflame',
 		'thundurus', 'tyranitar', 'venusaur', 'zapdos', 'crawdaunt', 'diggersby', 'hawlucha', 'klefki', 'medicham', 'scolipede', 'serperior', 'smeargle', 'staraptor', 'terrakion', 'thundurustherian', 'togekiss', 'tornadustherian', 'venomoth', 'victini', 'volcarona', 'weavile',
 		'zygarde', 'absol', 'aerodactyl', 'aggron', 'alakazam', 'ampharos', 'arcanine', 'azelf', 'beedrill', 'blastoise', 'blissey', 'chandelure', 'chesnaught', 'cloyster', 'crobat', 'darmanitan', 'donphan', 'empoleon', 'entei', 'espeon', 'florges', 'forretress', 'galvantula',
