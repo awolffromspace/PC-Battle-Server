@@ -3957,7 +3957,8 @@ exports.BattleScripts = {
 		'probopass', 'purugly', 'pyroar', 'quagsire', 'quilladin', 'qwilfish', 'raichu', 'rampardos', 'rapidash', 'raticate', 'regice', 'regigigas', 'regirock', 'relicanth', 'rhydon', 'roselia', 'rotom', 'rotomfan', 'rotomfrost', 'samurott', 'sandslash', 'sawk', 'sawsbuck',
 		'scyther', 'seadra', 'seaking', 'seismitoad', 'seviper', 'shedinja', 'shelgon', 'simipour', 'simisage', 'simisear', 'slaking', 'sliggoo', 'sneasel', 'solrock', 'spinda', 'stantler', 'steelix', 'stoutland', 'stunfisk', 'sudowoodo', 'sunflora', 'swalot', 'swanna',
 		'swellow', 'swoobat', 'tangela', 'tauros', 'throh', 'togetic', 'torkoal', 'torterra', 'tropius', 'typhlosion', 'unfezant', 'unown', 'ursaring', 'uxie', 'vanilluxe', 'vespiquen', 'victreebel', 'vigoroth', 'vileplume', 'virizion', 'vivillon', 'volbeat', 'wailord',
-		'walrein', 'watchog', 'weezing', 'whiscash', 'wigglytuff', 'wobbuffet', 'wormadam', 'wormadamsandy', 'wormadamtrash', 'xatu', 'zangoose', 'zebstrika', 'scrafty', 'gallade', 'flygon', 'pawniard', 'abomasnow', 'slowking', 'gothitelle'];
+		'walrein', 'watchog', 'weezing', 'whiscash', 'wigglytuff', 'wobbuffet', 'wormadam', 'wormadamsandy', 'wormadamtrash', 'xatu', 'zangoose', 'zebstrika', 'scrafty', 'gallade', 'flygon', 'pawniard', 'abomasnow', 'slowking', 'gothitelle', 'lopunny', 'altaria', 'ampharos',
+		'absol', 'aggron', 'blastoise', 'sceptile', 'aerodactyl', 'medicham', 'beedrill', 'sharpedo', 'pinsir', 'manectric', 'diancie', 'charizard'];
 
 		let typeCount = {};
 		let typeComboCount = {};
