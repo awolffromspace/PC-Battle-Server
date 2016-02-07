@@ -690,8 +690,6 @@ exports.grouplist = [
 		id: "battleplayer",
 		name: "Battle Player",
 		inherit: ' ',
-		alts: 's',
-		broadcast: true,
 		roomvoice: true,
 		modchat: true,
 		roomonly: true,
