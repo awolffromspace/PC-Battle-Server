@@ -1268,6 +1268,9 @@ exports.commands = {
 		if (targetUser && targetUser.locked && targetUser.locked.charAt(0) === '#') {
 			reason = ' (' + targetUser.locked + ')';
 		}
+		if (targetUser && targetUser.nameLocked && targetUser.nameLocked.charAt(0) === '#') {
+			reason = ' (' + targetUser.nameLocked + ')';
+		}
 
 		let unlocked = Users.unlock(target);
 		let nameUnlocked = Users.nameUnlock(target);
