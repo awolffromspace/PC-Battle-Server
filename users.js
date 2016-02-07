@@ -1049,6 +1049,7 @@ User = (function () {
 		if (this.locked === '#dnsbl' && !oldUser.locked) this.locked = false;
 		if (!this.locked && oldUser.locked === '#dnsbl') oldUser.locked = false;
 		if (oldUser.locked) this.locked = oldUser.locked;
+		if (oldUser.nameLocked) this.nameLocked = oldUser.nameLocked;
 		if (oldUser.autoconfirmed) this.autoconfirmed = oldUser.autoconfirmed;
 
 		for (let i = 0; i < oldUser.connections.length; i++) {
