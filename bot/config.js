@@ -123,7 +123,7 @@ exports.permissionExceptions = {
 	'searchbattle': '~',
 	'tournament': '@',
 	'games': '+',
-	'jointour': '~'
+	'jointour': '+'
 };
 
 exports.botguide = "http://www.pokecommunity.com/showthread.php?t=289012#botguide";
