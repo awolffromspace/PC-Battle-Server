@@ -9,13 +9,10 @@ exports.Formats = [
 	///////////////////////////////////////////////////////////////////
 
 	{
-		name: "[LotW 12] 1v1 Random",
+		name: "[LotW 13] Gen 5 Random",
 		section: "ORAS Singles",
 
-		teamLength: {
-			validate: [1, 6],
-			battle: 1
-		},
+		mod: 'gen5',
 		team: 'random',
 		ruleset: ['Random (no PotD)'],
 		onBegin: function() {
