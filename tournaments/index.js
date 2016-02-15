@@ -1027,6 +1027,12 @@ CommandParser.commands.tournament = function (paramString, room, user) {
 				return this.errorReply("Tournaments are disabled in this room (" + room.id + ").");
 			}
 		}
+		if (room.id == 'trl') {
+			var format = Tools.getFormat(params[0]);
+			if (!(/random/i).test(format['team'])) {
+				return this.sendReply("Only random battle tournaments may be created in this room. ");
+			}
+		}
 		if (params.length < 2) {
 			return this.sendReply("Usage: " + cmd + " <format>, <type> [, <comma-separated arguments>]");
 		}
