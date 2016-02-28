@@ -2017,7 +2017,7 @@ exports.commands = {
 			"- Rukario (PPN)<br />" +
 			"- Sheep (Cirnysheep)<br />" +
 			"- Sylphiel<br />" +
-			"- wolf (wofl)<br />" +
+			"- wolf (wofl)<br /><br />" +
 			"<b>@ Moderators</b><br />" +
 			"- Achromatic (Cap'n Chromatic)<br />" +
 			"- Archy<br />" +
