@@ -266,7 +266,8 @@ exports.BattleAbilities = {
 		num: 66,
 	},
 	"bulletproof": {
-		shortDesc: "This Pokemon is immune to bullet moves.",
+		desc: "This Pokemon is immune to ballistic moves. Ballistic moves include Bullet Seed, Octazooka, Barrage, Rock Wrecker, Zap Cannon, Acid Spray, Aura Sphere, Focus Blast, and all moves with Ball or Bomb in their name.",
+		shortDesc: "Makes user immune to ballistic moves (Shadow Ball, Sludge Bomb, Focus Blast, etc).",
 		onTryHit: function (pokemon, target, move) {
 			if (move.flags['bullet']) {
 				this.add('-immune', pokemon, '[msg]', '[from] ability: Bulletproof');
@@ -338,7 +339,6 @@ exports.BattleAbilities = {
 			if (target.isActive && move.effectType === 'Move' && move.category !== 'Status' && type !== '???' && !target.hasType(type)) {
 				if (!target.setType(type)) return false;
 				this.add('-start', target, 'typechange', type, '[from] Color Change');
-				target.update();
 			}
 		},
 		id: "colorchange",
@@ -474,9 +474,6 @@ exports.BattleAbilities = {
 			if (pokemon.hp <= pokemon.maxhp / 2) {
 				return this.chainModify(0.5);
 			}
-		},
-		onResidual: function (pokemon) {
-			pokemon.update();
 		},
 		id: "defeatist",
 		name: "Defeatist",
@@ -654,7 +651,7 @@ exports.BattleAbilities = {
 		desc: "30% chance a Pokemon making contact with this Pokemon will be poisoned, paralyzed, or fall asleep.",
 		shortDesc: "30% chance of poison/paralysis/sleep on others making contact with this Pokemon.",
 		onAfterDamage: function (damage, target, source, move) {
-			if (move && move.flags['contact'] && !source.status && source.runImmunity('powder')) {
+			if (move && move.flags['contact'] && !source.status && source.runStatusImmunity('powder')) {
 				let r = this.random(100);
 				if (r < 11) {
 					source.setStatus('slp', target);
@@ -705,7 +702,7 @@ exports.BattleAbilities = {
 		onAfterDamage: function (damage, target, source, move) {
 			if (move && move.flags['contact']) {
 				if (this.random(10) < 3) {
-					source.trySetStatus('brn', target, move);
+					source.trySetStatus('brn', target);
 				}
 			}
 		},
@@ -1350,9 +1347,7 @@ exports.BattleAbilities = {
 	"levitate": {
 		desc: "This Pokemon is immune to Ground. Gravity, Ingrain, Smack Down, Thousand Arrows, and Iron Ball nullify the immunity.",
 		shortDesc: "This Pokemon is immune to Ground; Gravity/Ingrain/Smack Down/Iron Ball nullify it.",
-		onImmunity: function (type) {
-			if (type === 'Ground') return false;
-		},
+		// airborneness implemented in battle-engine.js:BattlePokemon#isGrounded
 		id: "levitate",
 		name: "Levitate",
 		rating: 3.5,
@@ -1892,9 +1887,16 @@ exports.BattleAbilities = {
 			onBasePowerPriority: 8,
 			onBasePower: function (basePower) {
 				if (this.effectData.hit) {
+					this.effectData.hit++;
 					return this.chainModify(0.5);
 				} else {
-					this.effectData.hit = true;
+					this.effectData.hit = 1;
+				}
+			},
+			onSourceModifySecondaries: function (secondaries, target, source, move) {
+				if (move.id === 'secretpower' && this.effectData.hit < 2) {
+					// hack to prevent accidentally suppressing King's Rock/Razor Fang
+					return secondaries.filter(effect => effect.volatileStatus === 'flinch');
 				}
 			},
 		},
@@ -1923,7 +1925,6 @@ exports.BattleAbilities = {
 			randomTarget.lastItem = '';
 			let item = pokemon.getItem();
 			this.add('-item', pokemon, item, '[from] Pickup');
-			if (item.isBerry) pokemon.update();
 		},
 		id: "pickup",
 		name: "Pickup",
@@ -2015,7 +2016,7 @@ exports.BattleAbilities = {
 		onAfterDamage: function (damage, target, source, move) {
 			if (move && move.flags['contact']) {
 				if (this.random(10) < 3) {
-					source.trySetStatus('psn', target, move);
+					source.trySetStatus('psn', target);
 				}
 			}
 		},
@@ -2448,9 +2449,7 @@ exports.BattleAbilities = {
 		shortDesc: "This Pokemon is not affected by the secondary effect of another Pokemon's attack.",
 		onModifySecondaries: function (secondaries) {
 			this.debug('Shield Dust prevent secondary');
-			return secondaries.filter(function (effect) {
-				return !!effect.self;
-			});
+			return secondaries.filter(effect => !!effect.self);
 		},
 		id: "shielddust",
 		name: "Shield Dust",
@@ -2646,10 +2645,10 @@ exports.BattleAbilities = {
 	},
 	"static": {
 		shortDesc: "30% chance a Pokemon making contact with this Pokemon will be paralyzed.",
-		onAfterDamage: function (damage, target, source, effect) {
-			if (effect && effect.flags['contact']) {
+		onAfterDamage: function (damage, target, source, move) {
+			if (move && move.flags['contact']) {
 				if (this.random(10) < 3) {
-					source.trySetStatus('par', target, effect);
+					source.trySetStatus('par', target);
 				}
 			}
 		},
@@ -2868,7 +2867,8 @@ exports.BattleAbilities = {
 			if (!source || source === target) return;
 			if (effect && effect.id === 'toxicspikes') return;
 			if (status.id === 'slp' || status.id === 'frz') return;
-			source.trySetStatus(status, target);
+			if (source.trySetStatus(status, target)) return;
+			this.add('-immune', source, '[msg]', '[from] ability: Synchronize', '[of] ' + target);
 		},
 		id: "synchronize",
 		name: "Synchronize",
@@ -3316,9 +3316,10 @@ exports.BattleAbilities = {
 				return false;
 			}
 		},
-		onImmunity: function (type, target) {
-			if (type === 'Rock' && !target.activeTurns) {
-				return false;
+		onTryHit: function (target, source, move) {
+			if (move.type === 'Rock' && !target.activeTurns) {
+				this.add('-immune', target, '[msg]', '[from] ability: Mountaineer');
+				return null;
 			}
 		},
 		id: "mountaineer",

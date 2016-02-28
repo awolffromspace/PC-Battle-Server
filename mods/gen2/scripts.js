@@ -44,8 +44,10 @@ exports.BattleScripts = {
 			stat = this.battle.clampIntRange(stat, 1, 999);
 
 			// Screens
-			if ((this.side.sideConditions['reflect'] && statName === 'def') || (this.side.sideConditions['lightscreen'] && statName === 'spd')) {
-				stat *= 2;
+			if (!unboosted) {
+				if ((this.side.sideConditions['reflect'] && statName === 'def') || (this.side.sideConditions['lightscreen'] && statName === 'spd')) {
+					stat *= 2;
+				}
 			}
 
 			// Treat here the items.
@@ -381,8 +383,6 @@ exports.BattleScripts = {
 			// Level is doubled for damage calculation.
 			level *= 2;
 			if (!suppressMessages) this.add('-crit', target);
-			// If the attacker is burned, stat level modifications are always ignored. This includes screens.
-			if (attacker.status === 'brn') unboosted = true;
 			// Stat level modifications are ignored if they are neutral to or favour the defender.
 			// Reflect and Light Screen defensive boosts are only ignored if stat level modifications were also ignored as a result of that.
 			if (attacker.boosts[atkType] <= defender.boosts[defType]) {
@@ -485,7 +485,7 @@ exports.BattleScripts = {
 		if (damage !== 0) damage = this.clampIntRange(damage, 1);
 
 		if (effect.id !== 'struggle-recoil') { // Struggle recoil is not affected by effects
-			if (effect.effectType === 'Weather' && !target.runImmunity(effect.id)) {
+			if (effect.effectType === 'Weather' && !target.runStatusImmunity(effect.id)) {
 				this.debug('weather immunity');
 				return 0;
 			}

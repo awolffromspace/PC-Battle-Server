@@ -23,14 +23,14 @@ if (!process.send) {
 	let callbacks = {};
 	let callbackData = {};
 
-	let child = require('child_process').fork('verifier.js', {cwd: __dirname});
+	let child = exports.child = require('child_process').fork('verifier.js', {cwd: __dirname});
 	exports.verify = function (data, signature, callback) {
 		let localGuid = guid++;
 		callbacks[localGuid] = callback;
 		callbackData[localGuid] = data;
 		child.send({data: data, sig: signature, guid: localGuid});
 	};
-	child.on('message', function (response) {
+	child.on('message', response => {
 		if (callbacks[response.guid]) {
 			callbacks[response.guid](response.success, callbackData[response.guid]);
 			delete callbacks[response.guid];
@@ -46,7 +46,7 @@ if (!process.send) {
 	let keyalgo = Config.loginserverkeyalgo;
 	let pkey = Config.loginserverpublickey;
 
-	process.on('message', function (message) {
+	process.on('message', message => {
 		let verifier = crypto.createVerify(keyalgo);
 		verifier.update(message.data);
 		let success = false;
@@ -59,9 +59,9 @@ if (!process.send) {
 		});
 	});
 
-	process.on('disconnect', function () {
+	process.on('disconnect', () => {
 		process.exit();
 	});
 
-	require('./repl.js').start('verifier', function (cmd) { return eval(cmd); });
+	require('./repl.js').start('verifier', cmd => eval(cmd));
 }

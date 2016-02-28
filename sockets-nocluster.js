@@ -1,5 +1,5 @@
 /**
- * Connections
+ * Connections - nocluster edition
  * Pokemon Showdown - http://pokemonshowdown.com/
  *
  * Abstraction layer for multi-process SockJS connections.
@@ -8,23 +8,25 @@
  * browsers, the networking processes, and users.js in the
  * main process.
  *
+ * The nocluster edition uses child_process instead of cluster.
+ * The main drawback is that it can only spawn one process, but
+ * one process should be enough for everyone. The main advantage
+ * is unknown, but I'm hoping it will be more stable.
+ *
  * @license MIT license
  */
 
 'use strict';
 
-const cluster = require('cluster');
 global.Config = require('./config/config');
 
-if (cluster.isMaster) {
-	cluster.setupMaster({
-		exec: require('path').resolve(__dirname, 'sockets.js'),
-	});
-
+if (!process.send) {
 	let workers = exports.workers = {};
+	let nextId = 0;
 
 	let spawnWorker = exports.spawnWorker = function () {
-		let worker = cluster.fork({PSPORT: Config.port, PSBINDADDR: Config.bindaddress || '', PSNOSSL: Config.ssl ? 0 : 1});
+		let worker = require('child_process').fork('sockets-nocluster.js', {PSPORT: Config.port, PSBINDADDR: Config.bindaddress || '', PSNOSSL: Config.ssl ? 0 : 1});
+		if (!worker.id) worker.id = '' + (++nextId);
 		let id = worker.id;
 		workers[id] = worker;
 		worker.on('message', data => {
@@ -57,29 +59,29 @@ if (cluster.isMaster) {
 			// unhandled
 			}
 		});
-	};
 
-	cluster.on('disconnect', worker => {
-		// worker crashed, try our best to clean up
-		require('./crashlogger.js')(new Error("Worker " + worker.id + " abruptly died"), "The main process");
+		worker.on('disconnect', () => {
+			// worker crashed, try our best to clean up
+			require('./crashlogger.js')(new Error("Worker " + worker.id + " abruptly died"), "The main process");
 
-		// this could get called during cleanup; prevent it from crashing
-		worker.send = () => {};
+			// this could get called during cleanup; prevent it from crashing
+			worker.send = () => {};
 
-		let count = 0;
-		Users.connections.forEach(connection => {
-			if (connection.worker === worker) {
-				Users.socketDisconnect(worker, worker.id, connection.socketid);
-				count++;
-			}
+			let count = 0;
+			Users.connections.forEach(connection => {
+				if (connection.worker === worker) {
+					Users.socketDisconnect(worker, worker.id, connection.socketid);
+					count++;
+				}
+			});
+			console.error("" + count + " connections were lost.");
+
+			// don't delete the worker, so we can investigate it if necessary.
+
+			// attempt to recover
+			spawnWorker();
 		});
-		console.error("" + count + " connections were lost.");
-
-		// don't delete the worker, so we can investigate it if necessary.
-
-		// attempt to recover
-		spawnWorker();
-	});
+	};
 
 	exports.listen = function (port, bindAddress, workerCount) {
 		if (port !== undefined && !isNaN(port)) {
@@ -100,9 +102,7 @@ if (cluster.isMaster) {
 		if (workerCount === undefined) {
 			workerCount = (Config.workers !== undefined ? Config.workers : 1);
 		}
-		for (let i = 0; i < workerCount; i++) {
-			spawnWorker();
-		}
+		spawnWorker();
 	};
 
 	exports.killWorker = function (worker) {
@@ -187,7 +187,7 @@ if (cluster.isMaster) {
 	if (Config.crashguard) {
 		// graceful crash
 		process.on('uncaughtException', err => {
-			require('./crashlogger.js')(err, 'Socket process ' + cluster.worker.id + ' (' + process.pid + ')', true);
+			require('./crashlogger.js')(err, 'Socket process (' + process.pid + ')', true);
 		});
 	}
 
@@ -480,15 +480,15 @@ if (cluster.isMaster) {
 	server.installHandlers(app, {});
 	if (!Config.bindaddress) Config.bindaddress = '0.0.0.0';
 	app.listen(Config.port, Config.bindaddress);
-	console.log('Worker ' + cluster.worker.id + ' now listening on ' + Config.bindaddress + ':' + Config.port);
+	console.log('Worker now listening on ' + Config.bindaddress + ':' + Config.port);
 
 	if (appssl) {
 		server.installHandlers(appssl, {});
 		appssl.listen(Config.ssl.port, Config.bindaddress);
-		console.log('Worker ' + cluster.worker.id + ' now listening for SSL on port ' + Config.ssl.port);
+		console.log('Worker now listening for SSL on port ' + Config.ssl.port);
 	}
 
 	console.log('Test your server at http://' + (Config.bindaddress === '0.0.0.0' ? 'localhost' : Config.bindaddress) + ':' + Config.port);
 
-	require('./repl.js').start('sockets-', cluster.worker.id + '-' + process.pid, cmd => eval(cmd));
+	require('./repl.js').start('sockets-', 'nocluster-' + process.pid, cmd => eval(cmd));
 }

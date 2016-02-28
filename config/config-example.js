@@ -685,6 +685,7 @@ exports.grouplist = [
 		roomsubdriver: true,
 		tournamentsmanagement: true,
 		rmall: true,
+		gamemanagement: true,
 	},
 	{
 		symbol: '-',
@@ -751,6 +752,8 @@ exports.grouplist = [
 		poll: true,
 		joinbattle: true,
 		picklottery: true,
+		game: true,
+		minigame: true,
 	},
 	{
 		symbol: '\u2605',

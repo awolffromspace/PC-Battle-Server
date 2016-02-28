@@ -8,7 +8,7 @@
 
 function toArrayOfArrays(map) {
 	let ret = [];
-	map.forEach(function (value, key) {
+	map.forEach((value, key) => {
 		ret.push([value, key]);
 	});
 	return ret;
@@ -161,7 +161,7 @@ let commands = {
 			let prenominations = room.chatRoomData.prenominations;
 			if (!prenominations || !prenominations.length) return this.sendReplyBox("No prenominations have been submitted yet.");
 
-			prenominations = prenominations.sort(function (a, b) {
+			prenominations = prenominations.sort((a, b) => {
 				if (a[1] > b[1]) return 1;
 				if (a[1] < b[1]) return -1;
 				return 0;
@@ -178,7 +178,7 @@ let commands = {
 		if (!this.canBroadcast()) return false;
 		if (!artistOfTheDay.nominations.size) return this.sendReplyBox("No nominations have been submitted yet.");
 
-		let nominations = toArrayOfArrays(artistOfTheDay.nominations).sort(function (a, b) {return a[0].localeCompare(b[0]);});
+		let nominations = toArrayOfArrays(artistOfTheDay.nominations).sort((a, b) => a[0].localeCompare(b[0]));
 
 		buffer += "Current nominations (" + nominations.length + "):";
 		for (let i = 0; i < nominations.length; i++) {
@@ -240,7 +240,7 @@ let commands = {
 				"\"" + room.chatRoomData.artistQuoteOfTheDay + "\""
 			);
 		}
-		if (!this.can('ban', null, room)) return false;
+		if (!this.can('mute', null, room)) return false;
 		if (target === 'off' || target === 'disable' || target === 'reset') {
 			if (!room.chatRoomData.artistQuoteOfTheDay) return this.sendReply("The Artist Quote of the Day has already been reset.");
 			delete room.chatRoomData.artistQuoteOfTheDay;

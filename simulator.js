@@ -15,35 +15,41 @@
 
 let battles = Object.create(null);
 
-let SimulatorProcess = (function () {
-	function SimulatorProcess() {
+class SimulatorProcess {
+	constructor() {
+		this.load = 0;
+		this.active = true;
+
 		this.process = require('child_process').fork('battle-engine.js', {cwd: __dirname});
-		this.process.on('message', function (message) {
+		this.process.on('message', message => {
 			let lines = message.split('\n');
 			let battle = battles[lines[0]];
 			if (battle) {
 				battle.receive(lines);
 			}
 		});
-		this.send = this.process.send.bind(this.process);
 	}
-	SimulatorProcess.prototype.load = 0;
-	SimulatorProcess.prototype.active = true;
-	SimulatorProcess.processes = [];
-	SimulatorProcess.spawn = function (num) {
-		if (!num) num = Config.simulatorprocesses || 1;
+	send(data) {
+		this.process.send(data);
+	}
+	static init(num) {
+		this.processes = [];
+		if (num === undefined) num = Config.simulatorprocesses || 1;
+		this.spawn(num);
+	}
+	static spawn(num) {
 		for (let i = this.processes.length; i < num; ++i) {
 			this.processes.push(new SimulatorProcess());
 		}
-	};
-	SimulatorProcess.respawn = function () {
-		this.processes.splice(0).forEach(function (process) {
+	}
+	static reinit() {
+		for (let process of this.processes) {
 			process.active = false;
 			if (!process.load) process.process.disconnect();
-		});
-		this.spawn();
-	};
-	SimulatorProcess.acquire = function () {
+		}
+		this.init();
+	}
+	static acquire() {
 		let process = this.processes[0];
 		for (let i = 1; i < this.processes.length; ++i) {
 			if (this.processes[i].load < process.load) {
@@ -52,23 +58,22 @@ let SimulatorProcess = (function () {
 		}
 		process.load++;
 		return process;
-	};
-	SimulatorProcess.release = function (process) {
+	}
+	static release(process) {
 		process.load--;
 		if (!process.load && !process.active) {
 			process.process.disconnect();
 		}
-	};
-	SimulatorProcess.eval = function (code) {
-		this.processes.forEach(function (process) {
+	}
+	static eval(code) {
+		for (let process of this.processes) {
 			process.send('|eval|' + code);
-		});
-	};
-	return SimulatorProcess;
-})();
+		}
+	}
+}
 
 // Create the initial set of simulator processes.
-SimulatorProcess.spawn();
+SimulatorProcess.init();
 
 let slice = Array.prototype.slice;
 
@@ -373,10 +378,8 @@ class Battle {
 		let otherids = ['p2', 'p1'];
 
 		let name = 'Player ' + (side + 1);
-		if (user) {
-			name = user.name;
-		} else if (this.rated) {
-			name = this.rated[ids[side]];
+		if (this[ids[side]]) {
+			name = this[ids[side]].name;
 		}
 
 		this.room.add('|-message|' + name + message);
