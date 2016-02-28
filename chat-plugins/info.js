@@ -2009,24 +2009,22 @@ exports.commands = {
 			"- Anti (Papa Anti)<br />" +
 			"- Ausaudriel (Audy)<br />" +
 			"- Castform (Chase, Chaseform, Lаnа Del Phox, Michonne, Weаther Ball)<br />" +
-			"- Dragon (bellossom, Dгagon Dance, Kou Noodles, Lailah-tan)<br />" +
+			"- Dragon (bellossom, Dгagon Dance, Erika Senpai, Kou Noodles, Lailah-tan, LGDArm, Love Clinic, Rei)<br />" +
 			"- Hiroshi Sotomura<br />" +
-			"- Lance (Livewire)<br />" +
+			"- Livewire<br />" +
 			"- Nolafus<br />" +
+			"- Razor Leaf (unkempt harold)<br />" +
 			"- Rukario (PPN)<br />" +
 			"- Sheep (Cirnysheep)<br />" +
-			"- shenanigans (razor leaf, unkempt harold)<br />" +
 			"- Sylphiel<br />" +
 			"- wolf (wofl)<br />" +
 			"<b>@ Moderators</b><br />" +
-			"- Achromatic<br />" +
+			"- Achromatic (Cap'n Chromatic)<br />" +
 			"- Archy<br />" +
 			"- Aurora<br />" +
 			"- Christos<br />" +
 			"- Omicron (Megido, omicorn, omicronhuh)<br />" +
-			"- Peitharchia<br />" +
-			"- Sanguine<br />" +
-			"- Synerjee<br /><br />" +
+			"- Sanguine (Queen Bitch)<br /><br />" +
 			"<a href=\"http://www.pokecommunity.com/showthread.php?t=289012#staff\">Click here for more details.</a>"
 		);
 	},
