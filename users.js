@@ -1296,7 +1296,7 @@ class User {
 		this.autoconfirmed = '';
 		this.updateIdentity();
 	}
-	User.prototype.nameLock = function (userid) {
+	nameLock(userid) {
 		// recurse only once; the root for-loop already locks everything with your IP
 		if (!userid) userid = this.userid;
 
