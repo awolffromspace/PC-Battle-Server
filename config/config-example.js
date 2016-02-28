@@ -737,7 +737,6 @@ exports.grouplist = [
 		bypassblocks: 'u%@&~',
 		receiveauthmessages: true,
 		tournamentsmoderation: true,
-		jeopardy: true,
 	},
 	{
 		symbol: '+',
@@ -752,6 +751,7 @@ exports.grouplist = [
 		poll: true,
 		joinbattle: true,
 		picklottery: true,
+		jeopardy: true,
 		game: true,
 		minigame: true,
 	},
