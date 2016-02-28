@@ -9,10 +9,10 @@ exports.Formats = [
 	///////////////////////////////////////////////////////////////////
 
 	{
-		name: "[LotW 13] Gen 5 Random",
+		name: "[LotW 14] Gen 1 Random",
 		section: "ORAS Singles",
 
-		mod: 'gen5',
+		mod: 'gen1',
 		team: 'random',
 		ruleset: ['Random (no PotD)'],
 		onBegin: function() {
