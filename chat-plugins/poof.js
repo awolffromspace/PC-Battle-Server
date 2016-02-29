@@ -75,6 +75,14 @@ const kingdomoftea = [
 	"retreats to get more tea."
 ];
 
+const kingnovat = [
+	"Its time to fade away:/"
+];
+
+const mlod = [
+	"~I Wanna Shine Sparkle Shine like the Princess Divine~"
+];
+
 const nidokingdra44 = [
 	"is gone, everybody party! \o/"
 ];
@@ -368,6 +376,26 @@ exports.commands = {
 				message = '{{user}} ' + message;
 			}
 			message = message.replace(/{{user}}/g, user.name);
+
+			var colour = '#' + [1, 1, 1].map(function () {
+				var part = Math.floor(Math.random() * 0xaa);
+				return (part < 0x10 ? '0' : '') + part.toString(16);
+			}).join('');
+
+			room.addRaw('<center><strong><font color="' + colour + '">~~ ' + Tools.escapeHTML(message) + ' ~~</font></strong></center>');
+			user.leaveRoom(room);
+		} else if (userid.toUpperCase() === 'KINGNOVAT') {
+			var message = target || kingnovat[Math.floor(Math.random() * kingnovat.length)];
+
+			var colour = '#' + [1, 1, 1].map(function () {
+				var part = Math.floor(Math.random() * 0xaa);
+				return (part < 0x10 ? '0' : '') + part.toString(16);
+			}).join('');
+
+			room.addRaw('<center><strong><font color="' + colour + '">~~ ' + Tools.escapeHTML(message) + ' ~~</font></strong></center>');
+			user.leaveRoom(room);
+		} else if (userid.toUpperCase() === 'MLOD' || userid.toUpperCase() === 'PACHY' || userid.toUpperCase() === 'ELDY' || userid.toUpperCase() === 'ELOD') {
+			var message = target || mlod[Math.floor(Math.random() * mlod.length)];
 
 			var colour = '#' + [1, 1, 1].map(function () {
 				var part = Math.floor(Math.random() * 0xaa);
