@@ -32,7 +32,8 @@ var DEFAULT_MOD_VALUES = {
 	'inapwords': 2,
 	'servers': 2,
 	'youtube': 2,
-	'spoiler': 2
+	'spoiler': 2,
+	'replays': 1
 };
 
 function getValue (key) {
@@ -101,6 +102,16 @@ function isBanned (room, user, noregexp) {
 	return false;
 }
 
+function blacklistUser(user, room) {
+	if (!Settings.settings['autoban'] || !Settings.settings['autoban'][room] || !Settings.settings['autoban'][room][user]) {
+		if (!Settings.settings['autoban']) Settings.settings['autoban'] = {};
+		if (!Settings.settings['autoban'][room]) Settings.settings['autoban'][room] = {};
+		Settings.settings['autoban'][room][user] = 1;
+		return true;
+	}
+	return false;
+}
+
 function isGlobalBanned (user, noregexp) {
 	user = toId(user);
 	if (Settings.settings['gautoban'] && Settings.settings['gautoban'][user]) return true;
@@ -111,6 +122,15 @@ function isGlobalBanned (user, noregexp) {
 				if (regexObj.test(user)) return '#range';
 			} catch (e) {}
 		}
+	}
+	return false;
+}
+
+function blacklistGlobal(user, room) {
+	if (!Settings.settings['gautoban'] || !Settings.settings['gautoban'][user]) {
+		if (!Settings.settings['gautoban']) Settings.settings['gautoban'] = {};
+		Settings.settings['gautoban'][user] = 1;
+		return true;
 	}
 	return false;
 }
@@ -169,7 +189,7 @@ function parseChat (room, time, by, message) {
 	var ban = isBanned(room, by);
 	if (ban) Bot.say(room, '/roomban ' + by + ', ' + trad('ab', room) + ((ban === '#range') ? ' (RegExp)' : ''));
 	var globalBan = isGlobalBanned(by);
-	if (globalBan) Bot.say(room, '/ban ' + by + ', ' + trad('ab', room) + ((ban === '#range') ? ' (RegExp)' : ''));
+	if (globalBan) Bot.say(room, '/ban ' + by + ', ' + trad('ab', room) + ((globalBan === '#range') ? ' (RegExp)' : ''));
 
 	/* Chat Logs */
 
@@ -231,12 +251,13 @@ function parseChat (room, time, by, message) {
 	var stretchMatch = msg.toLowerCase().match(stretchRegExp);
 	var inlineSpam = stretchMatch ? false : msg.toLowerCase().match(repeatRegExp);
 	var isFlooding = (times.length >= getConst('FLOOD_MESSAGE_NUM') && (time - times[times.length - getConst('FLOOD_MESSAGE_NUM')]) < getConst('FLOOD_MESSAGE_TIME') && (time - times[times.length - getConst('FLOOD_MESSAGE_NUM')]) > (getConst('FLOOD_PER_MSG_MIN') * getConst('FLOOD_MESSAGE_NUM')));
+	var addFlood = false;
 
 	/*****************
 	* Spam Mod
 	******************/
 
-	if (modSettings['spam'] !== 0) {
+	if (modSettings['spam'] !== 0 || modSettings['flooding'] !== 0) {
 		if (times.length >= getConst('FLOOD_MESSAGE_NUM') && (time - times[times.length - getConst('FLOOD_MESSAGE_NUM')]) < getConst('FLOOD_MESSAGE_TIME')) {
 			var isSpamming = false;
 			for (var i = chatLog[room].users.length - 2; i > chatLog[room].users.length - 4; i--) {
@@ -246,20 +267,30 @@ function parseChat (room, time, by, message) {
 				}
 			}
 			if (isSpamming) {
-				if (msg.length < 10) {
-					muteMessage = ', ' + trad('automod', room) + ': ' + trad('fs', room);
-					pointVal = getValue('flood-hard');
-				} else if (msg.toLowerCase().indexOf("http://") > -1 || msg.toLowerCase().indexOf("https://") > -1 || msg.toLowerCase().indexOf("www.") > -1) {
-					muteMessage = ', ' + trad('automod', room) + ': ' + trad('sl', room);
-					pointVal = getValue('spam-link');
+				if (msg.toLowerCase().indexOf("http://") > -1 || msg.toLowerCase().indexOf("https://") > -1 || msg.toLowerCase().indexOf("www.") > -1) {
+					if (modSettings['spam'] !== 0) {
+						muteMessage = ', ' + trad('automod', room) + ': ' + trad('sl', room);
+						pointVal = getValue('spam-link');
+					} else if (modSettings['flooding'] !== 0) {
+						pointVal = getValue('flood');
+						muteMessage = ', ' + trad('automod', room) + ': ' + trad('f', room);
+						addFlood = true;
+					}
 				} else {
 					if (msg.length > 70 || capsMatch || msg.toLowerCase().indexOf("**") > -1 || stretchMatch || inlineSpam) {
-						muteMessage = ', ' + trad('automod', room) + ': ' + trad('s', room);
-						pointVal = getValue('spam');
+						if (modSettings['spam'] !== 0) {
+							muteMessage = ', ' + trad('automod', room) + ': ' + trad('s', room);
+							pointVal = getValue('spam');
+						} else if (modSettings['flooding'] !== 0) {
+							pointVal = getValue('flood');
+							muteMessage = ', ' + trad('automod', room) + ': ' + trad('f', room);
+							addFlood = true;
+						}
 					} else {
 						if (modSettings['flooding'] !== 0) {
 							pointVal = getValue('flood');
 							muteMessage = ', ' + trad('automod', room) + ': ' + trad('f', room);
+							addFlood = true;
 						}
 					}
 				}
@@ -271,7 +302,7 @@ function parseChat (room, time, by, message) {
 	if (modSettings['spam'] !== 0 && pointVal < pv) {
 		if (times.length >= 3 && (time - times[times.length - 3]) < getConst('FLOOD_MESSAGE_TIME') && msg === chatData[room][user].lastMsgs[0] && chatData[room][user].lastMsgs[0] === chatData[room][user].lastMsgs[1]) {
 			pointVal = pv;
-			muteMessage = ', ' + trad('automod', room) + ': ' + trad('possible', room);
+			muteMessage = ', ' + trad('automod', room) + ': ' + trad('fs', room);
 			if (msg.toLowerCase().indexOf("http://") > -1 || msg.toLowerCase().indexOf("https://") > -1 || msg.toLowerCase().indexOf("www.") > -1) {
 				muteMessage = ', ' + trad('automod', room) + ': ' + trad('sl', room);
 				pointVal = getValue('spam-link');
@@ -313,12 +344,15 @@ function parseChat (room, time, by, message) {
 
 	pv = getValue("flood");
 	if (modSettings['flooding'] !== 0 && isFlooding) {
-		infractions.push(trad('flood-0', room));
-		totalPointVal += pv;
+		addFlood = true;
 		if (pointVal < pv) {
 			pointVal = pv;
 			muteMessage = ', ' + trad('automod', room) + ': ' + trad('f', room);
 		}
+	}
+	if (addFlood) {
+		infractions.push(trad('flood-0', room));
+		totalPointVal += pv;
 	}
 
 	/*****************************
@@ -342,6 +376,16 @@ function parseChat (room, time, by, message) {
 		if (pointVal < pv) {
 			pointVal = pv;
 			muteMessage = ', ' + trad('automod', room) + ': ' + trad('youtube', room);
+		}
+	}
+
+	pv = getValue("replays");
+	if (modSettings['replays'] !== 0 && (msg.toLowerCase().indexOf("replay.pokemonshowdown.com/") > -1)) {
+		infractions.push(trad('replays-0', room));
+		totalPointVal += pv;
+		if (pointVal < pv) {
+			pointVal = pv;
+			muteMessage = ', ' + trad('automod', room) + ': ' + trad('replays', room);
 		}
 	}
 
@@ -453,7 +497,7 @@ function parseJoin (room, by) {
 	var ban = isBanned(room, by);
 	if (ban) Bot.say(room, '/roomban ' + by + ', ' + trad('ab', room) + ((ban === '#range') ? ' (RegExp)' : ''));
 	var globalBan = isGlobalBanned(by);
-	if (globalBan) Bot.say(room, '/ban ' + by + ', ' + trad('ab', room) + ((ban === '#range') ? ' (RegExp)' : ''));
+	if (globalBan) Bot.say(room, '/ban ' + by + ', ' + trad('ab', room) + ((globalBan === '#range') ? ' (RegExp)' : ''));
 }
 
 function parseLeave (room, by) {
@@ -463,9 +507,21 @@ function parseLeave (room, by) {
 function parseRename (room, by, old) {
 	if (Tools.equalOrHigherRank(by, Config.moderation.modException)) return;
 	var ban = isBanned(room, by);
-	if (ban) Bot.say(room, '/roomban ' + by + ', ' + trad('ab', room) + ((ban === '#range') ? ' (RegExp)' : ''));
+	if (ban) {
+		Bot.say(room, '/roomban ' + by + ', ' + trad('ab', room) + ((ban === '#range') ? ' (RegExp)' : ''));
+		if (ban !== '#range' && !isBanned(room, old)) {
+			blacklistUser(room, old); // Blacklist alt
+			SecurityLog.log("User \"" + old + "\" was blacklisted for being alt of \"" + toId(by) + "\" | Room: " + room);
+		}
+	}
 	var globalBan = isGlobalBanned(by);
-	if (globalBan) Bot.say(room, '/ban ' + by + ', ' + trad('ab', room) + ((ban === '#range') ? ' (RegExp)' : ''));
+	if (globalBan) {
+		Bot.say(room, '/ban ' + by + ', ' + trad('ab', room) + ((globalBan === '#range') ? ' (RegExp)' : ''));
+		if (globalBan !== '#range' && !isGlobalBanned(room, old)) {
+			blacklistUser(room, old); // Blacklist alt
+			SecurityLog.log("User \"" + old + "\" was blacklisted for being alt of \"" + toId(by) + "\" | Room: " + room);
+		}
+	}
 }
 
 exports.init = function () {
@@ -505,7 +561,7 @@ exports.parse = function (room, message, isIntro, spl) {
 			parseLeave(room, spl[1]);
 			break;
 
-		case 'N':
+		case 'n': case 'N':
 			parseRename(room, spl[1], spl[2]);
 			break;
 	}

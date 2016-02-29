@@ -11,7 +11,7 @@ try {
 	global.sys = require('sys');
 	global.fs = require('fs');
 	global.path = require('path');
-	global.PSClient = require('node-ps-client');
+	global.PSClient = require('./showdown-client.js');
 } catch (e) {
 	console.log(e.stack);
 	console.log("ERROR: missing dependencies, try 'npm install'");
@@ -188,7 +188,7 @@ function joinByQueryRequest(target) {
 		Bot.send(cmds, 2000);
 		return;
 	}
-	Bot.on('queryresponse', function (data) {
+	var qParser = function (data) {
 		data = data.split('|');
 		if (data[0] === 'rooms') {
 			data.splice(0, 1);
@@ -229,9 +229,10 @@ function joinByQueryRequest(target) {
 				}
 			}
 			Bot.send(cmds, 2000);
-			Bot.on('queryresponse', function () {return;});
+			Bot.removeListener('queryresponse', qParser);
 		}
-	});
+	};
+	Bot.on('queryresponse', qParser);
 	Bot.send('|/cmd rooms');
 }
 
@@ -395,7 +396,7 @@ Bot.on('disconnect', function (e) {
 
 Bot.on('chat', function (room, timeOff, by, msg) {
 	CommandParser.parse(room, by, msg);
-	Settings.reportSeen(by, room, 'c', []);
+	Settings.userManager.reportChat(by, room);
 });
 
 Bot.on('pm', function (by, msg) {
@@ -403,16 +404,15 @@ Bot.on('pm', function (by, msg) {
 });
 
 Bot.on('userjoin', function (room, by) {
-	Settings.reportSeen(by, room, 'j', []);
+	Settings.userManager.reportJoin(by, room);
 });
 
 Bot.on('userleave', function (room, by) {
-	Settings.reportSeen(by, room, 'l', []);
+	Settings.userManager.reportLeave(by, room);
 });
 
 Bot.on('userrename', function (room, old, by) {
-	if (!old || !by || toId(old) === toId(by)) return;
-	Settings.reportSeen(" " + old, room, 'n', [by.substr(1)]);
+	Settings.userManager.reportRename(old, by, room);
 });
 
 /* Features */
