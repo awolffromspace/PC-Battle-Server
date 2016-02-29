@@ -518,7 +518,7 @@ function parseRename (room, by, old) {
 	if (globalBan) {
 		Bot.say(room, '/ban ' + by + ', ' + trad('ab', room) + ((globalBan === '#range') ? ' (RegExp)' : ''));
 		if (globalBan !== '#range' && !isGlobalBanned(room, old)) {
-			blacklistUser(room, old); // Blacklist alt
+			blacklistGlobal(room, old); // Blacklist alt
 			SecurityLog.log("User \"" + old + "\" was blacklisted for being alt of \"" + toId(by) + "\" | Room: " + room);
 		}
 	}
