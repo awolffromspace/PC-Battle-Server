@@ -1309,11 +1309,13 @@ exports.commands = {
 
 		target = this.splitTarget(target);
 		let targetUser = this.targetUser;
-		if (!targetUser) return this.errorReply("User '" + this.targetUsername + "' does not exist.");
+		if (!targetUser) return this.errorReply("User '" + this.targetUsername + "' not found.");
 		if (target.length > MAX_REASON_LENGTH) {
 			return this.errorReply("The reason is too long. It cannot exceed " + MAX_REASON_LENGTH + " characters.");
 		}
 		if (!this.can('lock', targetUser)) return false;
+		let name = targetUser.getLastName();
+		let userid = targetUser.getLastId();
 
 		if ((targetUser.nameLocked) && !target) {
 			return this.privateModCommand("(" + targetUser.name + " would be namelocked by " + user.name + " but was already namelocked.)");
@@ -1329,16 +1331,15 @@ exports.commands = {
 		for (let i in targetUser.roomCount) {
 			if (i === 'global') continue;
 			let targetRoom = Rooms.get(i);
-			if (targetRoom.isPersonal && targetRoom.auth[targetUser.userid] && targetRoom.auth[targetUser.userid] === '#') {
+			if (targetRoom.isPersonal && targetRoom.auth[userid] && targetRoom.auth[userid] === '#') {
 				targetRoom.destroy();
 			}
 		}
 
 		targetUser.popup("|modal|" + user.name + " has locked you from talking in chats, battles, and PMing regular users." + (target ? "\n\nReason: " + target : "") + "\n\nIf you feel that your lock was unjustified, you can still PM staff members (%, @, &, and ~) to discuss it" + (Config.appealurl ? " or you can appeal:\n" + Config.appealurl : ".") + "\n\nYour lock will expire in a few days.");
 
-		this.add("" + targetUser.name + " was locked from talking by " + user.name + "." + (target ? " (" + target + ")" : ""));
+		this.add("" + name + " was locked from talking by " + user.name + "." + (target ? " (" + target + ")" : ""));
 		this.privateModCommand("(" + targetUser.name + " was namelocked from talking by " + user.name + "." + (target ? " (" + target + ")" : ")"));
-		let userid = this.getLastIdOf(targetUser);
 		this.add('|unlink|hide|' + userid);
 		if (userid !== toId(this.inputUsername)) this.add('|unlink|hide|' + toId(this.inputUsername));
 
