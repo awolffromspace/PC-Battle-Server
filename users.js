@@ -1297,7 +1297,6 @@ class User {
 		this.updateIdentity();
 	}
 	nameLock(userid) {
-		// recurse only once; the root for-loop already locks everything with your IP
 		if (!userid) userid = this.userid;
 
 		if (this.autoconfirmed) nameLockedUsers[this.autoconfirmed] = userid;
