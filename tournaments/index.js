@@ -1135,7 +1135,7 @@ CommandParser.commands.tournament = function (paramString, room, user) {
 		if (room.id == 'trl') {
 			var format = Tools.getFormat(params[0]);
 			if (!(/random/i).test(format['team'])) {
-				return this.sendReply("Only random battle tournaments may be created in this room. ");
+				return this.sendReply("Only Random Battle tournaments may be created in this room.");
 			}
 		}
 		if (params.length < 2) {
