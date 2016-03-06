@@ -26,7 +26,7 @@ function clearRoom(room) {
 
 exports.commands = {
 	clearall: function (target, room, user) {
-		if (!this.can('declare', null, room)) return false;
+		if (!this.can('warn', null, room)) return false;
 		if (room.battle) return this.sendReply("You cannot clearall in battle rooms.");
 
 		clearRoom(room);
@@ -34,7 +34,7 @@ exports.commands = {
 
 	gclearall: 'globalclearall',
 	globalclearall: function (target, room, user) {
-		if (!this.can('gdeclare')) return false;
+		if (!this.can('warn', null, room)) return false;
 
 		for (var u in Users.users) {
 			Users.users[u].popup("All rooms are being cleared.");
