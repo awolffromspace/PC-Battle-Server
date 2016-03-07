@@ -597,6 +597,8 @@ exports.customavatars = {
 	'allybugd': 'allybugd.png',
 	'allybugg': 'allybugd.png',
 	'ddrox13': 'ddrox13.png',
+	'stormlinoooone': 'stormlinoooone.png',
+	'yunowhoitis': 'stormlinoooone.png',
 };
 
 // custom avatars appear in profile by specifiying server url.
