@@ -12,7 +12,6 @@ exports.Formats = [
 		name: "[LotW 15] Mix and Mega",
 		desc: ["&bullet; <a href=\"https://www.smogon.com/forums/threads/3540979/\">Mix and Mega</a>"],
 		section: "ORAS Singles",
-		column: 2,
 
 		mod: 'mixandmega',
 		ruleset: ['Ubers', 'Baton Pass Clause'],
