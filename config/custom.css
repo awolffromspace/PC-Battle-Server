@@ -1,5 +1,5 @@
 html,body{margin:0;padding:0}body{background:#020315 url("http://cbc.pokecommunity.com/config/backgrounds/glaceon.png") no-repeat fixed left top}
-.mainmenufooter a,.dark a,.dark a:visited{color:#f2f2f2}
+.mainmenufooter a{color:#f2f2f2}
 .mainmenufooter a:hover{color:white}
 .menugroup .button{color:white;background:#262626!important;border:solid 1px black!important}
 .menugroup .button:hover,.menugroup .button:active{color:white;background:#1a1a1a!important;border:solid 1px black!important}
