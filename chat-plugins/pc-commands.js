@@ -52,7 +52,7 @@ exports.commands = {
 			setting = true;
 			Config.reportbattles = setting;
 			Simulator.SimulatorProcess.eval('Config.reportbattles = \'' + toId(setting) + '\'');
-			this.add('|raw|<div class=\"broadcast-blue\"><b>Battle messages are disabled!</b><br>Battles will be reported in the Lobby.</div>');
+			this.add('|raw|<div class=\"broadcast-red\"><b>Battle messages are enabled!</b><br>Battles will be reported in the Lobby.</div>');
 		}
 	},
 	togglebattlemsghelp: ["/togglebattlemsg - Toggle battle messages on or off."],
