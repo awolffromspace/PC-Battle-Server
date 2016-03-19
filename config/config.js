@@ -571,9 +571,9 @@ exports.customavatars = {
 	'noav': 'nodles.png',
 	'nodles': 'nodles.png',
 	'nakasu': 'nakasu.gif',
-	'pmseth': 'pmseth.gif',
-	'savashy': 'pmseth.gif',
-	'savash': 'pmseth.gif',
+	'pmseth': 'savash.png',
+	'savashy': 'savash.png',
+	'savash': 'savash.png',
 	'dedenne1': 'dedenne1.gif',
 	'nidokingdra44': 'nidokingdra44.png',
 	'nidohorsea': 'nidokingdra44.png',
@@ -599,6 +599,8 @@ exports.customavatars = {
 	'ddrox13': 'ddrox13.png',
 	'stormlinoooone': 'stormlinoooone.png',
 	'yunowhoitis': 'stormlinoooone.png',
+	'yunowhoitis': 'stormlinoooone.png',
+	'digitalesper': 'digitalesper.png',
 };
 
 // custom avatars appear in profile by specifiying server url.
