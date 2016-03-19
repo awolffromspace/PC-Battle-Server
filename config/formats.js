@@ -206,7 +206,6 @@ exports.Formats = [
 		section: "Random Battles (aka Randbats)",
 
 		teamLength: {
-			validate: [1, 6],
 			battle: 1
 		},
 		team: 'random',
@@ -3503,7 +3502,6 @@ exports.Formats = [
 		section: "Random Battles (aka Randbats)",
 
 		teamLength: {
-			validate: [1, 6],
 			battle: 1
 		},
 		team: 'randomCC',
