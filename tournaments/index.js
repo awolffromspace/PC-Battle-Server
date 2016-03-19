@@ -583,7 +583,7 @@ class Tournament {
 		this.purgeGhostUsers();
 		this.update();
 
-		from.prepBattle(this.format, 'tournament', from, result => this.finishChallenge(from, to, output, result));
+		from.prepBattle(this.format, 'tournament', from).then(result => this.finishChallenge(from, to, output, result));
 	}
 	finishChallenge(from, to, output, result) {
 		if (!result) {
@@ -634,7 +634,7 @@ class Tournament {
 		let challenge = this.pendingChallenges.get(user);
 		if (!challenge || !challenge.from) return;
 
-		user.prepBattle(this.format, 'tournament', user, result => this.finishAcceptChallenge(user, challenge, result));
+		user.prepBattle(this.format, 'tournament', user).then(result => this.finishAcceptChallenge(user, challenge, result));
 	}
 	finishAcceptChallenge(user, challenge, result) {
 		if (!result) return;
@@ -846,7 +846,7 @@ function createTournament(room, format, generator, playerCap, isRated, args, out
 	format = Tools.getFormat(format);
 	if (format.effectType !== 'Format' || !format.tournamentShow) {
 		output.errorReply(format.id + " is not a valid tournament format.");
-		output.errorReply("Valid formats: " + Object.values(Tools.data.Formats).filter(f => f.effectType === 'Format' && f.tournamentShow).map('name').join(", "));
+		output.errorReply("Valid formats: " + Object.values(Tools.data.Formats).filter(f => f.effectType === 'Format' && f.tournamentShow).map(format => format.name).join(", "));
 		return;
 	}
 	if (!TournamentGenerators[toId(generator)]) {

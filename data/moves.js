@@ -2150,7 +2150,7 @@ exports.BattleMovedex = {
 		priority: 0,
 		flags: {contact: 1, protect: 1, mirror: 1},
 		onHit: function (target, source) {
-			if (source.item) {
+			if (source.item || source.volatiles['gem']) {
 				return;
 			}
 			let yourItem = target.takeItem(source);
@@ -4659,12 +4659,13 @@ exports.BattleMovedex = {
 		effect: {
 			duration: 1,
 			onStart: function (pokemon) {
-				this.add('-start', pokemon, 'move: Follow Me');
+				this.add('-singleturn', pokemon, 'move: Follow Me');
 			},
 			onFoeRedirectTargetPriority: 1,
 			onFoeRedirectTarget: function (target, source, source2, move) {
 				if (this.validTarget(this.effectData.target, source, move.target)) {
 					this.debug("Follow Me redirected target of move");
+					this.retargetLastMove(this.effectData.target);
 					return this.effectData.target;
 				}
 			},
@@ -5984,7 +5985,7 @@ exports.BattleMovedex = {
 					this.add('-heal', target, target.getHealth, '[from] move: Healing Wish');
 					this.effectData.positions[target.position] = false;
 				}
-				if (!this.effectData.positions.any(true)) {
+				if (!this.effectData.positions.some(affected => affected === true)) {
 					target.side.removeSideCondition('healingwish');
 				}
 			},
@@ -7846,7 +7847,7 @@ exports.BattleMovedex = {
 					this.add('-heal', target, target.getHealth, '[from] move: Lunar Dance');
 					this.effectData.positions[target.position] = false;
 				}
-				if (!this.effectData.positions.any(true)) {
+				if (!this.effectData.positions.some(affected => affected === true)) {
 					target.side.removeSideCondition('lunardance');
 				}
 			},
@@ -9929,7 +9930,7 @@ exports.BattleMovedex = {
 		effect: {
 			duration: 1,
 			onStart: function (target) {
-				this.add('-start', target, 'Powder');
+				this.add('-singleturn', target, 'Powder');
 			},
 			onTryMove: function (pokemon, target, move) {
 				if (move.type === 'Fire') {
@@ -10639,12 +10640,13 @@ exports.BattleMovedex = {
 		effect: {
 			duration: 1,
 			onStart: function (pokemon) {
-				this.add('-start', pokemon, 'move: Rage Powder');
+				this.add('-singleturn', pokemon, 'move: Rage Powder');
 			},
 			onFoeRedirectTargetPriority: 1,
 			onFoeRedirectTarget: function (target, source, source2, move) {
 				if (source.runStatusImmunity('powder') && this.validTarget(this.effectData.target, source, move.target)) {
 					this.debug("Rage Powder redirected target of move");
+					this.retargetLastMove(this.effectData.target);
 					return this.effectData.target;
 				}
 			},
@@ -13525,6 +13527,7 @@ exports.BattleMovedex = {
 		onTry: function (source, target) {
 			let decision = this.willMove(target);
 			if (!decision || decision.choice !== 'move' || (decision.move.category === 'Status' && decision.move.id !== 'mefirst') || target.volatiles.mustrecharge) {
+				this.attrLastMove('[still]');
 				this.add('-fail', source);
 				return null;
 			}
@@ -14106,7 +14109,7 @@ exports.BattleMovedex = {
 		priority: 0,
 		flags: {contact: 1, protect: 1, mirror: 1},
 		onHit: function (target, source) {
-			if (source.item) {
+			if (source.item || source.volatiles['gem']) {
 				return;
 			}
 			let yourItem = target.takeItem(source);
@@ -14140,6 +14143,7 @@ exports.BattleMovedex = {
 		onEffectiveness: function (typeMod, type, move) {
 			if (move.type !== 'Ground') return;
 			let target = this.activeTarget;
+			if (!target) return; // avoid crashing when called from a chat plugin
 			// ignore effectiveness if the target is Flying type and immune to Ground
 			if (!target.runImmunity('Ground')) {
 				if (target.hasType('Flying')) return 0;

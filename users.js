@@ -294,7 +294,12 @@ function cacheGroupData() {
 			cachedGroups[sym] = 'processing';
 			let inheritGroup = groups[groupData['inherit']];
 			if (cacheGroup(groupData['inherit'], inheritGroup)) {
-				Object.merge(groupData, inheritGroup, false, false);
+				// Add lower group permissions to higher ranked groups,
+				// preserving permissions specifically declared for the higher group.
+				for (let key in inheritGroup) {
+					if (key in groupData) continue;
+					groupData[key] = inheritGroup[key];
+				}
 			}
 			delete groupData['inherit'];
 		}
@@ -745,7 +750,7 @@ class User {
 			let tokenData = token.substr(0, tokenSemicolonPos);
 			let tokenSig = token.substr(tokenSemicolonPos + 1);
 
-			Verifier.verify(tokenData, tokenSig, (success, tokenData) => {
+			Verifier.verify(tokenData, tokenSig).then(success => {
 				if (!success) {
 					console.log('verify failed: ' + token);
 					console.log('challenge was: ' + challenge);
@@ -1187,7 +1192,7 @@ class User {
 				}
 			}
 			this.roomCount = {};
-			if (!this.named && Object.isEmpty(this.prevNames)) {
+			if (!this.named && !Object.keys(this.prevNames).length) {
 				// user never chose a name (and therefore never talked/battled)
 				// there's no need to keep track of this user, so we can
 				// immediately deallocate
@@ -1237,11 +1242,13 @@ class User {
 	}
 	getLastName() {
 		if (this.named) return this.name;
-		return "[" + (Object.keys(this.prevNames).last() || this.name) + "]";
+		const prevNames = Object.keys(this.prevNames);
+		return "[" + (prevNames.length ? prevNames[prevNames.length - 1] : this.name) + "]";
 	}
 	getLastId() {
 		if (this.named) return this.userid;
-		return Object.keys(this.prevNames).last() || this.userid;
+		const prevNames = Object.keys(this.prevNames);
+		return (prevNames.length ? prevNames[prevNames.length - 1] : this.userid);
 	}
 	ban(noRecurse, userid) {
 		// recurse only once; the root for-loop already bans everything with your IP
@@ -1436,7 +1443,7 @@ class User {
 			delete this.roomCount[room.id];
 		}
 	}
-	prepBattle(formatid, type, connection, callback) {
+	prepBattle(formatid, type, connection) {
 		// all validation for a battle goes through here
 		if (!connection) connection = this;
 		if (!type) type = 'challenge';
@@ -1447,36 +1454,33 @@ class User {
 				message = "The server is under attack. Battles cannot be started at this time.";
 			}
 			connection.popup(message);
-			setImmediate(() => callback(false));
-			return;
+			return Promise.resolve(false);
 		}
 
 		let format = Tools.getFormat(formatid);
 		if (!format['' + type + 'Show']) {
 			connection.popup("That format is not available.");
-			setImmediate(() => callback(false));
-			return;
+			return Promise.resolve(false);
 		}
 		if (type === 'search' && this.searching[formatid]) {
 			connection.popup("You are already searching a battle in that format.");
-			setImmediate(() => callback(false));
-			return;
+			return Promise.resolve(false);
 		}
-		TeamValidator.validateTeam(formatid, this.team, (success, details) => this.finishPrepBattle(connection, callback, success, details));
+		return TeamValidator(formatid).prepTeam(this.team).then(result => this.finishPrepBattle(connection, result));
 	}
-	finishPrepBattle(connection, callback, success, details) {
-		if (!success) {
-			connection.popup("Your team was rejected for the following reasons:\n\n- " + details.replace(/\n/g, '\n- '));
-			callback(false);
-		} else {
-			if (details) {
-				this.team = details;
-				Monitor.teamValidatorChanged++;
-			} else {
-				Monitor.teamValidatorUnchanged++;
-			}
-			callback(this === users.get(this.userid));
+	finishPrepBattle(connection, result) {
+		if (result.charAt(0) !== '1') {
+			connection.popup("Your team was rejected for the following reasons:\n\n- " + result.slice(1).replace(/\n/g, '\n- '));
+			return false;
 		}
+
+		if (result.length > 1) {
+			this.team = result.slice(1);
+			Monitor.teamValidatorChanged++;
+		} else {
+			Monitor.teamValidatorUnchanged++;
+		}
+		return (this === users.get(this.userid));
 	}
 	updateChallenges() {
 		let challengeTo = this.challengeTo;
@@ -1486,8 +1490,12 @@ class User {
 				format: challengeTo.format,
 			};
 		}
+		let challengesFrom = {};
+		for (let challenger in this.challengesFrom) {
+			challengesFrom[challenger] = this.challengesFrom[challenger].format;
+		}
 		this.send('|updatechallenges|' + JSON.stringify({
-			challengesFrom: Object.map(this.challengesFrom, 'format'),
+			challengesFrom: challengesFrom,
 			challengeTo: challengeTo,
 		}));
 	}
