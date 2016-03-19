@@ -133,6 +133,7 @@ exports.commands = {
 		}
 	},
 
+	tpollremind: 'tourpollremind',
 	tremind: 'tourpollremind',
 	tourremind: 'tourpollremind',
 	tourpollremind: function (target, room, user) {
@@ -142,6 +143,7 @@ exports.commands = {
 		this.sendReplyBox(Poll[room.id].display);
 	},
 
+	tpoll: 'tourpoll',
 	tournamentpoll: 'tourpoll',
 	tourneypoll: 'tourpoll',
 	tourpoll: function (target, room, user) {
