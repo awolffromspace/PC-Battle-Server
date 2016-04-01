@@ -556,6 +556,7 @@ exports.customavatars = {
 	'soulcooler': 'soulcooler.gif',
 	'xcrystalberryx': 'xcrystalberryx.png',
 	'aeerca': 'aeerca.gif',
+	'dracostatics': 'aeerca.gif',
 	'chessurcat': 'chessurcat.gif',
 	'bacteriophaget4': 'chessurcat.gif',
 	'darkazelf': 'darkazelf.gif',
