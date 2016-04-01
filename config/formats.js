@@ -9,22 +9,66 @@ exports.Formats = [
 	///////////////////////////////////////////////////////////////////
 
 	{
-		name: "[LotW 16] UU",
-		desc: [
-			"&bullet; <a href=\"https://www.smogon.com/forums/threads/3557948/\">np: UU Stage 6</a>",
-			"&bullet; <a href=\"https://www.smogon.com/dex/xy/tags/uu/\">UU Banlist</a>",
-			"&bullet; <a href=\"https://www.smogon.com/forums/threads/3555277/\">UU Viability Ranking</a>",
-		],
+		name: "[LotW 17] Random",
 		section: "ORAS Singles",
 
-		ruleset: ['OU'],
-		banlist: ['OU', 'BL', 'Drizzle', 'Drought'],
+		team: 'randomNoPotD',
+		ruleset: ['Random (no PotD)'],
+		onNegateImmunity: function (pokemon, type) {
+			if (type in this.data.TypeChart && this.runEvent('Immunity', pokemon, null, null, type)) return false;
+		},
+		onEffectiveness: function (typeMod, target, type, move) {
+			// The effectiveness of Freeze Dry on Water isn't reverted
+			if (move && move.id === 'freezedry' && type === 'Water') return;
+			if (move && !this.getImmunity(move, type)) return 1;
+			return -typeMod;
+		},
 		onBegin: function () {
 			this.add('raw|This is the Ladder of the Week! Use the "Battle!" button to try and win the LotW. The winner is the user who is #1 on the ladder by 10 PM ET on Saturday. They receive a <img src="http://cbc.pokecommunity.com/config/user-list-images/trophy.png" /> beside their name for a week.');
+			let allPokemon = this.p1.pokemon.concat(this.p2.pokemon);
+			for (let i = 0, len = allPokemon.length; i < len; i++) {
+				let pokemon = allPokemon[i];
+				let newatk = pokemon.stats.def;
+				let newdef = pokemon.stats.atk;
+				let newspa = pokemon.stats.spd;
+				let newspd = pokemon.stats.spa;
+				pokemon.stats.atk = newatk;
+				pokemon.stats.def = newdef;
+				pokemon.stats.spa = newspa;
+				pokemon.stats.spd = newspd;
+				
+			}
 		},
 	},
 	{
 		name: "OU",
+		desc: [
+			"&bullet; <a href=\"https://www.smogon.com/forums/threads/3521201/\">OU Metagame Discussion</a>",
+			"&bullet; <a href=\"https://www.smogon.com/dex/xy/tags/ou/\">OU Banlist</a>",
+			"&bullet; <a href=\"https://www.smogon.com/forums/threads/3553516/\">OU Viability Ranking</a>",
+		],
+		section: "ORAS Singles",
+
+		ruleset: ['Pokemon', 'Standard', 'Team Preview', 'Swagger Clause', 'Baton Pass Clause'],
+		banlist: ['Uber', 'Shadow Tag', 'Soul Dew'],
+		onBegin: function () {
+			let allPokemon = this.p1.pokemon.concat(this.p2.pokemon);
+			for (let i = 0, len = allPokemon.length; i < len; i++) {
+				let pokemon = allPokemon[i];
+				let newatk = pokemon.stats.def;
+				let newdef = pokemon.stats.atk;
+				let newspa = pokemon.stats.spd;
+				let newspd = pokemon.stats.spa;
+				pokemon.stats.atk = newatk;
+				pokemon.stats.def = newdef;
+				pokemon.stats.spa = newspa;
+				pokemon.stats.spd = newspd;
+				
+			}
+		},
+	},
+	{
+		name: "OU (regular)",
 		desc: [
 			"&bullet; <a href=\"https://www.smogon.com/forums/threads/3521201/\">OU Metagame Discussion</a>",
 			"&bullet; <a href=\"https://www.smogon.com/dex/xy/tags/ou/\">OU Banlist</a>",
@@ -45,6 +89,21 @@ exports.Formats = [
 
 		ruleset: ['Pokemon', 'Standard', 'Swagger Clause', 'Team Preview', 'Mega Rayquaza Clause'],
 		banlist: [],
+		onBegin: function () {
+			let allPokemon = this.p1.pokemon.concat(this.p2.pokemon);
+			for (let i = 0, len = allPokemon.length; i < len; i++) {
+				let pokemon = allPokemon[i];
+				let newatk = pokemon.stats.def;
+				let newdef = pokemon.stats.atk;
+				let newspa = pokemon.stats.spd;
+				let newspd = pokemon.stats.spa;
+				pokemon.stats.atk = newatk;
+				pokemon.stats.def = newdef;
+				pokemon.stats.spa = newspa;
+				pokemon.stats.spd = newspd;
+				
+			}
+		},
 	},
 	{
 		name: "UU",
@@ -57,6 +116,21 @@ exports.Formats = [
 
 		ruleset: ['OU'],
 		banlist: ['OU', 'BL', 'Drizzle', 'Drought'],
+		onBegin: function () {
+			let allPokemon = this.p1.pokemon.concat(this.p2.pokemon);
+			for (let i = 0, len = allPokemon.length; i < len; i++) {
+				let pokemon = allPokemon[i];
+				let newatk = pokemon.stats.def;
+				let newdef = pokemon.stats.atk;
+				let newspa = pokemon.stats.spd;
+				let newspd = pokemon.stats.spa;
+				pokemon.stats.atk = newatk;
+				pokemon.stats.def = newdef;
+				pokemon.stats.spa = newspa;
+				pokemon.stats.spd = newspd;
+				
+			}
+		},
 	},
 	{
 		name: "RU",
@@ -69,6 +143,21 @@ exports.Formats = [
 
 		ruleset: ['UU'],
 		banlist: ['UU', 'BL2'],
+		onBegin: function () {
+			let allPokemon = this.p1.pokemon.concat(this.p2.pokemon);
+			for (let i = 0, len = allPokemon.length; i < len; i++) {
+				let pokemon = allPokemon[i];
+				let newatk = pokemon.stats.def;
+				let newdef = pokemon.stats.atk;
+				let newspa = pokemon.stats.spd;
+				let newspd = pokemon.stats.spa;
+				pokemon.stats.atk = newatk;
+				pokemon.stats.def = newdef;
+				pokemon.stats.spa = newspa;
+				pokemon.stats.spd = newspd;
+				
+			}
+		},
 	},
 	{
 		name: "NU",
@@ -82,6 +171,21 @@ exports.Formats = [
 		searchShow: false,
 		ruleset: ['RU'],
 		banlist: ['RU', 'BL3'],
+		onBegin: function () {
+			let allPokemon = this.p1.pokemon.concat(this.p2.pokemon);
+			for (let i = 0, len = allPokemon.length; i < len; i++) {
+				let pokemon = allPokemon[i];
+				let newatk = pokemon.stats.def;
+				let newdef = pokemon.stats.atk;
+				let newspa = pokemon.stats.spd;
+				let newspd = pokemon.stats.spa;
+				pokemon.stats.atk = newatk;
+				pokemon.stats.def = newdef;
+				pokemon.stats.spa = newspa;
+				pokemon.stats.spd = newspd;
+				
+			}
+		},
 	},
 	{
 		name: "NU (suspect test)",
@@ -90,6 +194,21 @@ exports.Formats = [
 		challengeShow: false,
 		ruleset: ['RU'],
 		banlist: ['RU', 'BL3'],
+		onBegin: function () {
+			let allPokemon = this.p1.pokemon.concat(this.p2.pokemon);
+			for (let i = 0, len = allPokemon.length; i < len; i++) {
+				let pokemon = allPokemon[i];
+				let newatk = pokemon.stats.def;
+				let newdef = pokemon.stats.atk;
+				let newspa = pokemon.stats.spd;
+				let newspd = pokemon.stats.spa;
+				pokemon.stats.atk = newatk;
+				pokemon.stats.def = newdef;
+				pokemon.stats.spa = newspa;
+				pokemon.stats.spd = newspd;
+				
+			}
+		},
 	},
 	{
 		name: "PU",
@@ -101,6 +220,21 @@ exports.Formats = [
 
 		ruleset: ['NU'],
 		banlist: ['NU', 'BL4', 'Chatter'],
+		onBegin: function () {
+			let allPokemon = this.p1.pokemon.concat(this.p2.pokemon);
+			for (let i = 0, len = allPokemon.length; i < len; i++) {
+				let pokemon = allPokemon[i];
+				let newatk = pokemon.stats.def;
+				let newdef = pokemon.stats.atk;
+				let newspa = pokemon.stats.spd;
+				let newspd = pokemon.stats.spa;
+				pokemon.stats.atk = newatk;
+				pokemon.stats.def = newdef;
+				pokemon.stats.spa = newspa;
+				pokemon.stats.spd = newspd;
+				
+			}
+		},
 	},
 	{
 		name: "LC",
@@ -115,6 +249,21 @@ exports.Formats = [
 		maxLevel: 5,
 		ruleset: ['Pokemon', 'Standard', 'Team Preview', 'Little Cup'],
 		banlist: ['LC Uber', 'Gligar', 'Misdreavus', 'Scyther', 'Sneasel', 'Tangela', 'Dragon Rage', 'Sonic Boom', 'Swagger'],
+		onBegin: function () {
+			let allPokemon = this.p1.pokemon.concat(this.p2.pokemon);
+			for (let i = 0, len = allPokemon.length; i < len; i++) {
+				let pokemon = allPokemon[i];
+				let newatk = pokemon.stats.def;
+				let newdef = pokemon.stats.atk;
+				let newspa = pokemon.stats.spd;
+				let newspd = pokemon.stats.spa;
+				pokemon.stats.atk = newatk;
+				pokemon.stats.def = newdef;
+				pokemon.stats.spa = newspa;
+				pokemon.stats.spd = newspd;
+				
+			}
+		},
 	},
 	{
 		name: "LC (suspect test)",
@@ -124,6 +273,21 @@ exports.Formats = [
 		maxLevel: 5,
 		ruleset: ['LC'],
 		banlist: ['Diglett'],
+		onBegin: function () {
+			let allPokemon = this.p1.pokemon.concat(this.p2.pokemon);
+			for (let i = 0, len = allPokemon.length; i < len; i++) {
+				let pokemon = allPokemon[i];
+				let newatk = pokemon.stats.def;
+				let newdef = pokemon.stats.atk;
+				let newspa = pokemon.stats.spd;
+				let newspd = pokemon.stats.spa;
+				pokemon.stats.atk = newatk;
+				pokemon.stats.def = newdef;
+				pokemon.stats.spa = newspa;
+				pokemon.stats.spd = newspd;
+				
+			}
+		},
 	},
 	{
 		name: "Anything Goes",
@@ -135,6 +299,21 @@ exports.Formats = [
 
 		ruleset: ['Pokemon', 'Endless Battle Clause', 'HP Percentage Mod', 'Cancel Mod', 'Team Preview'],
 		banlist: ['Unreleased', 'Illegal'],
+		onBegin: function () {
+			let allPokemon = this.p1.pokemon.concat(this.p2.pokemon);
+			for (let i = 0, len = allPokemon.length; i < len; i++) {
+				let pokemon = allPokemon[i];
+				let newatk = pokemon.stats.def;
+				let newdef = pokemon.stats.atk;
+				let newspa = pokemon.stats.spd;
+				let newspd = pokemon.stats.spa;
+				pokemon.stats.atk = newatk;
+				pokemon.stats.def = newdef;
+				pokemon.stats.spa = newspa;
+				pokemon.stats.spd = newspd;
+				
+			}
+		},
 	},
 	/*{
 		name: "CAP Crucibelle Playtest",
@@ -160,6 +339,21 @@ exports.Formats = [
 		},
 		ruleset: ['Pokemon', 'Standard GBU', 'Team Preview'],
 		requirePentagon: true,
+		onBegin: function () {
+			let allPokemon = this.p1.pokemon.concat(this.p2.pokemon);
+			for (let i = 0, len = allPokemon.length; i < len; i++) {
+				let pokemon = allPokemon[i];
+				let newatk = pokemon.stats.def;
+				let newdef = pokemon.stats.atk;
+				let newspa = pokemon.stats.spd;
+				let newspd = pokemon.stats.spa;
+				pokemon.stats.atk = newatk;
+				pokemon.stats.def = newdef;
+				pokemon.stats.spa = newspa;
+				pokemon.stats.spd = newspd;
+				
+			}
+		},
 	},
 	{
 		name: "Custom Game",
@@ -184,6 +378,21 @@ exports.Formats = [
 
 		team: 'random',
 		ruleset: ['PotD', 'Pokemon', 'Sleep Clause Mod', 'HP Percentage Mod', 'Cancel Mod', 'Team Preview'],
+		onBegin: function () {
+			let allPokemon = this.p1.pokemon.concat(this.p2.pokemon);
+			for (let i = 0, len = allPokemon.length; i < len; i++) {
+				let pokemon = allPokemon[i];
+				let newatk = pokemon.stats.def;
+				let newdef = pokemon.stats.atk;
+				let newspa = pokemon.stats.spd;
+				let newspd = pokemon.stats.spa;
+				pokemon.stats.atk = newatk;
+				pokemon.stats.def = newdef;
+				pokemon.stats.spa = newspa;
+				pokemon.stats.spd = newspd;
+				
+			}
+		},
 	},
 	{
 		name: "Unrated Random",
@@ -193,6 +402,21 @@ exports.Formats = [
 		challengeShow: false,
 		rated: false,
 		ruleset: ['Random'],
+		onBegin: function () {
+			let allPokemon = this.p1.pokemon.concat(this.p2.pokemon);
+			for (let i = 0, len = allPokemon.length; i < len; i++) {
+				let pokemon = allPokemon[i];
+				let newatk = pokemon.stats.def;
+				let newdef = pokemon.stats.atk;
+				let newspa = pokemon.stats.spd;
+				let newspd = pokemon.stats.spa;
+				pokemon.stats.atk = newatk;
+				pokemon.stats.def = newdef;
+				pokemon.stats.spa = newspa;
+				pokemon.stats.spd = newspd;
+				
+			}
+		},
 	},
 	{
 		name: "Random (no PotD)",
@@ -200,6 +424,21 @@ exports.Formats = [
 
 		team: 'random',
 		ruleset: ['Pokemon', 'Sleep Clause Mod', 'HP Percentage Mod', 'Cancel Mod', 'Team Preview'],
+		onBegin: function () {
+			let allPokemon = this.p1.pokemon.concat(this.p2.pokemon);
+			for (let i = 0, len = allPokemon.length; i < len; i++) {
+				let pokemon = allPokemon[i];
+				let newatk = pokemon.stats.def;
+				let newdef = pokemon.stats.atk;
+				let newspa = pokemon.stats.spd;
+				let newspd = pokemon.stats.spa;
+				pokemon.stats.atk = newatk;
+				pokemon.stats.def = newdef;
+				pokemon.stats.spa = newspa;
+				pokemon.stats.spd = newspd;
+				
+			}
+		},
 	},
 	{
 		name: "1v1 Random",
@@ -210,6 +449,21 @@ exports.Formats = [
 		},
 		team: 'random',
 		ruleset: ['Random (no PotD)'],
+		onBegin: function () {
+			let allPokemon = this.p1.pokemon.concat(this.p2.pokemon);
+			for (let i = 0, len = allPokemon.length; i < len; i++) {
+				let pokemon = allPokemon[i];
+				let newatk = pokemon.stats.def;
+				let newdef = pokemon.stats.atk;
+				let newspa = pokemon.stats.spd;
+				let newspd = pokemon.stats.spa;
+				pokemon.stats.atk = newatk;
+				pokemon.stats.def = newdef;
+				pokemon.stats.spa = newspa;
+				pokemon.stats.spd = newspd;
+				
+			}
+		},
 	},
 	{
 		name: "High Tier Random",
@@ -218,6 +472,21 @@ exports.Formats = [
 		mod: 'hightierrandom',
 		team: 'randomHighTier',
 		ruleset: ['Random (no PotD)'],
+		onBegin: function () {
+			let allPokemon = this.p1.pokemon.concat(this.p2.pokemon);
+			for (let i = 0, len = allPokemon.length; i < len; i++) {
+				let pokemon = allPokemon[i];
+				let newatk = pokemon.stats.def;
+				let newdef = pokemon.stats.atk;
+				let newspa = pokemon.stats.spd;
+				let newspd = pokemon.stats.spa;
+				pokemon.stats.atk = newatk;
+				pokemon.stats.def = newdef;
+				pokemon.stats.spa = newspa;
+				pokemon.stats.spd = newspd;
+				
+			}
+		},
 	},
 	{
 		name: "Low Tier Random",
@@ -226,6 +495,21 @@ exports.Formats = [
 		mod: 'lowtierrandom',
 		team: 'randomLowTier',
 		ruleset: ['Random (no PotD)'],
+		onBegin: function () {
+			let allPokemon = this.p1.pokemon.concat(this.p2.pokemon);
+			for (let i = 0, len = allPokemon.length; i < len; i++) {
+				let pokemon = allPokemon[i];
+				let newatk = pokemon.stats.def;
+				let newdef = pokemon.stats.atk;
+				let newspa = pokemon.stats.spd;
+				let newspd = pokemon.stats.spa;
+				pokemon.stats.atk = newatk;
+				pokemon.stats.def = newdef;
+				pokemon.stats.spa = newspa;
+				pokemon.stats.spd = newspd;
+				
+			}
+		},
 	},
 	{
 		name: "Uber Random",
@@ -234,6 +518,21 @@ exports.Formats = [
 		mod: 'uberrandom',
 		team: 'randomUber',
 		ruleset: ['Random (no PotD)'],
+		onBegin: function () {
+			let allPokemon = this.p1.pokemon.concat(this.p2.pokemon);
+			for (let i = 0, len = allPokemon.length; i < len; i++) {
+				let pokemon = allPokemon[i];
+				let newatk = pokemon.stats.def;
+				let newdef = pokemon.stats.atk;
+				let newspa = pokemon.stats.spd;
+				let newspd = pokemon.stats.spa;
+				pokemon.stats.atk = newatk;
+				pokemon.stats.def = newdef;
+				pokemon.stats.spa = newspa;
+				pokemon.stats.spd = newspd;
+				
+			}
+		},
 	},
 	{
 		name: "LC Random",
@@ -241,6 +540,21 @@ exports.Formats = [
 
 		team: 'randomLC',
 		ruleset: ['Random (no PotD)'],
+		onBegin: function () {
+			let allPokemon = this.p1.pokemon.concat(this.p2.pokemon);
+			for (let i = 0, len = allPokemon.length; i < len; i++) {
+				let pokemon = allPokemon[i];
+				let newatk = pokemon.stats.def;
+				let newdef = pokemon.stats.atk;
+				let newspa = pokemon.stats.spd;
+				let newspd = pokemon.stats.spa;
+				pokemon.stats.atk = newatk;
+				pokemon.stats.def = newdef;
+				pokemon.stats.spa = newspa;
+				pokemon.stats.spd = newspd;
+				
+			}
+		},
 	},
 	{
 		name: "Monotype Random",
@@ -248,6 +562,21 @@ exports.Formats = [
 
 		team: 'randomMonotype',
 		ruleset: ['Random (no PotD)'],
+		onBegin: function () {
+			let allPokemon = this.p1.pokemon.concat(this.p2.pokemon);
+			for (let i = 0, len = allPokemon.length; i < len; i++) {
+				let pokemon = allPokemon[i];
+				let newatk = pokemon.stats.def;
+				let newdef = pokemon.stats.atk;
+				let newspa = pokemon.stats.spd;
+				let newspd = pokemon.stats.spa;
+				pokemon.stats.atk = newatk;
+				pokemon.stats.def = newdef;
+				pokemon.stats.spa = newspa;
+				pokemon.stats.spd = newspd;
+				
+			}
+		},
 	},
 	{
 		name: "Generational Random",
@@ -255,6 +584,21 @@ exports.Formats = [
 
 		team: 'randomGenerational',
 		ruleset: ['Random (no PotD)'],
+		onBegin: function () {
+			let allPokemon = this.p1.pokemon.concat(this.p2.pokemon);
+			for (let i = 0, len = allPokemon.length; i < len; i++) {
+				let pokemon = allPokemon[i];
+				let newatk = pokemon.stats.def;
+				let newdef = pokemon.stats.atk;
+				let newspa = pokemon.stats.spd;
+				let newspd = pokemon.stats.spa;
+				pokemon.stats.atk = newatk;
+				pokemon.stats.def = newdef;
+				pokemon.stats.spa = newspa;
+				pokemon.stats.spd = newspd;
+				
+			}
+		},
 	},
 	{
 		name: "Color Random",
@@ -262,6 +606,21 @@ exports.Formats = [
 
 		team: 'randomColor',
 		ruleset: ['Random (no PotD)'],
+		onBegin: function () {
+			let allPokemon = this.p1.pokemon.concat(this.p2.pokemon);
+			for (let i = 0, len = allPokemon.length; i < len; i++) {
+				let pokemon = allPokemon[i];
+				let newatk = pokemon.stats.def;
+				let newdef = pokemon.stats.atk;
+				let newspa = pokemon.stats.spd;
+				let newspd = pokemon.stats.spa;
+				pokemon.stats.atk = newatk;
+				pokemon.stats.def = newdef;
+				pokemon.stats.spa = newspa;
+				pokemon.stats.spd = newspd;
+				
+			}
+		},
 	},
 	{
 		name: "Inverse Random",
@@ -278,6 +637,21 @@ exports.Formats = [
 			if (move && !this.getImmunity(move, type)) return 1;
 			return -typeMod;
 		},
+		onBegin: function () {
+			let allPokemon = this.p1.pokemon.concat(this.p2.pokemon);
+			for (let i = 0, len = allPokemon.length; i < len; i++) {
+				let pokemon = allPokemon[i];
+				let newatk = pokemon.stats.def;
+				let newdef = pokemon.stats.atk;
+				let newspa = pokemon.stats.spd;
+				let newspd = pokemon.stats.spa;
+				pokemon.stats.atk = newatk;
+				pokemon.stats.def = newdef;
+				pokemon.stats.spa = newspa;
+				pokemon.stats.spd = newspd;
+				
+			}
+		},
 	},
 	{
 		name: "Community Random",
@@ -287,6 +661,19 @@ exports.Formats = [
 		ruleset: ['Random (no PotD)'],
 		onBegin: function () {
 			this.add("raw|Would you like to be in Community Random? If so, <a href='http://www.pokecommunity.com/showthread.php?t=335080'>click here</a>.");
+			let allPokemon = this.p1.pokemon.concat(this.p2.pokemon);
+			for (let i = 0, len = allPokemon.length; i < len; i++) {
+				let pokemon = allPokemon[i];
+				let newatk = pokemon.stats.def;
+				let newdef = pokemon.stats.atk;
+				let newspa = pokemon.stats.spd;
+				let newspd = pokemon.stats.spa;
+				pokemon.stats.atk = newatk;
+				pokemon.stats.def = newdef;
+				pokemon.stats.spa = newspa;
+				pokemon.stats.spd = newspd;
+				
+			}
 		},
 	},
 	{
@@ -295,6 +682,21 @@ exports.Formats = [
 
 		team: 'randomHoenn',
 		ruleset: ['Random (no PotD)'],
+		onBegin: function () {
+			let allPokemon = this.p1.pokemon.concat(this.p2.pokemon);
+			for (let i = 0, len = allPokemon.length; i < len; i++) {
+				let pokemon = allPokemon[i];
+				let newatk = pokemon.stats.def;
+				let newdef = pokemon.stats.atk;
+				let newspa = pokemon.stats.spd;
+				let newspd = pokemon.stats.spa;
+				pokemon.stats.atk = newatk;
+				pokemon.stats.def = newdef;
+				pokemon.stats.spa = newspa;
+				pokemon.stats.spd = newspd;
+				
+			}
+		},
 	},
 	{
 		name: "Hoenn Weather Random",
@@ -302,6 +704,21 @@ exports.Formats = [
 
 		team: 'randomHoennWeather',
 		ruleset: ['Random (no PotD)'],
+		onBegin: function () {
+			let allPokemon = this.p1.pokemon.concat(this.p2.pokemon);
+			for (let i = 0, len = allPokemon.length; i < len; i++) {
+				let pokemon = allPokemon[i];
+				let newatk = pokemon.stats.def;
+				let newdef = pokemon.stats.atk;
+				let newspa = pokemon.stats.spd;
+				let newspd = pokemon.stats.spa;
+				pokemon.stats.atk = newatk;
+				pokemon.stats.def = newdef;
+				pokemon.stats.spa = newspa;
+				pokemon.stats.spd = newspd;
+				
+			}
+		},
 	},
 	{
 		name: "Super Smash Bros. Random",
@@ -309,6 +726,21 @@ exports.Formats = [
 
 		team: 'randomSmashBros',
 		ruleset: ['Random (no PotD)'],
+		onBegin: function () {
+			let allPokemon = this.p1.pokemon.concat(this.p2.pokemon);
+			for (let i = 0, len = allPokemon.length; i < len; i++) {
+				let pokemon = allPokemon[i];
+				let newatk = pokemon.stats.def;
+				let newdef = pokemon.stats.atk;
+				let newspa = pokemon.stats.spd;
+				let newspd = pokemon.stats.spa;
+				pokemon.stats.atk = newatk;
+				pokemon.stats.def = newdef;
+				pokemon.stats.spa = newspa;
+				pokemon.stats.spd = newspd;
+				
+			}
+		},
 	},
 	{
 		name: "Orb Random",
@@ -316,6 +748,21 @@ exports.Formats = [
 
 		team: 'randomOrb',
 		ruleset: ['Random (no PotD)'],
+		onBegin: function () {
+			let allPokemon = this.p1.pokemon.concat(this.p2.pokemon);
+			for (let i = 0, len = allPokemon.length; i < len; i++) {
+				let pokemon = allPokemon[i];
+				let newatk = pokemon.stats.def;
+				let newdef = pokemon.stats.atk;
+				let newspa = pokemon.stats.spd;
+				let newspd = pokemon.stats.spa;
+				pokemon.stats.atk = newatk;
+				pokemon.stats.def = newdef;
+				pokemon.stats.spa = newspa;
+				pokemon.stats.spd = newspd;
+				
+			}
+		},
 	},
 	{
 		name: "Metronome 3v3 Random",
@@ -328,6 +775,21 @@ exports.Formats = [
 		mod: 'metronomerandom',
 		team: 'randomMetronome',
 		ruleset: ['Random (no PotD)'],
+		onBegin: function () {
+			let allPokemon = this.p1.pokemon.concat(this.p2.pokemon);
+			for (let i = 0, len = allPokemon.length; i < len; i++) {
+				let pokemon = allPokemon[i];
+				let newatk = pokemon.stats.def;
+				let newdef = pokemon.stats.atk;
+				let newspa = pokemon.stats.spd;
+				let newspd = pokemon.stats.spa;
+				pokemon.stats.atk = newatk;
+				pokemon.stats.def = newdef;
+				pokemon.stats.spa = newspa;
+				pokemon.stats.spd = newspd;
+				
+			}
+		},
 	},
 	{
 		name: "Metronome 6v6 Random",
@@ -336,6 +798,21 @@ exports.Formats = [
 		mod: 'metronomerandom',
 		team: 'randomMetronome',
 		ruleset: ['Random (no PotD)'],
+		onBegin: function () {
+			let allPokemon = this.p1.pokemon.concat(this.p2.pokemon);
+			for (let i = 0, len = allPokemon.length; i < len; i++) {
+				let pokemon = allPokemon[i];
+				let newatk = pokemon.stats.def;
+				let newdef = pokemon.stats.atk;
+				let newspa = pokemon.stats.spd;
+				let newspd = pokemon.stats.spa;
+				pokemon.stats.atk = newatk;
+				pokemon.stats.def = newdef;
+				pokemon.stats.spa = newspa;
+				pokemon.stats.spd = newspd;
+				
+			}
+		},
 	},
 	/* {
 		name: "Winter Wonderland",
@@ -3473,6 +3950,21 @@ exports.Formats = [
 		gameType: 'doubles',
 		team: 'randomDoubles',
 		ruleset: ['PotD', 'Pokemon', 'HP Percentage Mod', 'Cancel Mod', 'Team Preview'],
+		onBegin: function () {
+			let allPokemon = this.p1.pokemon.concat(this.p2.pokemon);
+			for (let i = 0, len = allPokemon.length; i < len; i++) {
+				let pokemon = allPokemon[i];
+				let newatk = pokemon.stats.def;
+				let newdef = pokemon.stats.atk;
+				let newspa = pokemon.stats.spd;
+				let newspd = pokemon.stats.spa;
+				pokemon.stats.atk = newatk;
+				pokemon.stats.def = newdef;
+				pokemon.stats.spa = newspa;
+				pokemon.stats.spd = newspd;
+				
+			}
+		},
 	},
 	{
 		name: "Triples Random",
@@ -3481,6 +3973,21 @@ exports.Formats = [
 		gameType: 'triples',
 		team: 'randomDoubles',
 		ruleset: ['PotD', 'Pokemon', 'HP Percentage Mod', 'Cancel Mod', 'Team Preview'],
+		onBegin: function () {
+			let allPokemon = this.p1.pokemon.concat(this.p2.pokemon);
+			for (let i = 0, len = allPokemon.length; i < len; i++) {
+				let pokemon = allPokemon[i];
+				let newatk = pokemon.stats.def;
+				let newdef = pokemon.stats.atk;
+				let newspa = pokemon.stats.spd;
+				let newspd = pokemon.stats.spa;
+				pokemon.stats.atk = newatk;
+				pokemon.stats.def = newdef;
+				pokemon.stats.spa = newspa;
+				pokemon.stats.spd = newspd;
+				
+			}
+		},
 	},
 	{
 		name: "Battle Factory",
@@ -3488,6 +3995,21 @@ exports.Formats = [
 
 		team: 'randomFactory',
 		ruleset: ['Pokemon', 'Sleep Clause Mod', 'Team Preview', 'HP Percentage Mod', 'Cancel Mod', 'Mega Rayquaza Clause'],
+		onBegin: function () {
+			let allPokemon = this.p1.pokemon.concat(this.p2.pokemon);
+			for (let i = 0, len = allPokemon.length; i < len; i++) {
+				let pokemon = allPokemon[i];
+				let newatk = pokemon.stats.def;
+				let newdef = pokemon.stats.atk;
+				let newspa = pokemon.stats.spd;
+				let newspd = pokemon.stats.spa;
+				pokemon.stats.atk = newatk;
+				pokemon.stats.def = newdef;
+				pokemon.stats.spa = newspa;
+				pokemon.stats.spd = newspd;
+				
+			}
+		},
 	},
 	{
 		name: "Hackmons Cup",
@@ -3496,6 +4018,21 @@ exports.Formats = [
 
 		team: 'randomHC',
 		ruleset: ['Random (no PotD)'],
+		onBegin: function () {
+			let allPokemon = this.p1.pokemon.concat(this.p2.pokemon);
+			for (let i = 0, len = allPokemon.length; i < len; i++) {
+				let pokemon = allPokemon[i];
+				let newatk = pokemon.stats.def;
+				let newdef = pokemon.stats.atk;
+				let newspa = pokemon.stats.spd;
+				let newspd = pokemon.stats.spa;
+				pokemon.stats.atk = newatk;
+				pokemon.stats.def = newdef;
+				pokemon.stats.spa = newspa;
+				pokemon.stats.spd = newspd;
+				
+			}
+		},
 	},
 	{
 		name: "1v1 Challenge Cup",
@@ -3506,6 +4043,21 @@ exports.Formats = [
 		},
 		team: 'randomCC',
 		ruleset: ['Random (no PotD)'],
+		onBegin: function () {
+			let allPokemon = this.p1.pokemon.concat(this.p2.pokemon);
+			for (let i = 0, len = allPokemon.length; i < len; i++) {
+				let pokemon = allPokemon[i];
+				let newatk = pokemon.stats.def;
+				let newdef = pokemon.stats.atk;
+				let newspa = pokemon.stats.spd;
+				let newspd = pokemon.stats.spa;
+				pokemon.stats.atk = newatk;
+				pokemon.stats.def = newdef;
+				pokemon.stats.spa = newspa;
+				pokemon.stats.spd = newspd;
+				
+			}
+		},
 	},
 	{
 		name: "Doubles Hackmons Cup",
@@ -3515,6 +4067,21 @@ exports.Formats = [
 		team: 'randomHC',
 		searchShow: false,
 		ruleset: ['Random (no PotD)'],
+		onBegin: function () {
+			let allPokemon = this.p1.pokemon.concat(this.p2.pokemon);
+			for (let i = 0, len = allPokemon.length; i < len; i++) {
+				let pokemon = allPokemon[i];
+				let newatk = pokemon.stats.def;
+				let newdef = pokemon.stats.atk;
+				let newspa = pokemon.stats.spd;
+				let newspd = pokemon.stats.spa;
+				pokemon.stats.atk = newatk;
+				pokemon.stats.def = newdef;
+				pokemon.stats.spa = newspa;
+				pokemon.stats.spd = newspd;
+				
+			}
+		},
 	},
 	{
 		name: "Triples Hackmons Cup",
@@ -3524,6 +4091,21 @@ exports.Formats = [
 		team: 'randomHC',
 		searchShow: false,
 		ruleset: ['Random (no PotD)'],
+		onBegin: function () {
+			let allPokemon = this.p1.pokemon.concat(this.p2.pokemon);
+			for (let i = 0, len = allPokemon.length; i < len; i++) {
+				let pokemon = allPokemon[i];
+				let newatk = pokemon.stats.def;
+				let newdef = pokemon.stats.atk;
+				let newspa = pokemon.stats.spd;
+				let newspd = pokemon.stats.spa;
+				pokemon.stats.atk = newatk;
+				pokemon.stats.def = newdef;
+				pokemon.stats.spa = newspa;
+				pokemon.stats.spd = newspd;
+				
+			}
+		},
 	},
 	{
 		name: "Spring Random",
@@ -3536,6 +4118,19 @@ exports.Formats = [
 		onBegin: function() {
 			this.setWeather('Hail');
 			delete this.weatherData.duration;
+			let allPokemon = this.p1.pokemon.concat(this.p2.pokemon);
+			for (let i = 0, len = allPokemon.length; i < len; i++) {
+				let pokemon = allPokemon[i];
+				let newatk = pokemon.stats.def;
+				let newdef = pokemon.stats.atk;
+				let newspa = pokemon.stats.spd;
+				let newspd = pokemon.stats.spa;
+				pokemon.stats.atk = newatk;
+				pokemon.stats.def = newdef;
+				pokemon.stats.spa = newspa;
+				pokemon.stats.spd = newspd;
+				
+			}
 		},
 		onSwitchIn: function(pokemon, target, move) {
 			if (pokemon.template.species === 'Moltres' || pokemon.template.species === 'Ho-Oh' || pokemon.template.species === 'Groudon' || pokemon.template.species === 'Groudon-Primal') {
@@ -3661,6 +4256,21 @@ exports.Formats = [
 		searchShow: false,
 		team: 'randomSummerSendoff',
 		ruleset: ['Random (no PotD)'],
+		onBegin: function () {
+			let allPokemon = this.p1.pokemon.concat(this.p2.pokemon);
+			for (let i = 0, len = allPokemon.length; i < len; i++) {
+				let pokemon = allPokemon[i];
+				let newatk = pokemon.stats.def;
+				let newdef = pokemon.stats.atk;
+				let newspa = pokemon.stats.spd;
+				let newspd = pokemon.stats.spa;
+				pokemon.stats.atk = newatk;
+				pokemon.stats.def = newdef;
+				pokemon.stats.spa = newspa;
+				pokemon.stats.spd = newspd;
+				
+			}
+		},
 	},
 	{
 		name: "Halloween Random",
@@ -3670,6 +4280,21 @@ exports.Formats = [
 		mod: 'halloweenrandom',
 		team: 'randomHalloween',
 		ruleset: ['Random (no PotD)'],
+		onBegin: function () {
+			let allPokemon = this.p1.pokemon.concat(this.p2.pokemon);
+			for (let i = 0, len = allPokemon.length; i < len; i++) {
+				let pokemon = allPokemon[i];
+				let newatk = pokemon.stats.def;
+				let newdef = pokemon.stats.atk;
+				let newspa = pokemon.stats.spd;
+				let newspd = pokemon.stats.spa;
+				pokemon.stats.atk = newatk;
+				pokemon.stats.def = newdef;
+				pokemon.stats.spa = newspa;
+				pokemon.stats.spd = newspd;
+				
+			}
+		},
 	},
 	{
 		name: "SwagPlay Random",
@@ -3679,6 +4304,21 @@ exports.Formats = [
 		mod: 'swagplayrandom',
 		team: 'randomSwagPlay',
 		ruleset: ['Random (no PotD)'],
+		onBegin: function () {
+			let allPokemon = this.p1.pokemon.concat(this.p2.pokemon);
+			for (let i = 0, len = allPokemon.length; i < len; i++) {
+				let pokemon = allPokemon[i];
+				let newatk = pokemon.stats.def;
+				let newdef = pokemon.stats.atk;
+				let newspa = pokemon.stats.spd;
+				let newspd = pokemon.stats.spa;
+				pokemon.stats.atk = newatk;
+				pokemon.stats.def = newdef;
+				pokemon.stats.spa = newspa;
+				pokemon.stats.spd = newspd;
+				
+			}
+		},
 	},
 
 	// XY Doubles
@@ -3700,6 +4340,21 @@ exports.Formats = [
 			'Mewtwo', 'Palkia', 'Rayquaza', 'Reshiram', 'Salamence-Mega', 'Salamencite', 'Shaymin-Sky', 'Xerneas', 'Yveltal', 'Zekrom',
 			'Soul Dew', 'Dark Void', 'Gravity ++ Grass Whistle', 'Gravity ++ Hypnosis', 'Gravity ++ Lovely Kiss', 'Gravity ++ Sing', 'Gravity ++ Sleep Powder', 'Gravity ++ Spore',
 		],
+		onBegin: function () {
+			let allPokemon = this.p1.pokemon.concat(this.p2.pokemon);
+			for (let i = 0, len = allPokemon.length; i < len; i++) {
+				let pokemon = allPokemon[i];
+				let newatk = pokemon.stats.def;
+				let newdef = pokemon.stats.atk;
+				let newspa = pokemon.stats.spd;
+				let newspd = pokemon.stats.spa;
+				pokemon.stats.atk = newatk;
+				pokemon.stats.def = newdef;
+				pokemon.stats.spa = newspa;
+				pokemon.stats.spd = newspd;
+				
+			}
+		},
 	},
 	{
 		name: "Doubles Ubers",
@@ -3709,6 +4364,21 @@ exports.Formats = [
 		gameType: 'doubles',
 		ruleset: ['Pokemon', 'Species Clause', 'Moody Clause', 'OHKO Clause', 'Evasion Moves Clause', 'Evasion Abilities Clause', 'Endless Battle Clause', 'HP Percentage Mod', 'Cancel Mod', 'Team Preview'],
 		banlist: ['Unreleased', 'Illegal', 'Dark Void'],
+		onBegin: function () {
+			let allPokemon = this.p1.pokemon.concat(this.p2.pokemon);
+			for (let i = 0, len = allPokemon.length; i < len; i++) {
+				let pokemon = allPokemon[i];
+				let newatk = pokemon.stats.def;
+				let newdef = pokemon.stats.atk;
+				let newspa = pokemon.stats.spd;
+				let newspd = pokemon.stats.spa;
+				pokemon.stats.atk = newatk;
+				pokemon.stats.def = newdef;
+				pokemon.stats.spa = newspa;
+				pokemon.stats.spd = newspd;
+				
+			}
+		},
 	},
 	{
 		name: "Doubles UU",
@@ -3724,6 +4394,21 @@ exports.Formats = [
 			'Mew', 'Milotic', 'Ninetales', 'Politoed', 'Rotom-Wash', 'Scrafty', 'Shaymin-Sky', 'Suicune', 'Sylveon', 'Talonflame',
 			'Terrakion', 'Thundurus', 'Togekiss', 'Tyranitar', 'Venusaur', 'Victini', 'Weavile', 'Whimsicott', 'Zapdos',
 		],
+		onBegin: function () {
+			let allPokemon = this.p1.pokemon.concat(this.p2.pokemon);
+			for (let i = 0, len = allPokemon.length; i < len; i++) {
+				let pokemon = allPokemon[i];
+				let newatk = pokemon.stats.def;
+				let newdef = pokemon.stats.atk;
+				let newspa = pokemon.stats.spd;
+				let newspd = pokemon.stats.spa;
+				pokemon.stats.atk = newatk;
+				pokemon.stats.def = newdef;
+				pokemon.stats.spa = newspa;
+				pokemon.stats.spd = newspd;
+				
+			}
+		},
 	},
 	{
 		name: "Doubles NU",
@@ -3741,6 +4426,21 @@ exports.Formats = [
 			'Murkrow', 'Nidoking', 'Porygon2', 'Reuniclus', 'Rhyperior', 'Rotom-Heat', 'Sableye', 'Salamence',
 			'Sceptile-Mega', 'Sceptilite', 'Scizor', 'Slowking', 'Snorlax', 'Togetic', 'Tornadus', 'Vaporeon', 'Volcarona',
 		],
+		onBegin: function () {
+			let allPokemon = this.p1.pokemon.concat(this.p2.pokemon);
+			for (let i = 0, len = allPokemon.length; i < len; i++) {
+				let pokemon = allPokemon[i];
+				let newatk = pokemon.stats.def;
+				let newdef = pokemon.stats.atk;
+				let newspa = pokemon.stats.spd;
+				let newspd = pokemon.stats.spa;
+				pokemon.stats.atk = newatk;
+				pokemon.stats.def = newdef;
+				pokemon.stats.spa = newspa;
+				pokemon.stats.spd = newspd;
+				
+			}
+		},
 	},
 	{
 		name: "VGC 2016",
@@ -3771,6 +4471,21 @@ exports.Formats = [
 				if (n > 2) return ["You can only use up to two legendary Pok\u00E9mon."];
 			}
 		},
+		onBegin: function () {
+			let allPokemon = this.p1.pokemon.concat(this.p2.pokemon);
+			for (let i = 0, len = allPokemon.length; i < len; i++) {
+				let pokemon = allPokemon[i];
+				let newatk = pokemon.stats.def;
+				let newdef = pokemon.stats.atk;
+				let newspa = pokemon.stats.spd;
+				let newspd = pokemon.stats.spa;
+				pokemon.stats.atk = newatk;
+				pokemon.stats.def = newdef;
+				pokemon.stats.spa = newspa;
+				pokemon.stats.spd = newspd;
+				
+			}
+		},
 	},
 	{
 		name: "Battle Spot Doubles",
@@ -3788,6 +4503,21 @@ exports.Formats = [
 		},
 		ruleset: ['Pokemon', 'Standard GBU', 'Team Preview'],
 		requirePentagon: true,
+		onBegin: function () {
+			let allPokemon = this.p1.pokemon.concat(this.p2.pokemon);
+			for (let i = 0, len = allPokemon.length; i < len; i++) {
+				let pokemon = allPokemon[i];
+				let newatk = pokemon.stats.def;
+				let newdef = pokemon.stats.atk;
+				let newspa = pokemon.stats.spd;
+				let newspd = pokemon.stats.spa;
+				pokemon.stats.atk = newatk;
+				pokemon.stats.def = newdef;
+				pokemon.stats.spa = newspa;
+				pokemon.stats.spd = newspd;
+				
+			}
+		},
 	},
 	{
 		name: "Battle Spot Special 13",
@@ -3806,6 +4536,21 @@ exports.Formats = [
 			if (set.item) {
 				const item = this.getItem(set.item);
 				if (item.megaStone) return ["Mega Stones are not permitted."];
+			}
+		},
+		onBegin: function () {
+			let allPokemon = this.p1.pokemon.concat(this.p2.pokemon);
+			for (let i = 0, len = allPokemon.length; i < len; i++) {
+				let pokemon = allPokemon[i];
+				let newatk = pokemon.stats.def;
+				let newdef = pokemon.stats.atk;
+				let newspa = pokemon.stats.spd;
+				let newspd = pokemon.stats.spa;
+				pokemon.stats.atk = newatk;
+				pokemon.stats.def = newdef;
+				pokemon.stats.spa = newspa;
+				pokemon.stats.spd = newspd;
+				
 			}
 		},
 	},
@@ -3841,6 +4586,21 @@ exports.Formats = [
 			'Lugia', 'Mewtwo', 'Palkia', 'Rayquaza', 'Reshiram', 'Xerneas', 'Yveltal', 'Zekrom',
 			'Soul Dew', 'Dark Void', 'Perish Song',
 		],
+		onBegin: function () {
+			let allPokemon = this.p1.pokemon.concat(this.p2.pokemon);
+			for (let i = 0, len = allPokemon.length; i < len; i++) {
+				let pokemon = allPokemon[i];
+				let newatk = pokemon.stats.def;
+				let newdef = pokemon.stats.atk;
+				let newspa = pokemon.stats.spd;
+				let newspd = pokemon.stats.spa;
+				pokemon.stats.atk = newatk;
+				pokemon.stats.def = newdef;
+				pokemon.stats.spa = newspa;
+				pokemon.stats.spd = newspd;
+				
+			}
+		},
 	},
 	{
 		name: "Battle Spot Triples",
@@ -3857,6 +4617,21 @@ exports.Formats = [
 		},
 		ruleset: ['Pokemon', 'Standard GBU', 'Team Preview'],
 		requirePentagon: true,
+		onBegin: function () {
+			let allPokemon = this.p1.pokemon.concat(this.p2.pokemon);
+			for (let i = 0, len = allPokemon.length; i < len; i++) {
+				let pokemon = allPokemon[i];
+				let newatk = pokemon.stats.def;
+				let newdef = pokemon.stats.atk;
+				let newspa = pokemon.stats.spd;
+				let newspd = pokemon.stats.spa;
+				pokemon.stats.atk = newatk;
+				pokemon.stats.def = newdef;
+				pokemon.stats.spa = newspa;
+				pokemon.stats.spd = newspd;
+				
+			}
+		},
 	},
 	{
 		name: "Festive Feud",
@@ -3879,7 +4654,22 @@ exports.Formats = [
 				}
 			}
 			if (problems.length) return ["Only red, green and white Pok\u00E9mon are permitted.", "(You have " + problems.join(', ') + ")"];
-		}
+		},
+		onBegin: function () {
+			let allPokemon = this.p1.pokemon.concat(this.p2.pokemon);
+			for (let i = 0, len = allPokemon.length; i < len; i++) {
+				let pokemon = allPokemon[i];
+				let newatk = pokemon.stats.def;
+				let newdef = pokemon.stats.atk;
+				let newspa = pokemon.stats.spd;
+				let newspd = pokemon.stats.spa;
+				pokemon.stats.atk = newatk;
+				pokemon.stats.def = newdef;
+				pokemon.stats.spa = newspa;
+				pokemon.stats.spd = newspd;
+				
+			}
+		},
 	},
 	{
 		name: "Triples Custom Game",
@@ -4644,6 +5434,21 @@ exports.Formats = [
 		mod: 'gen5',
 		team: 'random',
 		ruleset: ['Random (no PotD)'],
+		onBegin: function () {
+			let allPokemon = this.p1.pokemon.concat(this.p2.pokemon);
+			for (let i = 0, len = allPokemon.length; i < len; i++) {
+				let pokemon = allPokemon[i];
+				let newatk = pokemon.stats.def;
+				let newdef = pokemon.stats.atk;
+				let newspa = pokemon.stats.spd;
+				let newspd = pokemon.stats.spa;
+				pokemon.stats.atk = newatk;
+				pokemon.stats.def = newdef;
+				pokemon.stats.spa = newspa;
+				pokemon.stats.spd = newspd;
+				
+			}
+		},
 	},
 	{
 		name: "[Gen 5] Custom Game",
@@ -4849,7 +5654,22 @@ exports.Formats = [
 
 		mod: 'gen2',
 		team: 'random',
-		ruleset: ['Random (no PotD)'],
+		ruleset: ['Pokemon', 'Sleep Clause Mod', 'HP Percentage Mod', 'Cancel Mod'],
+		onBegin: function () {
+			let allPokemon = this.p1.pokemon.concat(this.p2.pokemon);
+			for (let i = 0, len = allPokemon.length; i < len; i++) {
+				let pokemon = allPokemon[i];
+				let newatk = pokemon.stats.def;
+				let newdef = pokemon.stats.atk;
+				let newspa = pokemon.stats.spd;
+				let newspd = pokemon.stats.spa;
+				pokemon.stats.atk = newatk;
+				pokemon.stats.def = newdef;
+				pokemon.stats.spa = newspa;
+				pokemon.stats.spd = newspd;
+				
+			}
+		},
 	},
 	{
 		name: "[Gen 2] Custom Game",
@@ -4903,7 +5723,22 @@ exports.Formats = [
 
 		mod: 'gen1',
 		team: 'random',
-		ruleset: ['Random (no PotD)'],
+		ruleset: ['Pokemon', 'Sleep Clause Mod', 'HP Percentage Mod', 'Cancel Mod'],
+		onBegin: function () {
+			let allPokemon = this.p1.pokemon.concat(this.p2.pokemon);
+			for (let i = 0, len = allPokemon.length; i < len; i++) {
+				let pokemon = allPokemon[i];
+				let newatk = pokemon.stats.def;
+				let newdef = pokemon.stats.atk;
+				let newspa = pokemon.stats.spd;
+				let newspd = pokemon.stats.spa;
+				pokemon.stats.atk = newatk;
+				pokemon.stats.def = newdef;
+				pokemon.stats.spa = newspa;
+				pokemon.stats.spd = newspd;
+				
+			}
+		},
 	},
 	{
 		name: "[Gen 1] Challenge Cup",
@@ -4913,6 +5748,21 @@ exports.Formats = [
 		team: 'randomCC',
 		searchShow: false,
 		ruleset: ['Pokemon', 'Sleep Clause Mod', 'Freeze Clause Mod', 'HP Percentage Mod', 'Cancel Mod'],
+		onBegin: function () {
+			let allPokemon = this.p1.pokemon.concat(this.p2.pokemon);
+			for (let i = 0, len = allPokemon.length; i < len; i++) {
+				let pokemon = allPokemon[i];
+				let newatk = pokemon.stats.def;
+				let newdef = pokemon.stats.atk;
+				let newspa = pokemon.stats.spd;
+				let newspd = pokemon.stats.spa;
+				pokemon.stats.atk = newatk;
+				pokemon.stats.def = newdef;
+				pokemon.stats.spa = newspa;
+				pokemon.stats.spd = newspd;
+				
+			}
+		},
 	},
 	{
 		name: "[Gen 1] Stadium",
