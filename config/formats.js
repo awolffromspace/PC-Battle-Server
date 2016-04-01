@@ -337,7 +337,7 @@ exports.Formats = [
 		team: 'randomMetronome',
 		ruleset: ['Random (no PotD)'],
 	},
-	{
+	/* {
 		name: "Winter Wonderland",
 		section: "Random Battles (aka Randbats)",
 
@@ -454,7 +454,7 @@ exports.Formats = [
 		},
 		ruleset: ['Random (no PotD)']
 	},
-	/* {
+	{
 		name: "Super Staff Bros.",
 		section: "Random Battles (aka Randbats)",
 
