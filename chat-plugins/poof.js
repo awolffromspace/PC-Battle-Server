@@ -402,7 +402,7 @@ exports.commands = {
 
 			room.addRaw('<center><strong><font color="' + colour + '">~~ ' + Tools.escapeHTML(message) + ' ~~</font></strong></center>');
 			user.leaveRoom(room);
-		} else if (userid.toUpperCase() === 'KINGNOVAT' || userid.toUpperCase() === 'KINGASRIEL') {
+		} else if (userid.toUpperCase() === 'KINGNOVAT' || userid.toUpperCase() === 'KINGASRIEL' || userid.toUpperCase() === 'XELUSIVEEMERALDX') {
 			var message = target || kingnovat[Math.floor(Math.random() * kingnovat.length)];
 
 			var colour = '#' + [1, 1, 1].map(function () {
