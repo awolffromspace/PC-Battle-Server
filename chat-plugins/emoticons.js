@@ -93,6 +93,7 @@ var emotes = {
 	':scizor:': 'http://cbc.pokecommunity.com/config/emoticons/scizor.png',
 	':seduce:': 'http://cbc.pokecommunity.com/config/emoticons/seduce.png',
 	':senpai:': 'http://cbc.pokecommunity.com/config/emoticons/senpai.png',
+	':shinx:': 'http://cbc.pokecommunity.com/config/emoticons/shinx.png',
 	':sims:': 'http://cbc.pokecommunity.com/config/emoticons/sims.png',
 	':skarmory:': 'http://cbc.pokecommunity.com/config/emoticons/skarmory.png',
 	':slowpoke:': 'http://cbc.pokecommunity.com/config/emoticons/slowpoke.png',
