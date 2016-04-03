@@ -9,19 +9,12 @@ exports.Formats = [
 	///////////////////////////////////////////////////////////////////
 
 	{
-		name: "[LotW 16] UU",
-		desc: [
-			"&bullet; <a href=\"https://www.smogon.com/forums/threads/3557948/\">np: UU Stage 6</a>",
-			"&bullet; <a href=\"https://www.smogon.com/dex/xy/tags/uu/\">UU Banlist</a>",
-			"&bullet; <a href=\"https://www.smogon.com/forums/threads/3555277/\">UU Viability Ranking</a>",
-		],
+		name: "[LotW 18] Uber Random",
 		section: "ORAS Singles",
 
-		ruleset: ['OU'],
-		banlist: ['OU', 'BL', 'Drizzle', 'Drought'],
-		onBegin: function () {
-			this.add('raw|This is the Ladder of the Week! Use the "Battle!" button to try and win the LotW. The winner is the user who is #1 on the ladder by 10 PM ET on Saturday. They receive a <img src="http://cbc.pokecommunity.com/config/user-list-images/trophy.png" /> beside their name for a week.');
-		},
+		mod: 'uberrandom',
+		team: 'randomUber',
+		ruleset: ['Random (no PotD)'],
 	},
 	{
 		name: "OU",
