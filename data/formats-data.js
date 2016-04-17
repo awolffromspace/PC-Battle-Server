@@ -5383,7 +5383,7 @@ exports.BattleFormatsData = {
 		randomDoubleBattleMoves: ["psychic", "darkpulse", "focusblast", "protect", "hyperspacefury", "zenheadbutt", "icepunch", "drainpunch", "gunkshot"],
 		eventOnly: true,
 		unobtainableShiny: true,
-		tier: "OU",
+		tier: "Uber",
 	},
 	volcanion: {
 		randomBattleMoves: ["substitute", "steameruption", "fireblast", "sludgewave", "hiddenpowerice", "earthpower", "superpower"],
