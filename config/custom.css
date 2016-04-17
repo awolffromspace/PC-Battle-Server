@@ -6,6 +6,8 @@ html,body{margin:0;padding:0}body{background:#110008 url("http://cbc.pokecommuni
 .mainmenu .menugroup:nth-child(1) .button.disabled,.mainmenu .menugroup:nth-child(1) .button.disabled:hover,.mainmenu .menugroup:nth-child(1) .button.disabled:active{color:white!important}
 .userlist li button:hover{background:rgba(220,228,236,0.4)}
 .userlist li button:active{background:rgba(204,212,220,0.4)}
+.dark .userlist li button:hover{background:rgba(34,34,34,0.4)}
+.dark .userlist li button:active{background:rgba(0,0,0,0.4)}
 .broadcast-lobby{color:white;background-color:#110008;padding:5px 7px}
 .broadcast-emerald{color:white;text-shadow:2px 2px 2px black;background-color:#0b121f;background-repeat:no-repeat;padding:5px 7px;background-image:url("http://cbc.pokecommunity.com/config/backgrounds/emerald.png")}
 .broadcast-emerald-alt{color:white;background-color:#0b121f;padding:5px 7px}
