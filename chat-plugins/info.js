@@ -1032,7 +1032,7 @@ exports.commands = {
 			"- Archy<br />" +
 			"- Aurora<br />" +
 			"- Christos<br />" +
-			"- Dragon (bellossom, Lailah-tan, Rei)<br />" +
+			"- Dragon (bellossom)<br />" +
 			"- Omicron (Megido, omicorn, omicronhuh)<br />" +
 			"- Sanguine (Queen Bitch)<br />" +
 			"- Syndrome (Daddy, King Syn, Morning Bliss)<br /><br />" +
