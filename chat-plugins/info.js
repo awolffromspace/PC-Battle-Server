@@ -1020,23 +1020,22 @@ exports.commands = {
 			"<b>~ Administrators</b><br />" +
 			"- Anti (Papa Anti)<br />" +
 			"- Ausaudriel (Audy)<br />" +
-			"- Castform (Chase, Chaseform, Lаnа Del Phox, Michonne, Weаther Ball)<br />" +
-			"- Dragon (bellossom, Dгagon Dance, Erika Senpai, Kou Noodles, Lailah-tan, LGDArm, Love Clinic, Rei)<br />" +
+			"- Castform (Chase, Chaseform, Lаnа Del Phox, Michonne, Negan, Weаther Ball)<br />" +
 			"- Hiroshi Sotomura<br />" +
 			"- Livewire<br />" +
 			"- Nolafus<br />" +
-			"- Razor Leaf (unkempt harold)<br />" +
 			"- Rukario (PPN)<br />" +
 			"- Sheep (Cirnysheep)<br />" +
 			"- Sylphiel<br />" +
 			"- wolf (wofl)<br /><br />" +
 			"<b>@ Moderators</b><br />" +
-			"- Achromatic (Cap'n Chromatic)<br />" +
 			"- Archy<br />" +
 			"- Aurora<br />" +
 			"- Christos<br />" +
+			"- Dragon (bellossom, Lailah-tan, Rei)<br />" +
 			"- Omicron (Megido, omicorn, omicronhuh)<br />" +
-			"- Sanguine (Queen Bitch)<br /><br />" +
+			"- Sanguine (Queen Bitch)<br />" +
+			"- Syndrome (Daddy, King Syn, Morning Bliss)<br /><br />" +
 			"<a href=\"http://www.pokecommunity.com/showthread.php?t=289012#staff\">Click here for more details.</a>"
 		);
 	},
