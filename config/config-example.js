@@ -602,6 +602,7 @@ exports.customavatars = {
 	'yunowhoitis': 'stormlinoooone.png',
 	'yunowhoitis': 'stormlinoooone.png',
 	'digitalesper': 'digitalesper.png',
+	'snow': 'snow.gif',
 };
 
 // custom avatars appear in profile by specifiying server url.
