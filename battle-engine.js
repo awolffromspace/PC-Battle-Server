@@ -12,20 +12,12 @@
 
 'use strict';
 
-Object.defineProperty(Object, 'values', {writable: true, configurable: true, value: require('object.values')});
-
 global.Config = require('./config/config.js');
 
 if (Config.crashguard) {
 	// graceful crash - allow current battles to finish before restarting
 	process.on('uncaughtException', err => {
 		require('./crashlogger.js')(err, 'A simulator process');
-		/* let stack = Tools.escapeHTML(err.stack).split("\n").slice(0, 2).join("<br />");
-		if (Rooms.lobby) {
-			Rooms.lobby.addRaw('<div><b>THE SERVER HAS CRASHED:</b> ' + stack + '<br />Please restart the server.</div>');
-			Rooms.lobby.addRaw('<div>You will not be able to talk in the lobby or start new battles until the server restarts.</div>');
-		}
-		Rooms.global.lockdown = true; */
 	});
 }
 
@@ -133,7 +125,7 @@ BattlePokemon = (() => {
 			this.battle.debug('Unidentified species: ' + this.species);
 			this.baseTemplate = this.battle.getTemplate('Unown');
 		}
-		this.species = this.baseTemplate.species;
+		this.species = Tools.getSpecies(set.species);
 		if (set.name === set.species || !set.name) {
 			set.name = this.baseTemplate.baseSpecies;
 		}
@@ -466,12 +458,16 @@ BattlePokemon = (() => {
 			}
 			break;
 		default:
+			let selectedTarget = target;
 			if (!target || (target.fainted && target.side !== this.side)) {
 				// If a targeted foe faints, the move is retargeted
 				target = this.battle.resolveTarget(this, move);
 			}
 			if (target.side.active.length > 1) {
 				target = this.battle.priorityEvent('RedirectTarget', this, this, move, target);
+			}
+			if (selectedTarget !== target) {
+				this.battle.retargetLastMove(target);
 			}
 			targets = [target];
 
@@ -578,6 +574,10 @@ BattlePokemon = (() => {
 			if (moveEntry.id === 'hiddenpower') {
 				moveName = 'Hidden Power ' + this.hpType;
 				if (this.battle.gen < 6) moveName += ' ' + this.hpPower;
+			} else if (moveEntry.id === 'return') {
+				moveName = 'Return ' + this.battle.getMove('return').basePowerCallback(this);
+			} else if (moveEntry.id === 'frustration') {
+				moveName = 'Frustration ' + this.battle.getMove('frustration').basePowerCallback(this);
 			}
 			let target = moveEntry.target;
 			if (moveEntry.id === 'curse') {
@@ -805,7 +805,7 @@ BattlePokemon = (() => {
 			evasion: 0,
 		};
 
-		if (this.battle.gen === 1 && this.baseMoves.indexOf('mimic') >= 0 && !this.transformed) {
+		if (this.battle.gen === 1 && this.baseMoves.includes('mimic') && !this.transformed) {
 			let moveslot = this.baseMoves.indexOf('mimic');
 			let mimicPP = this.moveset[moveslot] ? this.moveset[moveslot].pp : 16;
 			this.moveset = this.baseMoveset.slice();
@@ -845,7 +845,7 @@ BattlePokemon = (() => {
 				if (this.hasType(type[i])) return true;
 			}
 		} else {
-			if (this.getTypes().indexOf(type) >= 0) return true;
+			if (this.getTypes().includes(type)) return true;
 		}
 		return false;
 	};
@@ -940,9 +940,7 @@ BattlePokemon = (() => {
 		return d;
 	};
 	BattlePokemon.prototype.trySetStatus = function (status, source, sourceEffect) {
-		if (!this.hp) return false;
-		if (this.status) return false;
-		return this.setStatus(status, source, sourceEffect);
+		return this.setStatus(this.status || status, source, sourceEffect);
 	};
 	BattlePokemon.prototype.cureStatus = function () {
 		if (!this.hp) return false;
@@ -960,20 +958,31 @@ BattlePokemon = (() => {
 			if (!sourceEffect) sourceEffect = this.battle.effect;
 		}
 
+		if (this.status === status.id) {
+			if (sourceEffect && sourceEffect.status === this.status) {
+				this.battle.add('-fail', this, this.status);
+			} else if (sourceEffect && sourceEffect.status) {
+				this.battle.add('-fail', this);
+			}
+			return false;
+		}
+
 		if (!ignoreImmunities && status.id) {
 			// the game currently never ignores immunities
 			if (!this.runStatusImmunity(status.id === 'tox' ? 'psn' : status.id)) {
 				this.battle.debug('immune to status');
+				if (sourceEffect && sourceEffect.status) this.battle.add('-immune', this, '[msg]');
 				return false;
 			}
 		}
-
-		if (this.status === status.id) return false;
 		let prevStatus = this.status;
 		let prevStatusData = this.statusData;
-		if (status.id && !this.battle.runEvent('SetStatus', this, source, sourceEffect, status)) {
-			this.battle.debug('set status [' + status.id + '] interrupted');
-			return false;
+		if (status.id) {
+			let result = this.battle.runEvent('SetStatus', this, source, sourceEffect, status);
+			if (!result) {
+				this.battle.debug('set status [' + status.id + '] interrupted');
+				return result;
+			}
 		}
 
 		this.status = status.id;
@@ -1015,10 +1024,11 @@ BattlePokemon = (() => {
 		if (!sourceEffect && this.battle.effect) sourceEffect = this.battle.effect;
 		if (!source && this.battle.event && this.battle.event.target) source = this.battle.event.target;
 		item = this.getItem();
-		if (this.battle.runEvent('UseItem', this, null, null, item) && this.battle.runEvent('EatItem', this, null, null, item)) {
+		if (this.battle.runEvent('UseItem', this, null, null, item) && this.battle.runEvent('TryEatItem', this, null, null, item)) {
 			this.battle.add('-enditem', this, item, '[eat]');
 
 			this.battle.singleEvent('Eat', item, this.itemData, this, source, sourceEffect);
+			this.battle.runEvent('EatItem', this, null, null, item);
 
 			this.lastItem = this.item;
 			this.item = '';
@@ -1082,7 +1092,10 @@ BattlePokemon = (() => {
 	BattlePokemon.prototype.setItem = function (item, source, effect) {
 		if (!this.hp || !this.isActive) return false;
 		item = this.battle.getItem(item);
-		if (item.id === 'leppaberry') {
+
+		let effectid;
+		if (this.battle.effect) effectid = this.battle.effect.id;
+		if (item.id === 'leppaberry' && effectid !== 'trick' && effectid !== 'switcheroo') {
 			this.isStale = 2;
 			this.isStaleSource = 'getleppa';
 		}
@@ -1104,7 +1117,7 @@ BattlePokemon = (() => {
 		if (!Array.isArray(item)) {
 			return ownItem === toId(item);
 		}
-		return (item.map(toId).indexOf(ownItem) >= 0);
+		return item.map(toId).includes(ownItem);
 	};
 	BattlePokemon.prototype.clearItem = function () {
 		return this.setItem('');
@@ -1136,7 +1149,7 @@ BattlePokemon = (() => {
 		if (!Array.isArray(ability)) {
 			return ownAbility === toId(ability);
 		}
-		return (ability.map(toId).indexOf(ownAbility) >= 0);
+		return ability.map(toId).includes(ownAbility);
 	};
 	BattlePokemon.prototype.clearAbility = function () {
 		return this.setAbility('');
@@ -1240,11 +1253,17 @@ BattlePokemon = (() => {
 		if (this.status) hpstring += ' ' + this.status;
 		return hpstring;
 	};
+	/**
+	 * Sets a type (except on Arceus, who resists type changes)
+	 * newType can be an array, but this is for OMs only. The game in
+	 * reality doesn't support setting a type to more than one type.
+	 */
 	BattlePokemon.prototype.setType = function (newType, enforce) {
 		// Arceus first type cannot be normally changed
 		if (!enforce && this.template.num === 493) return false;
 
-		this.types = [newType];
+		if (!newType) throw new Error("Must pass type to setType");
+		this.types = (typeof newType === 'string' ? [newType] : newType);
 		this.addedType = '';
 
 		return true;
@@ -1617,24 +1636,21 @@ Battle = (() => {
 	let Battle = {};
 
 	Battle.construct = (() => {
-		let battleProtoCache = {};
+		let battleProtoCache = new Map();
 		return (roomid, formatarg, rated) => {
-			let battle = Object.create((() => {
-				if (battleProtoCache[formatarg] !== undefined) {
-					return battleProtoCache[formatarg];
-				}
-
+			let format = Tools.getFormat(formatarg);
+			let mod = format.mod || 'base';
+			if (!battleProtoCache.has(mod)) {
 				// Scripts overrides Battle overrides Scripts overrides Tools
-				let tools = Tools.mod(formatarg);
+				let tools = Tools.mod(mod);
 				let proto = Object.create(tools);
-				for (let i in Battle.prototype) {
-					proto[i] = Battle.prototype[i];
-				}
+				Object.assign(proto, Battle.prototype);
 				let battle = Object.create(proto);
 				tools.install(battle);
-				return (battleProtoCache[formatarg] = battle);
-			})());
-			Battle.prototype.init.call(battle, roomid, formatarg, rated);
+				battleProtoCache.set(mod, battle);
+			}
+			let battle = Object.create(battleProtoCache.get(mod));
+			Battle.prototype.init.call(battle, roomid, format, rated);
 			return battle;
 		};
 	})();
@@ -1646,9 +1662,7 @@ Battle = (() => {
 
 	Battle.prototype = {};
 
-	Battle.prototype.init = function (roomid, formatarg, rated) {
-		let format = Tools.getFormat(formatarg);
-
+	Battle.prototype.init = function (roomid, format, rated) {
 		this.log = [];
 		this.sides = [null, null];
 		this.roomid = roomid;
@@ -1870,7 +1884,7 @@ Battle = (() => {
 		if (!Array.isArray(weather)) {
 			return ourWeather === toId(weather);
 		}
-		return (weather.map(toId).indexOf(ourWeather) >= 0);
+		return weather.map(toId).includes(ourWeather);
 	};
 	Battle.prototype.getWeather = function () {
 		return this.getEffect(this.weather);
@@ -1922,7 +1936,7 @@ Battle = (() => {
 		if (!Array.isArray(terrain)) {
 			return ourTerrain === toId(terrain);
 		}
-		return (terrain.map(toId).indexOf(ourTerrain) >= 0);
+		return terrain.map(toId).includes(ourTerrain);
 	};
 	Battle.prototype.getTerrain = function () {
 		return this.getEffect(this.terrain);
@@ -2329,7 +2343,6 @@ Battle = (() => {
 					TryHit: 1,
 					TryHitSide: 1,
 					TryMove: 1,
-					Hit: 1,
 					Boost: 1,
 					DragOut: 1,
 				};
@@ -3406,6 +3419,7 @@ Battle = (() => {
 				basePower: move,
 				type: '???',
 				category: 'Physical',
+				willCrit: false,
 				flags: {},
 			};
 		}
@@ -3450,18 +3464,19 @@ Battle = (() => {
 		basePower = this.clampIntRange(basePower, 1);
 
 		let critMult;
+		let critRatio = this.runEvent('ModifyCritRatio', pokemon, target, move, move.critRatio || 0);
 		if (this.gen <= 5) {
-			move.critRatio = this.clampIntRange(move.critRatio, 0, 5);
+			critRatio = this.clampIntRange(critRatio, 0, 5);
 			critMult = [0, 16, 8, 4, 3, 2];
 		} else {
-			move.critRatio = this.clampIntRange(move.critRatio, 0, 4);
+			critRatio = this.clampIntRange(critRatio, 0, 4);
 			critMult = [0, 16, 8, 2, 1];
 		}
 
 		move.crit = move.willCrit || false;
 		if (move.willCrit === undefined) {
-			if (move.critRatio) {
-				move.crit = (this.random(critMult[move.critRatio]) === 0);
+			if (critRatio) {
+				move.crit = (this.random(critMult[critRatio]) === 0);
 			}
 		}
 
@@ -4053,7 +4068,7 @@ Battle = (() => {
 			delete decision.pokemon.draggedIn;
 			break;
 		case 'runPrimal':
-			this.singleEvent('Primal', decision.pokemon.getItem(), decision.pokemon.itemData, decision.pokemon);
+			if (!decision.pokemon.transformed) this.singleEvent('Primal', decision.pokemon.getItem(), decision.pokemon.itemData, decision.pokemon);
 			break;
 		case 'shift': {
 			if (!decision.pokemon.isActive) return false;

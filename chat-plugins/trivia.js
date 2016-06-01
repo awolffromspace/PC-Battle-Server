@@ -161,7 +161,7 @@ let Trivia = (() => {
 		if (this.participants.has(user.userid)) return output.sendReply("You have already signed up for this trivia game.");
 
 		let latestIp = user.latestIp;
-		for (let participantid, participantsIterator = this.participants.keys(); !!(participantid = participantsIterator.next().value);) { // replace with for-of loop once available
+		for (let participantid of this.participants.keys()) {
 			let participant = Users(participantid);
 			if (participant && participant.ips[latestIp]) return output.sendReply("You have already signed up for this trivia game.");
 		}
@@ -300,7 +300,7 @@ let Trivia = (() => {
 		this.phase = 'intermission';
 
 		let isActive = false;
-		for (let scoreData, participantsIterator = this.participants.values(); !!(scoreData = participantsIterator.next().value);) { // replace with for-of loop once available
+		for (let scoreData of this.participants.values()) {
 			if (scoreData.answered) {
 				scoreData.answered = false;
 				isActive = true;
@@ -343,7 +343,7 @@ let Trivia = (() => {
 
 		if (!this.currentQuestions.length) return this.stalemate();
 
-		for (let participantsIterator = this.participants.values(); !!(scoreData = participantsIterator.next().value);) { // replace with for-of loop once available
+		for (let scoreData of this.participants.values()) {
 			scoreData.answered = false;
 		}
 
@@ -369,7 +369,7 @@ let Trivia = (() => {
 			"<tr bgcolor=\"#6688AA\"><th width=\"100px\">Points gained</th><th>Correct</th></tr>";
 		let innerBuffer = [[], [], [], [], []];
 
-		for (let data, participantsIterator = this.participants.entries(); !!(data = participantsIterator.next().value);) { // replace with for-of loop once available
+		for (let data of this.participants) {
 			let scoreData = data[1];
 			scoreData.answered = false;
 			if (scoreData.responderIndex < 0) continue;
@@ -420,7 +420,7 @@ let Trivia = (() => {
 		let points = ~~(5 - 4 * (this.correctResponders - 1) / (this.participants.size - 1 || 1));
 		let innerBuffer = [];
 
-		for (let data, participantsIterator = this.participants.entries(); !!(data = participantsIterator.next().value);) { // replace with for-of loop once available
+		for (let data of this.participants) {
 			let scoreData = data[1];
 			scoreData.answered = false;
 			if (scoreData.responderIndex < 0) continue;
@@ -469,7 +469,7 @@ let Trivia = (() => {
 		let leaderboard = triviaData.leaderboard;
 
 		// update leaderboard scores
-		for (let data, participantsIterator = this.participants.entries(); !!(data = participantsIterator.next().value);) { // replace with for-of loop once available
+		for (let data of this.participants) {
 			let scoreData = data[1];
 			if (!scoreData.score) continue;
 
@@ -822,7 +822,7 @@ let commands = {
 		let buffer = "|raw|<div class=\"ladder\"><table>";
 
 		if (!target) {
-			if (!this.canBroadcast()) return false;
+			if (!this.runBroadcast()) return false;
 
 			let questions = triviaData.questions;
 			let questionsLen = questions.length;
@@ -882,7 +882,7 @@ let commands = {
 	'': 'status',
 	status: function (target, room, user) {
 		if (room.id !== 'lobby') return this.errorReply('This command can only be used in Lobby.');
-		if (!this.canBroadcast()) return false;
+		if (!this.runBroadcast()) return false;
 		let trivium = trivia[room.id];
 		if (!trivium) return this.errorReply("There is no trivia game in progress.");
 		trivium.getStatus(this, user);
@@ -891,7 +891,7 @@ let commands = {
 
 	players: function (target, room) {
 		if (room.id !== 'lobby') return this.errorReply('This command can only be used in Lobby.');
-		if (!this.canBroadcast()) return false;
+		if (!this.runBroadcast()) return false;
 		let trivium = trivia[room.id];
 		if (!trivium) return this.errorReply("There is no trivia game in progress.");
 		trivium.getParticipants(this);
@@ -926,7 +926,7 @@ let commands = {
 
 	ladder: function (target, room) {
 		if (room.id !== 'lobby') return this.errorReply('This command can only be used in Lobby.');
-		if (!this.canBroadcast()) return false;
+		if (!this.runBroadcast()) return false;
 
 		let ladder = triviaData.ladder;
 		let leaderboard = triviaData.leaderboard;

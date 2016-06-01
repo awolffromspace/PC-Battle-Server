@@ -13,10 +13,26 @@
 
 'use strict';
 
-Object.defineProperty(Object, 'values', {writable: true, configurable: true, value: require('object.values')});
-
 const fs = require('fs');
 const path = require('path');
+
+// shim Object.values
+if (!Object.values) {
+	Object.values = function (object) {
+		let values = [];
+		for (let k in object) values.push(object[k]);
+		return values;
+	};
+}
+// shim Array.prototype.includes
+if (!Array.prototype.includes) {
+	Object.defineProperty(Array.prototype, 'includes', { // eslint-disable-line no-extend-native
+		writable: true, configurable: true,
+		value: function (object) {
+			return this.indexOf(object) !== -1;
+		},
+	});
+}
 
 module.exports = (() => {
 	let moddedTools = {};
@@ -229,6 +245,18 @@ module.exports = (() => {
 	};
 	let toId = Tools.prototype.getId;
 
+	Tools.prototype.getSpecies = function (species) {
+		let id = toId(species || '');
+		let template = this.getTemplate(id);
+		if (template.otherForms && template.otherForms.indexOf(id) >= 0) {
+			let form = id.slice(template.species.length);
+			species = template.species + '-' + form[0].toUpperCase() + form.slice(1);
+		} else {
+			species = template.species;
+		}
+		return species;
+	};
+
 	Tools.prototype.getTemplate = function (template) {
 		if (!template || typeof template === 'string') {
 			let name = (template || '').trim();
@@ -240,7 +268,7 @@ module.exports = (() => {
 			if (!this.data.Pokedex[id]) {
 				if (id.startsWith('mega') && this.data.Pokedex[id.slice(4) + 'mega']) {
 					id = id.slice(4) + 'mega';
-				} else if (id.startsWith('m') && this.data.Pokedex[id.slice(1) + 'mega'])  {
+				} else if (id.startsWith('m') && this.data.Pokedex[id.slice(1) + 'mega']) {
 					id = id.slice(1) + 'mega';
 				} else if (id.startsWith('primal') && this.data.Pokedex[id.slice(6) + 'primal']) {
 					id = id.slice(6) + 'primal';
@@ -607,7 +635,7 @@ module.exports = (() => {
 					if (banlistTable['Rule:' + toId(subformat.ruleset[i])]) continue;
 
 					banlistTable['Rule:' + toId(subformat.ruleset[i])] = subformat.ruleset[i];
-					if (format.ruleset.indexOf(subformat.ruleset[i]) < 0) format.ruleset.push(subformat.ruleset[i]);
+					if (!format.ruleset.includes(subformat.ruleset[i])) format.ruleset.push(subformat.ruleset[i]);
 
 					let subsubformat = this.getFormat(subformat.ruleset[i]);
 					if (subsubformat.ruleset || subsubformat.banlist) {
@@ -703,13 +731,17 @@ module.exports = (() => {
 		return parts.slice(0, 3).join("-") + " " + parts.slice(3, 6).join(":") + (isHour12 ? " " + parts[6] : "");
 	};
 
-	Tools.prototype.toDurationString = function (number) {
+	Tools.prototype.toDurationString = function (number, options) {
 		// TODO: replace by Intl.DurationFormat or equivalent when it becomes available (ECMA-402)
 		// https://github.com/tc39/ecma402/issues/47
 		const date = new Date(+number);
 		const parts = [date.getUTCFullYear() - 1970, date.getUTCMonth(), date.getUTCDate() - 1, date.getUTCHours(), date.getUTCMinutes(), date.getUTCSeconds()];
 		const unitNames = ["second", "minute", "hour", "day", "month", "year"];
 		const positiveIndex = parts.findIndex(elem => elem > 0);
+		if (options && options.hhmmss) {
+			let string = parts.slice(positiveIndex).map(value => value < 10 ? "0" + value : "" + value).join(":");
+			return string.length === 2 ? "00:" + string : string;
+		}
 		return parts.slice(positiveIndex).reverse().map((value, index) => value ? value + " " + unitNames[index] + (value > 1 ? "s" : "") : "").reverse().join(" ").trim();
 	};
 

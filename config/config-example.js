@@ -26,8 +26,8 @@ exports.potd = '';
 // crash guard - write errors to log file instead of crashing
 //   This is normally not recommended - if Node wants to crash, the
 //   server needs to be restarted
-//   Unfortunately, socket.io bug 409 requires some sort of crash guard
-//   https://github.com/LearnBoost/socket.io/issues/609
+//   However, most people want the server to stay online even if there is a
+//   crash, so this option is provided
 exports.crashguard = true;
 
 // login server data - don't forget the http:// and the trailing slash
@@ -605,13 +605,9 @@ exports.customavatars = {
 	'snow': 'snow.gif',
 };
 
-// custom avatars appear in profile by specifiying server url.
-exports.avatarurl = 'http://cbc.pokecommunity.com/config';
-
-// Tournament announcements
-// When tournaments are created in rooms listed below, they will be announced in
-// the server's main tournament room (either the specified tourroom or by default
-// the room 'tournaments')
+// tourroom - specify a room to receive tournament announcements (defaults to
+// the room 'tournaments').
+// tourannouncements - announcements are only allowed in these rooms
 exports.tourroom = '';
 exports.tourannouncements = [/* roomids */];
 

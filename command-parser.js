@@ -96,6 +96,21 @@ class CommandContext {
 		this.targetUser = null;
 	}
 
+	checkBanwords(room, message) {
+		if (!room) return true;
+		if (!room.banwordRegex) {
+			if (room.banwords && room.banwords.length) {
+				room.banwordRegex = new RegExp('(?:\\b|(?!\\w))(?:' + room.banwords.join('|') + ')(?:\\b|\\B(?!\\w))', 'i');
+			} else {
+				room.banwordRegex = true;
+			}
+		}
+		if (!message) return true;
+		if (room.banwordRegex !== true && room.banwordRegex.test(message)) {
+			return false;
+		}
+		return true;
+	}
 	sendReply(data) {
 		if (this.broadcasting) {
 			this.room.add(data);
@@ -105,9 +120,10 @@ class CommandContext {
 	}
 	errorReply(message) {
 		if (this.pmTarget) {
-			this.connection.send('|pm|' + this.user.getIdentity() + '|' + (this.pmTarget.getIdentity ? this.pmTarget.getIdentity() : ' ' + this.pmTarget) + '|/error ' + message);
+			let prefix = '|pm|' + this.user.getIdentity() + '|' + (this.pmTarget.getIdentity ? this.pmTarget.getIdentity() : ' ' + this.pmTarget) + '|/error ';
+			this.connection.send(prefix + message.replace(/\n/g, prefix));
 		} else {
-			this.sendReply('|html|<div class="message-error">' + Tools.escapeHTML(message) + '</div>');
+			this.sendReply('|html|<div class="message-error">' + Tools.escapeHTML(message).replace(/\n/g, '<br />') + '</div>');
 		}
 	}
 	sendReplyBox(html) {
@@ -172,16 +188,43 @@ class CommandContext {
 	}
 	canBroadcast(suppressMessage) {
 		if (!this.broadcasting && this.cmdToken === BROADCAST_TOKEN) {
-			let message = this.canTalk(this.message);
+			if (this.user.broadcasting) {
+				this.errorReply("You can't broadcast another command too soon.");
+				return false;
+			}
+
+			let message = this.canTalk(suppressMessage || this.message);
 			if (!message) return false;
 			if (!this.user.can('broadcast', null, this.room)) {
 				this.errorReply("You need to be voiced to broadcast this command's information.");
-				this.errorReply("To see it for yourself, use: /" + message.substr(1));
+				this.errorReply("To see it for yourself, use: /" + this.message.substr(1));
 				return false;
 			}
-			this.add('|c|' + this.user.getIdentity(this.room.id) + '|' + (suppressMessage || message));
-			this.broadcasting = true;
+			let broadcastMessage = message.toLowerCase().replace(/[^a-z0-9\s!,]/g, '');
+			this.message = message;
+			this.broadcastMessage = broadcastMessage;
+			this.user.broadcasting = true;
 		}
+		return true;
+	}
+	runBroadcast(suppressMessage) {
+		if (this.broadcasting || this.cmdToken !== BROADCAST_TOKEN) {
+			// Already being broadcast, or the user doesn't intend to broadcast.
+			return true;
+		}
+
+		if (!this.broadcastMessage) {
+			// Permission hasn't been checked yet. Do it now.
+			if (!this.canBroadcast(suppressMessage)) return false;
+		}
+
+		this.add('|c|' + this.user.getIdentity(this.room.id) + '|' + (suppressMessage || this.message));
+		this.room.lastBroadcast = this.broadcastMessage;
+		this.room.lastBroadcastTime = Date.now();
+
+		this.broadcasting = true;
+		this.user.broadcasting = false;
+
 		return true;
 	}
 	parse(message, inNamespace, room) {
@@ -246,6 +289,13 @@ class CommandContext {
 				this.errorReply("You are muted and cannot talk in this room.");
 				return false;
 			}
+			if ((!room || !room.battle) && (!targetUser || " +".includes(targetUser.group))) {
+				// in a chat room, or PMing non-staff
+				if (user.namelocked) {
+					this.errorReply("You are namelocked and cannot talk except in battles and to global staff.");
+					return false;
+				}
+			}
 			if (room && room.modchat) {
 				let userGroup = user.group;
 				if (room.auth) {
@@ -277,7 +327,9 @@ class CommandContext {
 				connection.popup("Your message can't be blank.");
 				return false;
 			}
-			if (message.length > MAX_MESSAGE_LENGTH && !user.can('ignorelimits')) {
+			let length = message.length;
+			length += 10 * message.replace(/[^\ufdfd]*/g, '').length;
+			if (length > MAX_MESSAGE_LENGTH && !user.can('ignorelimits')) {
 				this.errorReply("Your message is too long: " + message);
 				return false;
 			}
@@ -286,6 +338,11 @@ class CommandContext {
 			message = message.replace(/[\u0300-\u036f\u0483-\u0489\u0610-\u0615\u064B-\u065F\u0670\u06D6-\u06DC\u06DF-\u06ED\u0E31\u0E34-\u0E3A\u0E47-\u0E4E]{3,}/g, '');
 			if (/[\u239b-\u23b9]/.test(message)) {
 				this.errorReply("Your message contains banned characters.");
+				return false;
+			}
+
+			if (!this.checkBanwords(room, message) && !user.can('mute', null, room)) {
+				this.errorReply("Your message contained banned words.");
 				return false;
 			}
 
@@ -432,7 +489,7 @@ class CommandContext {
 		let targetUser = Users.get(this.inputUsername, exactName);
 		if (targetUser) {
 			this.targetUser = targetUser;
-			this.targetUsername = this.inputUsername = targetUser.name;
+			this.targetUsername = targetUser.name;
 		} else {
 			this.targetUser = null;
 			this.targetUsername = this.inputUsername;
@@ -545,8 +602,10 @@ let parse = exports.parse = function (message, room, user, connection, levelsDee
 		// Check for mod/demod/admin/deadmin/etc depending on the group ids
 		for (let g in Config.groups) {
 			let groupid = Config.groups[g].id;
-			if (cmd === groupid || cmd === 'global' + groupid) {
+			if (cmd === groupid) {
 				return parse('/promote ' + toId(target) + ', ' + g, room, user, connection, levelsDeep + 1);
+			} else if (cmd === 'global' + groupid) {
+				return parse('/globalpromote ' + toId(target) + ', ' + g, room, user, connection, levelsDeep + 1);
 			} else if (cmd === 'de' + groupid || cmd === 'un' + groupid || cmd === 'globalde' + groupid || cmd === 'deglobal' + groupid) {
 				return parse('/demote ' + toId(target), room, user, connection, levelsDeep + 1);
 			} else if (cmd === 'room' + groupid) {
@@ -593,7 +652,9 @@ exports.uncacheTree = function (root) {
 		for (let i = 0; i < uncache.length; ++i) {
 			if (require.cache[uncache[i]]) {
 				newuncache.push.apply(newuncache,
-					require.cache[uncache[i]].children.map(toId)
+					require.cache[uncache[i]].children
+						.filter(cachedModule => !cachedModule.id.endsWith('.node'))
+						.map(cachedModule => cachedModule.id)
 				);
 				delete require.cache[uncache[i]];
 			}

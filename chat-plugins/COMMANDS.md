@@ -17,7 +17,7 @@ This is called an alias: it makes it so `/ip` does the same thing as
 But to actually define a command, it's a function:
 
 	avatars: function (target, room, user) {
-		if (!this.canBroadcast()) return;
+		if (!this.runBroadcast()) return;
 		this.sendReplyBox('You can <button name="avatars">change ' +
 			'your avatar</button> by clicking on it in the <button ' +
 			'name="openOptions"><i class="icon-cog"></i> Options' +
@@ -129,7 +129,7 @@ Commands have access to the following functions:
 
 		if (!this.can('potd')) return false;
 
-`this.canBroadcast()`
+`this.runBroadcast()`
 *	Signifies that a message can be broadcast, as long as the user has
 	permission to. This will check to see if the user used `!command`
 	instead of `/command`. If so, it will check to see if the user has
@@ -143,7 +143,7 @@ Commands have access to the following functions:
 
 		if (!this.canBroadcast()) return false;
 
-`this.canBroadcast(suppressMessage)`
+`this.runBroadcast(suppressMessage)`
 *	Functionally the same as `this.canBroadcast()`. However, it will look as
 	if the user had written the text `suppressMessage`.
 
@@ -162,7 +162,7 @@ Commands have access to the following functions:
 	If it has a falsy value, the check won't be attached to any room.
 	In addition to running the checks from `this.canTalk()`, it also checks
 	to see if the message has any banned words, is too long, or was just
-	sent by the user. Returns the filtered message, or a falsy value if the 
+	sent by the user. Returns the filtered message, or a falsy value if the
 	user can't speak.
 
 	Should usually be near the top of the command, like:

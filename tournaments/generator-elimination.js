@@ -12,7 +12,7 @@ const nameMap = {
 	// Feel free to add more
 };
 
-let Elimination = (() => {
+module.exports = (() => {
 	function Elimination(maxSubtrees) {
 		maxSubtrees = maxSubtrees || 1;
 		if (typeof maxSubtrees === 'string' && maxSubtrees.toLowerCase() === 'infinity') {
@@ -41,23 +41,15 @@ let Elimination = (() => {
 
 	Elimination.prototype.addUser = function (user) {
 		if (this.isBracketFrozen) return 'BracketFrozen';
-
-		if (this.users.has(user)) return 'UserAlreadyAdded';
 		this.users.set(user, {});
 	};
 	Elimination.prototype.removeUser = function (user) {
 		if (this.isBracketFrozen) return 'BracketFrozen';
-
-		if (!this.users.has(user)) return 'UserNotAdded';
 		this.users.delete(user);
 	};
 	Elimination.prototype.replaceUser = function (user, replacementUser) {
-		if (!this.users.has(user)) return 'UserNotAdded';
-
-		if (this.users.has(replacementUser)) return 'UserAlreadyAdded';
-
 		this.users.delete(user);
-		this.users.set(user, {});
+		this.users.set(replacementUser, {});
 
 		let targetNode;
 		for (let n = 0; n < this.tree.currentLayerLeafNodes.length && !targetNode; ++n) {
@@ -240,9 +232,8 @@ let Elimination = (() => {
 	Elimination.prototype.disqualifyUser = function (user) {
 		if (!this.isBracketFrozen) return 'BracketNotFrozen';
 
-		if (!this.users.has(user)) return 'UserNotAdded';
-
 		this.users.get(user).isDisqualified = true;
+		user.destroy();
 
 		// The user either has a single available battle or no available battles
 		let match = null;
@@ -269,14 +260,10 @@ let Elimination = (() => {
 	};
 	Elimination.prototype.getUserBusy = function (user) {
 		if (!this.isBracketFrozen) return 'BracketNotFrozen';
-
-		if (!this.users.has(user)) return 'UserNotAdded';
 		return this.users.get(user).isBusy;
 	};
 	Elimination.prototype.setUserBusy = function (user, isBusy) {
 		if (!this.isBracketFrozen) return 'BracketNotFrozen';
-
-		if (!this.users.has(user)) return 'UserNotAdded';
 		this.users.get(user).isBusy = isBusy;
 	};
 
@@ -332,7 +319,10 @@ let Elimination = (() => {
 
 		let loserData = this.users.get(loser);
 		++loserData.loseCount;
-		if (loserData.loseCount === this.maxSubtrees) loserData.isEliminated = true;
+		if (loserData.loseCount === this.maxSubtrees) {
+			loserData.isEliminated = true;
+			loser.destroy();
+		}
 
 		if (targetNode.getParent()) {
 			let userA = targetNode.getParent().getChildAt(0).getValue().user;
@@ -403,5 +393,3 @@ let Elimination = (() => {
 
 	return Elimination;
 })();
-
-exports.Elimination = Elimination;

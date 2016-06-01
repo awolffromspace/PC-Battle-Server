@@ -6,8 +6,8 @@ exports.BattleScripts = {
 		let variant = (this.random(2) === 1);
 		let sets = {
 			'Acast': {
-				species: 'Gourgeist', ability: 'Prankster', item: 'Light Clay', gender: 'M',
-				moves: ['willowisp', 'recover', ['seedbomb', 'shadowclaw'][this.random(2)]],
+				species: 'Gourgeist-Super', ability: 'Prankster', item: 'Mental Herb', gender: 'M',
+				moves: ['willowisp', 'recover', ['seedbomb', 'shadowstrike'][this.random(2)]],
 				signatureMove: 'Needs More Screens',
 				evs: {hp:248, def:8, spd:252}, nature: 'Careful',
 			},
@@ -66,7 +66,7 @@ exports.BattleScripts = {
 				evs: {hp:252, spa:252, def:4}, nature: 'Modest',
 			},
 			'Anttya': {
-				species: 'Altaria', ability: 'Aerilate', item: 'Leftovers', gender: 'F',
+				species: 'Altaria', ability: 'Aerilate', item: 'Altarianite', gender: 'F',
 				moves: ['roost', 'triattack', 'searingshot'],
 				signatureMove: "Hax",
 				evs: {spa:252, spd:4, spe:252}, nature: 'Modest',
@@ -95,6 +95,12 @@ exports.BattleScripts = {
 				signatureMove: 'Star Bolt Desperation',
 				evs: {hp:4, spa:252, spe:252}, nature: 'Modest',
 			},
+			'Asty': {
+				species: 'Seismitoad', ability: 'Asty Absorb', item: 'Red Card', gender: 'M', shiny: true,
+				moves: ['recover', 'drainpunch', 'earthquake'],
+				signatureMove: 'Amphibian Toxic',
+				evs: {hp:252, atk:156, def:50, spd:50}, nature: 'Adamant',
+			},
 			'atomicllamas': {
 				species: 'Jynx', ability: 'Snow Warning', item: 'Focus Sash', gender: 'M',
 				moves: ['lovelykiss', 'blizzard', 'aurasphere'],
@@ -107,7 +113,7 @@ exports.BattleScripts = {
 				signatureMove: "Aerial Fury",
 				evs: {atk:252, def:4, spe:252}, nature: 'Jolly',
 			},
-			'awu': {
+			'Reisen': {
 				species: 'Mawile', ability: 'Adaptability', item: 'Mawilite', gender: 'F',
 				moves: ['meteormash', 'bulletpunch', 'uturn'],
 				signatureMove: "Ancestor's Rage",
@@ -217,7 +223,7 @@ exports.BattleScripts = {
 			},
 			'DMT': {
 				species: 'Shedinja', ability: 'Wonder Guard', item: 'Focus Sash',
-				moves: ['protect', 'shadowsneak', 'xscissor'],
+				moves: ['rapidspin', 'shadowsneak', 'xscissor'],
 				signatureMove: "Really Big Swords Dance",
 				evs: {atk:252, spa:4, spe:252}, nature: 'Adamant',
 			},
@@ -277,7 +283,7 @@ exports.BattleScripts = {
 			},
 			'Freeroamer': {
 				species: 'Lucario', ability: 'Justified', item: 'Lucarionite', gender: 'M',
-				moves: ['crunch', 'sacredsword', 'extremespeed'],
+				moves: ['crunch', 'skyuppercut', 'extremespeed'],
 				signatureMove: 'Screw This Matchup',
 				evs: {atk:252, spd:4, spe:252}, nature: 'Jolly',
 			},
@@ -354,16 +360,16 @@ exports.BattleScripts = {
 				evs: {hp:240, spa:252, spe:16}, nature: 'Modest',
 			},
 			'Hashtag': {
-				species: 'Ursaring', ability: 'Scrappy', item: 'Choice Scarf', gender: 'M',
+				species: 'Ursaring', ability: 'Scrappy', item: 'Choice Band', gender: 'M',
 				moves: ['thousandarrows', 'explosion', 'u-turn'],
 				signatureMove: "GOTTA GO STRATS",
 				evs: {hp:4, atk:252, spe:252}, nature: 'Jolly',
 			},
 			'Haund': {
 				species: 'Swellow', ability: 'Guts', item: 'Toxic Orb', gender: 'M',
-				moves: ['boomburst', 'heatwave', 'ominouswind'],
+				moves: ['boomburst', 'heatwave', 'defog'],
 				signatureMove: "Psychokinesis",
-				evs: {atk:252, def:4, spe:252}, nature: 'Jolly',
+				evs: {hp:180, atk:76, spe:252}, nature: 'Jolly',
 			},
 			'HeaLnDeaL': {
 				species: 'Magmar', ability: 'Fur Coat', item: 'Mental Herb', gender: 'M',
@@ -387,7 +393,7 @@ exports.BattleScripts = {
 				species: 'Mr. Mime', ability: 'Prankster', item: 'Leftovers', gender: 'M',
 				moves: ['batonpass', ['substitute', 'milkdrink'][this.random(2)], 'encore'],
 				signatureMove: "Meme Mime",
-				evs: {hp:252, def:4, spe:252},  ivs: {atk:0, spa:0}, nature: 'Timid',
+				evs: {hp:252, def:4, spe:252}, ivs: {atk:0, spa:0}, nature: 'Timid',
 			},
 			'ih8ih8sn0w': {
 				species: 'Deoxys-Speed', ability: 'Pressure', item: 'Leftovers', gender: 'N', shiny: true,
@@ -427,7 +433,7 @@ exports.BattleScripts = {
 			},
 			'Jack Higgins': {
 				species: 'Maractus', ability: 'Chlorophyll', item: 'Focus Sash', gender: 'M',
-				moves: [['eruption', 'blueflare'][this.random(2)], 'seedflare', ['voltswitch', 'synthesis', 'destinybond', 'healingwish', 'growth'][this.random(5)]],
+				moves: [['eruption', 'blueflare'][this.random(2)], 'leafstorm', ['voltswitch', 'synthesis', 'destinybond', 'healingwish', 'growth'][this.random(5)]],
 				signatureMove: "Splinters",
 				evs: {hp:4, spa:252, spe:252}, nature: 'Modest',
 			},
@@ -744,8 +750,8 @@ exports.BattleScripts = {
 				evs: {hp:52, def:232, spd:224}, ivs: {atk:0}, nature: 'Bold',
 			},
 			'Steamroll': {
-				species: 'Growlithe', ability: 'Adaptability', item: 'Life Orb', gender: 'M',
-				moves: ['flareblitz', 'wildcharge', 'superpower'],
+				species: 'Growlithe', ability: 'Sheer Force', item: 'Life Orb', gender: 'M',
+				moves: ['flareblitz', 'volttackle', 'playrough'],
 				signatureMove: "Conflagration",
 				evs: {atk:252, def:4, spe:252}, nature: 'Adamant',
 			},
@@ -766,6 +772,16 @@ exports.BattleScripts = {
 				moves: ['woodhammer', 'shadowforce', ['shadowsneak', 'leechseed', 'refresh', 'poweruppunch'][this.random(3)]],
 				signatureMove: 'I Want You Back',
 				evs: {hp:252, atk:156, def:32, spd:72}, ivs: {spa:1, spe:9}, nature: 'Brave',
+			},
+			'TEG': {
+				species: 'Thundurus', ability: 'Hidden Type', gender: 'M',
+				item: [
+					'Draco', 'Dread', 'Earth', 'Fist', 'Flame', 'Icicle', 'Insect', 'Iron',
+					'Meadow', 'Mind', 'Pixie', 'Splash', 'Spooky', 'Stone', 'Toxic',
+				][this.random(15)] + ' Plate',
+				moves: ['judgment', 'oblivionwing', 'voltswitch'],
+				signatureMove: 'Bad Code',
+				evs: {spa:252, spd:4, spe:252}, nature: 'Timid',
 			},
 			'Temporaryanonymous': {
 				species: 'Doublade', ability: 'Tough Claws', item: 'Eviolite', gender: 'M',
@@ -865,7 +881,7 @@ exports.BattleScripts = {
 			},
 			'Zero Lux Given': {
 				species: 'Luxray', ability: 'Guts', item: 'Flame Orb', gender: 'M',
-				moves: ['fusionbolt', 'facade', 'iciclespear'],
+				moves: ['fusionbolt', 'facade', ['iceshard', 'petalblizzard'][this.random(2)]],
 				signatureMove: "Pun Ray",
 				evs: {atk:252, def:4, spe:252}, ivs: {spa:0}, nature: 'Adamant',
 			},

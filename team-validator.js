@@ -25,7 +25,7 @@ class Validator {
 	}
 
 	prepTeam(team) {
-		return PM.send(this.format, team);
+		return PM.send(this.format.id, team);
 	}
 
 	baseValidateTeam(team) {
@@ -92,7 +92,7 @@ class Validator {
 		return problems;
 	}
 
-	validateSet(set, teamHas, flags) {
+	validateSet(set, teamHas, template) {
 		let format = this.format;
 		let tools = this.tools;
 
@@ -101,11 +101,13 @@ class Validator {
 			return ["This is not a Pokemon."];
 		}
 
-		let template = tools.getTemplate(Tools.getString(set.species));
-		if (!template.exists) {
-			return ["The Pokemon '" + set.species + "' does not exist."];
+		if (!template) {
+			template = tools.getTemplate(Tools.getString(set.species));
+			if (!template.exists) {
+				return ["The Pokemon '" + set.species + "' does not exist."];
+			}
 		}
-		set.species = template.species;
+		set.species = Tools.getSpecies(set.species);
 
 		set.name = tools.getName(set.name);
 		let item = tools.getItem(Tools.getString(set.item));
@@ -132,13 +134,11 @@ class Validator {
 		if (nameTemplate.exists && nameTemplate.name.toLowerCase() === set.name.toLowerCase()) {
 			set.name = null;
 		}
-		set.species = set.species;
 		set.name = set.name || set.baseSpecies;
 		let name = set.species;
 		if (set.species !== set.name && set.baseSpecies !== set.name) name = set.name + " (" + set.species + ")";
 		let isHidden = false;
 		let lsetData = {set:set, format:format};
-		if (flags) Object.assign(lsetData, flags);
 
 		let setHas = {};
 
@@ -158,7 +158,7 @@ class Validator {
 		if (format.onChangeSet) {
 			problems = problems.concat(format.onChangeSet.call(tools, set, format, setHas, teamHas) || []);
 		}
-		template = tools.getTemplate(set.species);
+		if (toId(set.species) !== template.speciesid) template = tools.getTemplate(set.species);
 		item = tools.getItem(set.item);
 		if (item.id && !item.exists) {
 			return ['"' + set.item + "' is an invalid item."];
@@ -218,9 +218,7 @@ class Validator {
 			} else if (!banlistTable['ignoreillegalabilities']) {
 				if (!ability.name) {
 					problems.push(name + " needs to have an ability.");
-				} else if (ability.name !== template.abilities['0'] &&
-					ability.name !== template.abilities['1'] &&
-					ability.name !== template.abilities['H']) {
+				} else if (!Object.values(template.abilities).includes(ability.name)) {
 					problems.push(name + " can't have " + set.ability + ".");
 				}
 				if (ability.name === template.abilities['H']) {
@@ -298,7 +296,7 @@ class Validator {
 				let limitedEgg = Array.from(new Set(lsetData.limitedEgg));
 				if (limitedEgg.length <= 1) {
 					// Only one source, can't conflict with anything else
-				} else if (limitedEgg.indexOf('self') >= 0) {
+				} else if (limitedEgg.includes('self')) {
 					// Self-moves are always incompatible with anything else
 					problems.push(name + "'s egg moves are incompatible.");
 				} else {
@@ -376,7 +374,7 @@ class Validator {
 						if (eventData.level && set.level < eventData.level) {
 							problems.push(name + " must be at least level " + eventData.level + " because it has a move only available from a specific event.");
 						}
-						if ((eventData.shiny && !set.shiny) || (!eventData.shiny && set.shiny)) {
+						if ((eventData.shiny === true && !set.shiny) || (!eventData.shiny && set.shiny)) {
 							problems.push(name + " must " + (eventData.shiny ? "" : "not ") + "be shiny because it has a move only available from a specific event.");
 						}
 						if (eventData.gender) {
@@ -393,18 +391,19 @@ class Validator {
 									problems.push(name + " must have " + eventData.ivs[i] + " " + statTable[i] + " IVs because it has a move only available from a specific event.");
 								}
 							}
-						} else if (set.ivs && eventData.generation >= 6 && (template.eggGroups[0] === 'Undiscovered' || template.species === 'Manaphy') && !template.prevo && !template.nfe &&
-							template.species !== 'Unown' && template.baseSpecies !== 'Pikachu' && (template.baseSpecies !== 'Diancie' || !set.shiny)) {
+						} else if (set.ivs && (eventData.perfectIVs || (eventData.generation >= 6 && (template.eggGroups[0] === 'Undiscovered' || template.species === 'Manaphy') && !template.prevo && !template.nfe &&
+							template.species !== 'Unown' && template.baseSpecies !== 'Pikachu' && (template.baseSpecies !== 'Diancie' || !set.shiny)))) {
 							// Legendary Pokemon must have at least 3 perfect IVs in gen 6
+							// Events can also have a certain amount of guaranteed perfect IVs
 							let perfectIVs = 0;
 							for (let i in set.ivs) {
 								if (set.ivs[i] >= 31) perfectIVs++;
 							}
-							if (perfectIVs < 3) problems.push(name + " must have at least three perfect IVs because it's a legendary and it has a move only available from a gen 6 event.");
-						}
-						if (eventData.generation < 5) eventData.isHidden = false;
-						if (eventData.isHidden !== undefined && eventData.isHidden !== isHidden) {
-							problems.push(name + (isHidden ? " can't have" : " must have") + " its hidden ability because it has a move only available from a specific " + eventTemplate.species + " event.");
+							if (eventData.perfectIVs) {
+								if (perfectIVs < eventData.perfectIVs) problems.push(name + " must have at least " + eventData.perfectIVs + " perfect IVs because it has a move only available from a specific event.");
+							} else if (perfectIVs < 3) {
+								problems.push(name + " must have at least three perfect IVs because it's a legendary and it has a move only available from a gen 6 event.");
+							}
 						}
 						if (tools.gen <= 5 && eventData.abilities && eventData.abilities.length === 1 && !eventData.isHidden) {
 							if (template.species === eventTemplate.species) {
@@ -429,7 +428,7 @@ class Validator {
 					}
 					isHidden = false;
 				}
-			} else if (banlistTable['illegal'] && (template.eventOnly || template.eventOnlyHidden && isHidden)) {
+			} else if (banlistTable['illegal'] && template.eventOnly) {
 				let eventPokemon = !template.learnset && template.baseSpecies !== template.species ? tools.getTemplate(template.baseSpecies).eventPokemon : template.eventPokemon;
 				let legal = false;
 				events:
@@ -437,7 +436,7 @@ class Validator {
 					let eventData = eventPokemon[i];
 					if (format.requirePentagon && eventData.generation < 6) continue;
 					if (eventData.level && set.level < eventData.level) continue;
-					if ((eventData.shiny && !set.shiny) || (!eventData.shiny && set.shiny)) continue;
+					if ((eventData.shiny === true && !set.shiny) || (!eventData.shiny && set.shiny)) continue;
 					if (eventData.nature && set.nature !== eventData.nature) continue;
 					if (eventData.ivs) {
 						if (!set.ivs) set.ivs = {hp: 31, atk: 31, def: 31, spa: 31, spd: 31, spe: 31};
@@ -449,7 +448,7 @@ class Validator {
 					legal = true;
 					if (eventData.gender) set.gender = eventData.gender;
 				}
-				if (!legal) problems.push(template.species + (template.eventOnlyHidden ? "'s hidden ability" : "") + " is only obtainable via event - it needs to match one of its events.");
+				if (!legal) problems.push(template.species + " is only obtainable via event - it needs to match one of its events.");
 			}
 			if (isHidden && lsetData.sourcesBefore) {
 				if (!lsetData.sources && lsetData.sourcesBefore < 5) {
@@ -536,6 +535,7 @@ class Validator {
 		let tools = this.tools;
 
 		let moveid = toId(move);
+		if (moveid === 'constructor') return true;
 		move = tools.getMove(moveid);
 		template = tools.getTemplate(template);
 
@@ -545,9 +545,9 @@ class Validator {
 		let alreadyChecked = {};
 		let level = set.level || 100;
 
+		let incompatibleAbility = false;
 		let isHidden = false;
 		if (set.ability && tools.getAbility(set.ability).name === template.abilities['H']) isHidden = true;
-		let incompatibleHidden = false;
 
 		let limit1 = true;
 		let sketch = false;
@@ -590,7 +590,7 @@ class Validator {
 				let types = template.types;
 				if (template.species === 'Shaymin') types = ['Grass', 'Flying'];
 				if (template.baseSpecies === 'Hoopa') types = ['Psychic', 'Ghost', 'Dark'];
-				if (types.indexOf(move.type) >= 0) return false;
+				if (types.includes(move.type)) return false;
 			}
 			if (!template.learnset) {
 				if (template.baseSpecies !== template.species) {
@@ -625,7 +625,7 @@ class Validator {
 
 					if (learnedGen !== '6' && isHidden && !tools.mod('gen' + learnedGen).getTemplate(template.species).abilities['H']) {
 						// check if the Pokemon's hidden ability was available
-						incompatibleHidden = true;
+						incompatibleAbility = true;
 						continue;
 					}
 					if (!template.isNonstandard) {
@@ -724,6 +724,14 @@ class Validator {
 							// can tradeback
 							sources.push('1ST' + learned.slice(2) + ' ' + template.id);
 						}
+						if (set.ability) {
+							// The event ability must match the Pokémon's
+							let hiddenAbility = template.eventPokemon[learned.substr(2)].isHidden || false;
+							if (hiddenAbility !== isHidden) {
+								incompatibleAbility = true;
+								continue;
+							}
+						}
 						sources.push(learned + ' ' + template.id);
 					} else if (learned.charAt(1) === 'D') {
 						// DW moves:
@@ -760,7 +768,7 @@ class Validator {
 				template = tools.getTemplate(template.prevo);
 				if (template.gen > Math.max(2, tools.gen)) template = null;
 				if (template && !template.abilities['H']) isHidden = false;
-			} else if (template.baseSpecies !== template.species && template.baseSpecies !== 'Kyurem' && template.baseSpecies !== 'Pikachu') {
+			} else if (template.baseSpecies !== template.species && template.baseSpecies !== 'Kyurem' && template.baseSpecies !== 'Pikachu' && template.baseSpecies !== 'Vivillon') {
 				template = tools.getTemplate(template.baseSpecies);
 			} else {
 				template = null;
@@ -784,7 +792,7 @@ class Validator {
 		// Now that we have our list of possible sources, intersect it with the current list
 		if (!sourcesBefore && !sources.length) {
 			if (noPastGen && sometimesPossible) return {type:'pokebank'};
-			if (incompatibleHidden) return {type:'incompatible'};
+			if (incompatibleAbility) return {type:'incompatible'};
 			return true;
 		}
 		if (!sources.length) sources = null;
@@ -851,83 +859,37 @@ function getValidator(format) {
  * Process manager
  *********************************************************/
 
-class ValidatorProcess {
-	constructor() {
-		this.load = 0;
-		this.active = true;
-		this.process = require('child_process').fork('team-validator.js', {cwd: __dirname});
-		this.process.on('message', message => {
-			// Protocol:
-			// success: "[id]|1[details]"
-			// failure: "[id]|0[details]"
-			let pipeIndex = message.indexOf('|');
-			let id = message.substr(0, pipeIndex);
+const ProcessManager = require('./process-manager');
 
-			if (id in PM.pendingValidations) {
-				PM.release(this);
-				PM.pendingValidations[id](message.slice(pipeIndex + 1));
-				delete PM.pendingValidations[id];
-			}
-		});
-	}
-}
-TeamValidator.ValidatorProcess = ValidatorProcess;
+PM = TeamValidator.PM = new ProcessManager({
+	maxProcesses: global.Config && Config.validatorprocesses,
+	execFile: 'team-validator.js',
+	onMessageUpstream: function (message) {
+		// Protocol:
+		// success: "[id]|1[details]"
+		// failure: "[id]|0[details]"
+		let pipeIndex = message.indexOf('|');
+		let id = +message.substr(0, pipeIndex);
 
-TeamValidator.PM = PM = {
-	processes: [],
-	validationCount: 0,
-	pendingValidations: {},
-
-	spawn() {
-		let num = 1;
-		if (typeof Config.validatorprocesses === 'number') {
-			num = Config.validatorprocesses;
-		}
-		for (let i = this.processes.length; i < num; ++i) {
-			this.processes.push(new ValidatorProcess());
+		if (this.pendingTasks.has(id)) {
+			this.pendingTasks.get(id)(message.slice(pipeIndex + 1));
+			this.pendingTasks.delete(id);
+			this.release();
 		}
 	},
-
-	respawn() {
-		for (let process of this.processes.splice(0)) {
-			process.active = false;
-			if (!process.load) process.process.disconnect();
-		}
-		this.spawn();
-	},
-	acquire() {
-		let process = this.processes[0];
-		for (let i = 1; i < this.processes.length; ++i) {
-			if (this.processes[i].load < process.load) {
-				process = this.processes[i];
-			}
-		}
-		++process.load;
-		return process;
-	},
-	release(process) {
-		--process.load;
-		if (!process.load && !process.active) {
-			process.process.disconnect();
-		}
-	},
-	send(format, team) {
-		if (!this.processes) {
-			// synchronously!
-			return Promise.resolve(this.receive(format, team));
-		}
-		let process = this.acquire();
-		return new Promise((resolve, reject) => {
-			this.pendingValidations[this.validationCount] = resolve;
-			try {
-				process.process.send('' + this.validationCount + '|' + format + '|' + team);
-			} catch (e) {}
-			++this.validationCount;
-		});
-	},
-	receive(format, team) {
+	onMessageDownstream: function (message) {
 		// protocol:
 		// "[id]|[format]|[team]"
+		let pipeIndex = message.indexOf('|');
+		let pipeIndex2 = message.indexOf('|', pipeIndex + 1);
+		let id = message.substr(0, pipeIndex);
+
+		let format = message.substr(pipeIndex + 1, pipeIndex2 - pipeIndex - 1);
+		let team = message.substr(pipeIndex2 + 1);
+
+		process.send(id + '|' + this.receive(format, team));
+	},
+	receive: function (format, team) {
 		let parsedTeam = Tools.fastUnpackTeam(team);
 
 		let problems;
@@ -950,13 +912,10 @@ TeamValidator.PM = PM = {
 			return '1' + packedTeam;
 		}
 	},
-};
-
+});
 
 if (process.send && module === process.mainModule) {
 	// This is a child process!
-
-	Object.defineProperty(Object, 'values', {writable: true, configurable: true, value: require('object.values')});
 
 	global.Config = require('./config/config.js');
 
@@ -971,20 +930,6 @@ if (process.send && module === process.mainModule) {
 
 	require('./repl.js').start('team-validator-', process.pid, cmd => eval(cmd));
 
-	process.on('message', message => {
-		// protocol:
-		// "[id]|[format]|[team]"
-		let pipeIndex = message.indexOf('|');
-		let pipeIndex2 = message.indexOf('|', pipeIndex + 1);
-		let id = message.substr(0, pipeIndex);
-
-		let format = message.substr(pipeIndex + 1, pipeIndex2 - pipeIndex - 1);
-		let team = message.substr(pipeIndex2 + 1);
-
-		process.send(id + '|' + PM.receive(format, team));
-	});
-
-	process.on('disconnect', () => {
-		process.exit();
-	});
+	process.on('message', message => PM.onMessageDownstream(message));
+	process.on('disconnect', () => process.exit());
 }
