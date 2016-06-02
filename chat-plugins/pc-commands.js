@@ -14,7 +14,7 @@ exports.commands = {
 	sample: function (target, room, user) {
 		if (!this.runBroadcast()) return;
 		this.sendReplyBox(
-			"Need sample teams?<br />" +
+			"Sample teams<br />" +
 			"- <a href=\"http://www.smogon.com/forums/threads/oras-ou-sample-teams.3571343/\">OU</a><br />" +
 			"- <a href=\"http://www.smogon.com/forums/threads/sample-teams-mega-thread-generations-3-4-5-and-6.3550998/\">Ubers</a><br />" +
 			"- <a href=\"http://www.smogon.com/forums/threads/oras-uu-sample-teams-v2.3562531/\">UU</a><br />" +
