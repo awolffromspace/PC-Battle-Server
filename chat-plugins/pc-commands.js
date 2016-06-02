@@ -22,7 +22,7 @@ exports.commands = {
 			"- <a href=\"http://www.smogon.com/forums/threads/nu-sample-teams-accepting-teams.3563961/\">NU</a><br />" +
 			"- <a href=\"http://www.smogon.com/forums/threads/sample-teams-v2.3540949/\">PU</a><br />" +
 			"- <a href=\"http://www.smogon.com/forums/threads/multigen-lc-sample-teams.3554452/\">LC</a><br />" +
-			"- <a href=\"http://www.smogon.com/forums/threads/doubles-ou-sample-teams.3548802/\">Doubles OU</a><br />" +
+			"- <a href=\"http://www.smogon.com/forums/threads/doubles-ou-sample-teams.3548802/\">Doubles OU</a>" +
 		);
 	},
 
