@@ -298,10 +298,6 @@ class CommandContext {
 				this.errorReply("You are locked from talking in chat.");
 				return false;
 			}
-			if (room && user.nameLocked) {
-				this.errorReply("You are locked from talking in chat.");
-				return false;
-			}
 			if (room && room.isMuted(user)) {
 				this.errorReply("You are muted and cannot talk in this room.");
 				return false;
