@@ -126,7 +126,7 @@ exports.permissionExceptions = {
 	'jointour': '+'
 };
 
-exports.botguide = "http://www.pokecommunity.com/showthread.php?t=289012#botguide";
+exports.botguide = "http://www.pokecommunity.com/showthread.php?t=289012#bot";
 
 //When you pm the bot but don't use a command, it replies you this message. Example: "Hi, I'm a bot. Use .help to view a command guide"
 //The var #USER is replaced with the username that pms it
