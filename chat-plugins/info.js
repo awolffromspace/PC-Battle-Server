@@ -938,6 +938,7 @@ exports.commands = {
 			"- Anti (Papa Anti)<br />" +
 			"- Ausaudriel (Audy)<br />" +
 			"- Castform (Chase, Chaseform, Lаnа Del Phox, Michonne, Negan, Weаther Ball)<br />" +
+			"- Dragon (bellossom)<br />" +
 			"- Hiroshi Sotomura<br />" +
 			"- Rukario (PPN)<br />" +
 			"- Sheep (Cirnysheep)<br />" +
@@ -947,7 +948,6 @@ exports.commands = {
 			"- Archy<br />" +
 			"- Aurora<br />" +
 			"- Christos<br />" +
-			"- Dragon (bellossom)<br />" +
 			"- Omicron (Megido, omicorn, omicronhuh)<br />" +
 			"- Sanguine (Queen Bitch)<br />" +
 			"- Syndrome (Daddy, King Syn, Morning Bliss)<br /><br />" +
