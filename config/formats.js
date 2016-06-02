@@ -2211,6 +2211,7 @@ exports.Formats = [
 		name: "Got Talent",
 		desc: ["&bullet; <a href=\"https://www.smogon.com/forums/threads/3569554/\">Got Talent</a>"],
 		section: "OM of the Month",
+		column: 2,
 
 		mod: 'gottalent',
 		ruleset: ['Pokemon', 'Standard', 'Swagger Clause', 'Baton Pass Clause', 'Team Preview'],
