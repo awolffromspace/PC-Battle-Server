@@ -1636,7 +1636,7 @@ exports.Formats = [
 		section: "Randomized Metas",
 
 		team: 'randomMonotype',
-		ruleset: ['Random (no PotD)'],
+		ruleset: ['Random (no PotD)', 'Same Type Clause'],
 	},
 	{
 		name: "Generational Random",
