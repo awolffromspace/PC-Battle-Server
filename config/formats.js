@@ -1636,7 +1636,7 @@ exports.Formats = [
 		section: "Randomized Metas",
 
 		team: 'randomMonotype',
-		ruleset: ['Random (no PotD)', 'Same Type Clause'],
+		ruleset: ['Pokemon', 'Same Type Clause', 'Sleep Clause Mod', 'HP Percentage Mod', 'Cancel Mod', 'Team Preview'],
 	},
 	{
 		name: "Generational Random",
