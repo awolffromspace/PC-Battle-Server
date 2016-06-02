@@ -9,6 +9,23 @@ exports.commands = {
 		);
 	},
 
+	sampleteam: 'sample',
+	sampleteams: 'sample',
+	sample: function (target, room, user) {
+		if (!this.runBroadcast()) return;
+		this.sendReplyBox(
+			"Need sample teams?<br />" +
+			"- <a href=\"http://www.smogon.com/forums/threads/oras-ou-sample-teams.3571343/\">OU</a><br />" +
+			"- <a href=\"http://www.smogon.com/forums/threads/sample-teams-mega-thread-generations-3-4-5-and-6.3550998/\">Ubers</a><br />" +
+			"- <a href=\"http://www.smogon.com/forums/threads/oras-uu-sample-teams-v2.3562531/\">UU</a><br />" +
+			"- <a href=\"http://www.smogon.com/forums/threads/ru-sample-teams-thread-3-0.3551316/\">RU</a><br />" +
+			"- <a href=\"http://www.smogon.com/forums/threads/nu-sample-teams-accepting-teams.3563961/\">NU</a><br />" +
+			"- <a href=\"http://www.smogon.com/forums/threads/sample-teams-v2.3540949/\">PU</a><br />" +
+			"- <a href=\"http://www.smogon.com/forums/threads/multigen-lc-sample-teams.3554452/\">LC</a><br />" +
+			"- <a href=\"http://www.smogon.com/forums/threads/doubles-ou-sample-teams.3548802/\">Doubles OU</a><br />" +
+		);
+	},
+
 	autojoinroom: function (target, room, user) {
 		if (!this.can('makeroom')) return;
 		if (target === 'off') {
