@@ -634,10 +634,10 @@ exports.commands = {
 		if (!target) {
 			if (!this.runBroadcast()) return;
 			if (!room.introMessage) return this.sendReply("This room does not have an introduction set.");
-			this.sendReply('|raw|<div class="infobox infobox-limited">' + room.introMessage + '</div>');
+			this.sendReply('|raw|<div class="infobox infobox-limited">' + room.introMessage.replace(/\n/g, '') + '</div>');
 			if (!this.broadcasting && user.can('declare', null, room)) {
 				this.sendReply('Source:');
-				this.sendReplyBox('<code>/roomintro ' + Tools.escapeHTML(room.introMessage) + '</code>');
+				this.sendReplyBox('<code>/roomintro ' + Tools.escapeHTML(room.introMessage).replace(/\n/g, '<br />') + '</code>');
 			}
 			return;
 		}
@@ -650,12 +650,12 @@ exports.commands = {
 		}
 		if (target.substr(0, 11) === '/roomintro ') target = target.substr(11);
 
-		room.introMessage = target;
+		room.introMessage = target.replace(/\r/g, '');
 		this.sendReply("(The room introduction has been changed to:)");
-		this.sendReply('|raw|<div class="infobox">' + target + '</div>');
+		this.sendReply('|raw|<div class="infobox">' + room.introMessage.replace(/\n/g, '') + '</div>');
 
 		this.privateModCommand("(" + user.name + " changed the roomintro.)");
-		this.logEntry(target);
+		this.logEntry(room.introMessage.replace(/\n/g, ''));
 
 		if (room.chatRoomData) {
 			room.chatRoomData.introMessage = room.introMessage;
@@ -682,10 +682,10 @@ exports.commands = {
 		if (!target) {
 			if (!this.can('mute', null, room)) return false;
 			if (!room.staffMessage) return this.sendReply("This room does not have a staff introduction set.");
-			this.sendReply('|raw|<div class="infobox">' + room.staffMessage + '</div>');
+			this.sendReply('|raw|<div class="infobox">' + room.staffMessage.replace(/\n/g, '') + '</div>');
 			if (user.can('ban', null, room)) {
 				this.sendReply('Source:');
-				this.sendReplyBox('<code>/staffintro ' + Tools.escapeHTML(room.staffMessage) + '</code>');
+				this.sendReplyBox('<code>/staffintro ' + Tools.escapeHTML(room.staffMessage).replace(/\n/g, '<br />') + '</code>');
 			}
 			return;
 		}
@@ -699,12 +699,12 @@ exports.commands = {
 		}
 		if (target.substr(0, 12) === '/staffintro ') target = target.substr(12);
 
-		room.staffMessage = target;
+		room.staffMessage = target.replace(/\r/g, '');
 		this.sendReply("(The staff introduction has been changed to:)");
-		this.sendReply('|raw|<div class="infobox">' + target + '</div>');
+		this.sendReply('|raw|<div class="infobox">' + target.replace(/\n/g, '') + '</div>');
 
 		this.privateModCommand("(" + user.name + " changed the staffintro.)");
-		this.logEntry(target);
+		this.logEntry(room.staffMessage.replace(/\n/g, ''));
 
 		if (room.chatRoomData) {
 			room.chatRoomData.staffMessage = room.staffMessage;
@@ -3160,3 +3160,8 @@ exports.commands = {
 	},
 
 };
+
+process.nextTick(() => {
+	CommandParser.multiLinePattern.register('>>>? ');
+	CommandParser.multiLinePattern.register('/(room|staff)(topic|intro) ');
+});
