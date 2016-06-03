@@ -4119,10 +4119,6 @@ exports.BattleScripts = {
 				// PUs are limited to 2 but have a 20% chance of being added anyway.
 				if (puCount > 1 && this.random(5) >= 1) continue;
 				break;
-			case 'LC':
-			case 'LC Uber':
-			case 'NFE':
-				if (puCount > 1) continue;
 			case 'Unreleased':
 				// Unreleased Pokémon have 20% the normal rate
 				if (this.random(5) >= 1) continue;
@@ -4215,7 +4211,7 @@ exports.BattleScripts = {
 			// Increment Uber/NU counters
 			if (tier === 'Uber') {
 				uberCount++;
-			} else if (tier === 'PU' || tier === 'NFE' || tier === 'LC' || tier === 'LC Uber') {
+			} else if (tier === 'PU') {
 				puCount++;
 			}
 
