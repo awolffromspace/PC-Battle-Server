@@ -21,6 +21,11 @@ exports.BattleFormatsData = {
 		requiredItem: "Banettite",
 		tier: "PU",
 	},
+	banettemega: {
+		randomBattleMoves: ["swagger","foulplay","substitute","thunderwave"],
+		requiredItem: "Banettite",
+		tier: "PU",
+	},
 	purrloin: {
 		randomBattleMoves: ["swagger","foulplay","substitute","thunderwave"],
 		requiredItem: "Leftovers",
