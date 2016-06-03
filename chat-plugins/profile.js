@@ -4,7 +4,7 @@ var moment = require('moment');
 
 var BR = '<br>';
 var SPACE = '&nbsp;';
-var profileColor = '#1f7bcc';
+var profileColor = '#1fa6cc';
 var trainersprites = [1, 2, 101, 102, 169, 170, 265, 266, 168];
 
 /**
