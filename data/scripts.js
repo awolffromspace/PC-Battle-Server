@@ -5505,6 +5505,29 @@ exports.BattleScripts = {
 			}
 			if (skip) continue;
 
+			let dice = this.random(8);
+			if (dice < 1) {
+				var lead = 'pikachu';
+			} else if (dice < 2) {
+				var lead = 'jigglypuff';
+			} else if (dice < 3) {
+				var lead = 'mewtwo';
+			} else if (dice < 4) {
+				var lead = 'charizard';
+			} else if (dice < 5) {
+				var lead = 'ivysaur';
+			} else if (dice < 6) {
+				var lead = 'squirtle';
+			} else if (dice < 7) {
+				var lead = 'lucario';
+			} else {
+				var lead = 'greninja';
+			}
+
+			if (pokemon.length === 0) {
+				template = lead;
+			}
+
 			let set = this.randomSet(template, pokemon.length, teamDetails);
 
 			// Illusion shouldn't be the last Pokemon of the team
