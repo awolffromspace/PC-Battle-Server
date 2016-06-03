@@ -937,8 +937,8 @@ exports.commands = {
 			"<b>~ Administrators</b><br />" +
 			"- Anti (Papa Anti)<br />" +
 			"- Ausaudriel (Audy)<br />" +
-			"- Castform (Chase, Chaseform, Lаnа Del Phox, Michonne, Negan, Weаther Ball)<br />" +
-			"- Dragon (bellossom)<br />" +
+			"- Castform (Carol's Cookies, Chase, Chaseform, Lаnа Del Phox, Michonne, Negan, Weаther Ball)<br />" +
+			"- Dragon (bellossom, Death by Chansey, Megumiii)<br />" +
 			"- Hiroshi Sotomura<br />" +
 			"- Rukario (PPN)<br />" +
 			"- Sheep (Cirnysheep)<br />" +
@@ -947,8 +947,8 @@ exports.commands = {
 			"<b>@ Moderators</b><br />" +
 			"- Archy<br />" +
 			"- Aurora<br />" +
-			"- Christos<br />" +
-			"- Omicron (Megido, omicorn, omicronhuh)<br />" +
+			"- Christos (sphealosophy)<br />" +
+			"- Omicron (Megido, omicorn, omicronhuh, Postcards)<br />" +
 			"- Sanguine (Queen Bitch)<br />" +
 			"- Syndrome (Daddy, King Syn, Morning Bliss)<br /><br />" +
 			"<a href=\"http://www.pokecommunity.com/showthread.php?t=289012#staff\">Click here for more details.</a>"
