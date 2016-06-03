@@ -3703,9 +3703,6 @@ exports.BattleScripts = {
 			case 'Gourgeist':
 				if (this.random(4) >= 1) continue;
 				break;
-			case 'Hoopa':
-				if (this.random(2) >= 1) continue;
-				break;
 			case 'Meloetta':
 				if (this.random(2) >= 1) continue;
 				break;
@@ -3858,9 +3855,6 @@ exports.BattleScripts = {
 			case 'Gourgeist':
 				if (this.random(4) >= 1) continue;
 				break;
-			case 'Hoopa':
-				if (this.random(2) >= 1) continue;
-				break;
 			case 'Meloetta':
 				if (this.random(2) >= 1) continue;
 				break;
@@ -3887,6 +3881,20 @@ exports.BattleScripts = {
 			if (skip) continue;
 
 			let set = this.randomSet(template, pokemon.length, teamDetails);
+
+			if (template.id === 'gothitelle') {
+				set.species = 'Gothitelle';
+				set.ability = 'Frisk';
+			} else if (template.id === 'wobbuffet') {
+				set.species = 'Wobbuffet';
+				set.ability = 'Telepathy';
+			} else if (template.id === 'ninetales') {
+				set.species = 'Ninetales';
+				set.ability = 'Flash Fire';
+			} else if (template.id === 'politoed') {
+				set.species = 'Politoed';
+				set.ability = 'Water Absorb';
+			}
 
 			// Illusion shouldn't be the last Pokemon of the team
 			if (set.ability === 'Illusion' && pokemonLeft > 4) continue;
