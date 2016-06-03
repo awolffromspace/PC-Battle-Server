@@ -2744,7 +2744,7 @@ exports.Formats = [
 
 		mod: 'gen5',
 		team: 'random',
-		ruleset: ['Random (no PotD)'],
+		ruleset: ['Pokemon', 'Sleep Clause Mod', 'HP Percentage Mod', 'Cancel Mod'],
 	},
 	{
 		name: "[Gen 5] Custom Game",
