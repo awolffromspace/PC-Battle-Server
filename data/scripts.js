@@ -2388,11 +2388,6 @@ exports.BattleScripts = {
 			let isMegaSet = this.getItem(set.item).megaStone || (forme && forme.isMega && forme.requiredMove && set.moves.includes(toId(forme.requiredMove)));
 			if (isMegaSet && teamDetails.megaCount > 0) continue;
 
-			// Limit the number of Megas to one
-			let forme = template.otherFormes && this.getTemplate(template.otherFormes[0]);
-			let isMegaSet = this.getItem(set.item).megaStone || (forme && forme.isMega && forme.requiredMove && set.moves.includes(toId(forme.requiredMove)));
-			if (isMegaSet && teamDetails.megaCount > 0) continue;
-
 			// Okay, the set passes, add it to our team
 			pokemon.push(set);
 
