@@ -2190,7 +2190,7 @@ exports.BattleScripts = {
 
 			let types = template.types;
 
-			if (format !== 'monotyperandombattle') {
+			if (format !== 'monotyperandom') {
 				// Limit 2 of any type
 				let skip = false;
 				for (let t = 0; t < types.length; t++) {
