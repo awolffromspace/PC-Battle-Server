@@ -2287,8 +2287,8 @@ exports.BattleScripts = {
 			// Limit to one of each species (Species Clause)
 			if (baseFormes[template.baseSpecies]) continue;
 
-			// Only certain NFE Pokemon are allowed
-			if (template.evos.length && !allowedNFE[template.species]) continue;
+			// Useless in Random Battle without greatly lowering the levels of everything else
+			if (template.species === 'Unown') continue;
 
 			// Slaking, without ability swap or a similar gimmick, makes the battle 5v6 at best
 			if (template.species === 'Slaking') continue;
