@@ -3641,7 +3641,7 @@ exports.BattleScripts = {
 		'zygarde', 'absol', 'aerodactyl', 'aggron', 'alakazam', 'ampharos', 'arcanine', 'azelf', 'beedrill', 'blastoise', 'blissey', 'chandelure', 'chesnaught', 'cloyster', 'crobat', 'darmanitan', 'donphan', 'empoleon', 'entei', 'espeon', 'florges', 'forretress', 'galvantula',
 		'gligar', 'goodra', 'haxorus', 'heracross', 'hippowdon', 'honchkrow', 'hydreigon', 'infernape', 'kingdra', 'krookodile', 'lucario', 'machamp', 'mienshao', 'milotic', 'nidoking', 'nidoqueen', 'pidgeot', 'pinsir', 'porygonz', 'porygon2', 'roserade', 'rotomheat', 'salamence',
 		'sceptile', 'sharpedo', 'shaymin', 'snorlax', 'suicune', 'swampert', 'tentacruel', 'toxicroak', 'trevenant', 'umbreon', 'vaporeon', 'dragalge', 'froslass', 'houndoom', 'kyurem', 'shuckle', 'tornadus', 'yanmega', 'zoroark', 'heliolisk', 'slurpuff', 'doublade',
-		'cresselia', 'whimsicott', 'moltres', 'pangoro', 'feraligatr', 'noivern', 'abomasnow', 'durant'];
+		'cresselia', 'whimsicott', 'moltres', 'pangoro', 'feraligatr', 'noivern', 'abomasnow', 'durant', 'quagsire', 'amoonguss'];
 
 		let typeCount = {};
 		let typeComboCount = {};
@@ -3783,7 +3783,7 @@ exports.BattleScripts = {
 		let pokemonLeft = 0;
 		let pokemon = [];
 
-		let pokemonPool = ['accelgor', 'alomomola', 'ambipom', 'amoonguss', 'aromatisse', 'banette', 'braviary', 'bronzong', 'cinccino', 'clawitzer', 'cobalion', 'cofagrigus', 'delphox', 'drapion', 'druddigon', 'dugtrio', 'durant', 'eelektross', 'emboar', 'escavalier', 'exploud',
+		let pokemonPool = ['accelgor', 'alomomola', 'ambipom', 'aromatisse', 'banette', 'braviary', 'bronzong', 'cinccino', 'clawitzer', 'cobalion', 'cofagrigus', 'delphox', 'drapion', 'druddigon', 'dugtrio', 'eelektross', 'emboar', 'escavalier', 'exploud',
 		'fletchinder', 'gastrodon', 'glalie', 'golbat', 'hitmonchan', 'hitmonlee', 'hitmontop', 'houndoom', 'jellicent', 'jolteon', 'kabutops', 'magneton', 'meloetta', 'omastar', 'registeel', 'reuniclus', 'rhyperior', 'rotommow', 'shiftry', 'skuntank', 'spiritomb',
 		'tangrowth', 'tyrantrum', 'combusken', 'sigilyph', 'arbok', 'archeops', 'ariados', 'armaldo', 'articuno', 'audino', 'aurorus', 'avalugg', 'barbaracle', 'basculin', 'basculinbluestriped', 'bastiodon', 'beartic', 'beautifly', 'beheeyem', 'bellossom', 'bibarel', 'bouffalant',
 		'butterfree', 'cacturne', 'camerupt', 'carbink', 'carnivine', 'carracosta', 'castformsunny', 'castformrainy', 'chatot', 'cherrim', 'chimecho', 'claydol', 'corsola', 'cradily', 'crustle', 'cryogonal', 'dedenne', 'delcatty', 'delibird', 'dewgong', 'ditto', 'dodrio',
@@ -3792,11 +3792,11 @@ exports.BattleScripts = {
 		'jynx', 'kadabra', 'kangaskhan', 'kecleon', 'kingler', 'klinklang', 'kricketune', 'lampent', 'lanturn', 'lapras', 'leafeon', 'leavanny', 'ledian', 'lickilicky', 'liepard', 'lilligant', 'linoone', 'ludicolo', 'lumineon', 'lunatone', 'luvdisc', 'luxray', 'machoke',
 		'magcargo', 'magmortar', 'malamar', 'mantine', 'maractus', 'marowak', 'masquerain', 'mawile', 'meganium', 'meowsticf', 'meowstic', 'mesprit', 'metang', 'mightyena', 'miltank', 'minun', 'misdreavus', 'mismagius', 'mothim', 'mrmime', 'muk', 'murkrow', 'musharna', 'ninetales',
 		'ninjask', 'noctowl', 'octillery', 'pachirisu', 'parasect', 'pelipper', 'persian', 'phione', 'pikachu', 'pikachucosplay', 'pikachurockstar', 'pikachubelle', 'pikachupopstar', 'pikachuphd', 'pikachulibre', 'piloswine', 'plusle', 'politoed', 'poliwrath', 'primeape',
-		'probopass', 'purugly', 'pyroar', 'quagsire', 'quilladin', 'qwilfish', 'raichu', 'rampardos', 'rapidash', 'raticate', 'regice', 'regigigas', 'regirock', 'relicanth', 'rhydon', 'roselia', 'rotom', 'rotomfan', 'rotomfrost', 'samurott', 'sandslash', 'sawk', 'sawsbuck',
+		'probopass', 'purugly', 'pyroar', 'quilladin', 'qwilfish', 'raichu', 'rampardos', 'rapidash', 'raticate', 'regice', 'regigigas', 'regirock', 'relicanth', 'rhydon', 'roselia', 'rotom', 'rotomfan', 'rotomfrost', 'samurott', 'sandslash', 'sawk', 'sawsbuck',
 		'scyther', 'seadra', 'seaking', 'seismitoad', 'seviper', 'shedinja', 'shelgon', 'simipour', 'simisage', 'simisear', 'slaking', 'sliggoo', 'sneasel', 'solrock', 'spinda', 'stantler', 'steelix', 'stoutland', 'stunfisk', 'sudowoodo', 'sunflora', 'swalot', 'swanna',
 		'swellow', 'swoobat', 'tangela', 'tauros', 'throh', 'togetic', 'torkoal', 'torterra', 'tropius', 'typhlosion', 'unfezant', 'unown', 'ursaring', 'uxie', 'vanilluxe', 'vespiquen', 'victreebel', 'vigoroth', 'vileplume', 'virizion', 'vivillon', 'volbeat', 'wailord',
 		'walrein', 'watchog', 'weezing', 'whiscash', 'wigglytuff', 'wobbuffet', 'wormadam', 'wormadamsandy', 'wormadamtrash', 'xatu', 'zangoose', 'zebstrika', 'scrafty', 'gallade', 'flygon', 'pawniard', 'abomasnow', 'slowking', 'gothitelle', 'lopunny', 'altaria', 'ampharos',
-		'absol', 'aggron', 'blastoise', 'sceptile', 'aerodactyl', 'medicham', 'beedrill', 'sharpedo', 'pinsir', 'manectric', 'diancie', 'charizard'];
+		'absol', 'aggron', 'blastoise', 'sceptile', 'aerodactyl', 'medicham', 'beedrill', 'pinsir', 'manectric', 'diancie', 'charizard', 'hoopa'];
 
 		let typeCount = {};
 		let typeComboCount = {};
@@ -3855,9 +3855,6 @@ exports.BattleScripts = {
 			case 'Genesect':
 				if (this.random(5) >= 1) continue;
 				break;
-			case 'Pumpkaboo':
-				if (this.random(4) >= 1) continue;
-				break;
 			case 'Gourgeist':
 				if (this.random(4) >= 1) continue;
 				break;
@@ -3867,9 +3864,15 @@ exports.BattleScripts = {
 			case 'Meloetta':
 				if (this.random(2) >= 1) continue;
 				break;
+			case 'Meowstic':
+				if (this.random(2) >= 1) continue;
+				break;
 			case 'Pikachu':
 				// Cosplay Pikachu formes have 20% the normal rate (1/30 the normal rate each)
 				if (template.species !== 'Pikachu' && this.random(30) >= 1) continue;
+			case 'Pumpkaboo':
+				if (this.random(4) >= 1) continue;
+				break;
 			}
 
 			// Limit 2 of any type
@@ -3885,20 +3888,6 @@ exports.BattleScripts = {
 
 			let set = this.randomSet(template, pokemon.length, teamDetails);
 
-			if (template.id === 'gothitelle') {
-				set.species = 'Gothitelle';
-				set.ability = 'Frisk';
-			} else if (template.id === 'wobbuffet') {
-				set.species = 'Wobbuffet';
-				set.ability = 'Telepathy';
-			} else if (template.id === 'ninetales') {
-				set.species = 'Ninetales';
-				set.ability = 'Flash Fire';
-			} else if (template.id === 'politoed') {
-				set.species = 'Politoed';
-				set.ability = 'Water Absorb';
-			}
-
 			// Illusion shouldn't be the last Pokemon of the team
 			if (set.ability === 'Illusion' && pokemonLeft > 4) continue;
 
@@ -3909,11 +3898,6 @@ exports.BattleScripts = {
 				typeCombo = set.ability;
 			}
 			if (typeCombo in typeComboCount) continue;
-
-			// Limit the number of Megas to one
-			let forme = template.otherFormes && this.getTemplate(template.otherFormes[0]);
-			let isMegaSet = this.getItem(set.item).megaStone || (forme && forme.isMega && forme.requiredMove && set.moves.indexOf(toId(forme.requiredMove)) >= 0);
-			if (isMegaSet && teamDetails.megaCount > 0) continue;
 
 			// Okay, the set passes, add it to our team
 			pokemon.push(set);
@@ -3942,11 +3926,11 @@ exports.BattleScripts = {
 			// Team has Mega/weather/hazards
 			if (this.getItem(set.item).megaStone) teamDetails['megaCount'] = 1;
 			if (set.ability === 'Snow Warning') teamDetails['hail'] = 1;
-			if (set.ability === 'Drizzle' || set.moves.indexOf('raindance') >= 0) teamDetails['rain'] = 1;
+			if (set.ability === 'Drizzle' || set.moves.includes('raindance')) teamDetails['rain'] = 1;
 			if (set.ability === 'Sand Stream') teamDetails['sand'] = 1;
-			if (set.moves.indexOf('stealthrock') >= 0) teamDetails['stealthRock'] = 1;
-			if (set.moves.indexOf('toxicspikes') >= 0) teamDetails['toxicSpikes'] = 1;
-			if (set.moves.indexOf('defog') >= 0 || set.moves.indexOf('rapidspin') >= 0) teamDetails['hazardClear'] = 1;
+			if (set.moves.includes('stealthrock')) teamDetails['stealthRock'] = 1;
+			if (set.moves.includes('toxicspikes')) teamDetails['toxicSpikes'] = 1;
+			if (set.moves.includes('defog') || set.moves.includes('rapidspin')) teamDetails['hazardClear'] = 1;
 		}
 		return pokemon;
 	},
