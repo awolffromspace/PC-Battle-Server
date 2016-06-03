@@ -11,6 +11,7 @@ var emotes = {
 	':armycat:': 'http://cbc.pokecommunity.com/config/emoticons/armycat.png',
 	':azelf:': 'http://cbc.pokecommunity.com/config/emoticons/azelf.png',
 	':bed:': 'http://cbc.pokecommunity.com/config/emoticons/bed.gif',
+	':bellossom:': 'http://cbc.pokecommunity.com/config/emoticons/bellossom.png',
 	':bidoof:': 'http://cbc.pokecommunity.com/config/emoticons/bidoof.png',
 	':blastoise:': 'http://cbc.pokecommunity.com/config/emoticons/blastoise.png',
 	':blissey:': 'http://cbc.pokecommunity.com/config/emoticons/blissey.png',
