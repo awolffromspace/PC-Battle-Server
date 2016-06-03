@@ -110,6 +110,10 @@ exports.BattleFormatsData = {
 		requiredItem: false,
 		tier: "UU",
 	},
+	abomasnow: {
+		inherit: true,
+		requiredItem: "Abomasite",
+	},
 	diancie: {
 		inherit: true,
 		requiredItem: "Diancite",
