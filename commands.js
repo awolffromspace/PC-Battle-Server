@@ -769,37 +769,12 @@ exports.commands = {
 		let name = this.targetUsername;
 		let userid = toId(name);
 
-		if (!this.can('makeroom', null, room)) return false;
+		if (!this.can('makeroom')) return false;
 
 		if (!room.auth) room.auth = room.chatRoomData.auth = {};
 
 		room.auth[userid] = '#';
 		this.addModCommand("" + name + " was appointed Room Owner by " + user.name + ".");
-		targetUser.popup("You were appointed Room Owner by " + user.name + " in " + room.id + ".");
-		if (targetUser) targetUser.updateIdentity();
-		if (room.chatRoomData) {
-			Rooms.global.writeChatRoomData();
-		}
-	},
-	roomownerhelp: ["/roomowner [username] - Appoints [username] as a room owner. Removes official status. Requires: & ~"],
-
-	roomdeowner: 'deroomowner',
-	deroomowner: function (target, room, user) {
-		if (!room.auth) {
-			return this.sendReply("/roomdeowner - This room isn't designed for per-room moderation");
-		}
-		if (!target) return this.parse('/help roomdeowner');
-		target = this.splitTarget(target, true);
-		let targetUser = this.targetUser;
-		let name = this.targetUsername;
-		let userid = toId(name);
-		if (!userid || userid === '') return this.errorReply("User '" + name + "' not found.");
-
-		if (room.auth[userid] !== '#') return this.errorReply("User '" + name + "' is not a room owner.");
-		if (!this.can('makeroom')) return false;
-
-		delete room.auth[userid];
-		this.sendReply("(" + name + " is no longer Room Owner.)");
 		if (targetUser) {
 			targetUser.popup("You were appointed Room Owner by " + user.name + " in " + room.id + ".");
 			room.onUpdateIdentity(targetUser);
