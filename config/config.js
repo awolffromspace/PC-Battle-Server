@@ -213,9 +213,14 @@ exports.customavatars = {
 	'novae': 'twilightsky.png',
 	'saeyru': 'twilightsky.png',
 	'charis': 'twilightsky.png',
-	'kjelle': 'doronjo.gif',
-	'captainsyrup': 'doronjo.gif',
-	'nabooru': 'nabooru.png',
+	'kjelle': 'deathbychansey.png',
+	'captainsyrup': 'deathbychansey.png',
+	'nabooru': 'deathbychansey.png',
+	'lailahtan': 'deathbychansey.png',
+	'bellssm': 'deathbychansey.png',
+	'kounoodles': 'deathbychansey.png',
+	'deathbychansey': 'deathbychansey.png',
+	'megumiii': 'deathbychansey.png',
 	'altairis': 'altairis.png',
 	'winry': 'altairis.png',
 	'sanguine': 'sanguine.gif',
@@ -585,9 +590,6 @@ exports.customavatars = {
 	'anthny': 'an7hony.png',
 	'squeetz': 'squeetz.png',
 	'whatagimmick': 'squeetz.png',
-	'lailahtan': 'lailahtan.png',
-	'bellssm': 'kounoodles.png',
-	'kounoodles': 'kounoodles.png',
 	'brcklesnar': 'brcklesnar.jpg',
 	'noanoodles': 'noanoodles.png',
 	'noatan': 'noanoodles.png',
@@ -603,6 +605,8 @@ exports.customavatars = {
 	'yunowhoitis': 'stormlinoooone.png',
 	'digitalesper': 'digitalesper.png',
 	'snow': 'snow.gif',
+	'moocyst': 'moocyst.png',
+	'oddsh': 'oddsh.png',
 };
 
 // tourroom - specify a room to receive tournament announcements (defaults to
@@ -670,6 +674,9 @@ exports.replsocketmode = 0o600;
 //     - tournaments: creating tournaments (/tour new, settype etc.)
 //     - tournamentsmoderation: /tour dq, autodq, end etc.
 //     - tournamentsmanagement: enable/disable tournaments.
+//     - minigame: make minigames (hangman, polls, etc.).
+//     - game: make games.
+//     - gamemanagement: enable/disable games and minigames.
 exports.grouplist = [
 	{
 		symbol: '~',
