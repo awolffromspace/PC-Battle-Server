@@ -2175,8 +2175,8 @@ exports.BattleScripts = {
 			}
 
 			if (potd && potd.exists) {
-				// The Pokemon of the Day belongs in slot 2
-				if (pokemon.length === 1) {
+				// The Pokemon of the Day belongs in slot 1
+				if (pokemon.length === 0) {
 					template = potd;
 					if (template.species === 'Magikarp') {
 						template.randomBattleMoves = ['bounce', 'flail', 'splash', 'magikarpsrevenge'];
