@@ -2074,9 +2074,6 @@ exports.BattleScripts = {
 		let pokemonLeft = 0;
 		let pokemon = [];
 
-		let excludedTiers = {'NFE':1, 'LC Uber':1, 'LC':1};
-		let allowedNFE = {'Chansey':1, 'Doublade':1, 'Gligar':1, 'Porygon2':1, 'Scyther':1};
-
 		// For Monotype
 		let typePool = Object.keys(this.data.TypeChart);
 		let type = typePool[this.random(typePool.length)];
@@ -2089,7 +2086,7 @@ exports.BattleScripts = {
 				if (template.battleOnly) types = this.getTemplate(template.baseSpecies).types;
 				if (types.indexOf(type) < 0) continue;
 			}
-			if (!excludedTiers[template.tier] && !template.isMega && !template.isPrimal && !template.isNonstandard && template.randomBattleMoves) {
+			if (!template.isMega && !template.isPrimal && !template.isNonstandard && template.randomBattleMoves) {
 				pokemonPool.push(id);
 			}
 		}
@@ -2117,9 +2114,6 @@ exports.BattleScripts = {
 			// Useless in Random Battle without greatly lowering the levels of everything else
 			if (template.species === 'Unown') continue;
 
-			// Only certain NFE Pokemon are allowed
-			if (template.evos.length && !allowedNFE[template.species]) continue;
-
 			let tier = template.tier;
 			switch (tier) {
 			case 'Uber':
@@ -2130,6 +2124,10 @@ exports.BattleScripts = {
 				// PUs are limited to 2 but have a 20% chance of being added anyway.
 				if (puCount > 1 && this.random(5) >= 1) continue;
 				break;
+			case 'LC':
+			case 'LC Uber':
+			case 'NFE':
+				if (puCount > 1) continue;
 			case 'Unreleased':
 				// Unreleased Pokémon have 20% the normal rate
 				if (this.random(5) >= 1) continue;
@@ -2169,8 +2167,11 @@ exports.BattleScripts = {
 				if (this.random(2) >= 1) continue;
 				break;
 			case 'Pikachu':
-				// Pikachu is not a viable NFE Pokemon
-				continue;
+				// Cosplay Pikachu formes have 20% the normal rate (1/30 the normal rate each)
+				if (template.species !== 'Pikachu' && this.random(30) >= 1) continue;
+			case 'Pumpkaboo':
+				if (this.random(4) >= 1) continue;
+				break;
 			}
 
 			if (potd && potd.exists) {
@@ -2234,7 +2235,7 @@ exports.BattleScripts = {
 			// Increment Uber/NU counters
 			if (tier === 'Uber') {
 				uberCount++;
-			} else if (tier === 'PU') {
+			} else if (tier === 'PU' || tier === 'NFE' || tier === 'LC' || tier === 'LC Uber') {
 				puCount++;
 			}
 
@@ -2253,13 +2254,10 @@ exports.BattleScripts = {
 		let pokemonLeft = 0;
 		let pokemon = [];
 
-		let excludedTiers = {'NFE':1, 'LC Uber':1, 'LC':1};
-		let allowedNFE = {'Chansey':1, 'Doublade':1, 'Porygon2':1, 'Scyther':1};
-
 		let pokemonPool = [];
 		for (let id in this.data.FormatsData) {
 			let template = this.getTemplate(id);
-			if (!excludedTiers[template.tier] && !template.isMega && !template.isPrimal && !template.isNonstandard && template.randomBattleMoves) {
+			if (!template.isMega && !template.isPrimal && !template.isNonstandard && template.randomBattleMoves) {
 				pokemonPool.push(id);
 			}
 		}
@@ -2292,12 +2290,24 @@ exports.BattleScripts = {
 
 			let tier = template.tier;
 			switch (tier) {
-			case 'CAP':
-				// CAPs have 20% the normal rate
-				if (this.random(5) >= 1) continue;
+			case 'Uber':
+				// Ubers are limited to 2 but have a 20% chance of being added anyway.
+				if (uberCount > 1 && this.random(5) >= 1) continue;
 				break;
+			case 'PU':
+				// PUs are limited to 2 but have a 20% chance of being added anyway.
+				if (puCount > 1 && this.random(5) >= 1) continue;
+				break;
+			case 'LC':
+			case 'LC Uber':
+			case 'NFE':
+				if (puCount > 1) continue;
 			case 'Unreleased':
 				// Unreleased Pokémon have 20% the normal rate
+				if (this.random(5) >= 1) continue;
+				break;
+			case 'CAP':
+				// CAPs have 20% the normal rate
 				if (this.random(5) >= 1) continue;
 			}
 
@@ -2328,8 +2338,11 @@ exports.BattleScripts = {
 				if (this.random(2) >= 1) continue;
 				break;
 			case 'Pikachu':
-				// Pikachu is not a viable NFE Pokemon
-				continue;
+				// Cosplay Pikachu formes have 20% the normal rate (1/30 the normal rate each)
+				if (template.species !== 'Pikachu' && this.random(30) >= 1) continue;
+			case 'Pumpkaboo':
+				if (this.random(4) >= 1) continue;
+				break;
 			}
 
 			// Limit 2 of any type
@@ -2389,7 +2402,7 @@ exports.BattleScripts = {
 			// Increment Uber/NU counters
 			if (tier === 'Uber') {
 				uberCount++;
-			} else if (tier === 'PU') {
+			} else if (tier === 'PU' || tier === 'NFE' || tier === 'LC' || tier === 'LC Uber') {
 				puCount++;
 			}
 
