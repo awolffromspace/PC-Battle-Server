@@ -96,7 +96,11 @@ const noanoodles = [
 ];
 
 const realluneh = [
-	"Inhale my dong enragement child"
+	"Inhale my enragement child"
+];
+
+const rulerofsaprailia = [
+	"Happy Flag Day"
 ];
 
 const shinysquirtlesquad = [
@@ -448,6 +452,16 @@ exports.commands = {
 			user.leaveRoom(room);
 		} else if (userid.toUpperCase() === 'REALLUNEH') {
 			var message = target || realluneh[Math.floor(Math.random() * realluneh.length)];
+
+			var colour = '#' + [1, 1, 1].map(function () {
+				var part = Math.floor(Math.random() * 0xaa);
+				return (part < 0x10 ? '0' : '') + part.toString(16);
+			}).join('');
+
+			room.addRaw('<center><strong><font color="' + colour + '">~~ ' + Tools.escapeHTML(message) + ' ~~</font></strong></center>');
+			user.leaveRoom(room);
+		} else if (userid.toUpperCase() === 'RULEROFSAPRAILIA') {
+			var message = target || rulerofsaprailia[Math.floor(Math.random() * rulerofsaprailia.length)];
 
 			var colour = '#' + [1, 1, 1].map(function () {
 				var part = Math.floor(Math.random() * 0xaa);
