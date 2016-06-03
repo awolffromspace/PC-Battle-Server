@@ -3483,22 +3483,13 @@ exports.BattleScripts = {
 
 		return pokemon;
 	},
-	randomNoPotDTeam: function (side, format) {
+	randomNoPotDTeam: function (side) {
 		let pokemonLeft = 0;
 		let pokemon = [];
-
-		// For Monotype
-		let typePool = Object.keys(this.data.TypeChart);
-		let type = typePool[this.random(typePool.length)];
 
 		let pokemonPool = [];
 		for (let id in this.data.FormatsData) {
 			let template = this.getTemplate(id);
-			if (format === 'monotyperandom') {
-				let types = template.types;
-				if (template.battleOnly) types = this.getTemplate(template.baseSpecies).types;
-				if (types.indexOf(type) < 0) continue;
-			}
 			if (!template.isMega && !template.isPrimal && !template.isNonstandard && template.randomBattleMoves) {
 				pokemonPool.push(id);
 			}
@@ -3581,19 +3572,16 @@ exports.BattleScripts = {
 				break;
 			}
 
-			let types = template.types;
-
-			if (format !== 'monotyperandom') {
-				// Limit 2 of any type
-				let skip = false;
-				for (let t = 0; t < types.length; t++) {
-					if (typeCount[types[t]] > 1 && this.random(5) >= 1) {
-						skip = true;
-						break;
-					}
+			// Limit 2 of any type
+			let types = template.types;	
+			let skip = false;
+			for (let t = 0; t < types.length; t++) {
+				if (typeCount[types[t]] > 1 && this.random(5) >= 1) {
+					skip = true;
+					break;
 				}
-				if (skip) continue;
 			}
+			if (skip) continue;
 
 			let set = this.randomSet(template, pokemon.length, teamDetails);
 
