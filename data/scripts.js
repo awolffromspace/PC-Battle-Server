@@ -3573,7 +3573,7 @@ exports.BattleScripts = {
 			}
 
 			// Limit 2 of any type
-			let types = template.types;	
+			let types = template.types;
 			let skip = false;
 			for (let t = 0; t < types.length; t++) {
 				if (typeCount[types[t]] > 1 && this.random(5) >= 1) {
@@ -3721,7 +3721,7 @@ exports.BattleScripts = {
 			}
 
 			// Limit 2 of any type
-			let types = template.types;	
+			let types = template.types;
 			let skip = false;
 			for (let t = 0; t < types.length; t++) {
 				if (typeCount[types[t]] > 1 && this.random(5) >= 1) {
