@@ -4005,9 +4005,6 @@ exports.BattleScripts = {
 			case 'Gourgeist':
 				if (this.random(4) >= 1) continue;
 				break;
-			case 'Hoopa':
-				if (this.random(2) >= 1) continue;
-				break;
 			case 'Meloetta':
 				if (this.random(2) >= 1) continue;
 				break;
