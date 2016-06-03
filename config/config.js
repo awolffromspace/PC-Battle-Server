@@ -609,6 +609,9 @@ exports.customavatars = {
 	'oddsh': 'oddsh.png',
 };
 
+// custom avatars appear in profile by specifiying server url.
+exports.avatarurl = 'http://cbc.pokecommunity.com/config';
+
 // tourroom - specify a room to receive tournament announcements (defaults to
 // the room 'tournaments').
 // tourannouncements - announcements are only allowed in these rooms
