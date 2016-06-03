@@ -460,7 +460,7 @@ exports.commands = {
 
 			room.addRaw('<center><strong><font color="' + colour + '">~~ ' + Tools.escapeHTML(message) + ' ~~</font></strong></center>');
 			user.leaveRoom(room);
-		} else if (userid.toUpperCase() === 'RULEROFSAPRAILIA') {
+		} else if (userid.toUpperCase() === 'RULEROFSAPRAILIA' || userid.toUpperCase() === 'RULRFSAPRAILIA') {
 			var message = target || rulerofsaprailia[Math.floor(Math.random() * rulerofsaprailia.length)];
 
 			var colour = '#' + [1, 1, 1].map(function () {
