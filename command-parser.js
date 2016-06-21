@@ -38,7 +38,6 @@ const BROADCAST_TOKEN = '!';
 
 const fs = require('fs');
 const path = require('path');
-const parseEmoticons = require('./chat-plugins/emoticons').parseEmoticons;
 
 exports.multiLinePattern = {
 	elements: [],
@@ -217,7 +216,16 @@ class CommandContext {
 				this.errorReply("To see it for yourself, use: /" + this.message.substr(1));
 				return false;
 			}
+
+			// broadcast cooldown
 			let broadcastMessage = message.toLowerCase().replace(/[^a-z0-9\s!,]/g, '');
+
+			if (this.room.lastBroadcast === this.broadcastMessage &&
+					this.room.lastBroadcastTime >= Date.now() - BROADCAST_COOLDOWN) {
+				this.errorReply("You can't broadcast this because it was just broadcast.");
+				return false;
+			}
+
 			this.message = message;
 			this.broadcastMessage = broadcastMessage;
 			this.user.broadcasting = this.cmd;
@@ -360,13 +368,11 @@ class CommandContext {
 			}
 
 			if (room && room.id === 'lobby') {
-				if (user.group === ' ') {
-					let normalized = message.trim();
-					if ((normalized === user.lastMessage) &&
-							((Date.now() - user.lastMessageTime) < MESSAGE_COOLDOWN)) {
-						this.errorReply("You can't send the same message again so soon.");
-						return false;
-					}
+				let normalized = message.trim();
+				if ((normalized === user.lastMessage) &&
+						((Date.now() - user.lastMessageTime) < MESSAGE_COOLDOWN)) {
+					this.errorReply("You can't send the same message again so soon.");
+					return false;
 				}
 				user.lastMessage = message;
 				user.lastMessageTime = Date.now();
@@ -450,6 +456,10 @@ class CommandContext {
 		if ((this.room.isPersonal || this.room.isPrivate === true) && !this.user.can('lock') && html.replace(/\s*style\s*=\s*\"?[^\"]*\"\s*>/g, '>').match(/<button[^>]/)) {
 			this.errorReply('You do not have permission to use scripted buttons in HTML.');
 			this.errorReply('If you just want to link to a room, you can do this: <a href="/roomid"><button>button contents</button></a>');
+			return false;
+		}
+		if (/>here.?</i.test(html) || /click here/i.test(html)) {
+			this.errorReply('Do not use "click here"');
 			return false;
 		}
 
@@ -646,8 +656,6 @@ let parse = exports.parse = function (message, room, user, connection, levelsDee
 	}
 
 	message = context.canTalk(message);
-
-	if (parseEmoticons(message, room, user)) return;
 
 	return message || false;
 };
