@@ -39,7 +39,7 @@ function wikiaSearch(subdomain, query, callback) {
 exports.commands = {
 	ygo: 'yugioh',
 	yugioh: function (target, room, user) {
-		if (!this.canBroadcast()) return;
+		if (!this.runBroadcast()) return;
 		let subdomain = 'yugioh';
 		let query = target.trim();
 

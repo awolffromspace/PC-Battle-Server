@@ -161,7 +161,7 @@ exports.commands = {
 	atm: 'wallet',
 	purse: 'wallet',
 	wallet: function (target, room, user) {
-		if (!this.canBroadcast()) return;
+		if (!this.runBroadcast()) return;
 		if (!target) target = user.name;
 
 		Database.read('bp', toId(target), function (err, amount) {
@@ -272,7 +272,7 @@ exports.commands = {
 
 	store: 'shop',
 	shop: function (target, room, user) {
-		if (!this.canBroadcast()) return;
+		if (!this.runBroadcast()) return;
 		return this.sendReply("|raw|" + shopDisplay);
 	},
 	shophelp: ["/shop - Display items you can buy with Battle Points."],
@@ -376,7 +376,7 @@ exports.commands = {
 	richladder: 'richestuser',
 	richestusers: 'richestuser',
 	richestuser: function (target, room, user) {
-		if (!this.canBroadcast()) return;
+		if (!this.runBroadcast()) return;
 		var _this = this;
 		var display = '<center><u><b>BP Ladder</b></u></center><br><table border="1" cellspacing="0" cellpadding="5" width="100%"><tbody><tr><th>Rank</th><th>Username</th><th>BP</th></tr>';
 		Database.sortDesc('bp', 10, function (err, users) {
@@ -482,7 +482,7 @@ exports.commands = {
 
 	ticket: 'tickets',
 	tickets: function (target, room, user) {
-		if (!this.canBroadcast()) return;
+		if (!this.runBroadcast()) return;
 		Database.read('tickets', user.userid, function (err, tickets) {
 				if (err) throw err;
 				if (!tickets || !tickets.length) {
@@ -539,7 +539,7 @@ exports.commands = {
 
 	jackpot: 'pot',
 	pot: function (target, room, user) {
-		if (!this.canBroadcast()) return;
+		if (!this.runBroadcast()) return;
 		Database.get('pot', function (err, pot) {
 			if (err) throw err;
 			if (!pot) pot = 5;
@@ -549,7 +549,7 @@ exports.commands = {
 
 	bpstats: 'economystats',
 	economystats: function (target, room, user) {
-		if (!this.canBroadcast()) return;
+		if (!this.runBroadcast()) return;
 		var _this = this;
 		Database.total('bp', function (err, total) {
 			Database.countUsers(function (err, numUsers) {
@@ -573,7 +573,7 @@ exports.commands = {
 	resetgthelp: ["/resetgt [user] - Reset user's Get-Together points to zero."],
 
 	gtladder: function (target, room, user) {
-		if (!this.canBroadcast()) return;
+		if (!this.runBroadcast()) return;
 		var _this = this;
 		var display = '<center><u><b>Get-Together Ladder</b></u></center><br><table border="1" cellspacing="0" cellpadding="5" width="100%"><tbody><tr><th>Rank</th><th>Username</th><th>GT Points</th></tr>';
 		Database.sortDesc('gt', 10, function (err, users) {

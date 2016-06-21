@@ -275,7 +275,7 @@ exports.commands = {
 	emotes: 'emoticons',
 	emoticon: 'emoticons',
 	emoticons: function (target, room, user) {
-		if (!this.canBroadcast()) return;
+		if (!this.runBroadcast()) return;
 		this.sendReply("|raw|" + emotes_table);
 	},
 	emoticonshelp: ["/emoticons - Get a list of emoticons."],

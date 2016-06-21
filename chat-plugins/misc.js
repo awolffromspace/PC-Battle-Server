@@ -89,7 +89,7 @@ exports.commands = {
 	pmallstaffhelp: ["/pmallstaff [message] - Sends a PM to every staff member online."],
 
 	regdate: function (target, room, user) {
-		if (!this.canBroadcast()) return;
+		if (!this.runBroadcast()) return;
 		if (!target || !toId(target)) return this.parse('/help regdate');
 		var username = toId(target);
 		request('http://pokemonshowdown.com/users/' + username, function (error, response, body) {
@@ -110,13 +110,13 @@ exports.commands = {
 
 	sb: 'showdownboilerplate',
 	showdownboilerplate: function (target, room, user) {
-		if (!this.canBroadcast()) return;
+		if (!this.runBroadcast()) return;
 		this.sendReply("|raw|This server uses <a href='https://github.com/CreaturePhil/Showdown-Boilerplate'>Showdown-Boilerplate</a>.");
 	},
 	showdownboilerplatehelp: ["/showdownboilerplate - Links to the Showdown-Boilerplate repository on Github."],
 
 	seen: function () {
-		if (!this.canBroadcast()) return;
+		if (!this.runBroadcast()) return;
 		this.sendReply("Please use .seen instead.");
 	},
 	seenhelp: ["/seen - Shows when the user last connected on the server."],
