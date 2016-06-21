@@ -38,6 +38,7 @@ const BROADCAST_TOKEN = '!';
 
 const fs = require('fs');
 const path = require('path');
+const parseEmoticons = require('./chat-plugins/emoticons').parseEmoticons;
 
 exports.multiLinePattern = {
 	elements: [],
@@ -166,7 +167,7 @@ class CommandContext {
 		for (let i in users) {
 			let user = users[i];
 			// hardcoded for performance reasons (this is an inner loop)
-			if (user.isStaff || (auth && (auth[user.userid] || '+') !== '+')) {
+			if (user.isStaff || (auth[user.userid] = '#') || (auth[user.userid] = '=')) {
 				user.sendTo(this.room, data);
 			}
 		}
@@ -367,7 +368,7 @@ class CommandContext {
 				return false;
 			}
 
-			if (room && room.id === 'lobby') {
+			if (room && room.id === 'lobby' && user.group === ' ') {
 				let normalized = message.trim();
 				if ((normalized === user.lastMessage) &&
 						((Date.now() - user.lastMessageTime) < MESSAGE_COOLDOWN)) {
@@ -456,10 +457,6 @@ class CommandContext {
 		if ((this.room.isPersonal || this.room.isPrivate === true) && !this.user.can('lock') && html.replace(/\s*style\s*=\s*\"?[^\"]*\"\s*>/g, '>').match(/<button[^>]/)) {
 			this.errorReply('You do not have permission to use scripted buttons in HTML.');
 			this.errorReply('If you just want to link to a room, you can do this: <a href="/roomid"><button>button contents</button></a>');
-			return false;
-		}
-		if (/>here.?</i.test(html) || /click here/i.test(html)) {
-			this.errorReply('Do not use "click here"');
 			return false;
 		}
 
@@ -656,6 +653,8 @@ let parse = exports.parse = function (message, room, user, connection, levelsDee
 	}
 
 	message = context.canTalk(message);
+
+	if (parseEmoticons(message, room, user)) return;
 
 	return message || false;
 };
