@@ -1,7 +1,7 @@
 exports.commands = {
 	eng: 'en',
 	en: function (target, room, user) {
-		if (!this.canBroadcast()) return;
+		if (!this.runBroadcast()) return;
 		this.sendReplyBox(
 			"Official chat rooms are English only. Other languages are allowed in battle rooms, private messages, and unofficial chat rooms.<br />" +
 			"- <a href=\"https://translate.google.com/#en/en/Official%20chat%20rooms%20are%20English%20only.%20Other%20languages%20are%20allowed%20in%20battle%20rooms%2C%20private%20messages%2C%20and%20unofficial%20chat%20rooms.\">TRANSLATION</a><br />" +
@@ -77,7 +77,7 @@ exports.commands = {
 	plain: 'plaintext',
 	plaintext: function (target, room, user) {
 		if (!target) return;
-		if (!this.canBroadcast()) return;
+		if (!this.runBroadcast()) return;
 		var originalVersion = target;
 		var newVersion = target;
 		newVersion = newVersion.replace(/[^a-zA-Z0-9]|\s+/g, "");
