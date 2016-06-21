@@ -2169,12 +2169,6 @@ exports.BattleMovedex = {
 		boosts: {
 			spe: -2,
 		},
-		onTryHit: function (target) {
-			if (!target.runStatusImmunity('powder')) {
-				this.add('-immune', target, '[msg]');
-				return null;
-			}
-		},
 		secondary: false,
 		target: "allAdjacentFoes",
 		type: "Grass",
@@ -2644,6 +2638,10 @@ exports.BattleMovedex = {
 			onBeforeMovePriority: 100,
 			onBeforeMove: function (pokemon) {
 				this.debug('removing Destiny Bond before attack');
+				pokemon.removeVolatile('destinybond');
+			},
+			onBeforeSwitchOutPriority: 1,
+			onBeforeSwitchOut: function (pokemon) {
 				pokemon.removeVolatile('destinybond');
 			},
 		},
@@ -10251,12 +10249,6 @@ exports.BattleMovedex = {
 		pp: 35,
 		priority: 0,
 		flags: {powder: 1, protect: 1, reflectable: 1, mirror: 1},
-		onTryHit: function (target) {
-			if (!target.runStatusImmunity('powder')) {
-				this.add('-immune', target, '[msg]');
-				return null;
-			}
-		},
 		status: 'psn',
 		secondary: false,
 		target: "normal",
@@ -10333,12 +10325,6 @@ exports.BattleMovedex = {
 		pp: 20,
 		priority: 1,
 		flags: {powder: 1, protect: 1, reflectable: 1, mirror: 1, authentic: 1},
-		onTryHit: function (target) {
-			if (!target.runStatusImmunity('powder')) {
-				this.add('-immune', target, '[msg]');
-				return null;
-			}
-		},
 		volatileStatus: 'powder',
 		effect: {
 			duration: 1,
@@ -11325,6 +11311,7 @@ exports.BattleMovedex = {
 			this.add('-start', source, 'typechange', '[from] move: Reflect Type', '[of] ' + target);
 			source.types = target.getTypes(true);
 			source.addedType = target.addedType;
+			source.knownType = target.side === source.side && target.knownType;
 		},
 		secondary: false,
 		target: "normal",
@@ -11337,13 +11324,14 @@ exports.BattleMovedex = {
 		basePower: 0,
 		category: "Status",
 		desc: "The user cures its burn, poison, or paralysis.",
-		shortDesc: "Removes status from the user.",
+		shortDesc: "User cures its burn, poison, or paralysis.",
 		id: "refresh",
 		name: "Refresh",
 		pp: 20,
 		priority: 0,
 		flags: {snatch: 1},
 		onHit: function (pokemon) {
+			if (pokemon.status in {'': 1, 'slp': 1, 'frz': 1}) return false;
 			pokemon.cureStatus();
 		},
 		secondary: false,
@@ -12958,12 +12946,6 @@ exports.BattleMovedex = {
 		pp: 15,
 		priority: 0,
 		flags: {powder: 1, protect: 1, reflectable: 1, mirror: 1},
-		onTryHit: function (target) {
-			if (!target.runStatusImmunity('powder')) {
-				this.add('-immune', target, '[msg]');
-				return null;
-			}
-		},
 		status: 'slp',
 		secondary: false,
 		target: "normal",
@@ -13608,12 +13590,6 @@ exports.BattleMovedex = {
 		pp: 15,
 		priority: 0,
 		flags: {powder: 1, protect: 1, reflectable: 1, mirror: 1},
-		onTryHit: function (target) {
-			if (!target.runStatusImmunity('powder')) {
-				this.add('-immune', target, '[msg]');
-				return null;
-			}
-		},
 		status: 'slp',
 		secondary: false,
 		target: "normal",
@@ -13962,12 +13938,6 @@ exports.BattleMovedex = {
 		pp: 30,
 		priority: 0,
 		flags: {powder: 1, protect: 1, reflectable: 1, mirror: 1},
-		onTryHit: function (target) {
-			if (!target.runStatusImmunity('powder')) {
-				this.add('-immune', target, '[msg]');
-				return null;
-			}
-		},
 		status: 'par',
 		secondary: false,
 		target: "normal",
@@ -15177,6 +15147,16 @@ exports.BattleMovedex = {
 			if (target.hasType('Ghost')) return false;
 			if (!target.addType('Ghost')) return false;
 			this.add('-start', target, 'typeadd', 'Ghost', '[from] move: Trick-or-Treat');
+
+			if (target.side.active.length === 2 && target.position === 1) {
+				// Curse Glitch
+				const decision = this.willMove(target);
+				if (decision && decision.move.id === 'curse') {
+					decision.targetLoc = -1;
+					decision.targetSide = target.side;
+					decision.targetPosition = 0;
+				}
+			}
 		},
 		secondary: false,
 		target: "normal",
@@ -16230,7 +16210,7 @@ exports.BattleMovedex = {
 		accuracy: true,
 		basePower: 0,
 		category: "Status",
-		desc: "Causes the target to fall asleep at the end of the next turn. If the target is still on the field and does not have a major status condition at that time, it falls asleep, and this effect cannot be prevented by Safeguard or a substitute. Fails if the target cannot fall asleep or if it already has a major status condition.",
+		desc: "Causes the target to fall asleep at the end of the next turn. Fails when used if the target cannot fall asleep or if it already has a major status condition. At the end of the next turn, if the target is still on the field, does not have a major status condition, and can fall asleep, it falls asleep. If the target becomes affected, this effect cannot be prevented by Safeguard or a substitute, or by falling asleep and waking up during the effect.",
 		shortDesc: "Puts the target to sleep after 1 turn.",
 		id: "yawn",
 		name: "Yawn",

@@ -160,7 +160,7 @@ exports.BattleAbilities = {
 		onFoeMaybeTrapPokemon: function (pokemon, source) {
 			if (!source) source = this.effectData.target;
 			if (!this.isAdjacent(pokemon, source)) return;
-			if (pokemon.isGrounded()) {
+			if (pokemon.isGrounded(!pokemon.knownType)) { // Negate immunity if the type is unknown
 				pokemon.maybeTrapped = true;
 			}
 		},
@@ -339,6 +339,16 @@ exports.BattleAbilities = {
 			if (target.isActive && move.effectType === 'Move' && move.category !== 'Status' && type !== '???' && !target.hasType(type)) {
 				if (!target.setType(type)) return false;
 				this.add('-start', target, 'typechange', type, '[from] Color Change');
+
+				if (target.side.active.length === 2 && target.position === 1) {
+					// Curse Glitch
+					const decision = this.willMove(target);
+					if (decision && decision.move.id === 'curse') {
+						decision.targetLoc = -1;
+						decision.targetSide = target.side;
+						decision.targetPosition = 0;
+					}
+				}
 			}
 		},
 		id: "colorchange",
@@ -1022,7 +1032,8 @@ exports.BattleAbilities = {
 				return;
 			}
 			for (let i = 0; i < allyActive.length; i++) {
-				if (allyActive[i] && this.isAdjacent(pokemon, allyActive[i]) && allyActive[i].status && this.random(10) < 3) {
+				if (allyActive[i] && allyActive[i].hp && this.isAdjacent(pokemon, allyActive[i]) && allyActive[i].status && this.random(10) < 10) {
+					this.add('-activate', pokemon, 'ability: Healer');
 					allyActive[i].cureStatus();
 				}
 			}
@@ -1521,7 +1532,7 @@ exports.BattleAbilities = {
 		},
 		onFoeMaybeTrapPokemon: function (pokemon, source) {
 			if (!source) source = this.effectData.target;
-			if (pokemon.hasType('Steel') && this.isAdjacent(pokemon, source)) {
+			if ((!pokemon.knownType || pokemon.hasType('Steel')) && this.isAdjacent(pokemon, source)) {
 				pokemon.maybeTrapped = true;
 			}
 		},
@@ -1816,13 +1827,10 @@ exports.BattleAbilities = {
 			}
 		},
 		onImmunity: function (type, pokemon) {
-			if (type === 'attract') {
-				this.add('-immune', pokemon, '[msg]', '[from] ability: Oblivious');
-				return null;
-			}
+			if (type === 'attract') return false;
 		},
 		onTryHit: function (pokemon, target, move) {
-			if (move.id === 'captivate' || move.id === 'taunt') {
+			if (move.id === 'attract' || move.id === 'captivate' || move.id === 'taunt') {
 				this.add('-immune', pokemon, '[msg]', '[from] ability: Oblivious');
 				return null;
 			}
@@ -1836,6 +1844,13 @@ exports.BattleAbilities = {
 		shortDesc: "This Pokemon is immune to powder moves and damage from Sandstorm or Hail.",
 		onImmunity: function (type, pokemon) {
 			if (type === 'sandstorm' || type === 'hail' || type === 'powder') return false;
+		},
+		onTryHitPriority: 1,
+		onTryHit: function (target, source, move) {
+			if (move.flags['powder'] && target !== source) {
+				this.add('-immune', target, '[msg]', '[from] ability: Overcoat');
+				return null;
+			}
 		},
 		id: "overcoat",
 		name: "Overcoat",
@@ -1868,13 +1883,16 @@ exports.BattleAbilities = {
 		shortDesc: "This Pokemon cannot be confused. Gaining this Ability while confused cures it.",
 		onUpdate: function (pokemon) {
 			if (pokemon.volatiles['confusion']) {
+				this.add('-activate', pokemon, 'ability: Own Tempo');
 				pokemon.removeVolatile('confusion');
 			}
 		},
 		onImmunity: function (type, pokemon) {
-			if (type === 'confusion') {
-				this.add('-immune', pokemon, 'confusion');
-				return false;
+			if (type === 'confusion') return false;
+		},
+		onHit: function (target, source, move) {
+			if (move && move.volatileStatus === 'confusion') {
+				this.add('-immune', target, 'confusion', '[from] ability: Own Tempo');
 			}
 		},
 		id: "owntempo",
@@ -2112,6 +2130,7 @@ exports.BattleAbilities = {
 		desc: "This Pokemon's type changes to match the type of the move it is about to use. This effect comes after all effects that change a move's type.",
 		shortDesc: "This Pokemon's type changes to match the type of the move it is about to use.",
 		onPrepareHit: function (source, target, move) {
+			if (move.hasBounced) return;
 			let type = move.type;
 			if (type && type !== '???' && source.getTypes().join() !== type) {
 				if (!source.setType(type)) return;

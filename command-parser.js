@@ -220,7 +220,7 @@ class CommandContext {
 			let broadcastMessage = message.toLowerCase().replace(/[^a-z0-9\s!,]/g, '');
 			this.message = message;
 			this.broadcastMessage = broadcastMessage;
-			this.user.broadcasting = true;
+			this.user.broadcasting = this.cmd;
 		}
 		return true;
 	}

@@ -636,7 +636,7 @@ exports.BattleFormatsData = {
 		eventPokemon: [
 			{"generation": 3, "level": 70, "moves":["futuresight", "calmmind", "psychic", "trick"]},
 		],
-		tier: "UU",
+		tier: "BL",
 	},
 	alakazammega: {
 		randomBattleMoves: ["calmmind", "psyshock", "focusblast", "shadowball", "encore", "substitute"],
@@ -884,7 +884,7 @@ exports.BattleFormatsData = {
 		randomBattleMoves: ["stealthrock", "earthquake", "heavyslam", "roar", "toxic", "dragontail"],
 		randomDoubleBattleMoves: ["stealthrock", "earthquake", "heavyslam", "rockslide", "protect", "explosion"],
 		requiredItem: "Steelixite",
-		tier: "RU",
+		tier: "BL2",
 	},
 	drowzee: {
 		randomBattleMoves: ["psychic", "seismictoss", "thunderwave", "wish", "protect", "toxic", "shadowball", "trickroom", "calmmind", "dazzlinggleam"],
@@ -2101,6 +2101,9 @@ exports.BattleFormatsData = {
 	miltank: {
 		randomBattleMoves: ["milkdrink", "stealthrock", "bodyslam", "healbell", "curse", "earthquake", "toxic"],
 		randomDoubleBattleMoves: ["protect", "helpinghand", "bodyslam", "healbell", "curse", "earthquake", "thunderwave"],
+		eventPokemon: [
+			{"generation": 6, "level": 20, "perfectIVs": 3, "isHidden": false, "abilities":["scrappy"], "moves":["rollout", "attract", "stomp", "milkdrink"], "pokeball": "cherishball"},
+		],
 		tier: "NU",
 	},
 	raikou: {
@@ -2428,6 +2431,7 @@ exports.BattleFormatsData = {
 		randomDoubleBattleMoves: ["psyshock", "focusblast", "shadowball", "moonblast", "taunt", "willowisp", "thunderbolt", "trickroom", "helpinghand", "protect", "dazzlinggleam"],
 		eventPokemon: [
 			{"generation": 5, "level": 50, "shiny": 1, "isHidden": false, "abilities":["trace"], "moves":["hypnosis", "thunderbolt", "focusblast", "psychic"], "pokeball": "cherishball"},
+			{"generation": 6, "level": 50, "shiny": true, "gender": "F", "isHidden": false, "abilities":["synchronize"], "moves":["dazzlinggleam", "moonblast", "storedpower", "calmmind"], "pokeball": "cherishball"},
 		],
 		tier: "UU",
 	},
@@ -5413,7 +5417,7 @@ exports.BattleFormatsData = {
 	tyrantrum: {
 		randomBattleMoves: ["stealthrock", "dragondance", "dragonclaw", "earthquake", "superpower", "outrage", "headsmash"],
 		randomDoubleBattleMoves: ["rockslide", "dragondance", "headsmash", "dragonclaw", "earthquake", "icefang", "firefang", "protect"],
-		tier: "RU",
+		tier: "BL2",
 	},
 	amaura: {
 		randomBattleMoves: ["naturepower", "hypervoice", "ancientpower", "thunderbolt", "darkpulse", "thunderwave", "dragontail", "flashcannon"],

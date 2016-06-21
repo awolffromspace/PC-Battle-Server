@@ -839,10 +839,7 @@ exports.commands = {
 			}
 		}
 		if (targetUser && targetUser.locked && !room.isPrivate && !room.battle && !room.isPersonal && (nextGroup === '%' || nextGroup === '@')) {
-			Monitor.log("[CrisisMonitor] " + user.name + " was automatically demoted in " + room.id + " for trying to promote locked user: " + targetUser.name + ".");
-			room.auth[user.userid] = '@';
-			user.updateIdentity(room.id);
-			return this.errorReply("You have been automatically deauthed for trying to promote locked user: '" + name + "'.");
+			return this.errorReply("Locked users can't be promoted.");
 		}
 
 		if (nextGroup === ' ') {
@@ -1261,7 +1258,7 @@ exports.commands = {
 		if (userid !== toId(this.inputUsername)) this.add('|unlink|hide|' + toId(this.inputUsername));
 
 		this.globalModlog("LOCK", targetUser, " by " + user.name + (target ? ": " + target : ""));
-		Punishments.lock(targetUser);
+		Punishments.lock(targetUser, null, null, target);
 		return true;
 	},
 	lockhelp: ["/lock OR /l [username], [reason] - Locks the user from talking in all chats. Requires: % @ & ~"],
@@ -1289,6 +1286,7 @@ exports.commands = {
 			if (cmd === 'forcelock') {
 				let from = targetUser.deconfirm();
 				Monitor.log("[CrisisMonitor] " + name + " was locked by " + user.name + " and demoted from " + from.join(", ") + ".");
+				this.globalModlog("CRISISDEMOTE", targetUser, " from " + from.join(", "));
 			} else {
 				return this.sendReply("" + name + " is a confirmed user. If you are sure you would like to lock them use /forcelock.");
 			}
@@ -1319,7 +1317,7 @@ exports.commands = {
 		if (userid !== toId(this.inputUsername)) this.add('|unlink|hide|' + toId(this.inputUsername));
 
 		this.globalModlog("WEEKLOCK", targetUser, " by " + user.name + (target ? ": " + target : ""));
-		Punishments.lock(targetUser, Date.now() + 7 * 24 * 60 * 60 * 1000);
+		Punishments.lock(targetUser, Date.now() + 7 * 24 * 60 * 60 * 1000, null, target);
 		return true;
 	},
 	weeklockhelp: ["/weeklock OR /wl [username], [reason] - Locks the user from talking in all chats for one week. Requires: % @ & ~"],
@@ -1334,7 +1332,7 @@ exports.commands = {
 			reason = ' (' + targetUser.locked + ')';
 		}
 
-		let unlocked = Users.unlock(target);
+		let unlocked = Punishments.unlock(target);
 
 		if (unlocked) {
 			this.addModCommand(unlocked.join(", ") + " " + ((unlocked.length > 1) ? "were" : "was") +
@@ -1395,7 +1393,7 @@ exports.commands = {
 
 		this.add('|unlink|hide|' + userid);
 		if (userid !== toId(this.inputUsername)) this.add('|unlink|hide|' + toId(this.inputUsername));
-		Punishments.ban(targetUser);
+		Punishments.ban(targetUser, null, null, target);
 		this.globalModlog("BAN", targetUser, " by " + user.name + (target ? ": " + target : ""));
 		return true;
 	},
@@ -1815,7 +1813,7 @@ exports.commands = {
 		this.addModCommand("" + targetUser.name + " was namelocked by " + user.name + "." + (reason ? " (" + reason + ")" : ""));
 		this.globalModlog("NAMELOCK", targetUser, " by " + user.name + (reason ? ": " + reason : ""));
 		Rooms.global.cancelSearch(targetUser);
-		Punishments.namelock(targetUser);
+		Punishments.namelock(targetUser, null, null, reason);
 		targetUser.popup("|modal|" + user.name + " has locked your name and you can't change names anymore" + (reason ? ": " + reason : "."));
 		return true;
 	},
