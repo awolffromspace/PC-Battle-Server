@@ -24,7 +24,10 @@ var emotes = {
 	':clown:': 'http://cbc.pokecommunity.com/config/emoticons/clown.png',
 	':cookie:': 'http://cbc.pokecommunity.com/config/emoticons/cookie.png',
 	':cthulhu:': 'http://cbc.pokecommunity.com/config/emoticons/cthulhu.png',
+	':curry:': 'http://cbc.pokecommunity.com/config/emoticons/curry.png',
+	':dab:': 'http://cbc.pokecommunity.com/config/emoticons/dab.png',
 	':dedenne:': 'http://cbc.pokecommunity.com/config/emoticons/dedenne.png',
+	':delivert:': 'http://cbc.pokecommunity.com/config/emoticons/delivert.png',
 	':diddy:': 'http://cbc.pokecommunity.com/config/emoticons/diddy.png',
 	':ditto:': 'http://cbc.pokecommunity.com/config/emoticons/ditto.png',
 	':dk:': 'http://cbc.pokecommunity.com/config/emoticons/dk.png',
@@ -48,22 +51,26 @@ var emotes = {
 	':jack:': 'http://cbc.pokecommunity.com/config/emoticons/jack.png',
 	':jigglypuff:': 'http://cbc.pokecommunity.com/config/emoticons/jigglypuff.png',
 	':jynx:': 'http://cbc.pokecommunity.com/config/emoticons/jynx.png',
+	':kanye:': 'http://cbc.pokecommunity.com/config/emoticons/kanye.png',
 	':kappa:': 'http://cbc.pokecommunity.com/config/emoticons/kappa.png',
 	':kappapride:': 'http://cbc.pokecommunity.com/config/emoticons/kappapride.png',
 	':kappaross:': 'http://cbc.pokecommunity.com/config/emoticons/kappaross.png',
 	':keepo:': 'http://cbc.pokecommunity.com/config/emoticons/keepo.png',
 	':kermit:': 'http://cbc.pokecommunity.com/config/emoticons/kermit.png',
+	':khaled:': 'http://cbc.pokecommunity.com/config/emoticons/khaled.png',
 	':kitty:': 'http://cbc.pokecommunity.com/config/emoticons/kitty.png',
 	':kreygasm:': 'http://cbc.pokecommunity.com/config/emoticons/kreygasm.png',
 	':lapras:': 'http://cbc.pokecommunity.com/config/emoticons/lapras.png',
 	':latias:': 'http://cbc.pokecommunity.com/config/emoticons/latias.png',
 	':latios:': 'http://cbc.pokecommunity.com/config/emoticons/latios.png',
+	':ledian:': 'http://cbc.pokecommunity.com/config/emoticons/ledian.png',
 	':lickilicky:': 'http://cbc.pokecommunity.com/config/emoticons/lickilicky.png',
 	':lickitung:': 'http://cbc.pokecommunity.com/config/emoticons/lickitung.gif',
 	':lileep:': 'http://cbc.pokecommunity.com/config/emoticons/lileep.png',
 	':ludicolo:': 'http://cbc.pokecommunity.com/config/emoticons/ludicolo.png',
 	':luvdisc:': 'http://cbc.pokecommunity.com/config/emoticons/luvdisc.png',
 	':lyin:': 'http://cbc.pokecommunity.com/config/emoticons/lyin.png',
+	':lying:': 'http://cbc.pokecommunity.com/config/emoticons/lying.png',
 	':magikarp:': 'http://cbc.pokecommunity.com/config/emoticons/magikarp.png',
 	':meganium:': 'http://cbc.pokecommunity.com/config/emoticons/meganium.png',
 	':meowstic:': 'http://cbc.pokecommunity.com/config/emoticons/meowstic.png',
@@ -78,6 +85,7 @@ var emotes = {
 	':pachirisu:': 'http://cbc.pokecommunity.com/config/emoticons/pachirisu.png',
 	':pancham:': 'http://cbc.pokecommunity.com/config/emoticons/pancham.png',
 	':pangoro:': 'http://cbc.pokecommunity.com/config/emoticons/pangoro.png',
+	':papabless:': 'http://cbc.pokecommunity.com/config/emoticons/papabless.png',
 	':papi:': 'http://cbc.pokecommunity.com/config/emoticons/papi.png',
 	':pear:': 'http://cbc.pokecommunity.com/config/emoticons/pear.png',
 	':pikachu:': 'http://cbc.pokecommunity.com/config/emoticons/pikachu.png',
@@ -90,6 +98,7 @@ var emotes = {
 	':psyduck:': 'http://cbc.pokecommunity.com/config/emoticons/psyduck.png',
 	':pyoshi:': 'http://cbc.pokecommunity.com/config/emoticons/pyoshi.png',
 	':raichu:': 'http://cbc.pokecommunity.com/config/emoticons/raichu.png',
+	':respek:': 'http://cbc.pokecommunity.com/config/emoticons/respek.png',
 	':rude:': 'http://cbc.pokecommunity.com/config/emoticons/rude.gif',
 	':scizor:': 'http://cbc.pokecommunity.com/config/emoticons/scizor.png',
 	':seduce:': 'http://cbc.pokecommunity.com/config/emoticons/seduce.png',
@@ -107,9 +116,11 @@ var emotes = {
 	':superman:': 'http://cbc.pokecommunity.com/config/emoticons/superman.png',
 	':sweep:': 'http://cbc.pokecommunity.com/config/emoticons/sweep.gif',
 	':taco:': 'http://cbc.pokecommunity.com/config/emoticons/taco.png',
+	':thugga:': 'http://cbc.pokecommunity.com/config/emoticons/thugga.png',
 	':toxic:': 'http://cbc.pokecommunity.com/config/emoticons/toxic.png',
 	':ugh:': 'http://cbc.pokecommunity.com/config/emoticons/ugh.gif',
 	':victini:': 'http://cbc.pokecommunity.com/config/emoticons/victini.gif',
+	':viper:': 'http://cbc.pokecommunity.com/config/emoticons/viper.png',
 	':vulpix:': 'http://cbc.pokecommunity.com/config/emoticons/vulpix.png',
 	':wave:': 'http://cbc.pokecommunity.com/config/emoticons/wave.gif',
 	':what:': 'http://cbc.pokecommunity.com/config/emoticons/what.png',
@@ -164,7 +175,7 @@ function parseEmoticons(message, room, user, pm) {
 	// add emotes
 	message = message.replace(patternRegex, function (match) {
 		var emote = emotes[match];
-		if (match === ':fatbowie:' || match === ':gav:' || match === ':kermit:' || match === ':nw:' || match === ':superman:' || match === ':sweep:' || match === ':yoshi:') return typeof emote != 'undefined' ?
+		if (match === ':dab:' || match === ':fatbowie:' || match === ':gav:' || match === ':kermit:' || match === ':nw:' || match === ':superman:' || match === ':sweep:' || match === ':yoshi:') return typeof emote != 'undefined' ?
 			'<img src="' + emote + '" title="' + match + '" width="30" height="30"/>' :
 			match;
 		if (match === ':bed:') return typeof emote != 'undefined' ?
@@ -176,17 +187,32 @@ function parseEmoticons(message, room, user, pm) {
 		if (match === ':catflip:') return typeof emote != 'undefined' ?
 			'<img src="' + emote + '" title="' + match + '" width="44" height="32"/>' :
 			match;
-		if (match === ':jack:') return typeof emote != 'undefined' ?
+		if (match === ':curry:' || match === ':jack:') return typeof emote != 'undefined' ?
 			'<img src="' + emote + '" title="' + match + '" width="23" height="30"/>' :
 			match;
-		if (match === ':lyin:') return typeof emote != 'undefined' ?
+		if (match === ':delivert:') return typeof emote != 'undefined' ?
+			'<img src="' + emote + '" title="' + match + '" width="28" height="42"/>' :
+			match;
+		if (match === ':kanye:' || match === ':papabless:') return typeof emote != 'undefined' ?
+			'<img src="' + emote + '" title="' + match + '" width="21" height="30"/>' :
+			match;
+		if (match === ':khaled:') return typeof emote != 'undefined' ?
+			'<img src="' + emote + '" title="' + match + '" width="40" height="42"/>' :
+			match;
+		if (match === ':lyin:' || match === ':thugga:') return typeof emote != 'undefined' ?
 			'<img src="' + emote + '" title="' + match + '" width="25" height="30"/>' :
 			match;
-		if (match === ':papi:') return typeof emote != 'undefined' ?
+		if (match === ':lying:' || match === ':papi:') return typeof emote != 'undefined' ?
 			'<img src="' + emote + '" title="' + match + '" width="20" height="30"/>' :
+			match;
+		if (match === ':respek:') return typeof emote != 'undefined' ?
+			'<img src="' + emote + '" title="' + match + '" width="24" height="30"/>' :
 			match;
 		if (match === ':strut:') return typeof emote != 'undefined' ?
 			'<img src="' + emote + '" title="' + match + '" width="23" height="33"/>' :
+			match;
+		if (match === ':viper:') return typeof emote != 'undefined' ?
+			'<img src="' + emote + '" title="' + match + '" width="27" height="30"/>' :
 			match;
 		if (match === ':what:') return typeof emote != 'undefined' ?
 			'<img src="' + emote + '" title="' + match + '" width="77" height="30"/>' :
