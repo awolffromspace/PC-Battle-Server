@@ -2095,7 +2095,7 @@ exports.BattleScripts = {
 		let pokemonPool = [];
 		for (let id in this.data.FormatsData) {
 			let template = this.getTemplate(id);
-			if (format === 'monotyperandom') {
+			if (this.format === 'monotyperandom') {
 				let types = template.types;
 				if (template.battleOnly) types = this.getTemplate(template.baseSpecies).types;
 				if (types.indexOf(type) < 0) continue;
@@ -2204,7 +2204,7 @@ exports.BattleScripts = {
 
 			let types = template.types;
 
-			if (format !== 'monotyperandom') {
+			if (this.format !== 'monotyperandom') {
 				// Limit 2 of any type
 				let skip = false;
 				for (let t = 0; t < types.length; t++) {
