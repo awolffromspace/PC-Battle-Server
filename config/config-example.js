@@ -582,6 +582,7 @@ exports.customavatars = {
 	'pmseth': 'savash.png',
 	'savashy': 'savash.png',
 	'savash': 'savash.png',
+	'mіsаkimei': 'savash.png',
 	'dedenne1': 'dedenne1.gif',
 	'nidokingdra44': 'nidokingdra44.png',
 	'nidohorsea': 'nidokingdra44.png',
