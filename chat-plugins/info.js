@@ -956,7 +956,6 @@ exports.commands = {
 			"- Aurora<br />" +
 			"- Christos (sphealosophy)<br />" +
 			"- Omicron (Megido, omicorn, omicronhuh, Postcards)<br />" +
-			"- Sanguine (Queen Bitch)<br />" +
 			"- Syndrome (Daddy, King Syn, Morning Bliss)<br /><br />" +
 			"<a href=\"http://www.pokecommunity.com/showthread.php?t=289012#staff\">Click here for more details.</a>"
 		);
