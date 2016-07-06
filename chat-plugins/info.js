@@ -953,10 +953,10 @@ exports.commands = {
 			"- wolf (wofl)<br /><br />" +
 			"<b>@ Moderators</b><br />" +
 			"- Archy<br />" +
-			"- Aurora<br />" +
+			"- Aurora (Tyranitar)<br />" +
 			"- Christos (sphealosophy)<br />" +
 			"- Omicron (Megido, omicorn, omicronhuh, Postcards)<br />" +
-			"- Syndrome (Daddy, King Syn, Morning Bliss)<br /><br />" +
+			"- Syndrome (Daddy, Fuck Kevin Durant, King Syn, Morning Bliss, Muhammad Ali, Steph Carried)<br /><br />" +
 			"<a href=\"http://www.pokecommunity.com/showthread.php?t=289012#staff\">Click here for more details.</a>"
 		);
 	},
