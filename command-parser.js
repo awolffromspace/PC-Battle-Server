@@ -109,8 +109,9 @@ class CommandContext {
 		this.user = options.user || null;
 		this.connection = options.connection || null;
 
-		this.targetUserName = '';
 		this.targetUser = null;
+		this.targetUsername = '';
+		this.inputUsername = '';
 	}
 
 	checkBanwords(room, message) {
@@ -320,12 +321,8 @@ class CommandContext {
 			}
 			if (room && room.modchat) {
 				let userGroup = user.group;
-				if (room.auth && !user.can('makeroom')) {
-					if (room.auth[user.userid]) {
-						userGroup = room.auth[user.userid];
-					} else if (room.isPrivate === true) {
-						userGroup = ' ';
-					}
+				if (!user.can('makeroom')) {
+					userGroup = room.getAuth(user);
 				}
 				if (room.modchat === 'autoconfirmed') {
 					if (!user.autoconfirmed && userGroup === ' ') {
@@ -514,6 +511,15 @@ class CommandContext {
 			this.targetUser = null;
 			this.targetUsername = this.inputUsername;
 		}
+		return target.substr(commaIndex + 1).trim();
+	}
+	splitTargetText(target) {
+		let commaIndex = target.indexOf(',');
+		if (commaIndex < 0) {
+			this.targetUsername = target;
+			return '';
+		}
+		this.targetUsername = target.substr(0, commaIndex);
 		return target.substr(commaIndex + 1).trim();
 	}
 }

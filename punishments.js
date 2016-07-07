@@ -31,9 +31,6 @@ Punishments.ips = new Map();
 // userids is a userid:punishment Map
 Punishments.userids = new Map();
 
-// hosts is a hosts:punishment Map
-Punishments.hosts = new Map();
-
 /*********************************************************
  * Persistence
  *********************************************************/
@@ -338,13 +335,13 @@ Punishments.unnamelock = function (name) {
 	return success;
 };
 
-Punishments.lockRange = function (range, isIp) {
-	let punishment = ['LOCK', '#rangelock', RANGELOCK_DURATION];
-	if (isIp) {
-		Punishments.ips.set(range, punishment);
-	} else {
-		Punishments.hosts.set(range, punishment);
-	}
+Punishments.lockRange = function (range, reason) {
+	let punishment = ['LOCK', '#rangelock', Date.now() + RANGELOCK_DURATION, reason];
+	Punishments.ips.set(range, punishment);
+};
+Punishments.banRange = function (range, reason) {
+	let punishment = ['BAN', '#rangelock', Date.now() + RANGELOCK_DURATION, reason];
+	Punishments.ips.set(range, punishment);
 };
 
 /*********************************************************
@@ -410,6 +407,10 @@ Punishments.checkRangeBanned = function () {};
 Punishments.checkName = function (user, registered) {
 	let userid = user.userid;
 	let punishment = Punishments.useridSearch(userid);
+	if (!punishment && user.namelocked) {
+		punishment = Punishments.useridSearch(user.namelocked);
+		if (!punishment) punishment = ['NAMELOCK', user.namelocked, 0];
+	}
 	if (!punishment) return;
 
 	let id = punishment[0];
@@ -417,24 +418,24 @@ Punishments.checkName = function (user, registered) {
 
 	if (registered && id === 'BAN') {
 		let bannedUnder = '';
-		if (punishUserid !== userid) bannedUnder = ' because of rule-breaking by your alt account ' + punishUserid;
+		if (punishUserid !== userid) bannedUnder = ' because it has the same IP as banned user: ' + punishUserid;
 		user.send("|popup|Your username (" + user.name + ") is banned" + bannedUnder + "'. Your ban will expire in a few days." + (Config.appealurl ? " Or you can appeal at:\n" + Config.appealurl : ""));
 		Punishments.punish(user, punishment);
 		user.disconnectAll();
 		return;
 	}
-	if (id === 'NAMELOCK') {
+	if (id === 'NAMELOCK' || user.namelocked) {
 		let bannedUnder = '';
-		if (punishUserid !== userid) bannedUnder = ' because of rule-breaking by your alt account ' + punishUserid;
-		user.send("|popup|Your are namelocked" + bannedUnder + "'. Your namelock will expire in a few days.");
-		Punishments.punish(user, punishment);
+		if (punishUserid !== userid) bannedUnder = ' because it has the same IP as banned user: ' + punishUserid;
+		user.send("|popup|You are namelocked" + bannedUnder + "'. Your namelock will expire in a few days.");
+		if (punishment[2]) Punishments.punish(user, punishment);
 		user.locked = punishUserid;
 		user.namelocked = punishUserid;
 		user.resetName();
 		user.updateIdentity();
 	} else {
 		let bannedUnder = '';
-		if (punishUserid !== userid) bannedUnder = ' because of rule-breaking by your alt account ' + punishUserid;
+		if (punishUserid !== userid) bannedUnder = ' because it has the same IP as banned user: ' + punishUserid;
 		user.send("|popup|Your username (" + user.name + ") is locked" + bannedUnder + "'. Your lock will expire in a few days." + (Config.appealurl ? " Or you can appeal at:\n" + Config.appealurl : ""));
 		Punishments.punish(user, punishment);
 		user.locked = punishUserid;
@@ -445,16 +446,6 @@ Punishments.checkName = function (user, registered) {
 		user.resetName();
 		user.updateIdentity();
 	}
-	// if (user.group === Config.groupsranking[0]) {
-	// 	let range = user.locked || Punishments.shortenHost(user.latestHost);
-	// 	if (Punishments.lockedRanges[range]) {
-	// 		user.send("|popup|You are in a range that has been temporarily locked from talking in chats and PMing regular users.");
-	// 		Punishments.rangeLockedUsers[range][user.userid] = 1;
-	// 		user.locked = '#range';
-	// 	}
-	// } else if (user.locked && (user.locked === '#range' || Punishments.lockedRanges[user.locked])) {
-	// 	user.locked = false;
-	// }
 };
 
 Punishments.checkIp = function (user, connection) {
@@ -472,16 +463,6 @@ Punishments.checkIp = function (user, connection) {
 		if (hosts && hosts[0]) {
 			user.latestHost = hosts[0];
 			if (Config.hostfilter) Config.hostfilter(hosts[0], user, connection);
-			if (user.named && !user.locked && user.group === Config.groupsranking[0]) {
-				let shortHost = Punishments.shortenHost(hosts[0]);
-				let punishment = Punishments.hosts.get(shortHost);
-				if (punishment) {
-					user.send("|popup|You are locked because someone on your ISP has spammed, and your ISP does not give us any way to tell you apart from them.");
-					Punishments.rangeLockedUsers[shortHost][user.userid] = 1;
-					user.locked = '#range';
-					user.updateIdentity();
-				}
-			}
 		} else {
 			if (Config.hostfilter) Config.hostfilter('', user, connection);
 		}
@@ -522,7 +503,7 @@ Punishments.checkIpBanned = function (connection) {
 	if (banned === '#ipban') {
 		connection.send("|popup||modal|Your IP (" + ip + ") is not allowed to connect to PS, because it has been used to spam, hack, or otherwise attack our server.||Make sure you are not using any proxies to connect to PS.");
 	} else {
-		connection.send("|popup||modal|Your IP (" + ip + ") was banned while using the username '" + banned + "'. Your ban will expire in a few days.||" + (Config.appealurl ? " Or you can appeal at:\n" + Config.appealurl : ""));
+		connection.send("|popup||modal|You are banned because you have the same IP (" + ip + ") as banned user '" + banned + "'. Your ban will expire in a few days.||" + (Config.appealurl ? " Or you can appeal at:\n" + Config.appealurl : ""));
 	}
 	if (!Config.quietconsole) console.log('CONNECT BLOCKED - IP BANNED: ' + ip + ' (' + banned + ')');
 

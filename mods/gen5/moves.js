@@ -1,6 +1,10 @@
 'use strict';
 
 exports.BattleMovedex = {
+	absorb: {
+		inherit: true,
+		flags: {protect: 1, mirror: 1},
+	},
 	acidarmor: {
 		inherit: true,
 		pp: 40,
@@ -16,11 +20,14 @@ exports.BattleMovedex = {
 	aromatherapy: {
 		inherit: true,
 		onHit: function (pokemon, source) {
+			this.add('-cureteam', source, '[from] move: Aromatherapy');
 			let side = pokemon.side;
 			for (let i = 0; i < side.pokemon.length; i++) {
-				side.pokemon[i].status = '';
+				if (side.pokemon[i].status && side.pokemon[i].hp) {
+					this.add('-curestatus', side.pokemon[i], side.pokemon[i].status);
+					side.pokemon[i].status = '';
+				}
 			}
-			this.add('-cureteam', source, '[from] move: Aromatherapy');
 		},
 	},
 	assist: {
@@ -191,6 +198,14 @@ exports.BattleMovedex = {
 		inherit: true,
 		basePower: 90,
 	},
+	drainpunch: {
+		inherit: true,
+		flags: {contact: 1, protect: 1, mirror: 1, punch: 1},
+	},
+	dreameater: {
+		inherit: true,
+		flags: {protect: 1, mirror: 1},
+	},
 	echoedvoice: {
 		inherit: true,
 		flags: {protect: 1, mirror: 1, sound: 1},
@@ -287,6 +302,10 @@ exports.BattleMovedex = {
 			return null;
 		},
 	},
+	gigadrain: {
+		inherit: true,
+		flags: {protect: 1, mirror: 1},
+	},
 	glare: {
 		inherit: true,
 		accuracy: 90,
@@ -320,50 +339,16 @@ exports.BattleMovedex = {
 	},
 	healbell: {
 		inherit: true,
-		flags: {protect: 1, mirror: 1, sound: 1},
+		flags: {snatch: 1, sound: 1},
 		onHit: function (pokemon, source) {
+			this.add('-cureteam', source, '[from] move: Heal Bell');
 			let side = pokemon.side;
 			for (let i = 0; i < side.pokemon.length; i++) {
-				side.pokemon[i].status = '';
+				if (side.pokemon[i].status && side.pokemon[i].hp) {
+					this.add('-curestatus', side.pokemon[i], side.pokemon[i].status);
+					side.pokemon[i].status = '';
+				}
 			}
-			this.add('-cureteam', source, '[from] move: Heal Bell');
-		},
-	},
-	healblock: {
-		inherit: true,
-		effect: {
-			duration: 5,
-			durationCallback: function (target, source, effect) {
-				if (source && source.hasAbility('persistent')) {
-					return 7;
-				}
-				return 5;
-			},
-			onStart: function (pokemon) {
-				this.add('-start', pokemon, 'move: Heal Block');
-			},
-			onDisableMove: function (pokemon) {
-				let disabledMoves = {healingwish:1, lunardance:1, rest:1, swallow:1, wish:1};
-				let moves = pokemon.moveset;
-				for (let i = 0; i < moves.length; i++) {
-					if (disabledMoves[moves[i].id] || this.getMove(moves[i].id).heal) {
-						pokemon.disableMove(moves[i].id);
-					}
-				}
-			},
-			onBeforeMovePriority: 6,
-			onBeforeMove: function (pokemon, target, move) {
-				let disabledMoves = {healingwish:1, lunardance:1, rest:1, swallow:1, wish:1};
-				if (disabledMoves[move.id] || move.heal) {
-					this.add('cant', pokemon, 'move: Heal Block', move);
-					return false;
-				}
-			},
-			onResidualOrder: 17,
-			onEnd: function (pokemon) {
-				this.add('-end', pokemon, 'move: Heal Block');
-			},
-			onTryHeal: false,
 		},
 	},
 	healpulse: {
@@ -456,6 +441,10 @@ exports.BattleMovedex = {
 		inherit: true,
 		basePower: 70,
 	},
+	hornleech: {
+		inherit: true,
+		flags: {contact: 1, protect: 1, mirror: 1},
+	},
 	hurricane: {
 		inherit: true,
 		basePower: 120,
@@ -495,6 +484,10 @@ exports.BattleMovedex = {
 		inherit: true,
 		basePower: 140,
 	},
+	leechlife: {
+		inherit: true,
+		flags: {contact: 1, protect: 1, mirror: 1},
+	},
 	lick: {
 		inherit: true,
 		basePower: 20,
@@ -515,6 +508,10 @@ exports.BattleMovedex = {
 	meanlook: {
 		inherit: true,
 		flags: {protect: 1, reflectable: 1, mirror: 1},
+	},
+	megadrain: {
+		inherit: true,
+		flags: {protect: 1, mirror: 1},
 	},
 	metalsound: {
 		inherit: true,
@@ -682,21 +679,9 @@ exports.BattleMovedex = {
 		},
 	},
 	ragepowder: {
-		num: 476,
-		accuracy: true,
-		basePower: 0,
-		category: "Status",
-		desc: "Until the end of the turn, all single-target attacks from the foe's team are redirected to the user if they are in range. Such attacks are redirected to the user before they can be reflected by Magic Coat or the Ability Magic Bounce, or drawn in by the Abilities Lightningrod or Storm Drain. Fails if it is not a double or triple battle. Priority +3.",
-		shortDesc: "The foes' moves target the user on the turn used.",
-		id: "ragepowder",
-		name: "Rage Powder",
-		pp: 20,
+		inherit: true,
 		priority: 3,
 		flags: {},
-		volatileStatus: 'followme',
-		secondary: false,
-		target: "self",
-		type: "Bug",
 	},
 	relicsong: {
 		inherit: true,

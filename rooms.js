@@ -226,6 +226,20 @@ let Room = (() => {
 			}
 		}
 	};
+	Room.prototype.getAuth = function (user) {
+		if (this.auth) {
+			if (user.userid in this.auth) {
+				return this.auth[user.userid];
+			}
+			if (this.tour && this.tour.room) {
+				return this.tour.room.getAuth(user);
+			}
+			if (this.isPrivate === true) {
+				return ' ';
+			}
+		}
+		return user.group;
+	};
 	Room.prototype.mute = function (user, setTime) {
 		let userid = user.userid;
 
@@ -980,6 +994,7 @@ let BattleRoom = (() => {
 		}
 		if (this.tour) {
 			this.tour.onBattleWin(this, winnerid);
+			this.tour = null;
 			if (this.format !== '1v1random' && this.format !== '1v1challengecup' && this.format !== '1v1') {
 				this.push("|raw|<b><font color='" + color + "'>" + Tools.escapeHTML(winner) + "</font> has won " + "<font color='" + color + "'>1</font> Battle Point for winning the tournament battle!</b>");
 			}
@@ -1308,6 +1323,12 @@ let BattleRoom = (() => {
 	};
 	BattleRoom.prototype.destroy = function () {
 		// deallocate ourself
+
+		if (this.tour) {
+			// resolve state of the tournament;
+			this.tour.onBattleWin(this, '');
+			this.tour = null;
+		}
 
 		// remove references to ourself
 		for (let i in this.users) {

@@ -25,6 +25,18 @@ exports.BattleMovedex = {
 			}
 		},
 	},
+	aromatherapy: {
+		inherit: true,
+		onHit: function (pokemon, source) {
+			this.add('-cureteam', source, '[from] move: Aromatherapy');
+			let side = pokemon.side;
+			for (let i = 0; i < side.pokemon.length; i++) {
+				if (side.pokemon[i].status && side.pokemon[i].hp) {
+					side.pokemon[i].status = '';
+				}
+			}
+		},
+	},
 	assist: {
 		inherit: true,
 		desc: "The user performs a random move from any of the Pokemon on its team. Assist cannot generate itself, Chatter, Copycat, Counter, Covet, Destiny Bond, Detect, Endure, Feint, Focus Punch, Follow Me, Helping Hand, Me First, Metronome, Mimic, Mirror Coat, Mirror Move, Protect, Sketch, Sleep Talk, Snatch, Struggle, Switcheroo, Thief or Trick.",
@@ -559,6 +571,18 @@ exports.BattleMovedex = {
 			spa: 1,
 		},
 	},
+	healbell: {
+		inherit: true,
+		onHit: function (pokemon, source) {
+			this.add('-cureteam', source, '[from] move: Heal Bell');
+			let side = pokemon.side;
+			for (let i = 0; i < side.pokemon.length; i++) {
+				if (side.pokemon[i].status && side.pokemon[i].hp) {
+					side.pokemon[i].status = '';
+				}
+			}
+		},
+	},
 	healblock: {
 		inherit: true,
 		flags: {protect: 1, mirror: 1},
@@ -574,18 +598,15 @@ exports.BattleMovedex = {
 				this.add('-start', pokemon, 'move: Heal Block');
 			},
 			onDisableMove: function (pokemon) {
-				let disabledMoves = {healingwish:1, lunardance:1, rest:1, swallow:1, wish:1};
-				let moves = pokemon.moveset;
-				for (let i = 0; i < moves.length; i++) {
-					if (disabledMoves[moves[i].id] || this.getMove(moves[i].id).heal) {
-						pokemon.disableMove(moves[i].id);
+				for (let i = 0; i < pokemon.moveset.length; i++) {
+					if (this.getMove(pokemon.moveset[i].id).flags['heal']) {
+						pokemon.disableMove(pokemon.moveset[i].id);
 					}
 				}
 			},
 			onBeforeMovePriority: 6,
 			onBeforeMove: function (pokemon, target, move) {
-				let disabledMoves = {healingwish:1, lunardance:1, rest:1, swallow:1, wish:1};
-				if (disabledMoves[move.id] || move.heal) {
+				if (move.flags['heal']) {
 					this.add('cant', pokemon, 'move: Heal Block', move);
 					return false;
 				}

@@ -642,9 +642,9 @@ BattlePokemon = (() => {
 		return boosts;
 	};
 	BattlePokemon.prototype.boostBy = function (boost) {
-		let changed = false;
+		let delta = 0;
 		for (let i in boost) {
-			let delta = boost[i];
+			delta = boost[i];
 			this.boosts[i] += delta;
 			if (this.boosts[i] > 6) {
 				delta -= this.boosts[i] - 6;
@@ -654,9 +654,8 @@ BattlePokemon = (() => {
 				delta -= this.boosts[i] - (-6);
 				this.boosts[i] = -6;
 			}
-			if (delta) changed = true;
 		}
-		return changed;
+		return delta;
 	};
 	BattlePokemon.prototype.clearBoosts = function () {
 		for (let i in this.boosts) {
@@ -737,7 +736,7 @@ BattlePokemon = (() => {
 		} else {
 			this.battle.add('-transform', this, pokemon);
 		}
-		this.setAbility(pokemon.ability);
+		this.setAbility(pokemon.ability, this, {id: 'transform'});
 
 		// Change formes based on held items (for Transform)
 		// Only ever relevant in Generation 4 since Generation 3 didn't have item-based forme changes
@@ -1133,8 +1132,10 @@ BattlePokemon = (() => {
 		if (noForce && oldAbility === ability.id) {
 			return false;
 		}
-		if (ability.id in {illusion:1, multitype:1, stancechange:1}) return false;
-		if (oldAbility in {multitype:1, stancechange:1}) return false;
+		if (!effect || effect.id !== 'transform') {
+			if (ability.id in {illusion:1, multitype:1, stancechange:1}) return false;
+			if (oldAbility in {multitype:1, stancechange:1}) return false;
+		}
 		this.battle.singleEvent('End', this.battle.getAbility(oldAbility), this.abilityData, this, source, effect);
 		this.ability = ability.id;
 		this.abilityData = {id: ability.id, target: this};
@@ -3537,7 +3538,7 @@ Battle = (() => {
 		this.midTurn = true;
 		if (!this.currentRequest) this.go();
 	};
-	Battle.prototype.boost = function (boost, target, source, effect) {
+	Battle.prototype.boost = function (boost, target, source, effect, isSecondary, isSelf) {
 		if (this.event) {
 			if (!target) target = this.event.target;
 			if (!source) source = this.event.source;
@@ -3547,42 +3548,45 @@ Battle = (() => {
 		if (!target.isActive) return false;
 		effect = this.getEffect(effect);
 		boost = this.runEvent('Boost', target, source, effect, Object.assign({}, boost));
-		let success = false;
+		let success = null;
 		let boosted = false;
 		for (let i in boost) {
 			let currentBoost = {};
 			currentBoost[i] = boost[i];
-			if (boost[i] !== 0 && target.boostBy(currentBoost)) {
+			let boostBy = target.boostBy(currentBoost);
+			let msg = '-boost';
+			if (boost[i] < 0) {
+				msg = '-unboost';
+				boostBy = -boostBy;
+			}
+			if (boostBy) {
 				success = true;
-				let msg = '-boost';
-				if (boost[i] < 0) {
-					msg = '-unboost';
-					boost[i] = -boost[i];
-				}
 				switch (effect.id) {
 				case 'bellydrum':
 					this.add('-setboost', target, 'atk', target.boosts['atk'], '[from] move: Belly Drum');
 					break;
 				case 'bellydrum2':
-					this.add(msg, target, i, boost[i], '[silent]');
+					this.add(msg, target, i, boostBy, '[silent]');
 					this.add('-hint', "In Gen 2, Belly Drum boosts by 2 when it fails.");
 					break;
 				case 'intimidate': case 'gooey':
-					this.add(msg, target, i, boost[i]);
+					this.add(msg, target, i, boostBy);
 					break;
 				default:
 					if (effect.effectType === 'Move') {
-						this.add(msg, target, i, boost[i]);
+						this.add(msg, target, i, boostBy);
 					} else {
 						if (effect.effectType === 'Ability' && !boosted) {
 							this.add('-ability', target, effect.name, 'boost');
 							boosted = true;
 						}
-						this.add(msg, target, i, boost[i]);
+						this.add(msg, target, i, boostBy);
 					}
 					break;
 				}
 				this.runEvent('AfterEachBoost', target, source, effect, currentBoost);
+			} else if (!isSecondary && !isSelf) {
+				this.add(msg, target, i, boostBy);
 			}
 		}
 		this.runEvent('AfterBoost', target, source, effect, boost);
@@ -4887,7 +4891,7 @@ Battle = (() => {
 			return;
 		}
 
-		const stepsBack = count === undefined ? true : +count;
+		const stepsBack = count === undefined || count === '' ? true : +count;
 		if (stepsBack !== true && isNaN(stepsBack)) return;
 
 		side.undoChoices(stepsBack);
