@@ -44,6 +44,14 @@ function isBP(bp) {
 	return numBP;
 }
 
+function logGT(message) {
+	if (!message) return;
+	var file = path.join(__dirname, '../logs/gt.txt');
+	var date = "[" + new Date().toUTCString() + "] ";
+	var msg = message + "\n";
+	fs.appendFile(file, date + msg);
+}
+
 /**
  * Log money to logs/money.txt file.
  *
@@ -562,9 +570,55 @@ exports.commands = {
 		});
 	},
 
+	givegt: function (target, room, user) {
+		if (!this.can('forcewin')) return false;
+		if (!target || target.indexOf(',') < 0) return this.parse('/help givegt');
+
+		var parts = target.split(',');
+		var username = parts[0];
+		var amount = isBP(parts[1]);
+
+		if (typeof amount === 'string') return this.sendReply(amount);
+
+		var _this = this;
+		Database.read('gt14', toId(username), function (err, initial) {
+			if (err) throw err;
+			if (!initial) initial = 0;
+			Database.write('gt14', initial + amount, toId(username), function (err, total) {
+				if (err) throw err;
+				_this.sendReply(username + " was given " + amount + " Get-Together point(s). " + username + " now has " + total + " Get-Together point(s).");
+				logGT(username + " was given " + amount + " Get-Together point(s) by " + user.name + ".");
+			});
+		});
+	},
+	givegthelp: ["/givegt [user], [amount] - Give a user a certain amount of Get-Together points."],
+
+	takegt: function (target, room, user) {
+		if (!this.can('forcewin')) return false;
+		if (!target || target.indexOf(',') < 0) return this.parse('/help takegt');
+
+		var parts = target.split(',');
+		var username = parts[0];
+		var amount = isBP(parts[1]);
+
+		if (typeof amount === 'string') return this.sendReply(amount);
+
+		var _this = this;
+		Database.read('gt14', toId(username), function (err, initial) {
+			if (err) throw err;
+			if (!initial) initial = 0;
+			Database.write('gt14', initial - amount, toId(username), function (err, total) {
+				if (err) throw err;
+				_this.sendReply(username + " lost " + amount + " Get-Together point(s). " + username + " now has " + total + " Get-Together point(s).");
+				logGT(username + " had " + amount + " Get-Together point(s) taken away by " + user.name + ".");
+			});
+		});
+	},
+	takegthelp: ["/takegt [user], [amount] - Take a certain amount of Get-Together point(s) from a user."],
+
 	resetgt: function (target, room, user) {
 		if (!this.can('forcewin')) return false;
-		Database.write('gt', 0, toId(target), function (err, total) {
+		Database.write('gt14', 0, toId(target), function (err, total) {
 			if (err) throw err;
 			this.sendReply(target + " now has " + total + " Get-Together points.");
 			logGT(user.name + " reset the Get-Together points of " + target + ".");
@@ -572,11 +626,35 @@ exports.commands = {
 	},
 	resetgthelp: ["/resetgt [user] - Reset user's Get-Together points to zero."],
 
+	gtlog: function (target, room, user, connection) {
+		if (!this.can('modlog')) return;
+		var numLines = 15;
+		var matching = true;
+		if (target.match(/\d/g) && !isNaN(target)) {
+			numLines = Number(target);
+			matching = false;
+		}
+		var topMsg = "Displaying the last " + numLines + " lines of transactions:\n";
+		var file = path.join(__dirname, '../logs/gt.txt');
+		fs.exists(file, function (exists) {
+			if (!exists) return connection.popup("No transactions.");
+			fs.readFile(file, 'utf8', function (err, data) {
+				data = data.split('\n');
+				if (target && matching) {
+					data = data.filter(function (line) {
+						return line.toLowerCase().indexOf(target.toLowerCase()) >= 0;
+					});
+				}
+				connection.popup('|wide|' + topMsg + data.slice(-(numLines + 1)).join('\n'));
+			});
+		});
+	},
+
 	gtladder: function (target, room, user) {
-		if (!this.runBroadcast()) return;
+		if (!this.canBroadcast()) return;
 		var _this = this;
 		var display = '<center><u><b>Get-Together Ladder</b></u></center><br><table border="1" cellspacing="0" cellpadding="5" width="100%"><tbody><tr><th>Rank</th><th>Username</th><th>GT Points</th></tr>';
-		Database.sortDesc('gt', 10, function (err, users) {
+		Database.sortDesc('gt14', 10, function (err, users) {
 			if (err) throw err;
 			if (!users.length) {
 				_this.sendReplyBox("Get-Together ladder is empty.");
