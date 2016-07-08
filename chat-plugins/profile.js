@@ -140,7 +140,7 @@ Profile.prototype.show = function (callback) {
 	Database.read('bp', userid, function (err, bp) {
 		if (err) throw err;
 		if (!bp) bp = 0;
-		Database.read('gt', userid, function (err, gt) {
+		Database.read('gt14', userid, function (err, gt) {
 			if (err) throw err;
 			if (!gt) gt = 0;
 			Database.read('title', userid, function (err, title) {
