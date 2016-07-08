@@ -116,6 +116,10 @@ Profile.prototype.bp = function (amount) {
 	return label('Battle Points') + amount;
 };
 
+Profile.prototype.gt = function (amount) {
+	return label('Get-Together Points') + amount;
+};
+
 Profile.prototype.name = function () {
 	return label('Name') + bold(font(color(toId(this.username)), this.username));
 };
@@ -136,24 +140,30 @@ Profile.prototype.show = function (callback) {
 	Database.read('bp', userid, function (err, bp) {
 		if (err) throw err;
 		if (!bp) bp = 0;
-		Database.read('title', userid, function (err, title) {
+		Database.read('gt', userid, function (err, gt) {
 			if (err) throw err;
-			if (title) {
-				return callback(this.avatar() +
-												SPACE + this.title(title) + BR +
-												SPACE + this.name() + BR +
-												SPACE + this.group() + BR +
-												SPACE + this.bp(bp) + BR +
-												SPACE + this.seen(Seen[userid]) +
-												'<br clear="all">');
-			} else {
-				return callback(this.avatar() +
-												SPACE + this.name() + BR +
-												SPACE + this.group() + BR +
-												SPACE + this.bp(bp) + BR +
-												SPACE + this.seen(Seen[userid]) +
-												'<br clear="all">');
-			}
+			if (!gt) gt = 0;
+			Database.read('title', userid, function (err, title) {
+				if (err) throw err;
+				if (title) {
+					return callback(this.avatar() +
+													SPACE + this.title(title) + BR +
+													SPACE + this.name() + BR +
+													SPACE + this.group() + BR +
+													SPACE + this.bp(bp) + BR +
+													SPACE + this.gt(gt) + BR +
+													SPACE + this.seen(Seen[userid]) +
+													'<br clear="all">');
+				} else {
+					return callback(this.avatar() +
+													SPACE + this.name() + BR +
+													SPACE + this.group() + BR +
+													SPACE + this.bp(bp) + BR +
+													SPACE + this.gt(gt) + BR +
+													SPACE + this.seen(Seen[userid]) +
+													'<br clear="all">');
+				}
+			}.bind(this));
 		}.bind(this));
 	}.bind(this));
 };
