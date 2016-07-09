@@ -176,7 +176,7 @@ var emotes = {
 	':wynaut:': 'http://cbc.pokecommunity.com/config/emoticons/wynaut.png',
 	':y:': 'http://cbc.pokecommunity.com/config/emoticons/y.png',
 	':yoshi:': 'http://cbc.pokecommunity.com/config/emoticons/yoshi.png',
-	':zz:': 'http://cbc.pokecommunity.com/config/emoticons/zz.gif',
+	':zzz:': 'http://cbc.pokecommunity.com/config/emoticons/zzz.gif',
 };
 
 var emotesKeys = Object.keys(emotes);
