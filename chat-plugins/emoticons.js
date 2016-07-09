@@ -223,7 +223,7 @@ function parseEmoticons(message, room, user, pm) {
 	// add emotes
 	message = message.replace(patternRegex, function (match) {
 		var emote = emotes[match];
-		if (match === ':dab:' || match === ':fatbowie:' || match === ':gav:' || match === ':hamtaro:' || match === ':kermit:' || match === ':nw:' || match === ':superman:' || match === ':sweep:' || match === ':yoshi:') return typeof emote != 'undefined' ?
+		if (match === ':dab:' || match === ':fatbowie:' || match === ':gav:' || match === ':hamtaro:' || match === ':kermit:' || match === ':nw:' || match === ':sun:' || match === ':superman:' || match === ':sweep:' || match === ':yoshi:') return typeof emote != 'undefined' ?
 			'<img src="' + emote + '" title="' + match + '" width="30" height="30"/>' :
 			match;
 		if (match === ':bed:') return typeof emote != 'undefined' ?
@@ -232,14 +232,20 @@ function parseEmoticons(message, room, user, pm) {
 		if (match === ':bowie:') return typeof emote != 'undefined' ?
 			'<img src="' + emote + '" title="' + match + '" width="22" height="30"/>' :
 			match;
+		if (match === ':bunny:') return typeof emote != 'undefined' ?
+			'<img src="' + emote + '" title="' + match + '" width="28" height="33"/>' :
+			match;
 		if (match === ':catflip:') return typeof emote != 'undefined' ?
 			'<img src="' + emote + '" title="' + match + '" width="44" height="32"/>' :
 			match;
-		if (match === ':curry:' || match === ':jack:') return typeof emote != 'undefined' ?
+		if (match === ':curry:' || match === ':jack:' || match === ':ok:') return typeof emote != 'undefined' ?
 			'<img src="' + emote + '" title="' + match + '" width="23" height="30"/>' :
 			match;
 		if (match === ':delivert:') return typeof emote != 'undefined' ?
 			'<img src="' + emote + '" title="' + match + '" width="28" height="42"/>' :
+			match;
+		if (match === ':fish:') return typeof emote != 'undefined' ?
+			'<img src="' + emote + '" title="' + match + '" width="65" height="42"/>' :
 			match;
 		if (match === ':kanye:' || match === ':papabless:') return typeof emote != 'undefined' ?
 			'<img src="' + emote + '" title="' + match + '" width="21" height="30"/>' :
@@ -247,10 +253,13 @@ function parseEmoticons(message, room, user, pm) {
 		if (match === ':khaled:') return typeof emote != 'undefined' ?
 			'<img src="' + emote + '" title="' + match + '" width="40" height="42"/>' :
 			match;
+		if (match === ':lewd:') return typeof emote != 'undefined' ?
+			'<img src="' + emote + '" title="' + match + '" width="54" height="42"/>' :
+			match;
 		if (match === ':lyin:' || match === ':thugga:') return typeof emote != 'undefined' ?
 			'<img src="' + emote + '" title="' + match + '" width="25" height="30"/>' :
 			match;
-		if (match === ':lying:' || match === ':papi:') return typeof emote != 'undefined' ?
+		if (match === ':bored:' || match === ':glare:' || match === ':lying:' || match === ':papi:' || match === ':shifty:' || match === ':squint:') return typeof emote != 'undefined' ?
 			'<img src="' + emote + '" title="' + match + '" width="20" height="30"/>' :
 			match;
 		if (match === ':respek:') return typeof emote != 'undefined' ?
@@ -259,11 +268,17 @@ function parseEmoticons(message, room, user, pm) {
 		if (match === ':strut:') return typeof emote != 'undefined' ?
 			'<img src="' + emote + '" title="' + match + '" width="23" height="33"/>' :
 			match;
+		if (match === ':uhhuh:') return typeof emote != 'undefined' ?
+			'<img src="' + emote + '" title="' + match + '" width="19" height="30"/>' :
+			match;
 		if (match === ':viper:') return typeof emote != 'undefined' ?
 			'<img src="' + emote + '" title="' + match + '" width="27" height="30"/>' :
 			match;
 		if (match === ':what:') return typeof emote != 'undefined' ?
 			'<img src="' + emote + '" title="' + match + '" width="77" height="30"/>' :
+			match;
+		if (match === ':wink:') return typeof emote != 'undefined' ?
+			'<img src="' + emote + '" title="' + match + '" width="33" height="30"/>' :
 			match;
 		return typeof emote != 'undefined' ?
 			'<img src="' + emote + '" title="' + match + '"/>' :
