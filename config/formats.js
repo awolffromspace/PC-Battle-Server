@@ -297,6 +297,13 @@ exports.Formats = [
 		ruleset: ['Random (no PotD)'],
 	},
 	{
+		name: "Hoenn Weather Random",
+		section: "Randomized Metas",
+
+		team: 'randomHoennWeather',
+		ruleset: ['Random (no PotD)'],
+	},
+	{
 		name: "Sinnoh Random",
 		section: "Randomized Metas",
 
@@ -349,20 +356,6 @@ exports.Formats = [
 		onBegin: function () {
 			this.add("raw|Would you like to be in Community Random? If so, <a href='http://www.pokecommunity.com/showthread.php?t=335080'>click here</a>.");
 		},
-	},
-	{
-		name: "Hoenn Random",
-		section: "Randomized Metas",
-
-		team: 'randomHoenn',
-		ruleset: ['Random (no PotD)'],
-	},
-	{
-		name: "Hoenn Weather Random",
-		section: "Randomized Metas",
-
-		team: 'randomHoennWeather',
-		ruleset: ['Random (no PotD)'],
 	},
 	{
 		name: "Super Smash Bros. Random",
