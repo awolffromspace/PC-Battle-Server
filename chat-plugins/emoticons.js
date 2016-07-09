@@ -221,7 +221,7 @@ function parseEmoticons(message, room, user, pm) {
 	// add emotes
 	message = message.replace(patternRegex, function (match) {
 		var emote = emotes[match];
-		if (match === ':dab:' || match === ':fatbowie:' || match === ':gav:' || match === ':hamtaro:' || match === ':kermit:' || match === ':nw:' || match === ':sun:' || match === ':superman:' || match === ':sweep:' || match === ':yoshi:') return typeof emote != 'undefined' ?
+		if (match === ':dab:' || match === ':fatbowie:' || match === ':gav:' || match === ':hamtaro:' || match === ':kermit:' || match === ':nw:' || match === ':superman:' || match === ':sweep:' || match === ':yoshi:') return typeof emote != 'undefined' ?
 			'<img src="' + emote + '" title="' + match + '" width="30" height="30"/>' :
 			match;
 		if (match === ':bed:') return typeof emote != 'undefined' ?
