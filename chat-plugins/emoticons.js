@@ -23,7 +23,6 @@ var emotes = {
 	':blissey:': 'http://cbc.pokecommunity.com/config/emoticons/blissey.png',
 	':blush:': 'http://cbc.pokecommunity.com/config/emoticons/blush.png',
 	':boatydrugs:': 'http://cbc.pokecommunity.com/config/emoticons/boatydrugs.png',
-	':bored:': 'http://cbc.pokecommunity.com/config/emoticons/bored.png',
 	':bowie:': 'http://cbc.pokecommunity.com/config/emoticons/bowie.png',
 	':bunny:': 'http://cbc.pokecommunity.com/config/emoticons/bunny.gif',
 	':castform:': 'http://cbc.pokecommunity.com/config/emoticons/castform.png',
@@ -152,7 +151,6 @@ var emotes = {
 	':squint:': 'http://cbc.pokecommunity.com/config/emoticons/squint.png',
 	':strut:': 'http://cbc.pokecommunity.com/config/emoticons/strut.png',
 	':suicune:': 'http://cbc.pokecommunity.com/config/emoticons/suicune.png',
-	':sun:': 'http://cbc.pokecommunity.com/config/emoticons/sun.gif',
 	':superman:': 'http://cbc.pokecommunity.com/config/emoticons/superman.png',
 	':sweep:': 'http://cbc.pokecommunity.com/config/emoticons/sweep.gif',
 	':swiftrage:': 'http://cbc.pokecommunity.com/config/emoticons/swiftrage.png',
@@ -247,6 +245,9 @@ function parseEmoticons(message, room, user, pm) {
 		if (match === ':fish:') return typeof emote != 'undefined' ?
 			'<img src="' + emote + '" title="' + match + '" width="65" height="42"/>' :
 			match;
+		if (match === ':glare:' || match === ':shifty:' || match === ':squint:' || match === ':uhhuh:') return typeof emote != 'undefined' ?
+			'<img src="' + emote + '" title="' + match + '" width="21" height="32"/>' :
+			match;
 		if (match === ':kanye:' || match === ':papabless:') return typeof emote != 'undefined' ?
 			'<img src="' + emote + '" title="' + match + '" width="21" height="30"/>' :
 			match;
@@ -259,7 +260,7 @@ function parseEmoticons(message, room, user, pm) {
 		if (match === ':lyin:' || match === ':thugga:') return typeof emote != 'undefined' ?
 			'<img src="' + emote + '" title="' + match + '" width="25" height="30"/>' :
 			match;
-		if (match === ':bored:' || match === ':glare:' || match === ':lying:' || match === ':papi:' || match === ':shifty:' || match === ':squint:') return typeof emote != 'undefined' ?
+		if (match === ':glare:' || match === ':lying:' || match === ':papi:') return typeof emote != 'undefined' ?
 			'<img src="' + emote + '" title="' + match + '" width="20" height="30"/>' :
 			match;
 		if (match === ':respek:') return typeof emote != 'undefined' ?
@@ -267,9 +268,6 @@ function parseEmoticons(message, room, user, pm) {
 			match;
 		if (match === ':strut:') return typeof emote != 'undefined' ?
 			'<img src="' + emote + '" title="' + match + '" width="23" height="33"/>' :
-			match;
-		if (match === ':uhhuh:') return typeof emote != 'undefined' ?
-			'<img src="' + emote + '" title="' + match + '" width="19" height="30"/>' :
 			match;
 		if (match === ':viper:') return typeof emote != 'undefined' ?
 			'<img src="' + emote + '" title="' + match + '" width="27" height="30"/>' :
