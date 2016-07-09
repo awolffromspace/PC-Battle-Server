@@ -660,7 +660,7 @@ exports.commands = {
 				_this.sendReplyBox("Get-Together ladder is empty.");
 			} else {
 				users.forEach(function (user, index) {
-					display += "<tr><td>" + (index + 1) + "</td><td>" + user.username + "</td><td>" + user.gt + "</td></tr>";
+					display += "<tr><td>" + (index + 1) + "</td><td>" + user.username + "</td><td>" + user.gt14 + "</td></tr>";
 				});
 				display += "</tbody></table>";
 				_this.sendReply("|raw|" + display);
