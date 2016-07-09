@@ -276,6 +276,48 @@ exports.Formats = [
 		ruleset: ['Random (no PotD)'],
 	},
 	{
+		name: "Kanto Random",
+		section: "Randomized Metas",
+
+		team: 'randomKanto',
+		ruleset: ['Random (no PotD)'],
+	},
+	{
+		name: "Johto Random",
+		section: "Randomized Metas",
+
+		team: 'randomJohto',
+		ruleset: ['Random (no PotD)'],
+	},
+	{
+		name: "Hoenn Random",
+		section: "Randomized Metas",
+
+		team: 'randomHoenn',
+		ruleset: ['Random (no PotD)'],
+	},
+	{
+		name: "Sinnoh Random",
+		section: "Randomized Metas",
+
+		team: 'randomSinnoh',
+		ruleset: ['Random (no PotD)'],
+	},
+	{
+		name: "Unova Random",
+		section: "Randomized Metas",
+
+		team: 'randomUnova',
+		ruleset: ['Random (no PotD)'],
+	},
+	{
+		name: "Kalos Random",
+		section: "Randomized Metas",
+
+		team: 'randomKalos',
+		ruleset: ['Random (no PotD)'],
+	},
+	{
 		name: "Color Random",
 		section: "Randomized Metas",
 
