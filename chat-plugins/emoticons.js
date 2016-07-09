@@ -260,7 +260,7 @@ function parseEmoticons(message, room, user, pm) {
 		if (match === ':lyin:' || match === ':thugga:') return typeof emote != 'undefined' ?
 			'<img src="' + emote + '" title="' + match + '" width="25" height="30"/>' :
 			match;
-		if (match === ':glare:' || match === ':lying:' || match === ':papi:') return typeof emote != 'undefined' ?
+		if (match === ':lying:' || match === ':papi:') return typeof emote != 'undefined' ?
 			'<img src="' + emote + '" title="' + match + '" width="20" height="30"/>' :
 			match;
 		if (match === ':respek:') return typeof emote != 'undefined' ?
