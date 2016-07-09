@@ -148,7 +148,7 @@ exports.commands = {
 	tourneypoll: 'tourpoll',
 	tourpoll: function (target, room, user) {
 		if (!this.can('poll', null, room)) return false;
-		this.parse("/defunctpoll Tournament format?," + "OU, Ubers, UU, RU, NU, PU, LC, Monotype, Random, [Seasonal] Random, Battle Factory, 1v1 Random, High Tier Random, Low Tier Random, Uber Random, LC Random, Monotype Random, Generational Random, Color Random, Inverse Random, Community Random, Hoenn Random, Hoenn Weather Random, Super Smash Bros. Random, Orb Random, Metronome 3v3 Random, Super Staff Bros. Melee, Hackmons Cup, Doubles Random, Triples Random, [Gen 5] Random, [Gen 2] Random, [Gen 1] Random");
+		this.parse("/defunctpoll Tournament format?," + "OU, Ubers, UU, RU, NU, PU, LC, Monotype, Random, [Seasonal] Random, Battle Factory, 1v1 Random, High Tier Random, Low Tier Random, Uber Random, LC Random, Monotype Random, Generational Random, Kanto Random, Johto Random, Hoenn Random, Hoenn Weather Random, Sinnoh Random, Unova Random, Kalos Random, Color Random, Inverse Random, Community Random, Super Smash Bros. Random, Orb Random, Metronome 3v3 Random, Super Staff Bros. Melee, Hackmons Cup, Doubles Random, Triples Random, [Gen 5] Random, [Gen 2] Random, [Gen 1] Random");
 	},
 
 	teampoll: function (target, room, user) {
@@ -161,7 +161,7 @@ exports.commands = {
 	randpoll: 'randompoll',
 	randompoll: function (target, room, user) {
 		if (!this.can('poll', null, room)) return false;
-		this.parse("/defunctpoll Tournament format?," + "Random, [Seasonal] Random, Battle Factory, 1v1 Random, High Tier Random, Low Tier Random, Uber Random, LC Random, Monotype Random, Generational Random, Color Random, Inverse Random, Community Random, Hoenn Random, Hoenn Weather Random, Super Smash Bros. Random, Orb Random, Metronome 3v3 Random, Super Staff Bros. Melee, Hackmons Cup, Doubles Random, Triples Random, [Gen 5] Random, [Gen 2] Random, [Gen 1] Random");
+		this.parse("/defunctpoll Tournament format?," + "Random, [Seasonal] Random, Battle Factory, 1v1 Random, High Tier Random, Low Tier Random, Uber Random, LC Random, Monotype Random, Generational Random, Kanto Random, Johto Random, Hoenn Random, Hoenn Weather Random, Sinnoh Random, Unova Random, Kalos Random, Color Random, Inverse Random, Community Random, Super Smash Bros. Random, Orb Random, Metronome 3v3 Random, Super Staff Bros. Melee, Hackmons Cup, Doubles Random, Triples Random, [Gen 5] Random, [Gen 2] Random, [Gen 1] Random");
 	},
 
 	tvote: 'tourvote',
