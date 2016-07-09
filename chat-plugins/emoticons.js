@@ -3,6 +3,7 @@ var color = require('../config/color');
 exports.parseEmoticons = parseEmoticons;
 
 var emotes = {
+	':4head:': 'http://cbc.pokecommunity.com/config/emoticons/4head.png',
 	':absol:': 'http://cbc.pokecommunity.com/config/emoticons/absol.png',
 	':aggron:': 'http://cbc.pokecommunity.com/config/emoticons/aggron.png',
 	':aids:': 'http://cbc.pokecommunity.com/config/emoticons/aids.png',
@@ -116,6 +117,7 @@ var emotes = {
 	':suicune:': 'http://cbc.pokecommunity.com/config/emoticons/suicune.png',
 	':superman:': 'http://cbc.pokecommunity.com/config/emoticons/superman.png',
 	':sweep:': 'http://cbc.pokecommunity.com/config/emoticons/sweep.gif',
+	':swiftrage:': 'http://cbc.pokecommunity.com/config/emoticons/swiftrage.png',
 	':taco:': 'http://cbc.pokecommunity.com/config/emoticons/taco.png',
 	':thugga:': 'http://cbc.pokecommunity.com/config/emoticons/thugga.png',
 	':toxic:': 'http://cbc.pokecommunity.com/config/emoticons/toxic.png',
