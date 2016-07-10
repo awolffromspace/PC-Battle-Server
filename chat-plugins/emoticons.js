@@ -173,6 +173,7 @@ var emotes = {
 	':wink:': 'http://cbc.pokecommunity.com/config/emoticons/wink.png',
 	':wobbuffet:': 'http://cbc.pokecommunity.com/config/emoticons/wobbuffet.png',
 	':wooper:': 'http://cbc.pokecommunity.com/config/emoticons/wooper.png',
+	':wutface:': 'http://cbc.pokecommunity.com/config/emoticons/wutface.png',
 	':wynaut:': 'http://cbc.pokecommunity.com/config/emoticons/wynaut.png',
 	':y:': 'http://cbc.pokecommunity.com/config/emoticons/y.png',
 	':yoshi:': 'http://cbc.pokecommunity.com/config/emoticons/yoshi.png',
