@@ -651,7 +651,7 @@ exports.commands = {
 	},
 
 	gtladder: function (target, room, user) {
-		if (!this.canBroadcast()) return;
+		if (!this.runBroadcast()) return;
 		var _this = this;
 		var display = '<center><u><b>Get-Together Ladder</b></u></center><br><table border="1" cellspacing="0" cellpadding="5" width="100%"><tbody><tr><th>Rank</th><th>Username</th><th>GT Points</th></tr>';
 		Database.sortDesc('gt14', 10, function (err, users) {
