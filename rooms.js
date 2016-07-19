@@ -955,7 +955,7 @@ let BattleRoom = (() => {
 			// Battle Point Winnings
 			//
 
-			if (this.format === 'lotw23gen3ou') {
+			if (this.format === 'lotw24generationalrandom') {
 				let wid = toId(winner);
 				Database.read('bp', wid, function (err, initial) {
 					if (err) throw err;
@@ -1004,7 +1004,7 @@ let BattleRoom = (() => {
 		if (p1.latestIp !== p2.latestIp) {
 			if (p1.userid === 'pokecommbot' || p2.userid === 'pokecommbot') return false;
 			if (this.format === 'customgame' || this.format === 'doublescustomgame' || this.format === 'triplescustomgame' || this.format === 'gen5customgame' || this.format === 'gen4customgame' || this.format === 'gen3customgame' || this.format === 'gen2customgame' || this.format === 'gen1customgame') return false;
-			if (this.format === 'lotw23gen3ou' || this.format === 'gen1uu' || this.format === 'gen5ou' || this.format === 'gen5ubers' || this.format === 'gen5uu' || this.format === 'gen5ru' || this.format === 'gen5nu' || this.format === 'gen5lc' || this.format === 'gen4ou' || this.format === 'gen4ubers' || this.format === 'gen4uu' || this.format === 'gen4lc' || this.format === 'gen3ou' || this.format === 'gen3ubers' || this.format === 'gen2ou' || this.format === 'gen2ubers' || this.format === 'gen1ou' || this.format === 'gen1ubers' || this.format === 'gen1outradeback' || this.format === 'gen1stadium') {
+			if (this.format === 'gen1uu' || this.format === 'gen5ou' || this.format === 'gen5ubers' || this.format === 'gen5uu' || this.format === 'gen5ru' || this.format === 'gen5nu' || this.format === 'gen5lc' || this.format === 'gen4ou' || this.format === 'gen4ubers' || this.format === 'gen4uu' || this.format === 'gen4lc' || this.format === 'gen3ou' || this.format === 'gen3ubers' || this.format === 'gen2ou' || this.format === 'gen2ubers' || this.format === 'gen1ou' || this.format === 'gen1ubers' || this.format === 'gen1outradeback' || this.format === 'gen1stadium') {
 				let wid = toId(winner);
 				Database.read('gt14', wid, function (err, initial) {
 					if (err) throw err;
@@ -1013,8 +1013,8 @@ let BattleRoom = (() => {
 						if (err) throw err;
 					});
 				});
-				this.push("|raw|<b><font color='" + color + "'>" + Tools.escapeHTML(winner) + "</font> has won " + "<font color='" + color + "'>60</font> Get-Together point for winning the battle!</b>");
-			} else if (this.format === 'generationalrandom' || this.format === 'kantorandom' || this.format === 'johtorandom' || this.format === 'hoennrandom' || this.format === 'hoennweatherrandom' || this.format === 'sinnohrandom' || this.format === 'unovarandom' || this.format === 'kalosrandom' || this.format === 'gen5randombattle' || this.format === 'gen2randombattle' || this.format === 'gen1randombattle') {
+				this.push("|raw|<b><font color='" + color + "'>" + Tools.escapeHTML(winner) + "</font> has won " + "<font color='" + color + "'>60</font> Get-Together points for winning the battle!</b>");
+			} else if (this.format === 'lotw24generationalrandom' || this.format === 'generationalrandom' || this.format === 'kantorandom' || this.format === 'johtorandom' || this.format === 'hoennrandom' || this.format === 'hoennweatherrandom' || this.format === 'sinnohrandom' || this.format === 'unovarandom' || this.format === 'kalosrandom' || this.format === 'gen5randombattle' || this.format === 'gen2randombattle' || this.format === 'gen1randombattle') {
 				let wid = toId(winner);
 				Database.read('gt14', wid, function (err, initial) {
 					if (err) throw err;
@@ -1053,7 +1053,7 @@ let BattleRoom = (() => {
 						if (err) throw err;
 					});
 				});
-				this.push("|raw|<b><font color='" + color + "'>" + Tools.escapeHTML(winner) + "</font> has won " + "<font color='" + color + "'>1</font> Get-Together points for winning the battle!</b>");
+				this.push("|raw|<b><font color='" + color + "'>" + Tools.escapeHTML(winner) + "</font> has won " + "<font color='" + color + "'>1</font> Get-Together point for winning the battle!</b>");
 			} else {
 				let wid = toId(winner);
 				Database.read('gt14', wid, function (err, initial) {
