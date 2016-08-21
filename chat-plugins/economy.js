@@ -562,33 +562,4 @@ exports.commands = {
 		});
 	},
 
-	resetgt: function (target, room, user) {
-		if (!this.can('forcewin')) return false;
-		Database.write('gt', 0, toId(target), function (err, total) {
-			if (err) throw err;
-			this.sendReply(target + " now has " + total + " Get-Together points.");
-			logGT(user.name + " reset the Get-Together points of " + target + ".");
-		}.bind(this));
-	},
-	resetgthelp: ["/resetgt [user] - Reset user's Get-Together points to zero."],
-
-	gtladder: function (target, room, user) {
-		if (!this.runBroadcast()) return;
-		var _this = this;
-		var display = '<center><u><b>Get-Together Ladder</b></u></center><br><table border="1" cellspacing="0" cellpadding="5" width="100%"><tbody><tr><th>Rank</th><th>Username</th><th>GT Points</th></tr>';
-		Database.sortDesc('gt', 10, function (err, users) {
-			if (err) throw err;
-			if (!users.length) {
-				_this.sendReplyBox("Get-Together ladder is empty.");
-			} else {
-				users.forEach(function (user, index) {
-					display += "<tr><td>" + (index + 1) + "</td><td>" + user.username + "</td><td>" + user.gt + "</td></tr>";
-				});
-				display += "</tbody></table>";
-				_this.sendReply("|raw|" + display);
-			}
-			room.update();
-		});
-	},
-
 };
