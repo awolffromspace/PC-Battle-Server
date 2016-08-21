@@ -12,97 +12,7 @@
 
 'use strict';
 
-global.Config = require('./config/config.js');
-
-if (Config.crashguard) {
-	// graceful crash - allow current battles to finish before restarting
-	process.on('uncaughtException', err => {
-		require('./crashlogger.js')(err, 'A simulator process');
-	});
-}
-
-global.Tools = require('./tools.js').includeMods();
-global.toId = Tools.getId;
-
 let Battle, BattleSide, BattlePokemon;
-
-let Battles = Object.create(null);
-
-require('./repl.js').start('battle-engine-', process.pid, cmd => eval(cmd));
-
-// Receive and process a message sent using Simulator.prototype.send in
-// another process.
-process.on('message', message => {
-	//console.log('CHILD MESSAGE RECV: "' + message + '"');
-	let nlIndex = message.indexOf("\n");
-	let more = '';
-	if (nlIndex > 0) {
-		more = message.substr(nlIndex + 1);
-		message = message.substr(0, nlIndex);
-	}
-	let data = message.split('|');
-	if (data[1] === 'init') {
-		if (!Battles[data[0]]) {
-			try {
-				Battles[data[0]] = Battle.construct(data[0], data[2], data[3]);
-			} catch (err) {
-				if (require('./crashlogger.js')(err, 'A battle', {
-					message: message,
-				}) === 'lockdown') {
-					let ministack = Tools.escapeHTML(err.stack).split("\n").slice(0, 2).join("<br />");
-					process.send(data[0] + '\nupdate\n|html|<div class="broadcast-red"><b>A BATTLE PROCESS HAS CRASHED:</b> ' + ministack + '</div>');
-				} else {
-					process.send(data[0] + '\nupdate\n|html|<div class="broadcast-red"><b>The battle crashed!</b><br />Don\'t worry, we\'re working on fixing it.</div>');
-				}
-			}
-		}
-	} else if (data[1] === 'dealloc') {
-		if (Battles[data[0]] && Battles[data[0]].destroy) {
-			Battles[data[0]].destroy();
-		} else {
-			require('./crashlogger.js')(new Error("Invalid dealloc"), 'A battle', {
-				message: message,
-			});
-		}
-		delete Battles[data[0]];
-	} else {
-		let battle = Battles[data[0]];
-		if (battle) {
-			let prevRequest = battle.currentRequest;
-			let prevRequestDetails = battle.currentRequestDetails || '';
-			try {
-				battle.receive(data, more);
-			} catch (err) {
-				require('./crashlogger.js')(err, 'A battle', {
-					message: message,
-					currentRequest: prevRequest,
-					log: '\n' + battle.log.join('\n').replace(/\n\|split\n[^\n]*\n[^\n]*\n[^\n]*\n/g, '\n'),
-				});
-
-				let logPos = battle.log.length;
-				battle.add('html', '<div class="broadcast-red"><b>The battle crashed</b><br />You can keep playing but it might crash again.</div>');
-				let nestedError;
-				try {
-					battle.makeRequest(prevRequest, prevRequestDetails);
-				} catch (e) {
-					nestedError = e;
-				}
-				battle.sendUpdates(logPos);
-				if (nestedError) {
-					throw nestedError;
-				}
-			}
-		} else if (data[1] === 'eval') {
-			try {
-				eval(data[2]);
-			} catch (e) {}
-		}
-	}
-});
-
-process.on('disconnect', () => {
-	process.exit();
-});
 
 BattlePokemon = (() => {
 	function BattlePokemon(set, side) {
@@ -465,7 +375,11 @@ BattlePokemon = (() => {
 				target = this.battle.resolveTarget(this, move);
 			}
 			if (target.side.active.length > 1) {
-				target = this.battle.priorityEvent('RedirectTarget', this, this, move, target);
+				if (!move.flags['charge'] || this.volatiles['twoturnmove'] ||
+						(move.id === 'solarbeam' && this.battle.isWeather(['sunnyday', 'desolateland'])) ||
+						(this.hasItem('powerherb') && move.id !== 'skydrop')) {
+					target = this.battle.priorityEvent('RedirectTarget', this, this, move, target);
+				}
 			}
 			if (selectedTarget !== target) {
 				this.battle.retargetLastMove(target);
@@ -768,7 +682,6 @@ BattlePokemon = (() => {
 		template = this.battle.getTemplate(template);
 
 		if (!template.abilities) return false;
-		this.illusion = null;
 		this.template = template;
 
 		this.types = template.types;
@@ -945,11 +858,11 @@ BattlePokemon = (() => {
 	BattlePokemon.prototype.trySetStatus = function (status, source, sourceEffect) {
 		return this.setStatus(this.status || status, source, sourceEffect);
 	};
-	BattlePokemon.prototype.cureStatus = function () {
+	BattlePokemon.prototype.cureStatus = function (silent) {
 		if (!this.hp) return false;
 		// unlike clearStatus, gives cure message
 		if (this.status) {
-			this.battle.add('-curestatus', this, this.status);
+			this.battle.add('-curestatus', this, this.status, silent ? '[silent]' : '[msg]');
 			this.setStatus('');
 		}
 	};
@@ -1530,8 +1443,14 @@ BattleSide = (() => {
 	BattleSide.prototype.emitRequest = function (update) {
 		this.battle.send('request', this.id + "\n" + this.battle.rqid + "\n" + JSON.stringify(update));
 	};
-	BattleSide.prototype.acceptChoice = function (offset, choiceData) {
-		this.battle.send('choice', this.id + "\n" + this.battle.rqid + "\n" + offset + "\n" + JSON.stringify(choiceData));
+	BattleSide.prototype.updateChoice = function () {
+		const offset = this.choiceData.choices.length;
+		this.battle.send('choice', this.id + "\n" + this.battle.rqid + "\n" + offset + "\n" + JSON.stringify({
+			done: this.choiceData.choices.map((choice, index) => choice === 'skip' ? '' : '' + index).join(""),
+			leave: Array.from(this.choiceData.leaveIndices).join(""),
+			enter: Array.from(this.choiceData.enterIndices).join(""),
+			team: this.currentRequest === 'teampreview' ? this.choiceData.decisions.map(decision => decision.pokemon.position + 1).join("") : null,
+		}));
 	};
 
 	BattleSide.prototype.getDecisionsFinished = function () {
@@ -1996,7 +1915,7 @@ Battle = (() => {
 
 	Battle.construct = (() => {
 		let battleProtoCache = new Map();
-		return (roomid, formatarg, rated) => {
+		return (roomid, formatarg, rated, send) => {
 			let format = Tools.getFormat(formatarg);
 			let mod = format.mod || 'base';
 			if (!battleProtoCache.has(mod)) {
@@ -2009,7 +1928,7 @@ Battle = (() => {
 				battleProtoCache.set(mod, battle);
 			}
 			let battle = Object.create(battleProtoCache.get(mod));
-			Battle.prototype.init.call(battle, roomid, format, rated);
+			Battle.prototype.init.call(battle, roomid, format, rated, send);
 			return battle;
 		};
 	})();
@@ -2021,7 +1940,7 @@ Battle = (() => {
 
 	Battle.prototype = {};
 
-	Battle.prototype.init = function (roomid, format, rated) {
+	Battle.prototype.init = function (roomid, format, rated, send) {
 		this.log = [];
 		this.sides = [null, null];
 		this.roomid = roomid;
@@ -2045,6 +1964,10 @@ Battle = (() => {
 		this.messageLog = [];
 
 		this.startingSeed = this.generateSeed();
+
+		if (typeof send === 'function') {
+			this.send = send;
+		}
 	};
 
 	Battle.prototype.turn = 0;
@@ -2699,6 +2622,7 @@ Battle = (() => {
 					ModifyDamage: 1,
 					ModifySecondaries: 1,
 					ModifyWeight: 1,
+					TryAddVolatile: 1,
 					TryHit: 1,
 					TryHitSide: 1,
 					TryMove: 1,
@@ -3178,6 +3102,7 @@ Battle = (() => {
 			pokemon.moveset[m].used = false;
 		}
 		this.add('switch', pokemon, pokemon.getDetails);
+		this.insertQueue({pokemon: pokemon, choice: 'runUnnerve'});
 		this.insertQueue({pokemon: pokemon, choice: 'runSwitch'});
 	};
 	Battle.prototype.canSwitch = function (side) {
@@ -3218,6 +3143,7 @@ Battle = (() => {
 				return false;
 			}
 			this.runEvent('SwitchOut', oldActive);
+			oldActive.illusion = null;
 			this.singleEvent('End', this.getAbility(oldActive.ability), oldActive.abilityData, oldActive);
 			oldActive.isActive = false;
 			oldActive.isStarted = false;
@@ -3246,6 +3172,7 @@ Battle = (() => {
 		}
 		this.add('drag', pokemon, pokemon.getDetails);
 		if (this.gen >= 5) {
+			this.singleEvent('PreStart', pokemon.getAbility(), pokemon.abilityData, pokemon);
 			this.runEvent('SwitchIn', pokemon);
 			if (!pokemon.hp) return true;
 			pokemon.isStarted = true;
@@ -3469,17 +3396,18 @@ Battle = (() => {
 
 		if (this.gameType === 'triples' && !this.sides.filter(side => side.pokemonLeft > 1).length) {
 			// If both sides have one Pokemon left in triples and they are not adjacent, they are both moved to the center.
-			let center = false;
+			let actives = [];
 			for (let i = 0; i < this.sides.length; i++) {
 				for (let j = 0; j < this.sides[i].active.length; j++) {
 					if (!this.sides[i].active[j] || this.sides[i].active[j].fainted) continue;
-					if (this.sides[i].active[j].position === 1) break;
-					this.swapPosition(this.sides[i].active[j], 1, '[silent]');
-					center = true;
-					break;
+					actives.push(this.sides[i].active[j]);
 				}
 			}
-			if (center) this.add('-center');
+			if (actives.length > 1 && !this.isAdjacent(actives[0], actives[1])) {
+				this.swapPosition(actives[0], 1, '[silent]');
+				this.swapPosition(actives[1], 1, '[silent]');
+				this.add('-center');
+			}
 		}
 
 		this.add('turn', this.turn);
@@ -3616,11 +3544,8 @@ Battle = (() => {
 				this.debug('damage event failed');
 				return damage;
 			}
-			if (target.illusion && effect && effect.effectType === 'Move' && effect.id !== 'confused') {
-				this.debug('illusion cleared');
-				target.illusion = null;
-				this.add('replace', target, target.getDetails);
-				this.add('-end', target, 'Illusion');
+			if (target.illusion && target.hasAbility('Illusion') && effect && effect.effectType === 'Move' && effect.id !== 'confused') {
+				this.singleEvent('End', this.getAbility('Illusion'), target.abilityData, target, source, effect);
 			}
 		}
 		if (damage !== 0) damage = this.clampIntRange(damage, 1);
@@ -4151,6 +4076,7 @@ Battle = (() => {
 					'beforeTurn': 100,
 					'beforeTurnMove': 99,
 					'switch': 7,
+					'runUnnerve': 7.3,
 					'runSwitch': 7.2,
 					'runPrimal': 7.1,
 					'instaswitch': 101,
@@ -4385,6 +4311,7 @@ Battle = (() => {
 					break;
 				}
 			}
+			decision.pokemon.illusion = null;
 			this.singleEvent('End', this.getAbility(decision.pokemon.ability), decision.pokemon.abilityData, decision.pokemon);
 			if (!decision.pokemon.hp && !decision.pokemon.fainted) {
 				// a pokemon fainted from Pursuit before it could switch
@@ -4415,6 +4342,9 @@ Battle = (() => {
 			}
 
 			this.switchIn(decision.target, decision.pokemon.position);
+			break;
+		case 'runUnnerve':
+			this.singleEvent('PreStart', decision.pokemon.getAbility(), decision.pokemon.abilityData, decision.pokemon);
 			break;
 		case 'runSwitch':
 			this.runEvent('SwitchIn', decision.pokemon);
@@ -4675,16 +4605,7 @@ Battle = (() => {
 			}
 		}
 
-		const queuedDecisions = side.choiceData.choices.length;
-		if (queuedDecisions) {
-			side.acceptChoice(queuedDecisions, {
-				done: side.choiceData.choices.map((choice, index) => choice === 'skip' ? '' : '' + index).join(""),
-				leave: Array.from(side.choiceData.leaveIndices).join(""),
-				enter: Array.from(side.choiceData.enterIndices).join(""),
-				team: side.currentRequest === 'teampreview' ? side.choiceData.decisions.map(decision => decision.pokemon.position + 1).join("") : null,
-			});
-		}
-
+		side.updateChoice();
 		this.checkDecisions();
 	};
 
@@ -4897,6 +4818,7 @@ Battle = (() => {
 		if (stepsBack !== true && isNaN(stepsBack)) return;
 
 		side.undoChoices(stepsBack);
+		side.updateChoice();
 	};
 	Battle.prototype.checkDecisions = function () {
 		let totalDecisions = 0;
@@ -5011,12 +4933,12 @@ Battle = (() => {
 
 	// IPC
 
+	// This function is overridden in Battle.construct.
 	// Messages sent by this function are received and handled in
 	// Battle.prototype.receive in simulator.js (in another process).
 	Battle.prototype.send = function (type, data) {
-		if (Array.isArray(data)) data = data.join("\n");
-		process.send(this.id + "\n" + type + "\n" + data);
 	};
+
 	// This function is called by this process's 'message' event.
 	Battle.prototype.receive = function (data, more) {
 		this.messageLog.push(data.join(' '));
@@ -5146,9 +5068,6 @@ Battle = (() => {
 
 		// in case the garbage collector really sucks, at least deallocate the log
 		this.log = null;
-
-		// remove from battle list
-		Battles[this.id] = null;
 	};
 	return Battle;
 })();

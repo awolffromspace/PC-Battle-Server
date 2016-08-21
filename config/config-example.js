@@ -709,6 +709,7 @@ exports.grouplist = [
 		name: "Leader",
 		inherit: '@',
 		jurisdiction: 'u',
+		roombot: true,
 		roommod: true,
 		roomdriver: true,
 		roomsubdriver: true,
@@ -727,6 +728,15 @@ exports.grouplist = [
 		editroom: true,
 		joinbattle: true,
 		modchatall: true,
+		nooverride: true,
+	},
+	{
+		symbol: '*',
+		id: "bot",
+		name: "Bot",
+		inherit: '@',
+		jurisdiction: 'u',
+		addhtml: true,
 	},
 	{
 		symbol: '@',

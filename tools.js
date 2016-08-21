@@ -259,7 +259,7 @@ module.exports = (() => {
 		if (!template || typeof template === 'string') {
 			let name = (template || '').trim();
 			let id = toId(name);
-			if (this.data.Aliases[id]) {
+			if (id !== 'constructor' && this.data.Aliases[id]) {
 				name = this.data.Aliases[id];
 				id = toId(name);
 			}
@@ -275,7 +275,7 @@ module.exports = (() => {
 				}
 			}
 			template = {};
-			if (id && this.data.Pokedex[id]) {
+			if (id && id !== 'constructor' && this.data.Pokedex[id]) {
 				template = this.data.Pokedex[id];
 				if (template.cached) return template;
 				template.cached = true;
@@ -347,7 +347,7 @@ module.exports = (() => {
 				let matches = /([a-z]*)([0-9]*)/.exec(id);
 				id = matches[1];
 			}
-			if (id && this.data.Movedex[id]) {
+			if (id && id !== 'constructor' && this.data.Movedex[id]) {
 				move = this.data.Movedex[id];
 				if (move.cached) return move;
 				move.cached = true;
@@ -481,7 +481,7 @@ module.exports = (() => {
 				id += 'berry';
 			}
 			item = {};
-			if (id && this.data.Items[id]) {
+			if (id && id !== 'constructor' && this.data.Items[id]) {
 				item = this.data.Items[id];
 				if (item.cached) return item;
 				item.cached = true;
@@ -517,7 +517,7 @@ module.exports = (() => {
 			let name = (ability || '').trim();
 			let id = toId(name);
 			ability = {};
-			if (id && this.data.Abilities[id]) {
+			if (id && id !== 'constructor' && this.data.Abilities[id]) {
 				ability = this.data.Abilities[id];
 				if (ability.cached) return ability;
 				ability.cached = true;
@@ -550,7 +550,7 @@ module.exports = (() => {
 			let id = toId(type);
 			id = id.charAt(0).toUpperCase() + id.substr(1);
 			type = {};
-			if (id && this.data.TypeChart[id]) {
+			if (id && id !== 'constructor' && this.data.TypeChart[id]) {
 				type = this.data.TypeChart[id];
 				if (type.cached) return type;
 				type.cached = true;
@@ -571,7 +571,7 @@ module.exports = (() => {
 			let name = (nature || '').trim();
 			let id = toId(name);
 			nature = {};
-			if (id && this.data.Natures[id]) {
+			if (id && id !== 'constructor' && this.data.Natures[id]) {
 				nature = this.data.Natures[id];
 				if (nature.cached) return nature;
 				nature.cached = true;

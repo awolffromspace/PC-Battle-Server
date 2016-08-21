@@ -75,22 +75,6 @@ for (let file of fs.readdirSync(path.resolve(__dirname, 'chat-plugins'))) {
 }
 
 /*********************************************************
- * Modlog
- *********************************************************/
-
-let modlog = exports.modlog = {
-	lobby: fs.createWriteStream(path.resolve(__dirname, 'logs/modlog/modlog_lobby.txt'), {flags:'a+'}),
-	battle: fs.createWriteStream(path.resolve(__dirname, 'logs/modlog/modlog_battle.txt'), {flags:'a+'}),
-};
-
-let writeModlog = exports.writeModlog = function (roomid, text) {
-	if (!modlog[roomid]) {
-		modlog[roomid] = fs.createWriteStream(path.resolve(__dirname, 'logs/modlog/modlog_' + roomid + '.txt'), {flags:'a+'});
-	}
-	modlog[roomid].write('[' + (new Date().toJSON()) + '] ' + text + '\n');
-};
-
-/*********************************************************
  * Parser
  *********************************************************/
 
@@ -112,6 +96,35 @@ class CommandContext {
 		this.targetUser = null;
 		this.targetUsername = '';
 		this.inputUsername = '';
+	}
+
+	checkFormat(room, message) {
+		if (!room) return false;
+		if (!room.filterStretching && !room.filterCaps) return false;
+		let formatError = [];
+		// Removes extra spaces and null characters
+		message = message.trim().replace(/[ \u0000\u200B-\u200F]+/g, ' ');
+
+		let stretchMatch = room.filterStretching && message.match(/(.+?)\1{7,}/i);
+		let capsMatch = room.filterCaps && message.match(/[A-Z\s]{18,}/);
+
+		if (stretchMatch) {
+			formatError.push("too much stretching");
+		}
+		if (capsMatch) {
+			formatError.push("too many capital letters");
+		}
+		if (formatError.length > 0) {
+			return formatError.join(' and ') + ".";
+		}
+		return false;
+	}
+
+	checkSlowchat(room, user) {
+		if (!room || !room.slowchat) return true;
+		let lastActiveSeconds = (Date.now() - user.lastMessageTime) / 1000;
+		if (lastActiveSeconds < room.slowchat) return false;
+		return true;
 	}
 
 	checkBanwords(room, message) {
@@ -144,8 +157,11 @@ class CommandContext {
 			this.sendReply('|html|<div class="message-error">' + Tools.escapeHTML(message).replace(/\n/g, '<br />') + '</div>');
 		}
 	}
+	addBox(html) {
+		this.add('|html|<div class="infobox">' + html + '</div>');
+	}
 	sendReplyBox(html) {
-		this.sendReply('|raw|<div class="infobox">' + html + '</div>');
+		this.sendReply('|html|<div class="infobox">' + html + '</div>');
 	}
 	popupReply(message) {
 		this.connection.popup(message);
@@ -156,34 +172,13 @@ class CommandContext {
 	send(data) {
 		this.room.send(data);
 	}
-	privateModCommand(data, noLog) {
-		this.sendModCommand(data);
-		this.logEntry(data);
-		this.logModCommand(data);
-	}
 	sendModCommand(data) {
-		let users = this.room.users;
-		let auth = this.room.auth;
-
-		for (let i in users) {
-			let user = users[i];
-			// hardcoded for performance reasons (this is an inner loop)
-			if (user.isStaff || ((auth && (auth[user.userid] || '+') !== '+') && (auth && (auth[user.userid] || '\u2605') !== '\u2605'))) {
-				user.sendTo(this.room, data);
-			}
-		}
+		this.room.sendModCommand(data);
 	}
-	logEntry(data) {
-		this.room.logEntry(data);
-	}
-	addModCommand(text, logOnlyText) {
-		this.add(text);
-		this.logModCommand(text + (logOnlyText || ""));
-	}
-	logModCommand(text) {
-		let roomid = (this.room.battle ? 'battle' : this.room.id);
-		if (this.room.isPersonal) roomid = 'groupchat';
-		writeModlog(roomid, '(' + this.room.id + ') ' + text);
+	privateModCommand(data) {
+		this.room.sendModCommand(data);
+		this.logEntry(data);
+		this.room.modlog(data);
 	}
 	globalModlog(action, user, text) {
 		let buf = "(" + this.room.id + ") " + action + ": ";
@@ -195,7 +190,17 @@ class CommandContext {
 			if (user.autoconfirmed && user.autoconfirmed !== userid) buf += " ac:[" + user.autoconfirmed + "]";
 		}
 		buf += text;
-		writeModlog('global', buf);
+		Rooms.global.modlog(buf);
+	}
+	logEntry(data) {
+		this.room.logEntry(data);
+	}
+	addModCommand(text, logOnlyText) {
+		this.add(text);
+		this.room.modlog(text + (logOnlyText || ""));
+	}
+	logModCommand(text) {
+		this.room.modlog(text);
 	}
 	can(permission, target, room) {
 		if (!this.user.can(permission, target, room)) {
@@ -360,6 +365,16 @@ class CommandContext {
 				return false;
 			}
 
+			if (this.checkFormat(room, message) && !user.can('mute', null, room)) {
+				this.errorReply("Your message was not sent because it contained " + this.checkFormat(room, message));
+				return false;
+			}
+
+			if (!this.checkSlowchat(room, user) && !user.can('mute', null, room)) {
+				this.errorReply("This room has slow-chat enabled. You can only talk once every " + room.slowchat + " seconds.");
+				return false;
+			}
+
 			if (!this.checkBanwords(room, message) && !user.can('mute', null, room)) {
 				this.errorReply("Your message contained banned words.");
 				return false;
@@ -367,7 +382,7 @@ class CommandContext {
 
 			if (room && room.id === 'lobby' && user.group === ' ') {
 				let normalized = message.trim();
-				if ((normalized === user.lastMessage) &&
+				if (room.id === 'lobby' && (normalized === user.lastMessage) &&
 						((Date.now() - user.lastMessageTime) < MESSAGE_COOLDOWN)) {
 					this.errorReply("You can't send the same message again so soon.");
 					return false;

@@ -28,7 +28,6 @@ function init(callback) {
 	}
 
 	// Turn IPC methods into no-op
-	BattleEngine.Battle.prototype.send = noop;
 	BattleEngine.Battle.prototype.receive = noop;
 
 	let Simulator = global.Simulator;
@@ -49,7 +48,7 @@ function init(callback) {
 	};
 
 	// Disable writing to modlog
-	require('./../command-parser.js').CommandContext.prototype.logModCommand = noop;
+	Rooms.Room.prototype.modlog = noop;
 
 	callback();
 }
