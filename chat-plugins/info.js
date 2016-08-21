@@ -958,8 +958,8 @@ exports.commands = {
 			"<b>~ Administrators</b><br />" +
 			"- Anti (Papa Anti)<br />" +
 			"- Ausaudriel (Audy)<br />" +
-			"- Castform (Bruxish, Carol's Cookies, Chase, Chaseform, Lаnа Del Phox, Michonne, Negan, Weаther Ball)<br />" +
-			"- Dragon (bellossom, Death by Chansey, Lailah, Megumiii, Princess Zelda)<br />" +
+			"- Castform (Bruxish, Carol's Cookies, Chase, Chaseform, jellicentfan1, Lаnа Del Phox, Michonne, Negan, Weаther Ball)<br />" +
+			"- Dragon (bellossom, Death by Chansey, Lailah, Mamori Minamoto, Megumiii, Princess Zelda, Sakura Wars)<br />" +
 			"- Hiroshi Sotomura<br />" +
 			"- Rukario (PPN)<br />" +
 			"- Sheep (Cirnysheep)<br />" +
@@ -971,7 +971,7 @@ exports.commands = {
 			"- Christos (sphealosophy)<br />" +
 			"- Noa (Rohan-Sensei, Sunflora)<br />" +
 			"- Omicron (Megido, omicorn, omicronhuh, Postcards)<br />" +
-			"- Syndrome (Daddy, Fuck Kevin Durant, King Syn, Morning Bliss, Muhammad Ali, Steph Carried, Widowmaker)<br /><br />" +
+			"- Syndrome (Daddy, Fuck Kevin Durant, King Syn, Morning Bliss, Muhammad Ali, Reaper, Steph Carried, Tracer, Widowmaker)<br /><br />" +
 			"<a href=\"http://www.pokecommunity.com/showthread.php?t=289012#staff\">Click here for more details.</a>"
 		);
 	},
