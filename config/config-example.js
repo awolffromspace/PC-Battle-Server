@@ -736,7 +736,6 @@ exports.grouplist = [
 		name: "Bot",
 		inherit: '@',
 		jurisdiction: 'u',
-		addhtml: true,
 	},
 	{
 		symbol: '@',
@@ -752,6 +751,7 @@ exports.grouplist = [
 		gdeclare: true,
 		clearall: true,
 		roomplayer: true,
+		addhtml: true,
 	},
 	{
 		symbol: '%',
