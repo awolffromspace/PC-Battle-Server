@@ -2303,6 +2303,8 @@ exports.BattleScripts = {
 		let typeCount = {};
 		let typeComboCount = {};
 		let baseFormes = {};
+		let uberCount = 0;
+		let puCount = 0;
 		let teamDetails = {megaCount: 0, stealthRock: 0, hazardClear: 0};
 
 		while (pokemonPool.length && pokemon.length < 6) {
