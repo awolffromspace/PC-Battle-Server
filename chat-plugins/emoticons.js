@@ -197,6 +197,7 @@ var emotes = {
 	':wigglytuff:': 'http://cbc.pokecommunity.com/config/emoticons/wigglytuff.png',
 	':wink:': 'http://cbc.pokecommunity.com/config/emoticons/wink.png',
 	':winston:': 'http://cbc.pokecommunity.com/config/emoticons/winston.png',
+	':wlink:': 'http://cbc.pokecommunity.com/config/emoticons/wlink.png',
 	':wobbuffet:': 'http://cbc.pokecommunity.com/config/emoticons/wobbuffet.png',
 	':wooper:': 'http://cbc.pokecommunity.com/config/emoticons/wooper.png',
 	':wutface:': 'http://cbc.pokecommunity.com/config/emoticons/wutface.png',
@@ -255,6 +256,9 @@ function parseEmoticons(message, room, user, pm) {
 			match;
 		if (match === ':ana:' || match === ':mercy:' || match === ':tracer:') return typeof emote != 'undefined' ?
 			'<img src="' + emote + '" title="' + match + '" width="35" height="33"/>' :
+			match;
+		if (match === ':bastion:' || match === ':dva:' || match === ':hanzo:' || match === ':junkrat:' || match === ':mccree:' || match === ':mei:' || match === ':pharah:' || match === ':reaper:' || match === ':reinhardt:' || match === ':roadhog:' || match === ':soldier76:' || match === ':torbjorn:' || match === ':winston:' || match === ':zarya:') return typeof emote != 'undefined' ?
+			'<img src="' + emote + '" title="' + match + '" width="37" height="33"/>' :
 			match;
 		if (match === ':bed:') return typeof emote != 'undefined' ?
 			'<img src="' + emote + '" title="' + match + '" width="39" height="32"/>' :
@@ -322,7 +326,7 @@ function parseEmoticons(message, room, user, pm) {
 		if (match === ':widowmaker:') return typeof emote != 'undefined' ?
 			'<img src="' + emote + '" title="' + match + '" width="34" height="33"/>' :
 			match;
-		if (match === ':wink:') return typeof emote != 'undefined' ?
+		if (match === ':wink:' || match === ':wlink:') return typeof emote != 'undefined' ?
 			'<img src="' + emote + '" title="' + match + '" width="33" height="30"/>' :
 			match;
 		if (match === ':zenyatta:') return typeof emote != 'undefined' ?
