@@ -312,11 +312,10 @@ let Room = (() => {
 		this.modlogStream.write('[' + (new Date().toJSON()) + '] (' + this.id + ') ' + text + '\n');
 	};
 	Room.prototype.sendModCommand = function (data) {
-		let auth = this.room.auth;
 		for (let i in this.users) {
 			let user = this.users[i];
 			// hardcoded for performance reasons (this is an inner loop)
-			if (user.isStaff || ((auth && (auth[user.userid] || '+') !== '+') && (auth && (auth[user.userid] || '\u2605') !== '\u2605'))) {
+			if (user.isStaff || ((room.auth && (room.auth[user.userid] || '+') !== '+') && (room.auth && (room.auth[user.userid] || '\u2605') !== '\u2605'))) {
 				user.sendTo(this, data);
 			}
 		}
