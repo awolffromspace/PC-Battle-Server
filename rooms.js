@@ -312,6 +312,7 @@ let Room = (() => {
 		this.modlogStream.write('[' + (new Date().toJSON()) + '] (' + this.id + ') ' + text + '\n');
 	};
 	Room.prototype.sendModCommand = function (data) {
+		let auth = this.room.auth;
 		for (let i in this.users) {
 			let user = this.users[i];
 			// hardcoded for performance reasons (this is an inner loop)
