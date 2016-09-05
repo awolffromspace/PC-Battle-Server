@@ -75,6 +75,7 @@ var emotes = {
 	':helix:': 'http://cbc.pokecommunity.com/config/emoticons/helix.png',
 	':houndoom:': 'http://cbc.pokecommunity.com/config/emoticons/houndoom.png',
 	':hug:': 'http://cbc.pokecommunity.com/config/emoticons/hug.png',
+	':hypno:': 'http://cbc.pokecommunity.com/config/emoticons/hypno.png',
 	':infernape:': 'http://cbc.pokecommunity.com/config/emoticons/infernape.png',
 	':jack:': 'http://cbc.pokecommunity.com/config/emoticons/jack.png',
 	':jigglypuff:': 'http://cbc.pokecommunity.com/config/emoticons/jigglypuff.png',
