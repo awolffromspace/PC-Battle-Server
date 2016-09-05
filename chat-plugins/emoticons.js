@@ -59,6 +59,7 @@ var emotes = {
 	':fish:': 'http://cbc.pokecommunity.com/config/emoticons/fish.gif',
 	':flirt:': 'http://cbc.pokecommunity.com/config/emoticons/flirt.png',
 	':flygon:': 'http://cbc.pokecommunity.com/config/emoticons/flygon.png',
+	':frank:': 'http://cbc.pokecommunity.com/config/emoticons/frank.png',
 	':gav:': 'http://cbc.pokecommunity.com/config/emoticons/gav.png',
 	':gawk:': 'http://cbc.pokecommunity.com/config/emoticons/gawk.png',
 	':genji:': 'http://cbc.pokecommunity.com/config/emoticons/genji.png',
@@ -102,7 +103,6 @@ var emotes = {
 	':ludicolo:': 'http://cbc.pokecommunity.com/config/emoticons/ludicolo.png',
 	':luvdisc:': 'http://cbc.pokecommunity.com/config/emoticons/luvdisc.png',
 	':lyin:': 'http://cbc.pokecommunity.com/config/emoticons/lyin.png',
-	':lying:': 'http://cbc.pokecommunity.com/config/emoticons/lying.png',
 	':magikarp:': 'http://cbc.pokecommunity.com/config/emoticons/magikarp.png',
 	':mccree:': 'http://cbc.pokecommunity.com/config/emoticons/mccree.png',
 	':meganium:': 'http://cbc.pokecommunity.com/config/emoticons/meganium.png',
@@ -305,7 +305,7 @@ function parseEmoticons(message, room, user, pm) {
 		if (match === ':carol:' || match === ':lyin:' || match === ':thugga:') return typeof emote != 'undefined' ?
 			'<img src="' + emote + '" title="' + match + '" width="25" height="30"/>' :
 			match;
-		if (match === ':lying:' || match === ':papi:') return typeof emote != 'undefined' ?
+		if (match === ':frank:' || match === ':papi:') return typeof emote != 'undefined' ?
 			'<img src="' + emote + '" title="' + match + '" width="20" height="30"/>' :
 			match;
 		if (match === ':respek:') return typeof emote != 'undefined' ?
