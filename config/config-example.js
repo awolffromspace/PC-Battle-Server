@@ -613,6 +613,9 @@ exports.customavatars = {
 	'moocyst': 'moocyst.png',
 	'oddsh': 'oddsh.png',
 	'wifinetwork': 'wifinetwork.gif',
+	'pdge': 'pdge.png',
+	'jnssen': 'pdge.png',
+	'sria': 'pdge.png',
 };
 
 // custom avatars appear in profile by specifiying server url.
