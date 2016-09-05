@@ -956,10 +956,11 @@ exports.commands = {
 		if (!this.runBroadcast()) return;
 		this.sendReplyBox(
 			"<b>~ Administrators</b><br />" +
+			"- Achromatic<br />" +
 			"- Anti (Papa Anti)<br />" +
 			"- Ausaudriel (Audy)<br />" +
-			"- Castform (Bruxish, Carol's Cookies, Chase, Chaseform, jellicentfan1, Lаnа Del Phox, Michonne, Negan, Weаther Ball)<br />" +
-			"- Dragon (bellossom, Death by Chansey, Lailah, Mamori Minamoto, Megumiii, Princess Zelda, Sakura Wars)<br />" +
+			"- Castform (Bruxish, Carol's Cookies, Chase, Chaseform, Eleven, jellicentfan1, Lаnа Del Phox, Michonne, Negan, Weаther Ball)<br />" +
+			"- Dragon (bellossom, Death by Chansey, Lailah, Mamori Minamoto, Megumiii, Princess Zelda, Sakura Wars, Terra Branford)<br />" +
 			"- Hiroshi Sotomura<br />" +
 			"- Rukario (PPN)<br />" +
 			"- Sheep (Cirnysheep)<br />" +
