@@ -9,16 +9,15 @@ exports.Formats = [
 	///////////////////////////////////////////////////////////////////
 
 	{
-		name: "[LotW 25] OU",
+		name: "[LotW 26] Ubers",
 		desc: [
-			"&bullet; <a href=\"https://www.smogon.com/forums/threads/3546114/\">OU Metagame Discussion</a>",
-			"&bullet; <a href=\"https://www.smogon.com/dex/xy/tags/ou/\">OU Banlist</a>",
-			"&bullet; <a href=\"https://www.smogon.com/forums/threads/3571990/\">OU Viability Ranking</a>",
+			"&bullet; <a href=\"https://www.smogon.com/forums/threads/3522911/\">Ubers Metagame Discussion</a>",
+			"&bullet; <a href=\"https://www.smogon.com/forums/threads/3535106/\">Ubers Viability Ranking</a>",
 		],
 		section: "ORAS Singles",
 
-		ruleset: ['Pokemon', 'Standard', 'Team Preview', 'Swagger Clause', 'Baton Pass Clause'],
-		banlist: ['Uber', 'Shadow Tag', 'Soul Dew'],
+		ruleset: ['Pokemon', 'Standard', 'Swagger Clause', 'Team Preview', 'Mega Rayquaza Clause'],
+		banlist: [],
 		onBegin: function () {
 			this.add('raw|This is the Ladder of the Week! Use the "Battle!" button to try and win the LotW. The winner is the user who is #1 on the ladder by 10 PM ET on Saturday. They receive a <img src="http://cbc.pokecommunity.com/config/user-list-images/trophy.png" /> beside their name for a week.');
 		},
