@@ -971,7 +971,7 @@ exports.commands = {
 			"- Aurora (Tyranitar)<br />" +
 			"- Christos (sphealosophy)<br />" +
 			"- Noa (Rohan-Sensei, Sunflora)<br />" +
-			"- Omicron (Megido, omicorn, omicronhuh, Postcards)<br />" +
+			"- Omicron (Carousels, Megido, omicorn, omicronhuh, Postcards)<br />" +
 			"- Syndrome (Daddy, Fuck Kevin Durant, King Syn, Morning Bliss, Muhammad Ali, Reaper, Steph Carried, Tracer, Widowmaker)<br /><br />" +
 			"<a href=\"http://www.pokecommunity.com/showthread.php?t=289012#staff\">Click here for more details.</a>"
 		);
