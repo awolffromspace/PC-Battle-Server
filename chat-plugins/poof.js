@@ -95,6 +95,10 @@ const noanoodles = [
 	" ٩(•౪•٩)三 "
 ];
 
+const pelipperzachary = [
+	"See you Later, Punks!"
+];
+
 const realluneh = [
 	"Inhale my enragement child"
 ];
@@ -441,6 +445,16 @@ exports.commands = {
 			room.addRaw('<center><strong><font color="' + colour + '">~~ ' + Tools.escapeHTML(message) + ' ~~</font></strong></center>');
 			user.leaveRoom(room);
 		} else if (userid.toUpperCase() === 'NOANOODLES' || userid.toUpperCase() === 'NOATAN') {
+			var message = target || noanoodles[Math.floor(Math.random() * noanoodles.length)];
+
+			var colour = '#' + [1, 1, 1].map(function () {
+				var part = Math.floor(Math.random() * 0xaa);
+				return (part < 0x10 ? '0' : '') + part.toString(16);
+			}).join('');
+
+			room.addRaw('<center><strong><font color="' + colour + '">~~ ' + Tools.escapeHTML(message) + ' ~~</font></strong></center>');
+			user.leaveRoom(room);
+		} else if (userid.toUpperCase() === 'PELIPPERZACHARY') {
 			var message = target || noanoodles[Math.floor(Math.random() * noanoodles.length)];
 
 			var colour = '#' + [1, 1, 1].map(function () {
