@@ -8,7 +8,7 @@ exports.Formats = [
 	// XY Singles
 	///////////////////////////////////////////////////////////////////
 
-	{
+	/*{
 		name: "[LotF 26] Ubers",
 		desc: [
 			"&bullet; <a href=\"https://www.smogon.com/forums/threads/3522911/\">Ubers Metagame Discussion</a>",
@@ -21,7 +21,7 @@ exports.Formats = [
 		onBegin: function () {
 			this.add('raw|This is the Ladder of the Fortnight! Use the "Battle!" button to try and win the LotW. The winner is the user who is #1 on the ladder by 10 PM ET on Saturday. They receive a <img src="http://cbc.pokecommunity.com/config/user-list-images/trophy.png" /> beside their name for a week.');
 		},
-	},
+	},*/
 	{
 		name: "OU",
 		desc: [
