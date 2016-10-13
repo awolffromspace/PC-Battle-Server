@@ -1,4 +1,4 @@
-html,body{margin:0;padding:0}body{background:#c66247 url("http://cbc.pokecommunity.com/config/backgrounds/lapras.png") no-repeat fixed left top}
+html,body{margin:0;padding:0}body{background:#130d1b url("http://cbc.pokecommunity.com/config/backgrounds/halloween.png") no-repeat fixed left top}
 .mainmenufooter a{color:#f2f2f2}
 .mainmenufooter a:hover{color:white}
 .menugroup .button{color:white;background:#262626!important;border:solid 1px black!important}
@@ -8,14 +8,14 @@ html,body{margin:0;padding:0}body{background:#c66247 url("http://cbc.pokecommuni
 .userlist li button:active{background:rgba(204,212,220,0.4)}
 .dark .userlist li button:hover{background:rgba(34,34,34,0.4)}
 .dark .userlist li button:active{background:rgba(0,0,0,0.4)}
-.broadcast-lobby{color:white;background-color:#c66247;padding:5px 7px}
+.broadcast-lobby{color:white;background-color:#130d1b;padding:5px 7px}
 .broadcast-emerald{color:white;text-shadow:2px 2px 2px black;background-color:#0b121f;background-repeat:no-repeat;padding:5px 7px;background-image:url("http://cbc.pokecommunity.com/config/backgrounds/emerald.png")}
 .broadcast-emerald-alt{color:white;background-color:#0b121f;padding:5px 7px}
 .broadcast-sun-moon{color:white;text-shadow:2px 2px 2px black;background-color:#0c070f;background-repeat:no-repeat;padding:5px 7px;background-image:url("http://cbc.pokecommunity.com/config/backgrounds/sun-moon.png")}
 .broadcast-sun-moon-alt{color:white;background-color:#0c070f;padding:5px 7px}
 .profile-title{font-family:georgia,times,serif;font-size:14pt;font-weight:bold;font-style:italic}
-#lobby-userlist-user-5qwerty{background:rgba(0,0,0,0) url("http://cbc.pokecommunity.com/config/user-list-images/trophy.png") no-repeat right}
-#lobby-userlist-user-zekrom52,#lobby-userlist-user-korpiklaanivodka,#lobby-userlist-user-rabinov,#lobby-userlist-user-wicked3ds{background:rgba(0,0,0,0) url("http://cbc.pokecommunity.com/config/user-list-images/darkrai.png") no-repeat right}
+#lobby-userlist-user-5qwerty,#lobby-userlist-user-kwstaspaokara,#lobby-userlist-user-savash{background:rgba(0,0,0,0) url("http://cbc.pokecommunity.com/config/user-list-images/trophy.png") no-repeat right}
+/*#lobby-userlist-user-zekrom52,#lobby-userlist-user-korpiklaanivodka,#lobby-userlist-user-rabinov,#lobby-userlist-user-wicked3ds{background:rgba(0,0,0,0) url("http://cbc.pokecommunity.com/config/user-list-images/darkrai.png") no-repeat right}
 #lobby-userlist-user-wolf,#lobby-userlist-user-arhy,#lobby-userlist-user-lostheart,#lobby-userlist-user-nolafus,#lobby-userlist-user-postcrds{background:rgba(0,0,0,0) url("http://cbc.pokecommunity.com/config/user-list-images/aegislash.png") no-repeat right}
 #lobby-userlist-user-mamoriinamoto,#lobby-userlist-user-trrbranford,#lobby-userlist-user-ddrox13,#lobby-userlist-user-gimmepie,#lobby-userlist-user-oakaxxiii,#lobby-userlist-user-snflr{background:rgba(0,0,0,0) url("http://cbc.pokecommunity.com/config/user-list-images/milotic.png") no-repeat right}
-#lobby-userlist-user-carolscookies,#lobby-userlist-user-ctfrm,#lobby-userlist-user-elvn,#lobby-userlist-user-christs,#lobby-userlist-user-elektraheart,#lobby-userlist-user-itssopheria,#lobby-userlist-user-nakuzami,#lobby-userlist-user-punkysaur{background:rgba(0,0,0,0) url("http://cbc.pokecommunity.com/config/user-list-images/castform-rainy.png") no-repeat right}
+#lobby-userlist-user-carolscookies,#lobby-userlist-user-ctfrm,#lobby-userlist-user-elvn,#lobby-userlist-user-christs,#lobby-userlist-user-elektraheart,#lobby-userlist-user-itssopheria,#lobby-userlist-user-nakuzami,#lobby-userlist-user-punkysaur{background:rgba(0,0,0,0) url("http://cbc.pokecommunity.com/config/user-list-images/castform-rainy.png") no-repeat right}*/
