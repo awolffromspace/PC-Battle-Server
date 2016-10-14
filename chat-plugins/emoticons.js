@@ -48,6 +48,7 @@ var emotes = {
 	':dinner:': 'http://cbc.pokecommunity.com/config/emoticons/dinner.png',
 	':ditto:': 'http://cbc.pokecommunity.com/config/emoticons/ditto.png',
 	':dk:': 'http://cbc.pokecommunity.com/config/emoticons/dk.png',
+	':drama:': 'http://cbc.pokecommunity.com/config/emoticons/drama.png',
 	':drowzee:': 'http://cbc.pokecommunity.com/config/emoticons/drowzee.png',
 	':dva:': 'http://cbc.pokecommunity.com/config/emoticons/dva.png',
 	':eevee:': 'http://cbc.pokecommunity.com/config/emoticons/eevee.png',
@@ -79,6 +80,7 @@ var emotes = {
 	':infernape:': 'http://cbc.pokecommunity.com/config/emoticons/infernape.png',
 	':jack:': 'http://cbc.pokecommunity.com/config/emoticons/jack.png',
 	':jigglypuff:': 'http://cbc.pokecommunity.com/config/emoticons/jigglypuff.png',
+	':joanne:': 'http://cbc.pokecommunity.com/config/emoticons/joanne.png',
 	':junkrat:': 'http://cbc.pokecommunity.com/config/emoticons/junkrat.png',
 	':jynx:': 'http://cbc.pokecommunity.com/config/emoticons/jynx.png',
 	':kanye:': 'http://cbc.pokecommunity.com/config/emoticons/kanye.png',
@@ -129,6 +131,7 @@ var emotes = {
 	':papabless:': 'http://cbc.pokecommunity.com/config/emoticons/papabless.png',
 	':papi:': 'http://cbc.pokecommunity.com/config/emoticons/papi.png',
 	':pear:': 'http://cbc.pokecommunity.com/config/emoticons/pear.png',
+	':petty:': 'http://cbc.pokecommunity.com/config/emoticons/petty.png',
 	':pharah:': 'http://cbc.pokecommunity.com/config/emoticons/pharah.png',
 	':pikachu:': 'http://cbc.pokecommunity.com/config/emoticons/pikachu.png',
 	':pix:': 'http://cbc.pokecommunity.com/config/emoticons/pix.png',
@@ -156,6 +159,7 @@ var emotes = {
 	':scizor:': 'http://cbc.pokecommunity.com/config/emoticons/scizor.png',
 	':seduce:': 'http://cbc.pokecommunity.com/config/emoticons/seduce.png',
 	':senpai:': 'http://cbc.pokecommunity.com/config/emoticons/senpai.png',
+	':sharpie:': 'http://cbc.pokecommunity.com/config/emoticons/sharpie.png',
 	':shift:': 'http://cbc.pokecommunity.com/config/emoticons/shift.gif',
 	':shifty:': 'http://cbc.pokecommunity.com/config/emoticons/shifty.png',
 	':shinx:': 'http://cbc.pokecommunity.com/config/emoticons/shinx.png',
@@ -171,6 +175,7 @@ var emotes = {
 	':spheal:': 'http://cbc.pokecommunity.com/config/emoticons/spheal.png',
 	':spinda:': 'http://cbc.pokecommunity.com/config/emoticons/spinda.png',
 	':squint:': 'http://cbc.pokecommunity.com/config/emoticons/squint.png',
+	':steelix:': 'http://cbc.pokecommunity.com/config/emoticons/steelix.png',
 	':strut:': 'http://cbc.pokecommunity.com/config/emoticons/strut.png',
 	':suicune:': 'http://cbc.pokecommunity.com/config/emoticons/suicune.png',
 	':superman:': 'http://cbc.pokecommunity.com/config/emoticons/superman.png',
@@ -279,6 +284,9 @@ function parseEmoticons(message, room, user, pm) {
 		if (match === ':delivert:') return typeof emote != 'undefined' ?
 			'<img src="' + emote + '" title="' + match + '" width="28" height="42"/>' :
 			match;
+		if (match === ':drama:') return typeof emote != 'undefined' ?
+			'<img src="' + emote + '" title="' + match + '" width="83" height="55"/>' :
+			match;
 		if (match === ':fish:') return typeof emote != 'undefined' ?
 			'<img src="' + emote + '" title="' + match + '" width="65" height="42"/>' :
 			match;
@@ -290,6 +298,9 @@ function parseEmoticons(message, room, user, pm) {
 			match;
 		if (match === ':harambe:') return typeof emote != 'undefined' ?
 			'<img src="' + emote + '" title="' + match + '" width="19" height="30"/>' :
+			match;
+		if (match === ':joanne:') return typeof emote != 'undefined' ?
+			'<img src="' + emote + '" title="' + match + '" width="26" height="32"/>' :
 			match;
 		if (match === ':kanye:' || match === ':papabless:') return typeof emote != 'undefined' ?
 			'<img src="' + emote + '" title="' + match + '" width="21" height="30"/>' :
@@ -308,6 +319,9 @@ function parseEmoticons(message, room, user, pm) {
 			match;
 		if (match === ':frank:' || match === ':papi:') return typeof emote != 'undefined' ?
 			'<img src="' + emote + '" title="' + match + '" width="20" height="30"/>' :
+			match;
+		if (match === ':petty:') return typeof emote != 'undefined' ?
+			'<img src="' + emote + '" title="' + match + '" width="59" height="55"/>' :
 			match;
 		if (match === ':respek:') return typeof emote != 'undefined' ?
 			'<img src="' + emote + '" title="' + match + '" width="24" height="30"/>' :
