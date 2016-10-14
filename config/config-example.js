@@ -619,6 +619,7 @@ exports.customavatars = {
 	'jnssen': 'pdge.png',
 	'sria': 'pdge.png',
 	'pabloocean': 'pdge.png',
+	'blnd': 'pdge.png',
 	'kwstaspaokara': 'kwstaspaokara.png',
 	'jannasheep': 'sheep.png',
 	'jnna': 'sheep.png',
