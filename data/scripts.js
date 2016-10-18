@@ -7115,13 +7115,13 @@ exports.BattleScripts = {
 		let pokemonLeft = 0;
 		let pokemon = [];
 
-		let pokemonPool = [];
-		for (let id in this.data.FormatsData) {
-			let template = this.getTemplate(id);
-			if (!template.isMega && !template.isPrimal && !template.isNonstandard && template.randomBattleMoves) {
-				pokemonPool.push(id);
-			}
-		}
+		let pokemonPool = ['aegislash', 'arceusghost', 'banette', 'chandelure', 'cofagrigus', 'doublade', 'drifblim', 'drifloon', 'dusclops', 'dusknoir', 'duskull', 'frillish', 'froslass', 'gastly', 'gengar', 'giratina', 'giratinaorigin', 'golett', 'golurk', 'gourgeist',
+		'gourgeistlarge', 'gourgeistsmall', 'gourgeistsuper', 'haunter', 'honedge', 'hoopa', 'jellicent', 'lampent', 'litwick', 'misdreavus', 'mismagius', 'phantump', 'pumpkaboo', 'pumpkaboolarge', 'pumpkaboosmall', 'pumpkaboosuper', 'rotom', 'sableye', 'shedinja', 'shuppet',
+		'spiritomb', 'trevenant', 'yamask', 'absol', 'arceusdark', 'bisharp', 'cacturne', 'carvanha', 'crawdaunt', 'darkrai', 'deino', 'drapion', 'greninja', 'honchkrow', 'hoopaunbound', 'houndoom', 'houndour', 'hydreigon', 'inkay', 'krokorok', 'krookodile', 'liepard', 'malamar',
+		'mandibuzz', 'mightyena', 'murkrow', 'nuzleaf', 'pangoro', 'pawniard', 'poochyena', 'purrloin', 'sandile', 'scrafty', 'scraggy', 'sharpedo', 'shiftry', 'skuntank', 'sneasel', 'stunky', 'tyranitar', 'umbreon', 'vullaby', 'weavile', 'yveltal', 'zoroark', 'zorua', 'zweilous',
+		'abra', 'alakazam', 'arceuspsychic', 'baltoy', 'beheeyem', 'claydol', 'cresselia', 'delphox', 'deoxys', 'deoxysattack', 'deoxysdefense', 'deoxysspeed', 'drowzee', 'elgyem', 'espurr', 'girafarig', 'gothita', 'gothitelle', 'gothorita', 'grumpig', 'hypno', 'jynx', 'kadabra',
+		'lunatone', 'meowstic', 'meowsticf', 'mewtwo', 'mimejr', 'mrmime', 'natu', 'sigilyph', 'smoochum', 'solrock', 'swoobat', 'woobat', 'xatu', 'arbok', 'ariados', 'beedrill', 'crobat', 'drapion', 'dustox', 'ekans', 'garbodor', 'golbat', 'grimer', 'koffing', 'muk',
+		'scolipede', 'seviper', 'skorupi', 'spinarak', 'tentacruel', 'trubbish', 'venipede', 'venomoth', 'venonat', 'weezing', 'whirlipede', 'zubat', 'noibat', 'noivern', 'joltik', 'galvantula'];
 
 		let typeCount = {};
 		let typeComboCount = {};
@@ -7183,9 +7183,6 @@ exports.BattleScripts = {
 			case 'Gourgeist':
 				if (this.random(4) >= 1) continue;
 				break;
-			case 'Hoopa':
-				if (this.random(2) >= 1) continue;
-				break;
 			case 'Meloetta':
 				if (this.random(2) >= 1) continue;
 				break;
@@ -7210,24 +7207,6 @@ exports.BattleScripts = {
 				}
 			}
 			if (skip) continue;
-
-			let halloweenPool = ['aegislash', 'arceusghost', 'banette', 'chandelure', 'cofagrigus', 'doublade', 'drifblim', 'drifloon', 'dusclops', 'dusknoir', 'duskull', 'frillish', 'froslass', 'gastly', 'gengar', 'giratina', 'giratinaorigin', 'golett', 'golurk', 'gourgeist',
-			'gourgeistlarge', 'gourgeistsmall', 'gourgeistsuper', 'haunter', 'honedge', 'hoopa', 'jellicent', 'lampent', 'litwick', 'misdreavus', 'mismagius', 'phantump', 'pumpkaboo', 'pumpkaboolarge', 'pumpkaboosmall', 'pumpkaboosuper', 'rotom', 'sableye', 'shedinja', 'shuppet',
-			'spiritomb', 'trevenant', 'yamask', 'absol', 'arceusdark', 'bisharp', 'cacturne', 'carvanha', 'crawdaunt', 'darkrai', 'deino', 'drapion', 'greninja', 'honchkrow', 'hoopaunbound', 'houndoom', 'houndour', 'hydreigon', 'inkay', 'krokorok', 'krookodile', 'liepard', 'malamar',
-			'mandibuzz', 'mightyena', 'murkrow', 'nuzleaf', 'pangoro', 'pawniard', 'poochyena', 'purrloin', 'sandile', 'scrafty', 'scraggy', 'sharpedo', 'shiftry', 'skuntank', 'sneasel', 'stunky', 'tyranitar', 'umbreon', 'vullaby', 'weavile', 'yveltal', 'zoroark', 'zorua', 'zweilous',
-			'abra', 'alakazam', 'arceuspsychic', 'baltoy', 'beheeyem', 'claydol', 'cresselia', 'delphox', 'deoxys', 'deoxysattack', 'deoxysdefense', 'deoxysspeed', 'drowzee', 'elgyem', 'espurr', 'girafarig', 'gothita', 'gothitelle', 'gothorita', 'grumpig', 'hypno', 'jynx', 'kadabra',
-			'lunatone', 'meowstic', 'meowsticf', 'mewtwo', 'mimejr', 'mrmime', 'natu', 'sigilyph', 'smoochum', 'solrock', 'swoobat', 'woobat', 'xatu', 'arbok', 'ariados', 'beedrill', 'crobat', 'drapion', 'dustox', 'ekans', 'garbodor', 'golbat', 'grimer', 'koffing', 'muk',
-			'scolipede', 'seviper', 'skorupi', 'spinarak', 'tentacruel', 'trubbish', 'venipede', 'venomoth', 'venonat', 'weezing', 'whirlipede', 'zubat', 'noibat', 'noivern', 'joltik', 'galvantula']
-			let halloweenPokemon = halloweenPool[Math.floor(Math.random()*halloweenPool.length)];
-			if (pokemon.length === 0) {
-				template = halloweenPokemon;
-			}
-			if (pokemon.length === 1) {
-				template = halloweenPokemon;
-			}
-			if (pokemon.length === 2) {
-				template = halloweenPokemon;
-			}
 
 			let set = this.randomSet(template, pokemon.length, teamDetails);
 
