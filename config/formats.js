@@ -23,6 +23,14 @@ exports.Formats = [
 		},
 	},*/
 	{
+		name: "[Ladder Race] Halloween Random",
+		section: "ORAS Singles",
+
+		mod: 'halloweenrandom',
+		team: 'randomHalloween',
+		ruleset: ['Random (no PotD)'],
+	},
+	{
 		name: "OU",
 		desc: [
 			"&bullet; <a href=\"https://www.smogon.com/forums/threads/3546114/\">OU Metagame Discussion</a>",
