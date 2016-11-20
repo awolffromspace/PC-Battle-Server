@@ -12,7 +12,7 @@ assert.bounded = function (value, range, message) {
 	if (value >= range[0] && value <= range[1]) return;
 	throw new AssertionError({
 		actual: value,
-		expected: `[${value[0]}, ${value[1]}]`,
+		expected: `[${range[0]}, ${range[1]}]`,
 		operator: '\u2208',
 		message: message,
 		stackStartFunction: assert.bounded,
@@ -151,14 +151,14 @@ assert.false = function (value, message) {
 };
 for (let methodName of assertMethods) {
 	const lastArgIndex = assert[methodName].length - 1;
-	assert.false[methodName] = function () {
+	assert.false[methodName] = function (...args) {
 		try {
-			assert[methodName].apply(null, arguments);
+			assert[methodName].apply(null, args);
 		} catch (err) {
 			return;
 		}
 		throw new AssertionError({
-			message: lastArgIndex < arguments.length ? arguments[lastArgIndex] : `Expected '${methodName}' assertion to fail.`,
+			message: lastArgIndex < args.length ? args[lastArgIndex] : `Expected '${methodName}' assertion to fail.`,
 			stackStartFunction: assert.false[methodName],
 		});
 	};

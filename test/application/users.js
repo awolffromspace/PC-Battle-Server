@@ -2,7 +2,7 @@
 
 const assert = require('assert');
 
-let userUtils = require('./../../dev-tools/users-utils.js');
+let userUtils = require('./../../dev-tools/users-utils');
 let Connection = userUtils.Connection;
 let User = userUtils.User;
 
@@ -64,16 +64,7 @@ describe('Users features', function () {
 
 				it('should join a room if not already present', function () {
 					this.connection.joinRoom(Rooms.lobby);
-					assert.ok('lobby' in this.connection.rooms);
-				});
-
-				it('should not join a room if already present in it', function () {
-					this.connection.joinRoom(Rooms.lobby);
-
-					let notLobby = {id: 'lobby'};
-					this.connection.joinRoom(notLobby);
-
-					assert.strictEqual(this.connection.rooms.lobby, Rooms.lobby);
+					assert.ok(this.connection.inRooms.has('lobby'));
 				});
 			});
 
@@ -82,7 +73,7 @@ describe('Users features', function () {
 					this.connection = new Connection('127.0.0.1');
 					this.connection.joinRoom(Rooms.lobby);
 					this.connection.leaveRoom(Rooms.lobby);
-					assert.ok(!('lobby' in this.connection.rooms));
+					assert.ok(!this.connection.inRooms.has('lobby'));
 				});
 			});
 		});

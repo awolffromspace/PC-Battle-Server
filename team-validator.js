@@ -12,21 +12,52 @@
 let TeamValidator = module.exports = getValidator;
 let PM;
 
+function banReason(strings, reason) {
+	return reason && typeof reason === 'string' ? `banned by ${reason}` : `banned`;
+}
+
 class Validator {
-	constructor(format) {
-		this.format = Tools.getFormat(format);
-		this.tools = Tools.mod(this.format);
+	constructor(format, supplementaryBanlist) {
+		format = Tools.getFormat(format);
+		if (supplementaryBanlist && supplementaryBanlist.length) {
+			format = Object.assign({}, format);
+			if (format.banlistTable) delete format.banlistTable;
+			if (format.banlist) {
+				format.banlist = format.banlist.slice();
+			} else {
+				format.banlist = [];
+			}
+			if (format.unbanlist) {
+				format.unbanlist = format.unbanlist.slice();
+			} else {
+				format.unbanlist = [];
+			}
+			for (let i = 0; i < supplementaryBanlist.length; i++) {
+				let ban = supplementaryBanlist[i];
+				if (ban.charAt(0) === '!') {
+					ban = ban.substr(1);
+					if (!format.unbanlist.includes(ban)) format.unbanlist.push(ban);
+				} else {
+					if (!format.banlist.includes(ban)) format.banlist.push(ban);
+				}
+			}
+			supplementaryBanlist = supplementaryBanlist.join(',');
+		} else {
+			supplementaryBanlist = '0';
+		}
+		this.format = format;
+		this.supplementaryBanlist = supplementaryBanlist;
+		this.tools = Tools.format(this.format);
 	}
 
 	validateTeam(team, removeNicknames) {
-		let format = Tools.getFormat(this.format);
-		if (format.validateTeam) return format.validateTeam.call(this, team, removeNicknames);
+		if (this.format.validateTeam) return this.format.validateTeam.call(this, team, removeNicknames);
 		return this.baseValidateTeam(team, removeNicknames);
 	}
 
 	prepTeam(team, removeNicknames) {
 		removeNicknames = removeNicknames ? '1' : '0';
-		return PM.send(this.format.id, removeNicknames, team);
+		return PM.send(this.format.id, this.supplementaryBanlist, removeNicknames, team);
 	}
 
 	baseValidateTeam(team, removeNicknames) {
@@ -42,7 +73,7 @@ class Validator {
 			if (format.canUseRandomTeam) {
 				return false;
 			}
-			return ["You sent invalid team data. If you're not using a custom client, please report this as a bug."];
+			return [`You sent invalid team data. If you're not using a custom client, please report this as a bug.`];
 		}
 
 		let lengthRange = format.teamLength && format.teamLength.validate;
@@ -51,12 +82,12 @@ class Validator {
 			if (format.gameType === 'doubles') lengthRange[0] = 2;
 			if (format.gameType === 'triples' || format.gameType === 'rotation') lengthRange[0] = 3;
 		}
-		if (team.length < lengthRange[0]) return ["You must bring at least " + lengthRange[0] + " Pok\u00E9mon."];
-		if (team.length > lengthRange[1]) return ["You may only bring up to " + lengthRange[1] + " Pok\u00E9mon."];
+		if (team.length < lengthRange[0]) return [`You must bring at least ${lengthRange[0]} Pok\u00E9mon.`];
+		if (team.length > lengthRange[1]) return [`You may only bring up to ${lengthRange[1]} Pok\u00E9mon.`];
 
 		let teamHas = {};
 		for (let i = 0; i < team.length; i++) {
-			if (!team[i]) return ["You sent invalid team data. If you're not using a custom client, please report this as a bug."];
+			if (!team[i]) return [`You sent invalid team data. If you're not using a custom client, please report this as a bug.`];
 			let setProblems = (format.validateSet || this.validateSet).call(this, team[i], teamHas);
 			if (setProblems) {
 				problems = problems.concat(setProblems);
@@ -66,15 +97,28 @@ class Validator {
 
 		for (let i = 0; i < format.teamBanTable.length; i++) {
 			let bannedCombo = true;
-			for (let j = 0; j < format.teamBanTable[i].length; j++) {
+			for (let j = 1; j < format.teamBanTable[i].length; j++) {
 				if (!teamHas[format.teamBanTable[i][j]]) {
 					bannedCombo = false;
 					break;
 				}
 			}
 			if (bannedCombo) {
-				let clause = format.name ? " by " + format.name : '';
-				problems.push("Your team has the combination of " + format.teamBanTable[i].join(' + ') + ", which is banned" + clause + ".");
+				const reason = banReason`${format.name}`;
+				problems.push(`Your team has the combination of ${format.teamBanTable[i][0]}, which is ${reason}.`);
+			}
+		}
+
+		for (let i = 0; i < format.teamLimitTable.length; i++) {
+			let entry = format.teamLimitTable[i];
+			let count = 0;
+			for (let j = 3; j < entry.length; j++) {
+				if (teamHas[entry[j]] > 0) count += teamHas[entry[j]];
+			}
+			let limit = entry[2];
+			if (count > limit) {
+				let clause = entry[1] ? " by " + entry[1] : '';
+				problems.push("You are limited to " + limit + " of " + entry[0] + clause + ".");
 			}
 		}
 
@@ -100,22 +144,16 @@ class Validator {
 
 		let problems = [];
 		if (!set) {
-			return ["This is not a Pokemon."];
+			return [`This is not a Pokemon.`];
 		}
 
-		if (!template) {
-			template = tools.getTemplate(Tools.getString(set.species));
-			if (!template.exists) {
-				return ["The Pokemon '" + set.species + "' does not exist."];
-			}
-		}
 		set.species = Tools.getSpecies(set.species);
-
 		set.name = tools.getName(set.name);
 		let item = tools.getItem(Tools.getString(set.item));
 		set.item = item.name;
 		let ability = tools.getAbility(Tools.getString(set.ability));
 		set.ability = ability.name;
+		set.nature = tools.getNature(Tools.getString(set.nature)).name;
 		if (!Array.isArray(set.moves)) set.moves = [];
 
 		let maxLevel = format.maxLevel || 100;
@@ -138,16 +176,11 @@ class Validator {
 		}
 		set.name = set.name || set.baseSpecies;
 		let name = set.species;
-		if (set.species !== set.name && set.baseSpecies !== set.name) name = set.name + " (" + set.species + ")";
+		if (set.species !== set.name && set.baseSpecies !== set.name) name = `${set.name} (${set.species})`;
 		let isHidden = false;
 		let lsetData = {set:set, format:format};
 
 		let setHas = {};
-
-		if (!template || !template.abilities) {
-			set.species = 'Unown';
-			template = tools.getTemplate('Unown');
-		}
 
 		if (format.ruleset) {
 			for (let i = 0; i < format.ruleset.length; i++) {
@@ -160,10 +193,17 @@ class Validator {
 		if (format.onChangeSet) {
 			problems = problems.concat(format.onChangeSet.call(tools, set, format, setHas, teamHas) || []);
 		}
-		if (toId(set.species) !== template.speciesid) template = tools.getTemplate(set.species);
+
+		if (!template) {
+			template = tools.getTemplate(set.species);
+		}
+		if (!template.exists) {
+			return [`The Pokemon "${set.species}" does not exist.`];
+		}
+
 		item = tools.getItem(set.item);
 		if (item.id && !item.exists) {
-			return ['"' + set.item + "' is an invalid item."];
+			return [`"${set.item}" is an invalid item.`];
 		}
 		ability = tools.getAbility(set.ability);
 		if (ability.id && !ability.exists) {
@@ -172,44 +212,54 @@ class Validator {
 				ability = tools.getAbility('');
 				set.ability = '';
 			} else {
-				return ['"' + set.ability + "' is an invalid ability."];
+				return [`"${set.ability}" is an invalid ability.`];
 			}
+		}
+		if (set.nature && !tools.getNature(set.nature).exists) {
+			if (tools.gen < 3) {
+				// gen 1-2 don't have natures, just remove them
+				set.nature = '';
+			} else {
+				return [`${set.species}'s nature is invalid.`];
+			}
+		}
+		if (set.happiness !== undefined && isNaN(set.happiness)) {
+			problems.push(`${set.species} has an invalid happiness.`);
 		}
 
 		let banlistTable = tools.getBanlistTable(format);
 
 		let check = template.id;
-		let clause = '';
 		setHas[check] = true;
 		if (banlistTable[check]) {
-			clause = typeof banlistTable[check] === 'string' ? " by " + banlistTable[check] : '';
-			return [set.species + " is banned" + clause + "."];
+			const reason = banReason`${banlistTable[check]}`;
+			return [`${set.species} is ${reason}.`];
 		} else if (!tools.data.FormatsData[check] || !tools.data.FormatsData[check].tier) {
 			check = toId(template.baseSpecies);
 			if (banlistTable[check]) {
-				clause = typeof banlistTable[check] === 'string' ? " by " + banlistTable[check] : '';
-				return [template.baseSpecies + " is banned" + clause + "."];
+				const reason = banReason`${banlistTable[check]}`;
+				return [`${template.baseSpecies} is ${reason}.`];
 			}
 		}
 
 		check = toId(set.ability);
 		setHas[check] = true;
 		if (banlistTable[check]) {
-			clause = typeof banlistTable[check] === 'string' ? " by " + banlistTable[check] : '';
-			problems.push(name + "'s ability " + set.ability + " is banned" + clause + ".");
+			const reason = banReason`${banlistTable[check]}`;
+			problems.push(`${name}'s ability ${set.ability} is ${reason}.`);
 		}
 		check = toId(set.item);
 		setHas[check] = true;
 		if (banlistTable[check]) {
-			clause = typeof banlistTable[check] === 'string' ? " by " + banlistTable[check] : '';
-			problems.push(name + "'s item " + set.item + " is banned" + clause + ".");
+			const reason = banReason`${banlistTable[check]}`;
+			problems.push(`${name}'s item ${set.item} is ${reason}.`);
 		}
 		if (banlistTable['Unreleased'] && item.isUnreleased) {
-			problems.push(name + "'s item " + set.item + " is unreleased.");
+			problems.push(`${name}'s item ${set.item} is unreleased.`);
 		}
 		if (banlistTable['Unreleased'] && template.isUnreleased) {
 			if (!format.requirePentagon || (template.eggGroups[0] === 'Undiscovered' && !template.evos)) {
-				problems.push(name + " (" + template.species + ") is unreleased.");
+				problems.push(`${name} (${template.species}) is unreleased.`);
 			}
 		}
 		setHas[toId(set.ability)] = true;
@@ -219,17 +269,19 @@ class Validator {
 				set.ability = 'None';
 			} else if (!banlistTable['ignoreillegalabilities']) {
 				if (!ability.name) {
-					problems.push(name + " needs to have an ability.");
+					problems.push(`${name} needs to have an ability.`);
 				} else if (!Object.values(template.abilities).includes(ability.name)) {
-					problems.push(name + " can't have " + set.ability + ".");
+					problems.push(`${name} can't have ${set.ability}.`);
 				}
 				if (ability.name === template.abilities['H']) {
 					isHidden = true;
 
 					if (template.unreleasedHidden && banlistTable['Unreleased']) {
-						problems.push(name + "'s hidden ability is unreleased.");
+						problems.push(`${name}'s hidden ability is unreleased.`);
+					} else if (set.species.endsWith('Orange') || set.species.endsWith('White') && ability.name === 'Symbiosis') {
+						problems.push(`${name}'s hidden ability is unreleased for the Orange and White forms.`);
 					} else if (tools.gen === 5 && set.level < 10 && (template.maleOnlyHidden || template.gender === 'N')) {
-						problems.push(name + " must be at least level 10 with its hidden ability.");
+						problems.push(`${name} must be at least level 10 with its hidden ability.`);
 					}
 					if (template.maleOnlyHidden) {
 						set.gender = 'M';
@@ -242,7 +294,7 @@ class Validator {
 			set.moves = set.moves.filter(val => val);
 		}
 		if (!set.moves || !set.moves.length) {
-			problems.push(name + " has no moves.");
+			problems.push(`${name} has no moves.`);
 		} else {
 			// A limit is imposed here to prevent too much engine strain or
 			// too much layout deformation - to be exact, this is the Debug
@@ -254,35 +306,36 @@ class Validator {
 			for (let i = 0; i < set.moves.length; i++) {
 				if (!set.moves[i]) continue;
 				let move = tools.getMove(Tools.getString(set.moves[i]));
-				if (!move.exists) return ['"' + move.name + '" is an invalid move.'];
+				if (!move.exists) return [`"${move.name}" is an invalid move.`];
 				set.moves[i] = move.name;
 				check = move.id;
 				setHas[check] = true;
 				if (banlistTable[check]) {
-					clause = typeof banlistTable[check] === 'string' ? " by " + banlistTable[check] : '';
-					problems.push(name + "'s move " + set.moves[i] + " is banned" + clause + ".");
+					const reason = banReason`${banlistTable[check]}`;
+					problems.push(`${name}'s move ${set.moves[i]} is ${reason}.`);
 				}
 
 				if (banlistTable['Unreleased']) {
-					if (move.isUnreleased) problems.push(name + "'s move " + set.moves[i] + " is unreleased.");
+					if (move.isUnreleased) problems.push(`${name}'s move ${set.moves[i]} is unreleased.`);
 				}
 
 				if (banlistTable['illegal']) {
 					let problem = this.checkLearnset(move, template, lsetData);
 					if (problem) {
-						let problemString = name + " can't learn " + move.name;
+						let problemString = `${name} can't learn ${move.name}`;
 						if (problem.type === 'incompatible') {
 							if (isHidden) {
-								problemString = problemString.concat(" because it's incompatible with its ability or another move.");
+								problemString = problemString.concat(` because it's incompatible with its ability or another move.`);
 							} else {
-								problemString = problemString.concat(" because it's incompatible with another move.");
+								problemString = problemString.concat(` because it's incompatible with another move.`);
 							}
 						} else if (problem.type === 'oversketched') {
-							problemString = problemString.concat(" because it can only sketch " + problem.maxSketches + " move" + (problem.maxSketches > 1 ? "s" : "") + ".");
+							let plural = (parseInt(problem.maxSketches) === 1 ? '' : 's');
+							problemString = problemString.concat(` because it can only sketch ${problem.maxSketches} move${plural}.`);
 						} else if (problem.type === 'pokebank') {
-							problemString = problemString.concat(" because it's only obtainable from a previous generation.");
+							problemString = problemString.concat(` because it's only obtainable from a previous generation.`);
 						} else {
-							problemString = problemString.concat(".");
+							problemString = problemString.concat(`.`);
 						}
 						problems.push(problemString);
 					}
@@ -300,7 +353,7 @@ class Validator {
 					// Only one source, can't conflict with anything else
 				} else if (limitedEgg.includes('self')) {
 					// Self-moves are always incompatible with anything else
-					problems.push(name + "'s egg moves are incompatible.");
+					problems.push(`${name}'s egg moves are incompatible.`);
 				} else {
 					// Doing a full validation of the possible egg parents takes way too much
 					// CPU power (and is in NP), so we're just gonna use a heuristic:
@@ -313,14 +366,14 @@ class Validator {
 						if (lsetData.sources[i].charAt(1) !== 'E' || eggGen === 6) {
 							// (There is a way to obtain this pokemon without past-gen breeding.)
 							// In theory, limitedEgg should not exist in this case.
-							throw new Error("invalid limitedEgg on " + name + ": " + limitedEgg + " with " + lsetData.sources[i]);
+							throw new Error(`invalid limitedEgg on ${name}: ${limitedEgg} with ${lsetData.sources[i]}`);
 						}
 						let potentialFather = tools.getTemplate(lsetData.sources[i].slice(lsetData.sources[i].charAt(2) === 'T' ? 3 : 2));
 						let restrictedSources = 0;
 						for (let j = 0; j < limitedEgg.length; j++) {
 							let moveid = limitedEgg[j];
 							let fatherSources = potentialFather.learnset[moveid] || potentialFather.learnset['sketch'];
-							if (!fatherSources) throw new Error("Egg move father " + potentialFather.id + " can't learn " + moveid);
+							if (!fatherSources) throw new Error(`Egg move father ${potentialFather.id} can't learn ${moveid}`);
 							let hasUnrestrictedSource = false;
 							let hasSource = false;
 							for (let k = 0; k < fatherSources.length; k++) {
@@ -358,7 +411,10 @@ class Validator {
 							}
 						}
 						lsetData.sources = newSources;
-						if (!newSources.length) problems.push(name + "'s past gen egg moves " + limitedEgg.map(id => tools.getMove(id).name).join(', ') + " do not have a valid father. (Is this incorrect? If so, post the chainbreeding instructions in Bug Reports)");
+						if (!newSources.length) {
+							const moveNames = limitedEgg.map(id => tools.getMove(id).name);
+							problems.push(`${name}'s past gen egg moves ${moveNames.join(', ')} do not have a valid father. (Is this incorrect? If so, post the chainbreeding instructions in Bug Reports)`);
+						}
 					}
 				}
 			}
@@ -374,23 +430,24 @@ class Validator {
 					if (eventTemplate.eventPokemon) eventData = eventTemplate.eventPokemon[parseInt(splitSource[0])];
 					if (eventData) {
 						if (eventData.level && set.level < eventData.level) {
-							problems.push(name + " must be at least level " + eventData.level + " because it has a move only available from a specific event.");
+							problems.push(`${name} must be at least level ${eventData.level} because it has a move only available from a specific event.`);
 						}
 						if ((eventData.shiny === true && !set.shiny) || (!eventData.shiny && set.shiny)) {
-							problems.push(name + " must " + (eventData.shiny ? "" : "not ") + "be shiny because it has a move only available from a specific event.");
+							let shinyReq = eventData.shiny ? ` be shiny` : ` not be shiny`;
+							problems.push(`${name} must${shinyReq} because it has a move only available from a specific event.`);
 						}
 						if (eventData.gender) {
 							set.gender = eventData.gender;
 						}
 						if (eventData.nature && eventData.nature !== set.nature) {
-							problems.push(name + " must have a " + eventData.nature + " nature because it has a move only available from a specific event.");
+							problems.push(`${name} must have a ${eventData.nature} nature because it has a move only available from a specific event.`);
 						}
 						if (eventData.ivs) {
 							if (!set.ivs) set.ivs = {hp: 31, atk: 31, def: 31, spa: 31, spd: 31, spe: 31};
 							let statTable = {atk:'Attack', def:'Defense', spa:'Special Attack', spd:'Special Defense', spe:'Speed'};
-							for (let i in eventData.ivs) {
-								if (set.ivs[i] !== eventData.ivs[i]) {
-									problems.push(name + " must have " + eventData.ivs[i] + " " + statTable[i] + " IVs because it has a move only available from a specific event.");
+							for (let statId in eventData.ivs) {
+								if (set.ivs[statId] !== eventData.ivs[statId]) {
+									problems.push(`${name} must have ${eventData.ivs[statId]} ${statTable[statId]} IVs because it has a move only available from a specific event.`);
 								}
 							}
 						} else if (set.ivs && (eventData.perfectIVs || (eventData.generation >= 6 && (template.eggGroups[0] === 'Undiscovered' || template.species === 'Manaphy') && !template.prevo && !template.nfe &&
@@ -402,16 +459,17 @@ class Validator {
 								if (set.ivs[i] >= 31) perfectIVs++;
 							}
 							if (eventData.perfectIVs) {
-								if (perfectIVs < eventData.perfectIVs) problems.push(name + " must have at least " + eventData.perfectIVs + " perfect IVs because it has a move only available from a specific event.");
+								if (perfectIVs < eventData.perfectIVs) problems.push(`${name} must have at least ${eventData.perfectIVs} perfect IVs because it has a move only available from a specific event.`);
 							} else if (perfectIVs < 3) {
-								problems.push(name + " must have at least three perfect IVs because it's a legendary and it has a move only available from a gen 6 event.");
+								problems.push(`${name} must have at least three perfect IVs because it's a legendary and it has a move only available from a gen 6 event.`);
 							}
 						}
 						if (tools.gen <= 5 && eventData.abilities && eventData.abilities.length === 1 && !eventData.isHidden) {
 							if (template.species === eventTemplate.species) {
 								// has not evolved, abilities must match
-								if (ability.id !== eventData.abilities[0]) {
-									problems.push(name + " must have " + tools.getAbility(eventData.abilities[0]).name + " because it has a move only available from a specific event.");
+								const requiredAbility = tools.getAbility(eventData.abilities[0]).name;
+								if (ability.name !== requiredAbility) {
+									problems.push(`${name} must have ${requiredAbility}  because it has a move only available from a specific event.`);
 								}
 							} else {
 								// has evolved
@@ -419,10 +477,11 @@ class Validator {
 								if (ability1.gen && eventData.generation >= ability1.gen) {
 									// pokemon had 2 available abilities in the gen the event happened
 									// ability is restricted to a single ability slot
-									let requiredAbilitySlot = (toId(eventData.abilities[0]) === ability1.id ? 1 : 0);
-									let requiredAbility = toId(template.abilities[requiredAbilitySlot] || template.abilities['0']);
-									if (ability.id !== requiredAbility) {
-										problems.push(name + " must have " + tools.getAbility(requiredAbility).name + " because it has a move only available from a specific " + tools.getAbility(eventData.abilities[0]).name + " " + eventTemplate.species + " event.");
+									const requiredAbilitySlot = (toId(eventData.abilities[0]) === ability1.id ? 1 : 0);
+									const requiredAbility = tools.getAbility(template.abilities[requiredAbilitySlot] || template.abilities['0']).name;
+									if (ability.name !== requiredAbility) {
+										const originalAbility = tools.getAbility(eventData.abilities[0]).name;
+										problems.push(`${name} must have ${requiredAbility}  because it has a move only available from a specific ${originalAbility} ${eventTemplate.species} event.`);
 									}
 								}
 							}
@@ -436,7 +495,7 @@ class Validator {
 				events:
 				for (let i = 0; i < eventPokemon.length; i++) {
 					let eventData = eventPokemon[i];
-					if (format.requirePentagon && eventData.generation < 6) continue;
+					if (format.requirePentagon && eventData.generation < tools.gen) continue;
 					if (eventData.level && set.level < eventData.level) continue;
 					if ((eventData.shiny === true && !set.shiny) || (!eventData.shiny && set.shiny)) continue;
 					if (eventData.nature && set.nature !== eventData.nature) continue;
@@ -450,11 +509,11 @@ class Validator {
 					legal = true;
 					if (eventData.gender) set.gender = eventData.gender;
 				}
-				if (!legal) problems.push(template.species + " is only obtainable via event - it needs to match one of its events.");
+				if (!legal) problems.push(`${template.species} is only obtainable via event - it needs to match one of its events.`);
 			}
 			if (isHidden && lsetData.sourcesBefore) {
 				if (!lsetData.sources && lsetData.sourcesBefore < 5) {
-					problems.push(name + " has a hidden ability - it can't have moves only learned before gen 5.");
+					problems.push(`${name} has a hidden ability - it can't have moves only learned before gen 5.`);
 				} else if (lsetData.sources && template.gender && template.gender !== 'F' && !{'Nidoran-M':1, 'Nidorino':1, 'Nidoking':1, 'Volbeat':1}[template.species]) {
 					let compatibleSource = false;
 					for (let i = 0, len = lsetData.sources.length; i < len; i++) {
@@ -464,52 +523,68 @@ class Validator {
 						}
 					}
 					if (!compatibleSource) {
-						problems.push(name + " has moves incompatible with its hidden ability.");
+						problems.push(`${name} has moves incompatible with its hidden ability.`);
 					}
 				}
 			}
 			if (banlistTable['illegal'] && set.level < template.evoLevel) {
 				// FIXME: Event pokemon given at a level under what it normally can be attained at gives a false positive
-				problems.push(name + " must be at least level " + template.evoLevel + " to be evolved.");
+				problems.push(`${name} must be at least level ${template.evoLevel} to be evolved.`);
 			}
 			if (!lsetData.sources && lsetData.sourcesBefore <= 3 && tools.getAbility(set.ability).gen === 4 && !template.prevo && tools.gen <= 5) {
-				problems.push(name + " has a gen 4 ability and isn't evolved - it can't use anything from gen 3.");
+				problems.push(`${name} has a gen 4 ability and isn't evolved - it can't use anything from gen 3.`);
 			}
 			if (!lsetData.sources && lsetData.sourcesBefore < 6 && lsetData.sourcesBefore >= 3 && (isHidden || tools.gen <= 5) && template.gen <= lsetData.sourcesBefore) {
 				let oldAbilities = tools.mod('gen' + lsetData.sourcesBefore).getTemplate(set.species).abilities;
 				if (ability.name !== oldAbilities['0'] && ability.name !== oldAbilities['1'] && !oldAbilities['H']) {
-					problems.push(name + " has moves incompatible with its ability.");
+					problems.push(`${name} has moves incompatible with its ability.`);
 				}
 			}
 		}
 		if (item.megaEvolves === template.species) {
 			template = tools.getTemplate(item.megaStone);
 		}
+		if (banlistTable['mega'] && template.forme in {'Mega': 1, 'Mega-X': 1, 'Mega-Y': 1}) {
+			problems.push(`Mega evolutions are banned.`);
+		}
 		if (template.tier) {
 			let tier = template.tier;
 			if (tier.charAt(0) === '(') tier = tier.slice(1, -1);
 			setHas[toId(tier)] = true;
-			if (banlistTable[tier]) {
-				problems.push(template.species + " is in " + tier + ", which is banned.");
+			if (banlistTable[tier] && banlistTable[template.id] !== false) {
+				problems.push(`${template.species} is in ${tier}, which is banned.`);
+			}
+		}
+		if (format.requirePentagon && tools.gen >= 7) {
+			const islandScanList = ["Chikorita", "Bayleef", "Meganium", "Cyndaquil", "Quilava", "Typhlosion", "Totodile", "Croconaw", "Feraligatr", "Klink", "Klang", "Klinklang", "Litwick", "Lampent", "Chandelure", "Deino", "Zweilous", "Hydreigon", "Bellsprout", "Weepinbell", "Victreebel", "Rhyhorn", "Rhydon", "Rhyperior", "Marill", "Azumarill", "Spheal", "Sealeo", "Walrein", "Shinx", "Luxio", "Luxray", "Venipede", "Whirlipede", "Scolipede", "Gothita", "Gothorita", "Gothitelle", "Honedge", "Doublade", "Aegislash", "Swinub", "Piloswine", "Mamoswine", "Slakoth", "Vigoroth", "Slaking", "Budew", "Roselia", "Roserade", "Starly", "Staravia", "Staraptor", "Solosis", "Duosion", "Reuniclus", "Axew", "Fraxure", "Haxorus", "Togepi", "Togetic", "Togekiss", "Snivy", "Servine", "Serperior", "Tepig", "Pignite", "Emboar", "Oshawott", "Dewott", "Samurott", "Timburr", "Gurdurr", "Conkeldurr", "Sewaddle", "Swadloon", "Leavanny", "Tynamo", "Eelektrik", "Eelektross", "Froakie", "Frogadier", "Greninja"];
+			const alolaDex = {
+				"Caterpie":1, "Metapod":1, "Butterfree":1, "Rattata-Alola":1, "Raticate-Alola":1, "Spearow":1, "Fearow":1, "Pikachu":1, "Raichu-Alola":1, "Sandshrew-Alola":1, "Sandslash-Alola":1, "Clefairy":1, "Clefable":1, "Vulpix-Alola":1, "Ninetales-Alola":1, "Jigglypuff":1, "Wigglytuff":1, "Zubat":1, "Golbat":1, "Paras":1, "Parasect":1, "Diglett-Alola":1, "Dugtrio-Alola":1, "Meowth-Alola":1, "Persian-Alola":1, "Psyduck":1, "Golduck":1, "Mankey":1, "Primeape":1, "Growlithe":1, "Arcanine":1, "Poliwag":1, "Poliwhirl":1, "Poliwrath":1, "Abra":1, "Kadabra":1, "Alakazam":1, "Machop":1, "Machoke":1, "Machamp":1, "Tentacool":1, "Tentacruel":1, "Geodude-Alola":1, "Graveler-Alola":1, "Golem-Alola":1, "Slowpoke":1, "Slowbro":1, "Magnemite":1, "Magneton":1, "Grimer-Alola":1, "Muk-Alola":1, "Shellder":1, "Cloyster":1, "Gastly":1, "Haunter":1, "Gengar":1, "Drowzee":1, "Hypno":1, "Exeggcute":1, "Exeggutor-Alola":1, "Cubone":1, "Marowak-Alola":1, "Chansey":1, "Kangaskhan":1, "Goldeen":1, "Seaking":1, "Staryu":1, "Starmie":1, "Scyther":1, "Electabuzz":1, "Magmar":1, "Pinsir":1, "Tauros":1, "Magikarp":1, "Gyarados":1, "Lapras":1, "Ditto":1, "Eevee":1, "Vaporeon":1, "Jolteon":1, "Flareon":1, "Porygon":1, "Aerodactyl":1, "Snorlax":1, "Dratini":1, "Dragonair":1, "Dragonite":1, "Ledyba":1, "Ledian":1, "Spinarak":1, "Ariados":1, "Crobat":1, "Chinchou":1, "Lanturn":1, "Pichu":1, "Cleffa":1, "Igglybuff":1, "Sudowoodo":1, "Politoed":1, "Espeon":1, "Umbreon":1, "Murkrow":1, "Slowking":1, "Misdreavus":1, "Snubbull":1, "Granbull":1, "Scizor":1, "Sneasel":1, "Corsola":1, "Delibird":1, "Skarmory":1, "Porygon2":1, "Smeargle":1, "Elekid":1, "Magby":1, "Miltank":1, "Blissey":1, "Wingull":1, "Pelipper":1, "Surskit":1, "Masquerain":1, "Makuhita":1, "Hariyama":1, "Nosepass":1, "Sableye":1, "Carvanha":1, "Sharpedo":1, "Wailmer":1, "Wailord":1, "Torkoal":1, "Spinda":1, "Trapinch":1, "Vibrava":1, "Flygon":1, "Barboach":1, "Whiscash":1, "Feebas":1, "Milotic":1, "Castform":1, "Absol":1, "Snorunt":1, "Glalie":1, "Relicanth":1, "Luvdisc":1, "Bagon":1, "Shelgon":1, "Salamence":1, "Beldum":1, "Metang":1, "Metagross":1, "Cranidos":1, "Rampardos":1, "Shieldon":1, "Bastiodon":1, "Shellos":1, "Gastrodon":1, "Drifloon":1, "Drifblim":1, "Mismagius":1, "Honchkrow":1, "Bonsly":1, "Happiny":1, "Gible":1, "Gabite":1, "Garchomp":1, "Munchlax":1, "Riolu":1, "Lucario":1, "Finneon":1, "Lumineon":1, "Weavile":1, "Magnezone":1, "Electivire":1, "Magmortar":1, "Leafeon":1, "Glaceon":1, "Porygon-Z":1, "Probopass":1, "Froslass":1, "Lillipup":1, "Herdier":1, "Stoutland":1, "Roggenrola":1, "Boldore":1, "Gigalith":1, "Cottonee":1, "Whimsicott":1, "Petilil":1, "Lilligant":1, "Sandile":1, "Krokorok":1, "Krookodile":1, "Tirtouga":1, "Carracosta":1, "Archen":1, "Archeops":1, "Trubbish":1, "Garbodor":1, "Vanillite":1, "Vanillish":1, "Vanilluxe":1, "Emolga":1, "Alomomola":1, "Rufflet":1, "Braviary":1, "Vullaby":1, "Mandibuzz":1, "Fletchling":1, "Fletchinder":1, "Talonflame":1, "Pancham":1, "Pangoro":1, "Sylveon":1, "Carbink":1, "Goomy":1, "Sliggoo":1, "Goodra":1, "Klefki":1, "Phantump":1, "Trevenant":1, "Zygarde":1, "Rowlet":1, "Dartrix":1, "Decidueye":1, "Litten":1, "Torracat":1, "Incineroar":1, "Popplio":1, "Brionne":1, "Primarina":1, "Pikipek":1, "Trumbeak":1, "Toucannon":1, "Yungoos":1, "Gumshoos":1, "Grubbin":1, "Charjabug":1, "Vikavolt":1, "Crabrawler":1, "Crabominable":1, "Oricorio":1, "Cutiefly":1, "Ribombee":1, "Rockruff":1, "Lycanroc":1, "Wishiwashi":1, "Mareanie":1, "Toxapex":1, "Mudbray":1, "Mudsdale":1, "Dewpider":1, "Araquanid":1, "Fomantis":1, "Lurantis":1, "Morelull":1, "Shiinotic":1, "Salandit":1, "Salazzle":1, "Stufful":1, "Bewear":1, "Bounsweet":1, "Steenee":1, "Tsareena":1, "Comfey":1, "Oranguru":1, "Passimian":1, "Wimpod":1, "Golisopod":1, "Sandygast":1, "Palossand":1, "Pyukumuku":1, "Type: Null":1, "Silvally":1, "Minior":1, "Komala":1, "Turtonator":1, "Togedemaru":1, "Mimikyu":1, "Bruxish":1, "Drampa":1, "Dhelmise":1, "Jangmo-o":1, "Hakamo-o":1, "Kommo-o":1, "Tapu Koko":1, "Tapu Lele":1, "Tapu Bulu":1, "Tapu Fini":1, "Cosmog":1, "Cosmoem":1, "Solgaleo":1, "Lunala":1, "Nihilego":1, "Buzzwole":1, "Pheromosa":1, "Xurkitree":1, "Celesteela":1, "Kartana":1, "Guzzlord":1, "Necrozma":1, "Magearna":1, "Marshadow":1,
+			};
+			if (!(template.baseSpecies in alolaDex) && !(template.species in alolaDex) && !islandScanList.includes(template.baseSpecies)) {
+				problems.push(template.baseSpecies + " is unreleased in gen 7. (It's not possible to transfer Pokemon to Sun/Moon yet)");
 			}
 		}
 
 		if (teamHas) {
 			for (let i in setHas) {
-				teamHas[i] = true;
+				if (i in teamHas) {
+					teamHas[i]++;
+				} else {
+					teamHas[i] = 1;
+				}
 			}
 		}
 		for (let i = 0; i < format.setBanTable.length; i++) {
 			let bannedCombo = true;
-			for (let j = 0; j < format.setBanTable[i].length; j++) {
+			for (let j = 1; j < format.setBanTable[i].length; j++) {
 				if (!setHas[format.setBanTable[i][j]]) {
 					bannedCombo = false;
 					break;
 				}
 			}
 			if (bannedCombo) {
-				clause = format.name ? " by " + format.name : '';
-				problems.push(name + " has the combination of " + format.setBanTable[i].join(' + ') + ", which is banned" + clause + ".");
+				const reason = banReason`${format.name}`;
+				problems.push(`${name} has the combination of ${format.setBanTable[i][0]}, which is ${reason}.`);
 			}
 		}
 
@@ -575,7 +650,7 @@ class Validator {
 		let sources = [];
 		// the equivalent of adding "every source at or before this gen" to sources
 		let sourcesBefore = 0;
-		if (lsetData.sourcesBefore === undefined) lsetData.sourcesBefore = 6;
+		if (lsetData.sourcesBefore === undefined) lsetData.sourcesBefore = tools.gen;
 		let noPastGen = !!format.requirePentagon;
 		// Pokemon cannot be traded to past generations except in Gen 1 Tradeback
 		let noFutureGen = !(format.banlistTable && format.banlistTable['allowtradeback']);
@@ -588,7 +663,7 @@ class Validator {
 			alreadyChecked[template.speciesid] = true;
 			if (tools.gen === 2 && template.gen === 1) tradebackEligible = true;
 			// STABmons hack to avoid copying all of validateSet to formats
-			if (format.banlistTable && format.banlistTable['ignorestabmoves'] && !(moveid in {'bellydrum':1, 'chatter':1, 'darkvoid':1, 'geomancy':1, 'lovelykiss':1, 'shellsmash':1, 'shiftgear':1})) {
+			if (format.banlistTable && format.banlistTable['ignorestabmoves'] && !(moveid in {'acupressure':1, 'bellydrum':1, 'chatter':1, 'darkvoid':1, 'geomancy':1, 'lovelykiss':1, 'shellsmash':1, 'shiftgear':1})) {
 				let types = template.types;
 				if (template.species === 'Shaymin') types = ['Grass', 'Flying'];
 				if (template.baseSpecies === 'Hoopa') types = ['Psychic', 'Ghost', 'Dark'];
@@ -610,7 +685,7 @@ class Validator {
 				sometimesPossible = true;
 				let lset = template.learnset[moveid];
 				if (!lset || template.speciesid === 'smeargle') {
-					if (move.noSketch) return true;
+					if (move.noSketch || move.isZ) return true;
 					lset = template.learnset['sketch'];
 					sketch = true;
 				}
@@ -618,14 +693,14 @@ class Validator {
 
 				for (let i = 0, len = lset.length; i < len; i++) {
 					let learned = lset[i];
-					let learnedGen = learned.charAt(0);
-					if (noPastGen && learnedGen !== '6') continue;
-					if (noFutureGen && parseInt(learnedGen) > tools.gen) continue;
+					let learnedGen = parseInt(learned.charAt(0));
+					if (noPastGen && learnedGen < tools.gen) continue;
+					if (noFutureGen && learnedGen > tools.gen) continue;
 
 					// redundant
 					if (learnedGen <= sourcesBefore) continue;
 
-					if (learnedGen !== '6' && isHidden && !tools.mod('gen' + learnedGen).getTemplate(template.species).abilities['H']) {
+					if (learnedGen < 7 && isHidden && !tools.mod('gen' + learnedGen).getTemplate(template.species).abilities['H']) {
 						// check if the Pokemon's hidden ability was available
 						incompatibleAbility = true;
 						continue;
@@ -637,8 +712,8 @@ class Validator {
 						// Defog and Whirlpool can't be transferred together
 						if (tools.gen >= 5 && moveid in {'defog':1, 'whirlpool':1} && learnedGen <= 4) blockedHM = true;
 					}
-					if (learned.substr(0, 2) in {'4L':1, '5L':1, '6L':1}) {
-						// gen 4-6 level-up moves
+					if (learned.substr(0, 2) in {'4L':1, '5L':1, '6L':1, '7L':1}) {
+						// gen 4-7 level-up moves
 						if (level >= parseInt(learned.substr(2))) {
 							// we're past the required level to learn it
 							return false;
@@ -653,7 +728,7 @@ class Validator {
 						}
 					}
 					if (learned.charAt(1) in {L:1, M:1, T:1}) {
-						if (parseInt(learnedGen) === tools.gen) {
+						if (learnedGen === tools.gen) {
 							// current-gen TM or tutor moves:
 							//   always available
 							return false;
@@ -661,12 +736,12 @@ class Validator {
 						// past-gen level-up, TM, or tutor moves:
 						//   available as long as the source gen was or was before this gen
 						limit1 = false;
-						sourcesBefore = Math.max(sourcesBefore, parseInt(learnedGen));
+						sourcesBefore = Math.max(sourcesBefore, learnedGen);
 						limitedEgg = false;
 					} else if (learned.charAt(1) === 'E') {
 						// egg moves:
 						//   only if that was the source
-						if (learnedGen === '6' || lsetData.fastCheck) {
+						if (learnedGen >= 6 || lsetData.fastCheck) {
 							// gen 6 doesn't have egg move incompatibilities except for certain cases with baby Pokemon
 							learned = learnedGen + 'E' + (template.prevo ? template.id : '');
 							sources.push(learned);
@@ -688,7 +763,7 @@ class Validator {
 							// can't inherit from CAP pokemon
 							if (dexEntry.isNonstandard) continue;
 							// can't breed mons from future gens
-							if (dexEntry.gen > parseInt(learnedGen)) continue;
+							if (dexEntry.gen > learnedGen) continue;
 							// father must be male
 							if (dexEntry.gender === 'N' || dexEntry.gender === 'F') continue;
 							// can't inherit from dex entries with no learnsets
@@ -704,7 +779,7 @@ class Validator {
 
 							// we can breed with it
 							atLeastOne = true;
-							if (tradebackEligible && learnedGen === '2' && move.gen <= 1) {
+							if (tradebackEligible && learnedGen === 2 && move.gen <= 1) {
 								// can tradeback
 								sources.push('1ET' + dexEntry.id);
 							}
@@ -722,7 +797,7 @@ class Validator {
 						//   only if that was the source
 						// Event Pokémon:
 						//	Available as long as the past gen can get the Pokémon and then trade it back.
-						if (tradebackEligible && learnedGen === '2' && move.gen <= 1) {
+						if (tradebackEligible && learnedGen === 2 && move.gen <= 1) {
 							// can tradeback
 							sources.push('1ST' + learned.slice(2) + ' ' + template.id);
 						}
@@ -853,8 +928,8 @@ class Validator {
 }
 TeamValidator.Validator = Validator;
 
-function getValidator(format) {
-	return new Validator(format);
+function getValidator(format, supplementaryBanlist) {
+	return new Validator(format, supplementaryBanlist);
 }
 
 /*********************************************************
@@ -863,10 +938,8 @@ function getValidator(format) {
 
 const ProcessManager = require('./process-manager');
 
-PM = TeamValidator.PM = new ProcessManager({
-	maxProcesses: global.Config && Config.validatorprocesses,
-	execFile: 'team-validator.js',
-	onMessageUpstream: function (message) {
+class TeamValidatorManager extends ProcessManager {
+	onMessageUpstream(message) {
 		// Protocol:
 		// success: "[id]|1[details]"
 		// failure: "[id]|0[details]"
@@ -878,10 +951,11 @@ PM = TeamValidator.PM = new ProcessManager({
 			this.pendingTasks.delete(id);
 			this.release();
 		}
-	},
-	onMessageDownstream: function (message) {
+	}
+
+	onMessageDownstream(message) {
 		// protocol:
-		// "[id]|[format]|[removeNicknames]|[team]"
+		// "[id]|[format]|[supplementaryBanlist]|[removeNicknames]|[team]"
 		let pipeIndex = message.indexOf('|');
 		let nextPipeIndex = message.indexOf('|', pipeIndex + 1);
 		let id = message.substr(0, pipeIndex);
@@ -889,24 +963,30 @@ PM = TeamValidator.PM = new ProcessManager({
 
 		pipeIndex = nextPipeIndex;
 		nextPipeIndex = message.indexOf('|', pipeIndex + 1);
+		let supplementaryBanlist = message.substr(pipeIndex + 1, nextPipeIndex - pipeIndex - 1);
+
+		pipeIndex = nextPipeIndex;
+		nextPipeIndex = message.indexOf('|', pipeIndex + 1);
 		let removeNicknames = message.substr(pipeIndex + 1, nextPipeIndex - pipeIndex - 1);
 		let team = message.substr(nextPipeIndex + 1);
 
-		process.send(id + '|' + this.receive(format, removeNicknames, team));
-	},
-	receive: function (format, removeNicknames, team) {
+		process.send(id + '|' + this.receive(format, supplementaryBanlist, removeNicknames, team));
+	}
+
+	receive(format, supplementaryBanlist, removeNicknames, team) {
 		let parsedTeam = Tools.fastUnpackTeam(team);
+		supplementaryBanlist = supplementaryBanlist === '0' ? false : supplementaryBanlist.split(',');
 		removeNicknames = removeNicknames === '1';
 
 		let problems;
 		try {
-			problems = TeamValidator(format).validateTeam(parsedTeam, removeNicknames);
+			problems = TeamValidator(format, supplementaryBanlist).validateTeam(parsedTeam, removeNicknames);
 		} catch (err) {
-			require('./crashlogger.js')(err, 'A team validation', {
+			require('./crashlogger')(err, 'A team validation', {
 				format: format,
 				team: team,
 			});
-			problems = ["Your team crashed the team validator. We've been automatically notified and will fix this crash, but you should use a different team for now."];
+			problems = [`Your team crashed the team validator. We've been automatically notified and will fix this crash, but you should use a different team for now.`];
 		}
 
 		if (problems && problems.length) {
@@ -917,24 +997,32 @@ PM = TeamValidator.PM = new ProcessManager({
 			// console.log('TO: ' + packedTeam);
 			return '1' + packedTeam;
 		}
-	},
+	}
+}
+
+TeamValidator.TeamValidatorManager = TeamValidatorManager;
+
+PM = TeamValidator.PM = new TeamValidatorManager({
+	execFile: __filename,
+	maxProcesses: global.Config ? Config.validatorprocesses : 1,
+	isChatBased: false,
 });
 
 if (process.send && module === process.mainModule) {
 	// This is a child process!
 
-	global.Config = require('./config/config.js');
+	global.Config = require('./config/config');
 
 	if (Config.crashguard) {
 		process.on('uncaughtException', err => {
-			require('./crashlogger.js')(err, 'A team validator process', true);
+			require('./crashlogger')(err, `A team validator process`, true);
 		});
 	}
 
-	global.Tools = require('./tools.js').includeMods();
+	global.Tools = require('./tools').includeData();
 	global.toId = Tools.getId;
 
-	require('./repl.js').start('team-validator-', process.pid, cmd => eval(cmd));
+	require('./repl').start('team-validator-', process.pid, cmd => eval(cmd));
 
 	process.on('message', message => PM.onMessageDownstream(message));
 	process.on('disconnect', () => process.exit());

@@ -24,13 +24,13 @@ class RoomGamePlayer {
 		this.userid = user.userid;
 		this.name = user.name;
 		this.game = game;
-		user.games[this.game.id] = this.game;
+		user.games.add(this.game.id);
 		user.updateSearch();
 	}
 	destroy() {
 		let user = Users.getExact(this.userid);
 		if (user) {
-			delete user.games[this.game.id];
+			user.games.delete(this.game.id);
 			user.updateSearch();
 		}
 	}
@@ -68,10 +68,10 @@ class RoomGame {
 		}
 	}
 
-	addPlayer(user) {
+	addPlayer(user, ...rest) {
 		if (user.userid in this.players) return false;
 		if (this.playerCount >= this.playerCap) return false;
-		let player = this.makePlayer.apply(this, arguments);
+		let player = this.makePlayer(user, ...rest);
 		if (!player) return false;
 		this.players[user.userid] = player;
 		this.playerCount++;
@@ -153,7 +153,12 @@ class RoomGame {
 	// need to handle the other events.
 
 	onRename(user, oldUserid) {
-		if (!this.allowRenames) return;
+		if (!this.allowRenames) {
+			if (!(user.userid in this.players)) {
+				user.games.delete(this.id);
+			}
+			return;
+		}
 		if (!(oldUserid in this.players)) return;
 		if (user.userid === oldUserid) {
 			this.players[user.userid].name = user.name;

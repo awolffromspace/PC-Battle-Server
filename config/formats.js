@@ -5,9 +5,10 @@
 
 exports.Formats = [
 
-	// XY Singles
+	// SM Singles
 	///////////////////////////////////////////////////////////////////
 
+<<<<<<< HEAD
 	/*{
 		name: "[LotF 26] Ubers",
 		desc: [
@@ -29,11 +30,133 @@ exports.Formats = [
 		mod: 'halloweenrandom',
 		team: 'randomHalloween',
 		ruleset: ['Random (no PotD)'],
+=======
+	{
+		name: "Random Battle",
+		desc: ["Randomized teams of level-balanced Pok&eacute;mon with sets that are generated to be competitively viable."],
+		section: "SM Singles (beta)",
+
+		mod: 'gen7',
+		team: 'random',
+		ruleset: ['PotD', 'Pokemon', 'Sleep Clause Mod', 'HP Percentage Mod', 'Cancel Mod'],
 	},
+	{
+		name: "Unrated Random Battle",
+		section: "SM Singles (beta)",
+
+		mod: 'gen7',
+		team: 'random',
+		challengeShow: false,
+		rated: false,
+		ruleset: ['PotD', 'Pokemon', 'Sleep Clause Mod', 'HP Percentage Mod', 'Cancel Mod'],
+>>>>>>> upstream/master
+	},
+	{
+		name: "[Gen 7] OU",
+		section: "SM Singles (beta)",
+
+		mod: 'gen7',
+		ruleset: ['Pokemon', 'Standard', 'Team Preview', 'Baton Pass Clause'],
+		banlist: ['Uber', 'Shadow Tag'],
+	},
+	{
+		name: "[Gen 7] Pokebank OU",
+		desc: [
+			"&bullet; <a href=\"https://www.smogon.com/forums/threads/3587188/\">OU Metagame Discussion</a>",
+			"&bullet; <a href=\"https://www.smogon.com/forums/threads/3587177/\">OU Banlist</a>",
+		],
+		section: "SM Singles (beta)",
+
+		mod: 'gen7',
+		ruleset: ['Pokemon', 'Standard', 'Team Preview', 'Baton Pass Clause'],
+		banlist: ['Uber', 'Shadow Tag'],
+	},
+	{
+		name: "[Gen 7] Pokebank Ubers",
+		desc: ["&bullet; <a href=\"https://www.smogon.com/forums/threads/3587184/\">Ubers Metagame Discussion</a>"],
+		section: "SM Singles (beta)",
+
+		mod: 'gen7',
+		ruleset: ['Pokemon', 'Standard', 'Swagger Clause', 'Team Preview', 'Mega Rayquaza Clause'],
+	},
+	{
+		name: "[Gen 7] Pokebank LC",
+		desc: ["&bullet; <a href=\"https://www.smogon.com/forums/threads/3587196/\">LC Metagame Discussion</a>"],
+		section: "SM Singles (beta)",
+
+		mod: 'gen7',
+		maxLevel: 5,
+		ruleset: ['Pokemon', 'Standard', 'Swagger Clause', 'Team Preview', 'Little Cup'],
+		banlist: ['LC Uber', 'Gligar', 'Misdreavus', 'Scyther', 'Sneasel', 'Tangela', 'Eevium Z', 'Dragon Rage', 'Sonic Boom'],
+	},
+	{
+		name: "[Gen 7] Pokebank Anything Goes",
+		section: "SM Singles (beta)",
+
+		mod: 'gen7',
+		ruleset: ['Pokemon', 'Endless Battle Clause', 'Team Preview', 'HP Percentage Mod', 'Cancel Mod'],
+		banlist: ['Illegal', 'Unreleased'],
+	},
+
+	// SM Doubles
+	///////////////////////////////////////////////////////////////////
+
+	{
+		name: "Random Doubles Battle",
+		section: "SM Doubles (beta)",
+
+		mod: 'gen7',
+		gameType: 'doubles',
+		team: 'random',
+		ruleset: ['PotD', 'Pokemon', 'HP Percentage Mod', 'Cancel Mod'],
+	},
+	{
+		name: "[Gen 7] Pokebank Doubles OU",
+		desc: ["&bullet; <a href=\"https://www.smogon.com/forums/threads/3586596/\">Doubles OU Metagame Discussion</a>"],
+		section: "SM Doubles (beta)",
+
+		mod: 'gen7',
+		gameType: 'doubles',
+		ruleset: ['Pokemon', 'Standard Doubles', 'Team Preview'],
+		banlist: ['Arceus', 'Dialga', 'Giratina', 'Giratina-Origin', 'Groudon', 'Ho-Oh', 'Kyogre', 'Kyurem-White',
+			'Lugia', 'Lunala', 'Mewtwo', 'Palkia', 'Rayquaza', 'Reshiram', 'Solgaleo', 'Xerneas', 'Yveltal', 'Zekrom',
+			'Dark Void', 'Gravity ++ Grass Whistle', 'Gravity ++ Hypnosis', 'Gravity ++ Lovely Kiss', 'Gravity ++ Sing', 'Gravity ++ Sleep Powder',
+		],
+	},
+	{
+		name: "[Gen 7] Pokebank Doubles Ubers",
+		section: "SM Doubles (beta)",
+
+		mod: 'gen7',
+		gameType: 'doubles',
+		searchShow: false,
+		ruleset: ['Pokemon', 'Species Clause', 'Moody Clause', 'OHKO Clause', 'Evasion Moves Clause', 'Evasion Abilities Clause', 'Endless Battle Clause', 'HP Percentage Mod', 'Cancel Mod', 'Team Preview'],
+		banlist: ['Illegal', 'Unreleased'],
+	},
+	{
+		name: "[Gen 7] VGC 2017",
+		desc: ["&bullet; <a href=\"https://www.smogon.com/forums/threads/3586596/\"VGC 2017 Discussion</a>"],
+		section: "SM Doubles (beta)",
+
+		mod: 'gen7',
+		gameType: 'doubles',
+		maxForcedLevel: 50,
+		teamLength: {
+			validate: [4, 6],
+			battle: 4,
+		},
+		ruleset: ['Pokemon', 'Species Clause', 'Nickname Clause', 'Item Clause', 'Team Preview', 'Cancel Mod'],
+		banlist: ['Illegal', 'Unreleased', 'Solgaleo', 'Lunala', 'Necrozma', 'Magearna', 'Marshadow', 'Mega'],
+		requirePentagon: true,
+	},
+
+	// ORAS Singles
+	///////////////////////////////////////////////////////////////////
+
 	{
 		name: "OU",
 		desc: [
-			"&bullet; <a href=\"https://www.smogon.com/forums/threads/3546114/\">OU Metagame Discussion</a>",
+			"&bullet; <a href=\"https://www.smogon.com/forums/threads/3573990/\">OU Metagame Discussion</a>",
 			"&bullet; <a href=\"https://www.smogon.com/dex/xy/tags/ou/\">OU Banlist</a>",
 			"&bullet; <a href=\"https://www.smogon.com/forums/threads/3571990/\">OU Viability Ranking</a>",
 		],
@@ -51,28 +174,32 @@ exports.Formats = [
 		section: "ORAS Singles",
 
 		ruleset: ['Pokemon', 'Standard', 'Swagger Clause', 'Team Preview', 'Mega Rayquaza Clause'],
-		banlist: [],
 	},
 	{
 		name: "UU",
 		desc: [
-			"&bullet; <a href=\"https://www.smogon.com/forums/threads/3576546/\">np: UU Stage 7.2</a>",
+			"&bullet; <a href=\"https://www.smogon.com/forums/threads/3582473/\">np: UU Stage 7.3</a>",
 			"&bullet; <a href=\"https://www.smogon.com/dex/xy/tags/uu/\">UU Banlist</a>",
 			"&bullet; <a href=\"https://www.smogon.com/forums/threads/3555277/\">UU Viability Ranking</a>",
 		],
 		section: "ORAS Singles",
 
 		ruleset: ['OU'],
-		banlist: ['OU', 'BL', 'Drizzle', 'Drought'],
+		banlist: ['OU', 'BL', 'Drizzle', 'Drought', 'Baton Pass'],
 	},
 	{
 		name: "RU",
 		desc: [
+<<<<<<< HEAD
 			"&bullet; <a href=\"https://www.smogon.com/forums/threads/3572877/\">np: RU Stage 17</a>",
+=======
+			"&bullet; <a href=\"https://www.smogon.com/forums/threads/3583022/\">np: RU Stage 19</a>",
+>>>>>>> upstream/master
 			"&bullet; <a href=\"https://www.smogon.com/dex/xy/tags/ru/\">RU Banlist</a>",
 			"&bullet; <a href=\"https://www.smogon.com/forums/threads/3558546/\">RU Viability Ranking</a>",
 		],
 		section: "ORAS Singles",
+<<<<<<< HEAD
 
 		ruleset: ['UU'],
 		banlist: ['UU', 'BL2'],
@@ -1933,11 +2060,17 @@ exports.Formats = [
 		gameType: 'doubles',
 		team: 'randomDoubles',
 		ruleset: ['Random'],
+=======
+
+		ruleset: ['OU'],
+		banlist: ['OU', 'BL', 'UU', 'BL2', 'Drizzle', 'Drought'],
+>>>>>>> upstream/master
 	},
 	{
 		name: "Doubles Hackmons Cup",
 		section: "Randomized Metas",
 
+<<<<<<< HEAD
 		gameType: 'doubles',
 		team: 'randomHC',
 		searchShow: false,
@@ -1954,6 +2087,30 @@ exports.Formats = [
 	{
 		name: "Triples Hackmons Cup",
 		section: "Randomized Metas",
+=======
+		ruleset: ['RU', 'Baton Pass Speed Clause'],
+		banlist: ['RU', 'BL3'],
+	},
+	{
+		name: "PU",
+		desc: [
+			"&bullet; <a href=\"https://www.smogon.com/forums/threads/3578583/\">np: PU Stage 9</a>",
+			"&bullet; <a href=\"https://www.smogon.com/forums/threads/3528743/\">PU Viability Ranking</a>",
+		],
+		section: "ORAS Singles",
+
+		ruleset: ['RU'],
+		banlist: ['RU', 'BL3', 'NU', 'BL4', 'Chatter'],
+	},
+	{
+		name: "LC",
+		desc: [
+			"&bullet; <a href=\"https://www.smogon.com/forums/threads/3505710/\">LC Metagame Discussion</a>",
+			"&bullet; <a href=\"https://www.smogon.com/dex/xy/formats/lc/\">LC Banlist</a>",
+			"&bullet; <a href=\"https://www.smogon.com/forums/threads/3547566/\">LC Viability Ranking</a>",
+		],
+		section: "ORAS Singles",
+>>>>>>> upstream/master
 
 		gameType: 'triples',
 		team: 'randomHC',
@@ -2098,6 +2255,7 @@ exports.Formats = [
 		ruleset: ['Random (no PotD)'],
 	},
 	{
+<<<<<<< HEAD
 		name: "Halloween Random",
 		section: "Randomized Metas",
 
@@ -2105,6 +2263,14 @@ exports.Formats = [
 		mod: 'halloweenrandom',
 		team: 'randomHalloween',
 		ruleset: ['Random (no PotD)'],
+=======
+		name: "[Gen 6] Random Battle",
+		section: "ORAS Singles",
+
+		team: 'random',
+		searchShow: false,
+		ruleset: ['PotD', 'Pokemon', 'Sleep Clause Mod', 'HP Percentage Mod', 'Cancel Mod'],
+>>>>>>> upstream/master
 	},
 	{
 		name: "SwagPlay Random",
@@ -2116,47 +2282,53 @@ exports.Formats = [
 		ruleset: ['Random (no PotD)'],
 	},
 
-	// XY Doubles
+	// ORAS Doubles/Triples
 	///////////////////////////////////////////////////////////////////
 
 	{
 		name: "Doubles OU",
 		desc: [
-			"&bullet; <a href=\"https://www.smogon.com/forums/threads/3569913/\">np: Doubles OU Stage 4</a>",
+			"&bullet; <a href=\"https://www.smogon.com/forums/threads/3580680/\">np: Doubles OU Stage 5</a>",
 			"&bullet; <a href=\"https://www.smogon.com/forums/threads/3498688/\">Doubles OU Banlist</a>",
 			"&bullet; <a href=\"https://www.smogon.com/forums/threads/3535930/\">Doubles OU Viability Ranking</a>",
 		],
+<<<<<<< HEAD
 		section: "ORAS Doubles",
 		column: 2,
+=======
+		section: "ORAS Doubles/Triples",
+>>>>>>> upstream/master
 
 		gameType: 'doubles',
 		ruleset: ['Pokemon', 'Standard Doubles', 'Swagger Clause', 'Team Preview'],
-		banlist: ['Arceus', 'Dialga', 'Giratina', 'Giratina-Origin', 'Groudon', 'Ho-Oh', 'Kyogre', 'Kyurem-White', 'Lugia',
-			'Mewtwo', 'Palkia', 'Rayquaza', 'Reshiram', 'Salamence-Mega', 'Salamencite', 'Shaymin-Sky', 'Xerneas', 'Yveltal', 'Zekrom',
-			'Soul Dew', 'Dark Void', 'Gravity ++ Grass Whistle', 'Gravity ++ Hypnosis', 'Gravity ++ Lovely Kiss', 'Gravity ++ Sing', 'Gravity ++ Sleep Powder', 'Gravity ++ Spore',
+		banlist: [
+			'Arceus', 'Dialga', 'Giratina', 'Giratina-Origin', 'Groudon', 'Ho-Oh', 'Kyogre', 'Kyurem-White', 'Lugia', 'Mewtwo',
+			'Palkia', 'Rayquaza', 'Reshiram', 'Salamence-Mega', 'Salamencite', 'Shaymin-Sky', 'Xerneas', 'Yveltal', 'Zekrom', 'Soul Dew',
+			'Dark Void', 'Gravity ++ Grass Whistle', 'Gravity ++ Hypnosis', 'Gravity ++ Lovely Kiss', 'Gravity ++ Sing', 'Gravity ++ Sleep Powder', 'Gravity ++ Spore',
 		],
 	},
 	{
 		name: "Doubles Ubers",
 		desc: ["&bullet; <a href=\"https://www.smogon.com/forums/threads/3542746/\">Doubles Ubers</a>"],
-		section: "ORAS Doubles",
+		section: "ORAS Doubles/Triples",
 
 		gameType: 'doubles',
 		ruleset: ['Pokemon', 'Species Clause', 'Moody Clause', 'OHKO Clause', 'Evasion Moves Clause', 'Evasion Abilities Clause', 'Endless Battle Clause', 'HP Percentage Mod', 'Cancel Mod', 'Team Preview'],
-		banlist: ['Unreleased', 'Illegal', 'Dark Void'],
+		banlist: ['Illegal', 'Unreleased', 'Dark Void'],
 	},
 	{
 		name: "Doubles UU",
 		desc: ["&bullet; <a href=\"https://www.smogon.com/forums/threads/3542755/\">Doubles UU</a>"],
-		section: "ORAS Doubles",
+		section: "ORAS Doubles/Triples",
 
 		gameType: 'doubles',
 		ruleset: ['Doubles OU'],
-		banlist: ['Aegislash', 'Amoonguss', 'Azumarill', 'Bisharp', 'Breloom', 'Charizard-Mega-Y', 'Charizardite Y', 'Conkeldurr',
-			'Cresselia', 'Diancie-Mega', 'Diancite', 'Dragonite', 'Ferrothorn', 'Garchomp', 'Gardevoir-Mega', 'Gardevoirite',
-			'Gengar', 'Greninja', 'Gyarados', 'Heatran', 'Hoopa-Unbound', 'Hydreigon', 'Jirachi', 'Kangaskhan-Mega', 'Kangaskhanite',
-			'Keldeo', 'Kyurem-Black', 'Landorus', 'Landorus-Therian', 'Latios', 'Ludicolo', 'Mawile-Mega', 'Mawilite',
-			'Milotic', 'Politoed', 'Rotom-Wash', 'Scizor', 'Scrafty', 'Shaymin-Sky', 'Suicune', 'Sylveon', 'Talonflame',
+		banlist: [
+			'Aegislash', 'Amoonguss', 'Arcanine', 'Azumarill', 'Bisharp', 'Breloom', 'Charizard-Mega-Y', 'Charizardite Y',
+			'Conkeldurr', 'Cresselia', 'Diancie-Mega', 'Diancite', 'Ferrothorn', 'Garchomp', 'Gardevoir-Mega', 'Gardevoirite',
+			'Gastrodon', 'Gengar', 'Greninja', 'Heatran', 'Hitmontop', 'Hoopa-Unbound', 'Hydreigon', 'Jirachi',
+			'Kangaskhan-Mega', 'Kangaskhanite', 'Keldeo', 'Kyurem-Black', 'Landorus-Therian', 'Latios', 'Ludicolo', 'Milotic',
+			'Politoed', 'Raichu', 'Rotom-Wash', 'Scizor', 'Scrafty', 'Shaymin-Sky', 'Suicune', 'Sylveon', 'Talonflame',
 			'Terrakion', 'Thundurus', 'Togekiss', 'Tyranitar', 'Venusaur', 'Volcanion', 'Weavile', 'Whimsicott', 'Zapdos',
 		],
 	},
@@ -2164,10 +2336,9 @@ exports.Formats = [
 		name: "VGC 2016",
 		desc: [
 			"&bullet; <a href=\"https://www.smogon.com/forums/threads/3558332/\">VGC 2016 Rules</a>",
-			"&bullet; <a href=\"https://www.smogon.com/forums/threads/3558929/\">VGC 2016 Viability Ranking</a>",
-			"&bullet; <a href=\"https://www.smogon.com/forums/threads/3500650/\">VGC Learning Resources</a>",
+			"&bullet; <a href=\"https://www.smogon.com/forums/threads/3580592/\">VGC 2016 Viability Ranking</a>",
 		],
-		section: "ORAS Doubles",
+		section: "ORAS Doubles/Triples",
 
 		gameType: 'doubles',
 		maxForcedLevel: 50,
@@ -2176,8 +2347,9 @@ exports.Formats = [
 			battle: 4,
 		},
 		ruleset: ['Pokemon', 'Species Clause', 'Nickname Clause', 'Item Clause', 'Team Preview', 'Cancel Mod'],
-		banlist: ['Illegal', 'Unreleased', 'Mew', 'Celebi', 'Jirachi', 'Deoxys', 'Deoxys-Attack', 'Deoxys-Defense', 'Deoxys-Speed', 'Phione', 'Manaphy',
-			'Darkrai', 'Shaymin', 'Shaymin-Sky', 'Arceus', 'Victini', 'Keldeo', 'Meloetta', 'Genesect', 'Diancie', 'Hoopa', 'Hoopa-Unbound', 'Volcanion', 'Soul Dew',
+		banlist: [
+			'Illegal', 'Unreleased', 'Mew', 'Celebi', 'Jirachi', 'Deoxys', 'Deoxys-Attack', 'Deoxys-Defense', 'Deoxys-Speed', 'Phione', 'Manaphy', 'Darkrai',
+			'Shaymin', 'Shaymin-Sky', 'Arceus', 'Victini', 'Keldeo', 'Meloetta', 'Genesect', 'Diancie', 'Hoopa', 'Hoopa-Unbound', 'Volcanion', 'Soul Dew',
 		],
 		requirePentagon: true,
 		onValidateTeam: function (team) {
@@ -2196,7 +2368,7 @@ exports.Formats = [
 			"&bullet; <a href=\"https://www.smogon.com/forums/threads/3560820/\">Battle Spot Doubles Metagame Discussion</a>",
 			"&bullet; <a href=\"https://www.smogon.com/forums/threads/3560824/\">Battle Spot Doubles Viability Ranking</a>",
 		],
-		section: "ORAS Doubles",
+		section: "ORAS Doubles/Triples",
 
 		gameType: 'doubles',
 		maxForcedLevel: 50,
@@ -2208,8 +2380,17 @@ exports.Formats = [
 		requirePentagon: true,
 	},
 	{
+		name: "[Gen 6] Random Doubles Battle",
+		section: "ORAS Doubles/Triples",
+
+		gameType: 'doubles',
+		team: 'random',
+		searchShow: false,
+		ruleset: ['PotD', 'Pokemon', 'HP Percentage Mod', 'Cancel Mod'],
+	},
+	{
 		name: "Doubles Custom Game",
-		section: "ORAS Doubles",
+		section: "ORAS Doubles/Triples",
 
 		gameType: 'doubles',
 		searchShow: false,
@@ -2220,6 +2401,7 @@ exports.Formats = [
 		// no restrictions, for serious (other than team preview)
 		ruleset: ['Team Preview', 'Cancel Mod'],
 	},
+<<<<<<< HEAD
 
 	// XY Triples
 	///////////////////////////////////////////////////////////////////
@@ -2240,13 +2422,15 @@ exports.Formats = [
 			'Soul Dew', 'Dark Void', 'Perish Song',
 		],
 	},
+=======
+>>>>>>> upstream/master
 	{
 		name: "Battle Spot Triples",
 		desc: [
 			"&bullet; <a href=\"https://www.smogon.com/forums/threads/3533914/\">Battle Spot Triples Metagame Discussion</a>",
 			"&bullet; <a href=\"https://www.smogon.com/forums/threads/3549201/\">Battle Spot Triples Viability Ranking</a>",
 		],
-		section: "ORAS Triples",
+		section: "ORAS Doubles/Triples",
 
 		gameType: 'triples',
 		maxForcedLevel: 50,
@@ -2257,33 +2441,8 @@ exports.Formats = [
 		requirePentagon: true,
 	},
 	{
-		name: "Unova Classic",
-		desc: ["&bullet; <a href=\"https://www.smogon.com/forums/threads/3577932/\">Unova Classic</a>"],
-		section: "ORAS Triples",
-
-		gameType: 'triples',
-		maxForcedLevel: 50,
-		teamLength: {
-			validate: [6, 6],
-		},
-		ruleset: ['Pokemon', 'Standard GBU', 'Team Preview'],
-		banlist: [],
-		onValidateSet: function (set) {
-			let problems = [];
-			let template = this.getTemplate(set.species || set.name);
-			if (template.num > 649) {
-				problems.push(template.species + " is banned by Unova Classic.");
-			}
-			let item = this.getItem(set.item);
-			if (item.megaStone) {
-				problems.push(item.name + " is banned by Unova Classic.");
-			}
-			return problems;
-		},
-	},
-	{
 		name: "Triples Custom Game",
-		section: "ORAS Triples",
+		section: "ORAS Doubles/Triples",
 
 		gameType: 'triples',
 		searchShow: false,
@@ -2299,64 +2458,25 @@ exports.Formats = [
 	///////////////////////////////////////////////////////////////////
 
 	{
-		name: "Nature Swap",
-		desc: ["&bullet; <a href=\"https://www.smogon.com/forums/threads/3577739/\">Nature Swap</a>"],
+		name: "[Gen 7] Balanced Hackmons",
 		section: "OM of the Month",
 		column: 2,
 
-		ruleset: ['OU'],
-		banlist: ['Chansey', 'Cloyster'],
-		onBegin: function () {
-			let allPokemon = this.p1.pokemon.concat(this.p2.pokemon);
-			for (let i = 0, len = allPokemon.length; i < len; i++) {
-				let pokemon = allPokemon[i];
-				let nature = pokemon.battle.getNature(pokemon.set.nature);
-				if (nature.plus !== nature.minus) {
-					["baseTemplate", "canMegaEvo"].forEach(key => {
-						if (pokemon[key]) {
-							let template = Object.assign({}, this.getTemplate(pokemon[key]));
-							template.baseStats = Object.assign({}, template.baseStats);
-							let plus = template.baseStats[nature.plus];
-							let minus = template.baseStats[nature.minus];
-							template.baseStats[nature.plus] = minus;
-							template.baseStats[nature.minus] = plus;
-							pokemon[key] = template;
-						}
-					});
-					pokemon.formeChange(pokemon.baseTemplate);
-				}
-			}
-		},
+		mod: 'gen7',
+		ruleset: ['Pokemon', 'Ability Clause', 'OHKO Clause', 'Evasion Moves Clause', 'Endless Battle Clause', 'Team Preview', 'HP Percentage Mod', 'Cancel Mod'],
+		banlist: ['Arena Trap', 'Huge Power', 'Moody', 'Parental Bond', 'Protean', 'Pure Power', 'Shadow Tag', 'Wonder Guard', 'Chatter'],
 	},
 	{
-		name: "Follow The Leader",
-		desc: ["&bullet; <a href=\"https://www.smogon.com/forums/threads/3565685/\">Follow The Leader</a>"],
+		name: "STABmons",
+		desc: [
+			"Pok&eacute;mon can use any move of their typing, in addition to the moves they can normally learn.",
+			"&bullet; <a href=\"https://www.smogon.com/forums/threads/3547279/\">STABmons</a>",
+			"&bullet; <a href=\"https://www.smogon.com/forums/threads/3558034/\">STABmons Viability Ranking</a>",
+		],
 		section: "OM of the Month",
 
-		ruleset: ['Pokemon', 'Standard', 'Team Preview', 'Swagger Clause', 'Baton Pass Clause'],
-		banlist: ['Regigigas', 'Shedinja', 'Slaking', 'Smeargle', 'Gengarite', 'Kangaskhanite', 'Lucarionite', 'Mawilite', 'Salamencite', 'Soul Dew',
-			'Arena Trap', 'Gale Wings', 'Huge Power', 'Imposter', 'Pure Power', 'Shadow Tag', 'Chatter',
-		],
-		validateSet: function (set, teamHas) {
-			let species = toId(set.species);
-			let template = this.tools.getTemplate(species);
-			if (!template.exists || template.isNonstandard) return ["" + set.species + " is not a real Pok\u00E9mon."];
-			if (template.battleOnly) template = this.tools.getTemplate(template.baseSpecies);
-			if (this.tools.getBanlistTable(this.format)[template.id] || template.tier in {'Uber': 1, 'Unreleased': 1} && template.species !== 'Aegislash') {
-				return ["" + template.species + " is banned by Follow The Leader."];
-			}
-
-			if (!teamHas.donorTemplate) teamHas.donorTemplate = template;
-			let name = set.name;
-			if (name === set.species) delete set.name;
-			set.species = teamHas.donorTemplate.species;
-			let problems = this.validateSet(set, teamHas, teamHas.donorTemplate);
-
-			set.species = template.species;
-			set.name = (name === set.species ? "" : name);
-
-			return problems;
-		},
+		ruleset: ['OU'],
+		banlist: ['Ignore STAB Moves', 'Diggersby', 'Kyurem-Black', 'Porygon-Z', 'Thundurus', 'Aerodactylite', 'Altarianite', "King's Rock", 'Metagrossite', 'Razor Fang'],
 	},
 	{
 		name: "Phoenix Rising",
@@ -2415,9 +2535,9 @@ exports.Formats = [
 			battle: 1,
 		},
 		ruleset: ['Pokemon', 'Moody Clause', 'OHKO Clause', 'Evasion Moves Clause', 'Swagger Clause', 'Endless Battle Clause', 'HP Percentage Mod', 'Cancel Mod', 'Team Preview'],
-		banlist: ['Illegal', 'Unreleased', 'Arceus', 'Blaziken', 'Darkrai', 'Deoxys', 'Deoxys-Attack', 'Dialga',
-			'Giratina', 'Giratina-Origin', 'Groudon', 'Ho-Oh', 'Kyogre', 'Kyurem-White', 'Lugia', 'Mewtwo',
-			'Palkia', 'Rayquaza', 'Reshiram', 'Shaymin-Sky', 'Xerneas', 'Yveltal', 'Zekrom',
+		banlist: [
+			'Illegal', 'Unreleased', 'Arceus', 'Blaziken', 'Darkrai', 'Deoxys', 'Deoxys-Attack', 'Dialga', 'Giratina', 'Giratina-Origin', 'Groudon',
+			'Ho-Oh', 'Kyogre', 'Kyurem-White', 'Lugia', 'Mewtwo', 'Palkia', 'Rayquaza', 'Reshiram', 'Shaymin-Sky', 'Xerneas', 'Yveltal', 'Zekrom',
 			'Focus Sash', 'Kangaskhanite', 'Salamencite', 'Soul Dew', 'Perish Song', 'Chansey + Charm + Seismic Toss',
 		],
 	},
@@ -2431,29 +2551,85 @@ exports.Formats = [
 		section: "Other Metagames",
 
 		ruleset: ['Pokemon', 'Standard', 'Baton Pass Clause', 'Swagger Clause', 'Same Type Clause', 'Team Preview'],
-		banlist: ['Aegislash', 'Arceus', 'Blaziken', 'Darkrai', 'Deoxys', 'Deoxys-Attack', 'Dialga', 'Genesect', 'Giratina', 'Giratina-Origin', 'Greninja', 'Groudon',
-			'Ho-Oh', 'Hoopa-Unbound', 'Kyogre', 'Kyurem-White', 'Lugia', 'Mewtwo', 'Palkia', 'Rayquaza', 'Reshiram', 'Shaymin-Sky', 'Talonflame', 'Xerneas', 'Yveltal', 'Zekrom',
+		banlist: [
+			'Aegislash', 'Arceus', 'Blaziken', 'Darkrai', 'Deoxys', 'Deoxys-Attack', 'Dialga', 'Genesect', 'Giratina', 'Giratina-Origin', 'Greninja', 'Groudon',
+			'Ho-Oh', 'Kyogre', 'Kyurem-White', 'Lugia', 'Mewtwo', 'Palkia', 'Rayquaza', 'Reshiram', 'Shaymin-Sky', 'Talonflame', 'Xerneas', 'Yveltal', 'Zekrom',
 			'Altarianite', 'Charizardite X', 'Damp Rock', 'Gengarite', 'Kangaskhanite', 'Lucarionite', 'Mawilite', 'Metagrossite', 'Sablenite', 'Salamencite', 'Slowbronite', 'Smooth Rock', 'Soul Dew',
 		],
+	},
+	{
+		name: "Mix and Mega",
+		desc: [
+			"Mega Stones and Primal Orbs can be used on almost any fully evolved Pok&eacute;mon with no Mega Evolution limit.",
+			"&bullet; <a href=\"https://www.smogon.com/forums/threads/3540979/\">Mix and Mega</a>",
+		],
+		section: "Other Metagames",
+
+		mod: 'mixandmega',
+		ruleset: ['Ubers'],
+		banlist: ['Baton Pass', 'Dynamic Punch', 'Electrify', 'Zap Cannon'],
+		onValidateTeam: function (team) {
+			let itemTable = {};
+			for (let i = 0; i < team.length; i++) {
+				let item = this.getItem(team[i].item);
+				if (!item) continue;
+				if (itemTable[item] && item.megaStone) return ["You are limited to one of each Mega Stone.", "(You have more than one " + this.getItem(item).name + ")"];
+				if (itemTable[item] && (item.id === 'blueorb' || item.id === 'redorb')) return ["You are limited to one of each Primal Orb.", "(You have more than one " + this.getItem(item).name + ")"];
+				itemTable[item] = true;
+			}
+		},
+		onValidateSet: function (set) {
+			let template = this.getTemplate(set.species || set.name);
+			let item = this.getItem(set.item);
+			if (!item.megaEvolves && item.id !== 'blueorb' && item.id !== 'redorb') return;
+			if (template.baseSpecies === item.megaEvolves || (template.baseSpecies === 'Groudon' && item.id === 'redorb') || (template.baseSpecies === 'Kyogre' && item.id === 'blueorb')) return;
+			if (template.evos.length) return ["" + template.species + " is not allowed to hold " + item.name + " because it's not fully evolved."];
+			let uberStones = ['beedrillite', 'gengarite', 'kangaskhanite', 'mawilite', 'medichamite'];
+			if (template.tier === 'Uber' || uberStones.indexOf(item.id) >= 0) return ["" + template.species + " is not allowed to hold " + item.name + "."];
+		},
+		onBegin: function () {
+			let allPokemon = this.p1.pokemon.concat(this.p2.pokemon);
+			for (let i = 0, len = allPokemon.length; i < len; i++) {
+				let pokemon = allPokemon[i];
+				pokemon.originalSpecies = pokemon.baseTemplate.species;
+			}
+		},
+		onSwitchIn: function (pokemon) {
+			let oMegaTemplate = this.getTemplate(pokemon.template.originalMega);
+			if (oMegaTemplate.exists && pokemon.originalSpecies !== oMegaTemplate.baseSpecies) {
+				// Place volatiles on the Pokémon to show its mega-evolved condition and details
+				this.add('-start', pokemon, oMegaTemplate.requiredItem || oMegaTemplate.requiredMove, '[silent]');
+				let oTemplate = this.getTemplate(pokemon.originalSpecies);
+				if (oTemplate.types.length !== pokemon.template.types.length || oTemplate.types[1] !== pokemon.template.types[1]) {
+					this.add('-start', pokemon, 'typechange', pokemon.template.types.join('/'), '[silent]');
+				}
+			}
+		},
+		onSwitchOut: function (pokemon) {
+			let oMegaTemplate = this.getTemplate(pokemon.template.originalMega);
+			if (oMegaTemplate.exists && pokemon.originalSpecies !== oMegaTemplate.baseSpecies) {
+				this.add('-end', pokemon, oMegaTemplate.requiredItem || oMegaTemplate.requiredMove, '[silent]');
+			}
+		},
 	},
 	{
 		name: "Almost Any Ability",
 		desc: [
 			"Pok&eacute;mon can use any ability, barring the few that are banned.",
 			"&bullet; <a href=\"https://www.smogon.com/forums/threads/3528058/\">Almost Any Ability</a>",
-			"&bullet; <a href=\"https://www.smogon.com/forums/threads/3551063/\">AAA Viability Ranking</a>",
+			"&bullet; <a href=\"https://www.smogon.com/forums/threads/3578707/\">AAA Resources</a>",
 		],
 		section: "Other Metagames",
 
 		ruleset: ['Pokemon', 'Standard', 'Ability Clause', 'Baton Pass Clause', 'Swagger Clause', 'Team Preview'],
 		banlist: ['Ignore Illegal Abilities',
-			'Arceus', 'Archeops', 'Bisharp', 'Chatot', 'Darkrai', 'Deoxys', 'Deoxys-Attack', 'Dialga', 'Giratina', 'Giratina-Origin', 'Groudon', 'Ho-Oh',
-			'Hoopa-Unbound', 'Keldeo', 'Kyogre', 'Kyurem-Black', 'Kyurem-White', 'Lugia', 'Mamoswine', 'Mewtwo', 'Palkia', 'Rayquaza', 'Regigigas',
+			'Arceus', 'Archeops', 'Bisharp', 'Chatot', 'Darkrai', 'Deoxys', 'Deoxys-Attack', 'Dialga', 'Dragonite', 'Giratina', 'Giratina-Origin', 'Groudon',
+			'Ho-Oh', 'Hoopa-Unbound', 'Keldeo', 'Kyogre', 'Kyurem-Black', 'Kyurem-White', 'Lugia', 'Mamoswine', 'Mewtwo', 'Palkia', 'Rayquaza', 'Regigigas',
 			'Reshiram', 'Shaymin-Sky', 'Shedinja', 'Slaking', 'Smeargle', 'Snorlax', 'Suicune', 'Terrakion', 'Weavile', 'Xerneas', 'Yveltal', 'Zekrom',
-			'Blazikenite', 'Gengarite', 'Kangaskhanite', 'Lucarionite', 'Mawilite', 'Salamencite', 'Soul Dew', 'Shadow Tag',
+			'Blazikenite', 'Gengarite', 'Kangaskhanite', 'Lucarionite', 'Mawilite', 'Salamencite', 'Soul Dew', 'Shadow Tag', 'Dynamic Punch', 'Zap Cannon',
 		],
 		onValidateSet: function (set) {
-			let bannedAbilities = {'Aerilate': 1, 'Arena Trap': 1, 'Contrary': 1, 'Fur Coat': 1, 'Huge Power': 1, 'Illusion': 1, 'Imposter': 1, 'Parental Bond': 1, 'Protean': 1, 'Pure Power': 1, 'Simple':1, 'Speed Boost': 1, 'Wonder Guard': 1};
+			let bannedAbilities = {'Arena Trap': 1, 'Contrary': 1, 'Fur Coat': 1, 'Huge Power': 1, 'Illusion': 1, 'Imposter': 1, 'Parental Bond': 1, 'Protean': 1, 'Pure Power': 1, 'Simple':1, 'Speed Boost': 1, 'Wonder Guard': 1};
 			if (set.ability in bannedAbilities) {
 				let template = this.getTemplate(set.species || set.name);
 				let legalAbility = false;
@@ -2463,18 +2639,6 @@ exports.Formats = [
 				if (!legalAbility) return ['The ability ' + set.ability + ' is banned on Pok\u00e9mon that do not naturally have it.'];
 			}
 		},
-	},
-	{
-		name: "STABmons",
-		desc: [
-			"Pok&eacute;mon can use any move of their typing, in addition to the moves they can normally learn.",
-			"&bullet; <a href=\"https://www.smogon.com/forums/threads/3547279/\">STABmons</a>",
-			"&bullet; <a href=\"https://www.smogon.com/forums/threads/3558034/\">STABmons Viability Ranking</a>",
-		],
-		section: "Other Metagames",
-
-		ruleset: ['OU'],
-		banlist: ['Ignore STAB Moves', 'Diggersby', 'Kyurem-Black', 'Porygon-Z', 'Thundurus', 'Aerodactylite', 'Altarianite', "King's Rock", 'Metagrossite', 'Razor Fang'],
 	},
 	{
 		name: "Tier Shift",
@@ -2498,7 +2662,8 @@ exports.Formats = [
 		section: "Other Metagames",
 
 		ruleset: ['Pokemon', 'Standard', 'Baton Pass Clause', 'Swagger Clause', 'Team Preview'],
-		banlist: ['Arceus', 'Blaziken', 'Darkrai', 'Deoxys', 'Deoxys-Attack', 'Deoxys-Defense', 'Deoxys-Speed', 'Diggersby', 'Giratina-Origin', 'Groudon',
+		banlist: [
+			'Arceus', 'Blaziken', 'Darkrai', 'Deoxys', 'Deoxys-Attack', 'Deoxys-Defense', 'Deoxys-Speed', 'Diggersby', 'Giratina-Origin', 'Groudon',
 			'Ho-Oh', 'Hoopa-Unbound', 'Kyogre', 'Kyurem-Black', 'Kyurem-White', 'Lugia', 'Mewtwo', 'Palkia', 'Rayquaza', 'Reshiram', 'Serperior',
 			'Shaymin-Sky', 'Snorlax', 'Xerneas', 'Yveltal', 'Zekrom', 'Gengarite', 'Kangaskhanite', 'Salamencite', 'Soul Dew', 'Shadow Tag',
 		],
@@ -2509,23 +2674,6 @@ exports.Formats = [
 			if (move && !this.getImmunity(move, type)) return 1;
 			return -typeMod;
 		},
-	},
-	{
-		name: "LC UU",
-		desc: [
-			"&bullet; <a href=\"https://www.smogon.com/forums/threads/3562639/\">LC UU</a>",
-			"&bullet; <a href=\"https://www.smogon.com/forums/threads/3562640/\">LC UU Viability Ranking</a>",
-		],
-		section: "Other Metagames",
-
-		maxLevel: 5,
-		ruleset: ['LC'],
-		banlist: ['Abra', 'Aipom', 'Anorith', 'Archen', 'Bunnelby', 'Carvanha', 'Chinchou', 'Cottonee', 'Croagunk', 'Diglett',
-			'Drifloon', 'Drilbur', 'Dwebble', 'Elekid', 'Ferroseed', 'Fletchling', 'Foongus', 'Gastly', 'Gothita', 'Honedge',
-			'Larvesta', 'Magnemite', 'Mienfoo', 'Munchlax', 'Omanyte', 'Onix', 'Pawniard', 'Ponyta', 'Porygon', 'Scraggy',
-			'Shellder', 'Snivy', 'Snubbull', 'Spritzee', 'Staryu', 'Stunky', 'Surskit', 'Timburr', 'Tirtouga', 'Vullaby',
-			'Corphish', 'Houndour', 'Pancham', 'Skrelp', 'Vulpix', 'Zigzagoon', 'Shell Smash', 'Sticky Web',
-		],
 	},
 	{
 		name: "2v2 Doubles",
@@ -2543,21 +2691,6 @@ exports.Formats = [
 		},
 		ruleset: ['Doubles OU'],
 		banlist: ['Kangaskhanite', 'Perish Song'],
-	},
-	{
-		name: "Averagemons",
-		desc: [
-			"Every Pok&eacute;mon has a stat spread of 100/100/100/100/100/100.",
-			"&bullet; <a href=\"https://www.smogon.com/forums/threads/3526481/\">Averagemons</a>",
-		],
-		section: "Other Metagames",
-
-		searchShow: false,
-		mod: 'averagemons',
-		ruleset: ['Pokemon', 'Standard', 'Evasion Abilities Clause', 'Baton Pass Clause', 'Swagger Clause', 'Team Preview'],
-		banlist: ['Smeargle', 'Gengarite', 'Kangaskhanite', 'Mawilite', 'Medichamite', 'Sableye + Prankster',
-			'DeepSeaScale', 'DeepSeaTooth', 'Eviolite', 'Light Ball', 'Soul Dew', 'Thick Club', 'Arena Trap', 'Huge Power', 'Pure Power', 'Shadow Tag', 'Chatter',
-		],
 	},
 	{
 		name: "Hidden Type",
@@ -2594,6 +2727,7 @@ exports.Formats = [
 		desc: ["&bullet; <a href=\"https://www.smogon.com/forums/threads/3540979/\">Mix and Mega</a>"],
 		section: "Other Metagames",
 
+<<<<<<< HEAD
 		mod: 'mixandmega',
 		ruleset: ['Ubers', 'Baton Pass Clause'],
 		banlist: ['Gengarite', 'Shadow Tag', 'Dynamic Punch', 'Electrify', 'Zap Cannon'],
@@ -2706,6 +2840,34 @@ exports.Formats = [
 					}
 				}
 			}
+=======
+	// Randomized Metas
+	///////////////////////////////////////////////////////////////////
+
+	{
+		name: "[Gen 7] Challenge Cup",
+		section: "Randomized Metas",
+		column: 2,
+
+		mod: 'gen7',
+		team: 'randomCC',
+		ruleset: ['Pokemon', 'HP Percentage Mod', 'Cancel Mod'],
+	},
+	{
+		name: "Battle Factory",
+		section: "Randomized Metas",
+
+		team: 'randomFactory',
+		ruleset: ['Pokemon', 'Sleep Clause Mod', 'Team Preview', 'HP Percentage Mod', 'Cancel Mod', 'Mega Rayquaza Clause'],
+	},
+	{
+		name: "Challenge Cup 1v1",
+		section: "Randomized Metas",
+
+		team: 'randomCC',
+		teamLength: {
+			battle: 1,
+>>>>>>> upstream/master
 		},
 		onSwitchOut: function (pokemon) {
 			let oMegaTemplate = this.getTemplate(pokemon.template.originalMega);
@@ -2762,13 +2924,16 @@ exports.Formats = [
 	///////////////////////////////////////////////////////////////////
 
 	{
-		name: "[Gen 2] UU",
-		desc: ["&bullet; <a href=\"https://www.smogon.com/forums/threads/3576710/\">GSC UU</a>"],
+		name: "[Gen 3] UU",
+		desc: [
+			"&bullet; <a href=\"https://www.smogon.com/dex/rs/formats/uu/\">ADV UU</a>",
+			"&bullet; <a href=\"https://www.smogon.com/forums/threads/3548578/\">ADV UU Viability Ranking</a>",
+		],
 		section: "RoA Spotlight",
 		column: 3,
 
-		mod: 'gen2',
-		ruleset: ['[Gen 2] OU'],
+		mod: 'gen3',
+		ruleset: ['[Gen 3] OU'],
 		banlist: ['OU', 'BL'],
 	},
 
@@ -2798,7 +2963,6 @@ exports.Formats = [
 
 		mod: 'gen5',
 		ruleset: ['Pokemon', 'Team Preview', 'Standard Ubers'],
-		banlist: [],
 	},
 	{
 		name: "[Gen 5] UU",
@@ -2900,7 +3064,8 @@ exports.Formats = [
 		mod: 'gen5',
 		gameType: 'doubles',
 		ruleset: ['Pokemon', 'Standard', 'Evasion Abilities Clause', 'Team Preview'],
-		banlist: ['Arceus', 'Dialga', 'Giratina', 'Giratina-Origin', 'Groudon', 'Ho-Oh', 'Kyogre', 'Kyurem-White', 'Jirachi',
+		banlist: [
+			'Arceus', 'Dialga', 'Giratina', 'Giratina-Origin', 'Groudon', 'Ho-Oh', 'Kyogre', 'Kyurem-White', 'Jirachi',
 			'Lugia', 'Mewtwo', 'Palkia', 'Rayquaza', 'Reshiram', 'Zekrom', 'Soul Dew', 'Dark Void', 'Sky Drop',
 		],
 	},
@@ -2985,7 +3150,7 @@ exports.Formats = [
 		mod: 'gen4',
 		maxLevel: 5,
 		ruleset: ['Pokemon', 'Standard', 'Little Cup'],
-		banlist: ['Berry Juice', 'DeepSeaTooth', 'Dragon Rage', 'Sonic Boom', 'Meditite', 'Misdreavus', 'Murkrow', 'Scyther', 'Sneasel', 'Tangela', 'Yanma'],
+		banlist: ['LC Uber', 'Misdreavus', 'Murkrow', 'Scyther', 'Sneasel', 'Tangela', 'Yanma', 'Berry Juice', 'DeepSeaTooth', 'Dragon Rage', 'Sonic Boom'],
 	},
 	{
 		name: "[Gen 4] Custom Game",
@@ -3121,7 +3286,6 @@ exports.Formats = [
 		mod: 'gen1',
 		searchShow: false,
 		ruleset: ['Pokemon', 'Standard'],
-		banlist: [],
 	},
 	{
 		name: "[Gen 1] OU (tradeback)",

@@ -4,7 +4,7 @@
   "description": "The server for the Pokémon Showdown battle simulator",
   "version": "0.10.2",
   "dependencies": {
-    "sockjs": "0.3.15",
+    "sockjs": "0.3.18",
     "es6-shim": "0.27.1",
     "lowdb": "^0.10.1",
     "moment": "^2.10.3",
@@ -21,7 +21,7 @@
     "ofe": "0.1.2"
   },
   "engines": {
-    "node": "> 4.0.0"
+    "node": ">=6.0.0"
   },
   "main": "app.js",
   "scripts": {
@@ -56,7 +56,7 @@
   "devDependencies": {
     "eslint": "^3.2.2",
     "mocha": "^3.0.0",
-    "mock-fs": "3.10.0",
+    "mock-fs-require-fix": "~1.0.0",
     "fuzzur": "0.1.2"
   }
 }

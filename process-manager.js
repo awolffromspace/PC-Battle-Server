@@ -13,6 +13,11 @@ const EventEmitter = require('events');
 
 const processManagers = new Map();
 
+function serialize(str) {
+	if (typeof str === 'string') return str;
+	return JSON.stringify(str);
+}
+
 class ProcessWrapper extends EventEmitter {
 	constructor(PM) {
 		super();
@@ -42,19 +47,30 @@ class ProcessWrapper extends EventEmitter {
 	}
 }
 
+// execFile - the path to the file to spawn the child process(es) from
+// maxProcesses - the maximum number of child processes to spawn
+// isChatBased - the process manager handles some chat functionality
 class ProcessManager {
 	constructor(options) {
-		if (!options) options = {};
+		if (!('execFile' in options)) {
+			Monitor.debug(
+				"No execFile property was missing form the options object to be " +
+				"given to the ProcessManager constructor!"
+			);
+		} else if (!('maxProcesses' in options) || !('isChatBased' in options)) {
+			Monitor.debug(
+				"An options object given to the ProcessManager constructor is " +
+				"missing required properties! The filename given is: " + (options.execFile || '""') + "."
+			);
+		}
 
 		this.processes = [];
 		this.taskId = 0;
+		this.execFile = options.execFile;
+		this.maxProcesses = (typeof options.maxProcesses === 'number') ? options.maxProcesses : 1;
+		this.isChatBased = !!options.isChatBased;
 
-		Object.assign(this, options);
-		if (typeof this.maxProcesses !== 'number') {
-			this.maxProcesses = 1;
-		}
-
-		processManagers.set(this, this.execFile);
+		processManagers.set(this, options.execFile);
 	}
 
 	spawn() {
@@ -88,41 +104,26 @@ class ProcessManager {
 	release(process) {
 		process.release();
 	}
-	send() {
+
+	send(...args) {
 		if (!this.processes.length) {
-			return Promise.resolve(this.receive.apply(this, arguments));
+			return Promise.resolve(this.receive.apply(this, args));
 		}
 
-		let serializedArgs = '';
-		switch (arguments.length) {
-		case 0:
-			break;
-		case 1:
-			serializedArgs = serialize(arguments[0]);
-			break;
-		case 2:
-			serializedArgs = serialize(arguments[0]) + '|' + serialize(arguments[1]);
-			break;
-		default:
-			let lastIndex = arguments.length - 1;
-			for (let i = 0; i < lastIndex; ++i) {
-				serializedArgs += serialize(arguments[i]) + '|';
-			}
-			serializedArgs += serialize(arguments[lastIndex]);
-		}
-
-		let process = this.acquire();
+		let serializedArgs = args.map(serialize).join('|');
 		return new Promise((resolve, reject) => {
+			let process = this.acquire();
 			process.pendingTasks.set(this.taskId, resolve);
 			try {
-				process.process.send('' + this.taskId + '|' + serializedArgs);
+				process.process.send(`${this.taskId}|${serializedArgs}`);
 			} catch (e) {}
 			++this.taskId;
 		});
 	}
-	sendSync() {
+
+	sendSync(...args) {
 		// synchronously!
-		return this.receive.apply(this, arguments);
+		return this.receive.apply(this, args);
 	}
 
 	onMessageUpstream() {
@@ -142,9 +143,5 @@ class ProcessManager {
 }
 
 ProcessManager.cache = processManagers;
+ProcessManager.ProcessWrapper = ProcessWrapper;
 module.exports = ProcessManager;
-
-function serialize(str) {
-	if (typeof str === 'string') return str;
-	return JSON.stringify(str);
-}

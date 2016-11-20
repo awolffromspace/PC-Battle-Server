@@ -39,14 +39,22 @@ class TestTools {
 
 	mod(mod) {
 		if (cache.has(mod)) return cache.get(mod);
-		if (Tools.moddedTools[mod]) return new TestTools({mod: mod});
+		if (Tools.dexes[mod]) return new TestTools({mod: mod});
 		const baseFormat = Tools.getFormat(mod);
-		if (baseFormat.effectType === 'Format') return new TestTools({mod: 'base', baseFormat});
+		if (baseFormat.effectType === 'Format') return new TestTools({mod: baseFormat.mod, baseFormat});
 		throw new Error(`Mod ${mod} does not exist`);
 	}
 
 	gen(genNum) {
 		return this.mod('gen' + genNum);
+	}
+
+	get minRollSeed() {
+		return [0x09917, 0x06924, 0x0e1c8, 0x06af0];
+	}
+
+	get maxRollSeed() {
+		return [0x0967e, 0x0b79c, 0x06494, 0x068e3];
 	}
 
 	getFormat(options) {
@@ -92,7 +100,7 @@ class TestTools {
 			options = {};
 		}
 		const format = this.getFormat(options || {});
-		const battle = BattleEngine.Battle.construct(`battle-test-${battleNum++}`, format.id);
+		const battle = BattleEngine.construct(`battle-test-${battleNum++}`, format.id);
 		if (options && options.partialDecisions) battle.supportPartialDecisions = true;
 		if (teams) {
 			for (let i = 0; i < teams.length; i++) {
@@ -107,4 +115,4 @@ class TestTools {
 
 const common = exports = module.exports = new TestTools();
 cache.set('base', common);
-cache.set('gen6', common);
+cache.set('gen7', common);

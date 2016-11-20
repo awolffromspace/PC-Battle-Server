@@ -15,10 +15,13 @@ const ProcessManager = require('./../process-manager');
 const MAX_PROCESSES = 1;
 const RESULTS_MAX_LENGTH = 10;
 
-const PM = exports.PM = new ProcessManager({
-	maxProcesses: MAX_PROCESSES,
-	execFile: __filename,
-	onMessageUpstream: function (message) {
+function escapeHTML(str) {
+	if (!str) return '';
+	return ('' + str).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;').replace(/'/g, '&apos;').replace(/\//g, '&#x2f;');
+}
+
+class DatasearchManager extends ProcessManager {
+	onMessageUpstream(message) {
 		// Protocol:
 		// "[id]|JSON"
 		let pipeIndex = message.indexOf('|');
@@ -30,8 +33,9 @@ const PM = exports.PM = new ProcessManager({
 			this.pendingTasks.delete(id);
 			this.release();
 		}
-	},
-	onMessageDownstream: function (message) {
+	}
+
+	onMessageDownstream(message) {
 		// protocol:
 		// "[id]|{data, sig}"
 		let pipeIndex = message.indexOf('|');
@@ -39,8 +43,9 @@ const PM = exports.PM = new ProcessManager({
 
 		let data = JSON.parse(message.slice(pipeIndex + 1));
 		process.send(id + '|' + JSON.stringify(this.receive(data)));
-	},
-	receive: function (data) {
+	}
+
+	receive(data) {
 		let result;
 		try {
 			switch (data.cmd) {
@@ -61,15 +66,23 @@ const PM = exports.PM = new ProcessManager({
 				result = null;
 			}
 		} catch (err) {
-			require('./../crashlogger.js')(err, 'A search query', data);
+			require('./../crashlogger')(err, 'A search query', data);
 			result = {error: "Sorry! Our search engine crashed on your query. We've been automatically notified and will fix this crash."};
 		}
 		return result;
-	},
+	}
+}
+
+exports.DatasearchManager = DatasearchManager;
+
+const PM = exports.PM = new DatasearchManager({
+	execFile: __filename,
+	maxProcesses: MAX_PROCESSES,
 	isChatBased: true,
 });
 
 exports.commands = {
+	'!dexsearch': true,
 	ds: 'dexsearch',
 	dsearch: 'dexsearch',
 	dexsearch: function (target, room, user, connection, cmd, message) {
@@ -79,7 +92,7 @@ exports.commands = {
 		return runSearch({
 			target: target,
 			cmd: 'dexsearch',
-			canAll: (!this.broadcastMessage || room.isPersonal),
+			canAll: (!this.broadcastMessage || (room && room.isPersonal)),
 			message: (this.broadcastMessage ? "" : message),
 		}).then(response => {
 			if (!this.runBroadcast()) return;
@@ -88,9 +101,9 @@ exports.commands = {
 			} else if (response.reply) {
 				this.sendReplyBox(response.reply);
 			} else if (response.dt) {
-				CommandParser.commands.data.call(this, response.dt, room, user, connection, 'dt');
+				Chat.commands.data.call(this, response.dt, room, user, connection, 'dt');
 			}
-			room.update();
+			this.update();
 		});
 	},
 
@@ -106,6 +119,7 @@ exports.commands = {
 		"Parameters separated with '|' will be searched as alternatives for each other, e.g., 'trick | switcheroo' searches for all Pok\u00e9mon that learn either Trick or Switcheroo.",
 		"The order of the parameters does not matter."],
 
+	'!randompokemon': true,
 	rollpokemon: 'randompokemon',
 	randpoke: 'randompokemon',
 	randompokemon: function (target, room, user, connection, cmd, message) {
@@ -130,7 +144,7 @@ exports.commands = {
 		return runSearch({
 			target: targetsBuffer.join(","),
 			cmd: 'randpoke',
-			canAll: (!this.broadcastMessage || room.isPersonal),
+			canAll: (!this.broadcastMessage || (room && room.isPersonal)),
 			message: (this.broadcastMessage ? "" : message),
 		}).then(response => {
 			if (!this.runBroadcast()) return;
@@ -139,15 +153,16 @@ exports.commands = {
 			} else if (response.reply) {
 				this.sendReplyBox(response.reply);
 			} else if (response.dt) {
-				CommandParser.commands.data.call(this, response.dt, room, user, connection, 'dt');
+				Chat.commands.data.call(this, response.dt, room, user, connection, 'dt');
 			}
-			room.update();
+			this.update();
 		});
 	},
 	randompokemonhelp: ["/randompokemon - Generates random Pok\u00e9mon based on given search conditions.",
 		"/randompokemon uses the same parameters as /dexsearch (see '/help ds').",
 		"Adding a number as a parameter returns that many random Pok\u00e9mon, e.g., '/randpoke 6' returns 6 random Pok\u00e9mon."],
 
+	'!movesearch': true,
 	ms: 'movesearch',
 	msearch: 'movesearch',
 	movesearch: function (target, room, user, connection, cmd, message) {
@@ -157,7 +172,7 @@ exports.commands = {
 		return runSearch({
 			target: target,
 			cmd: 'movesearch',
-			canAll: (!this.broadcastMessage || room.isPersonal),
+			canAll: (!this.broadcastMessage || (room && room.isPersonal)),
 			message: (this.broadcastMessage ? "" : message),
 		}).then(response => {
 			if (!this.runBroadcast()) return;
@@ -166,9 +181,9 @@ exports.commands = {
 			} else if (response.reply) {
 				this.sendReplyBox(response.reply);
 			} else if (response.dt) {
-				CommandParser.commands.data.call(this, response.dt, room, user, connection, 'dt');
+				Chat.commands.data.call(this, response.dt, room, user, connection, 'dt');
 			}
-			room.update();
+			this.update();
 		});
 	},
 	movesearchhelp: ["/movesearch [parameter], [parameter], [parameter], ... - Searches for moves that fulfill the selected criteria.",
@@ -181,6 +196,7 @@ exports.commands = {
 		"If a Pok\u00e9mon is included as a parameter, moves will be searched from its movepool.",
 		"The order of the parameters does not matter."],
 
+	'!itemsearch': true,
 	isearch: 'itemsearch',
 	itemsearch: function (target, room, user, connection, cmd, message) {
 		if (!this.runBroadcast()) return;
@@ -189,7 +205,7 @@ exports.commands = {
 		return runSearch({
 			target: target,
 			cmd: 'itemsearch',
-			canAll: (!this.broadcastMessage || room.isPersonal),
+			canAll: (!this.broadcastMessage || (room && room.isPersonal)),
 			message: (this.broadcastMessage ? "" : message),
 		}).then(response => {
 			if (!this.runBroadcast()) return;
@@ -198,16 +214,19 @@ exports.commands = {
 			} else if (response.reply) {
 				this.sendReplyBox(response.reply);
 			} else if (response.dt) {
-				CommandParser.commands.data.call(this, response.dt, room, user, connection, 'dt');
+				Chat.commands.data.call(this, response.dt, room, user, connection, 'dt');
 			}
-			room.update();
+			this.update();
 		});
 	},
-	itemsearchhelp: ["/itemsearch [move description] - finds items that match the given key words.",
-	"Command accepts natural language. (tip: fewer words tend to work better)",
-	"Searches with \"fling\" in them will find items with the specified Fling behavior.",
-	"Searches with \"natural gift\" in them will find items with the specified Natural Gift behavior."],
+	itemsearchhelp: [
+		"/itemsearch [move description] - finds items that match the given key words.",
+		"Command accepts natural language. (tip: fewer words tend to work better)",
+		"Searches with \"fling\" in them will find items with the specified Fling behavior.",
+		"Searches with \"natural gift\" in them will find items with the specified Natural Gift behavior.",
+	],
 
+	'!learn': true,
 	learnset: 'learn',
 	learnall: 'learn',
 	learn5: 'learn',
@@ -217,6 +236,7 @@ exports.commands = {
 	advlearn: 'learn',
 	dpplearn: 'learn',
 	bw2learn: 'learn',
+	oraslearn: 'learn',
 	learn: function (target, room, user, connection, cmd, message) {
 		if (!this.runBroadcast()) return;
 		if (!target) return this.parse('/help learn');
@@ -232,7 +252,7 @@ exports.commands = {
 			} else if (response.reply) {
 				this.sendReplyBox(response.reply);
 			}
-			room.update();
+			this.update();
 		});
 	},
 	learnhelp: ["/learn [pokemon], [move, move, ...] - Displays how a Pok\u00e9mon can learn the given moves, if it can at all.",
@@ -242,26 +262,23 @@ exports.commands = {
 if (process.send && module === process.mainModule) {
 	// This is a child process!
 
-	global.Config = require('../config/config.js');
+	global.Config = require('../config/config');
 
 	if (Config.crashguard) {
 		process.on('uncaughtException', err => {
-			require('../crashlogger.js')(err, 'A dexsearch process', true);
+			require('../crashlogger')(err, 'A dexsearch process', true);
 		});
 	}
 
-	global.Tools = require('../tools.js');
+	global.Tools = require('../tools');
 	global.toId = Tools.getId;
 	Tools.includeData();
-	Tools.includeMods();
-	global.TeamValidator = require('../team-validator.js');
+	global.TeamValidator = require('../team-validator');
 
 	process.on('message', message => PM.onMessageDownstream(message));
 	process.on('disconnect', () => process.exit());
 
-	require('../repl.js').start('dexsearch', cmd => eval(cmd));
-} else if (!PM.maxProcesses) {
-	process.nextTick(() => Tools.includeMods());
+	require('../repl').start('dexsearch', cmd => eval(cmd));
 }
 
 function runDexsearch(target, cmd, canAll, message) {
@@ -340,7 +357,7 @@ function runDexsearch(target, cmd, canAll, message) {
 
 			let targetInt = 0;
 			if (target.substr(0, 3) === 'gen' && Number.isInteger(parseFloat(target.substr(3)))) targetInt = parseInt(target.substr(3).trim());
-			if (0 < targetInt && targetInt < 7) {
+			if (0 < targetInt && targetInt < 8) {
 				let invalid = validParameter("gens", targetInt, isNotSearch, target);
 				if (invalid) return {reply: invalid};
 				orGroup.gens[targetInt] = !isNotSearch;
@@ -472,7 +489,7 @@ function runDexsearch(target, cmd, canAll, message) {
 					case '=': direction = 'equal'; break;
 					}
 				} else {
-					return {reply: "No value given to compare with '" + Tools.escapeHTML(target) + "'."};
+					return {reply: "No value given to compare with '" + escapeHTML(target) + "'."};
 				}
 				switch (toId(stat)) {
 				case 'attack': stat = 'atk'; break;
@@ -483,13 +500,13 @@ function runDexsearch(target, cmd, canAll, message) {
 				case 'spdef': stat = 'spd'; break;
 				case 'speed': stat = 'spe'; break;
 				}
-				if (!(stat in allStats)) return {reply: "'" + Tools.escapeHTML(target) + "' did not contain a valid stat."};
+				if (!(stat in allStats)) return {reply: "'" + escapeHTML(target) + "' did not contain a valid stat."};
 				if (!orGroup.stats[stat]) orGroup.stats[stat] = {};
 				if (orGroup.stats[stat][direction]) return {reply: "Invalid stat range for " + stat + "."};
 				orGroup.stats[stat][direction] = num;
 				continue;
 			}
-			return {reply: "'" + Tools.escapeHTML(target) + "' could not be found in any of the search categories."};
+			return {reply: "'" + escapeHTML(target) + "' could not be found in any of the search categories."};
 		}
 		searches.push(orGroup);
 	}
@@ -649,7 +666,7 @@ function runDexsearch(target, cmd, canAll, message) {
 		results = Tools.shuffle(results).slice(0, randomOutput);
 	}
 
-	let resultsStr = (message === "" ? message : "<font color=#999999>" + Tools.escapeHTML(message) + ":</font><br>");
+	let resultsStr = (message === "" ? message : "<font color=#999999>" + escapeHTML(message) + ":</font><br>");
 	if (results.length > 1) {
 		if (showAll || results.length <= RESULTS_MAX_LENGTH + 5) {
 			results.sort();
@@ -690,7 +707,7 @@ function runMovesearch(target, cmd, canAll, message) {
 		let typeIndex = target.indexOf(' type');
 		if (typeIndex >= 0) {
 			target = target.charAt(0).toUpperCase() + target.substring(1, typeIndex);
-			if (!(target in Tools.data.TypeChart)) return {reply: "Type '" + Tools.escapeHTML(target) + "' not found."};
+			if (!(target in Tools.data.TypeChart)) return {reply: "Type '" + escapeHTML(target) + "' not found."};
 			if (!searches['type']) searches['type'] = {};
 			if ((searches['type'][target] && isNotSearch) || (searches['type'][target] === false && !isNotSearch)) return {reply: 'A search cannot both exclude and include a type.'};
 			searches['type'][target] = !isNotSearch;
@@ -774,7 +791,7 @@ function runMovesearch(target, cmd, canAll, message) {
 				case '=': direction = 'equal'; break;
 				}
 			} else {
-				return {reply: "No value given to compare with '" + Tools.escapeHTML(target) + "'."};
+				return {reply: "No value given to compare with '" + escapeHTML(target) + "'."};
 			}
 			let prop = targetParts[propSide];
 			switch (toId(targetParts[propSide])) {
@@ -782,7 +799,7 @@ function runMovesearch(target, cmd, canAll, message) {
 			case 'bp': prop = 'basePower'; break;
 			case 'acc': prop = 'accuracy'; break;
 			}
-			if (!(prop in allProperties)) return {reply: "'" + Tools.escapeHTML(target) + "' did not contain a valid property."};
+			if (!(prop in allProperties)) return {reply: "'" + escapeHTML(target) + "' did not contain a valid property."};
 			if (!searches['property']) searches['property'] = {};
 			if (direction === 'equal') {
 				if (searches['property'][prop]) return {reply: "Invalid property range for " + prop + "."};
@@ -833,7 +850,7 @@ function runMovesearch(target, cmd, canAll, message) {
 			case 'evasiveness': target = 'evasion'; break;
 			default: target = target.substr(7);
 			}
-			if (!(target in allBoosts)) return {reply: "'" + Tools.escapeHTML(target.substr(7)) + "' is not a recognized stat."};
+			if (!(target in allBoosts)) return {reply: "'" + escapeHTML(target.substr(7)) + "' is not a recognized stat."};
 			if (!searches['boost']) searches['boost'] = {};
 			if ((searches['boost'][target] && isNotSearch) || (searches['boost'][target] === false && !isNotSearch)) return {reply: 'A search cannot both exclude and include a stat boost.'};
 			searches['boost'][target] = !isNotSearch;
@@ -868,7 +885,7 @@ function runMovesearch(target, cmd, canAll, message) {
 			continue;
 		}
 
-		return {reply: "'" + Tools.escapeHTML(oldTarget) + "' could not be found in any of the search categories."};
+		return {reply: "'" + escapeHTML(oldTarget) + "' could not be found in any of the search categories."};
 	}
 
 	if (showAll && !Object.keys(searches).length && !targetMon) {
@@ -1005,7 +1022,7 @@ function runMovesearch(target, cmd, canAll, message) {
 	if (targetMon) {
 		resultsStr += "<font color=#999999>Matching moves found in learnset for</font> " + targetMon + ":<br>";
 	} else {
-		resultsStr += (message === "" ? message : "<font color=#999999>" + Tools.escapeHTML(message) + ":</font><br>");
+		resultsStr += (message === "" ? message : "<font color=#999999>" + escapeHTML(message) + ":</font><br>");
 	}
 	if (results.length > 0) {
 		if (showAll || results.length <= RESULTS_MAX_LENGTH + 5) {
@@ -1221,7 +1238,7 @@ function runItemsearch(target, cmd, canAll, message) {
 		}
 	}
 
-	let resultsStr = (message === "" ? message : "<font color=#999999>" + Tools.escapeHTML(message) + ":</font><br>");
+	let resultsStr = (message === "" ? message : "<font color=#999999>" + escapeHTML(message) + ":</font><br>");
 	if (foundItems.length > 0) {
 		if (showAll || foundItems.length <= RESULTS_MAX_LENGTH + 5) {
 			foundItems.sort();
@@ -1241,7 +1258,7 @@ function runLearn(target, cmd) {
 	let template = Tools.getTemplate(targets[0]);
 	let move = {};
 	let problem;
-	let gen = ({rby:1, gsc:2, adv:3, dpp:4, bw2:5}[cmd.substring(0, 3)] || 6);
+	let gen = ({rby:1, gsc:2, adv:3, dpp:4, bw2:5, oras:6}[cmd.slice(0, -5)] || 7);
 	let format = 'gen' + gen + 'ou';
 	let all = (cmd === 'learnall');
 	if (cmd === 'learn5') lsetData.set.level = 5;

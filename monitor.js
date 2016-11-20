@@ -85,13 +85,13 @@ const Monitor = module.exports = {
 		let count = val[0], duration = val[1];
 		name = (name ? ': ' + name : '');
 		if (count === 500) {
-			this.adminlog('[ResourceMonitor] IP ' + ip + ' banned for cflooding (' + count + ' times in ' + Tools.toDurationString(duration) + name + ')');
+			this.adminlog('[ResourceMonitor] IP ' + ip + ' banned for cflooding (' + count + ' times in ' + Chat.toDurationString(duration) + name + ')');
 			return true;
 		} else if (count > 500) {
 			if (count % 500 === 0) {
 				let c = count / 500;
 				if (c === 2 || c === 4 || c === 10 || c === 20 || c % 40 === 0) {
-					this.adminlog('[ResourceMonitor] IP ' + ip + ' still cflooding (' + count + ' times in ' + Tools.toDurationString(duration) + name + ')');
+					this.adminlog('[ResourceMonitor] IP ' + ip + ' still cflooding (' + count + ' times in ' + Chat.toDurationString(duration) + name + ')');
 				}
 			}
 			return true;
@@ -104,18 +104,30 @@ const Monitor = module.exports = {
 		let val = this.battles.increment(ip, 30 * 60 * 1000);
 		let count = val[0], duration = val[1];
 		name = (name ? ': ' + name : '');
-		if (duration < 5 * 60 * 1000 && count % 15 === 0) {
-			this.adminlog('[ResourceMonitor] IP ' + ip + ' has battled ' + count + ' times in the last ' + Tools.toDurationString(duration) + name);
-		} else if (count % 75 === 0) {
-			this.adminlog('[ResourceMonitor] IP ' + ip + ' has battled ' + count + ' times in the last ' + Tools.toDurationString(duration) + name);
+		if (duration < 5 * 60 * 1000 && count % 30 === 0) {
+			this.adminlog('[ResourceMonitor] IP ' + ip + ' has battled ' + count + ' times in the last ' + Chat.toDurationString(duration) + name);
+		} else if (count % 150 === 0) {
+			this.adminlog('[ResourceMonitor] IP ' + ip + ' has battled ' + count + ' times in the last ' + Chat.toDurationString(duration) + name);
 		}
 	},
 	/**
 	 * Counts battle prep. Returns true if too much
 	 */
-	countPrepBattle: function (ip) {
+	countPrepBattle: function (ip, connection) {
 		let count = this.battlePreps.increment(ip, 3 * 60 * 1000)[0];
-		if (count > 6) return true;
+		if (count > 12) {
+			connection.popup(`Due to high load, you are limited to 12 battles and team validations every 3 minutes.`);
+			return true;
+		}
+	},
+	/**
+	 * Counts concurrent battles. Returns true if too much
+	 */
+	countConcurrentBattle: function (count, connection) {
+		if (count > 5) {
+			connection.popup(`Due to high load, you are limited to 5 games at the same time.`);
+			return true;
+		}
 	},
 	/**
 	 * Counts group chat creation. Returns true if too much.
