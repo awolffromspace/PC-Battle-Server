@@ -54,7 +54,7 @@ exports.autoReloginDelay = 60 * 1000;
 * Rooms to join
 */
 
-exports.rooms = ['lobby', 'worldofpc', 'mariokart', 'darkalley', 'johtoleagueshowdown', 'kamehouse', 'trl', 'japanese', 'theshowdowninterviews', 'pokmonphoenixrisingmetagame', 'pcplayspokkn', 'franais'];
+exports.rooms = ['lobby', 'worldofpc', 'mariokart', 'darkalley', 'johtoleagueshowdown', 'kamehouse', 'trl', 'japanese', 'theshowdowninterviews', 'pokmonphoenixrisingmetagame', 'pcplayspokkn', 'franais', 'hug', 'trivia'];
 
 /*
 * exports.rooms = 'all'; //For joining all rooms
