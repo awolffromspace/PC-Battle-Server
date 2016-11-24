@@ -13,7 +13,7 @@ exports.BattleMovedex = {
 		flags: {authentic: 1},
 		volatileStatus: 'curse',
 		onTryHit: function (target, source, move) {
-			var rand = this.random(2);
+			var rand = this.random(1);
 			if (rand < 1 && target.hp < target.maxhp) {
 				delete move.volatileStatus;
 				delete move.onHit;

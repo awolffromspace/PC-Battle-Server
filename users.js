@@ -1006,6 +1006,7 @@ class User {
 		}
 	}
 	onDisconnect(connection) {
+		if (this.named) Db('seen').set(this.userid, Date.now());
 		for (let i = 0; i < this.connections.length; i++) {
 			if (this.connections[i] === connection) {
 				// console.log('DISCONNECT: ' + this.userid);
@@ -1197,6 +1198,13 @@ class User {
 				message = `The server is under attack. Battles cannot be started at this time.`;
 			}
 			connection.popup(message);
+			return Promise.resolve(false);
+		}
+		let gameCount = this.games.size;
+		if (Monitor.countConcurrentBattle(gameCount, connection)) {
+			return Promise.resolve(false);
+		}
+		if (Monitor.countPrepBattle(connection.ip || connection.latestIp, connection)) {
 			return Promise.resolve(false);
 		}
 

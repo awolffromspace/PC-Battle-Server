@@ -37,6 +37,10 @@
  *   Used to abstract out network connections. sockets.js handles
  *   the actual server and connection set-up.
  *
+ * Tells - from tells.js
+ *
+ *   Handles offline messaging.
+ *
  * @license MIT license
  */
 
@@ -118,15 +122,7 @@ global.Rooms = require('./rooms');
 
 global.Tells = require('./tells.js');
 
-global.Database = require('./database.js')(Config.database);
-
-try {
-	global.Seen = JSON.parse(fs.readFileSync('config/seen.json', 'utf8'));
-} catch (e) {
-	if (e instanceof SyntaxError) e.message = 'Malformed JSON in seen.json: \n' + e.message;
-	if (e.code !== 'ENOENT') throw e;
-	global.Seen = {};
-}
+global.Db = require('origindb')('config/db');
 
 delete process.send; // in case we're a child process
 global.Verifier = require('./verifier');

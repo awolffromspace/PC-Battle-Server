@@ -1,18 +1,20 @@
-var fs = require('fs');
-var path = require('path');
+'use strict';
 
-var shop = [
+let color = require('../config/color');
+let fs = require('fs');
+let path = require('path');
+
+let shop = [
 	['Star', 'Buy a \u2606 that goes in front of your name and puts you at the top of the user list. It goes away whether you leave for more than one hour or the server restarts.', 1],
-	['Ticket', 'Buy a lottery ticket for a chance to win lots of Battle Points. However, if you buy too many tickets, you may not make a profit.', 5],
+	['BlackStar', 'Buy a \u2605 that goes in front of your name and puts you at the top of the user list. It lasts for four weeks.', 20],
 	['Poof', 'Buy a poof message to be added into your pool of possible poofs. Poofs are custom leave messages that are used via "/poof".', 20],
 	['Adjustment', 'Buy a change for either your avatar or your join phrase. Can only be used once; further changes require additional purchases. Don\'t buy this if you haven\'t bought an avatar or join phrase before. If you have a custom avatar and would like to apply it to other usernames, contact the admin wolf and don\'t buy this.', 30],
-	['BlackStar', 'Buy a \u2605 that goes in front of your name and puts you at the top of the user list. It lasts for four weeks.', 30],
 	['Title', 'Buy a user title for your profile. It can be seen via "/profile username". Check "/profile wolf" for an example.', 30],
 	['Avatar', 'Buy a custom avatar to be applied to your name. You supply the image. Images larger than 80px by 80px don\'t show correctly in battles.', 60],
 	['JoinPhrase', 'Buy a join phrase that the bot submits in the chat every time you join the Lobby.', 60],
 ];
 
-var shopDisplay = getShopDisplay(shop);
+let shopDisplay = getShopDisplay(shop);
 
 /**
  * Gets an amount and returns the amount with the name of the currency.
@@ -26,7 +28,7 @@ var shopDisplay = getShopDisplay(shop);
  * @returns {String}
  */
 function currencyName(amount) {
-	var name = " Battle Point";
+	let name = " Battle Point";
 	return amount === 1 ? name : name + "s";
 }
 
@@ -36,12 +38,12 @@ function currencyName(amount) {
  * @param {String} money
  * @return {String|Number}
  */
-function isBP(bp) {
-	var numBP = Number(bp);
-	if (isNaN(bp)) return "Must be a number.";
-	if (String(bp).includes('.')) return "Cannot contain a decimal.";
-	if (numBP < 1) return "Cannot be less than one Battle Point.";
-	return numBP;
+function isMoney(money) {
+	let numMoney = Number(money);
+	if (isNaN(money)) return "Must be a number.";
+	if (String(money).includes('.')) return "Cannot contain a decimal.";
+	if (numMoney < 1) return "Cannot be less than one Battle Point.";
+	return numMoney;
 }
 
 /**
@@ -49,11 +51,11 @@ function isBP(bp) {
  *
  * @param {String} message
  */
-function logBP(message) {
+function logMoney(message) {
 	if (!message) return;
-	var file = path.join(__dirname, '../logs/bp.txt');
-	var date = "[" + new Date().toUTCString() + "] ";
-	var msg = message + "\n";
+	let file = path.join(__dirname, '../logs/bp.txt');
+	let date = "[" + new Date().toUTCString() + "] ";
+	let msg = message + "\n";
 	fs.appendFile(file, date + msg);
 }
 
@@ -64,9 +66,9 @@ function logBP(message) {
  * @return {String} display
  */
 function getShopDisplay(shop) {
-	var display = "<table border='1' cellspacing='0' cellpadding='5' width='100%'>" +
+	let display = "<table border='1' cellspacing='0' cellpadding='5' width='100%'>" +
 					"<tbody><tr><th>Command</th><th>Description</th><th>Cost</th></tr>";
-	var start = 0;
+	let start = 0;
 	while (start < shop.length) {
 		display += "<tr>" +
 						"<td align='center'><button name='send' value='/buy " + shop[start][0] + "'><b>" + shop[start][0] + "</b></button>" + "</td>" +
@@ -87,21 +89,21 @@ function getShopDisplay(shop) {
  * @param {Number} money
  * @return {Object}
  */
-function findItem(item, bp) {
-	var len = shop.length;
-	var price = 0;
-	var amount = 0;
+function findItem(item, money) {
+	let len = shop.length;
+	let price = 0;
+	let amount = 0;
 	while (len--) {
 		if (item.toLowerCase() !== shop[len][0].toLowerCase()) continue;
 		price = shop[len][2];
-		if (price > bp) {
-			amount = price - bp;
-			this.sendReply("You don't have enough Battle Points for this. You need " + amount + currencyName(amount) + " more to buy " + item + ".");
+		if (price > money) {
+			amount = price - money;
+			this.errorReply("You don't have you enough Battle Points for this. You need " + amount + currencyName(amount) + " more to buy " + item + ".");
 			return false;
 		}
 		return price;
 	}
-	this.sendReply(item + " not found in shop.");
+	this.errorReply(item + " not found in shop.");
 }
 
 /**
@@ -117,44 +119,10 @@ function handleBoughtItem(item, user, cost) {
 		this.sendReply("You have purchased a \u2606. You can use /star to get your \u2606.");
 		this.sendReply("You will have this until you log off for more than an hour.");
 		this.sendReply("If you do not want your \u2606 anymore, you may use /resetsymbol to go back to your old symbol.");
-	} else if (item === 'ticket') {
-		var _this = this;
-		Database.get('pot', function (err, pot) {
-			if (err) throw err;
-			if (!pot) pot = 5;
-			Database.set('pot', pot + 3,  function (err, pot) {
-				if (err) throw err;
-				Database.read('tickets', user.userid, function (err, tickets) {
-					if (err) throw err;
-					if (!tickets) tickets = [];
-					var ticket = '' + rng() + rng() + rng();
-					tickets.push(ticket);
-					Database.write('tickets', tickets, user.userid, function (err) {
-						if (err) throw err;
-						_this.sendReply("Your ticket has this id: " + ticket + ". The jackpot is currently worth " + pot + currencyName(pot) + ". Use /tickets to view your ticket(s).");
-					});
-				});
-			});
-		});
-	} else if (item === 'poof') {
-		var msg = '**' + user.name + " has bought " + item + ".**";
-		this.sendReply('Please contact the admin wolf to get ' + item + '. Use "/tell wolf, poof message here". If you want it to be set to any other usernames, mention them as well.');
-	} else if (item === 'title' || item === 'joinphrase' || item === 'blackstar') {
-		var msg = '**' + user.name + " has bought " + item + ".**";
-		this.sendReply('Please contact the admins Castform, wolf, or Zeffy to get ' + item + '. Use "/tell wolf, message here". Swap "wolf" with "ctfrm" or "zeffy" to contact a different admin. If you bought a title or a join phrase, include your desired title or join phrase in the message.');
 	} else {
-		var msg = '**' + user.name + " has bought " + item + ".**";
-		this.sendReply('Please contact the admin wolf to get ' + item + '. Use "/tell wolf, message here". If you bought an avatar or an adjustment for your avatar, include the image link in the message. If you bought an adjustment for your join phrase, include your desired join phrase in the message. If you want either of these to be set to any other usernames, mention them as well.');
+		let msg = '**' + user.name + " has bought " + item + ".**";
+		this.sendReply('Please contact the admin wolf to get ' + item + '. Use "/tell wolf, insert relevant info here". If you want to set ' + item + ' to any other usernames, please include them in the message.');
 	}
-}
-
-/**
- * Generates a random number between 0 and 1000.
- *
- * @return {Number}
- */
-function rng() {
-	return Math.floor(Math.random() * 1000);
 }
 
 exports.commands = {
@@ -164,12 +132,9 @@ exports.commands = {
 		if (!this.runBroadcast()) return;
 		if (!target) target = user.name;
 
-		Database.read('bp', toId(target), function (err, amount) {
-			if (err) throw err;
-			if (!amount) amount = 0;
-			this.sendReplyBox(Tools.escapeHTML(target) + " has " + amount + currencyName(amount) + ".");
-			room.update();
-		}.bind(this));
+		const amount = Db('bp').get(toId(target), 0);
+		let group = user.getIdentity().charAt(0);
+		this.sendReplyBox("<font color=#948A88>" + group +  "</font><font color=" + color(user.userid) + "><b>" + Chat.escapeHTML(target) + "</b></font> has " + amount + currencyName(amount) + ".");
 	},
 	wallethelp: ["/wallet [user] - Shows the amount of Battle Points a user has."],
 
@@ -177,25 +142,18 @@ exports.commands = {
 		if (!this.can('forcewin')) return false;
 		if (!target || target.indexOf(',') < 0) return this.parse('/help givebp');
 
-		var parts = target.split(',');
-		var username = parts[0];
-		var amount = isBP(parts[1]);
+		let parts = target.split(',');
+		let username = parts[0];
+		let amount = isMoney(parts[1]);
 
-		if (typeof amount === 'string') return this.sendReply(amount);
+		if (typeof amount === 'string') return this.errorReply(amount);
 
-		var _this = this;
-		Database.read('bp', toId(username), function (err, initial) {
-			if (err) throw err;
-			if (!initial) initial = 0;
-			Database.write('bp', initial + amount, toId(username), function (err, total) {
-				if (err) throw err;
-				amount = amount + currencyName(amount);
-				total = total + currencyName(total);
-				_this.sendReply(username + " was given " + amount + ". " + username + " now has " + total + ".");
-				if (Users.get(username)) Users.get(username).popup(user.name + " has given you " + amount + ". You now have " + total + ".");
-				logBP(username + " was given " + amount + " by " + user.name + ".");
-			});
-		});
+		let total = Db('bp').set(toId(username), Db('bp').get(toId(username), 0) + amount).get(toId(username));
+		amount = amount + currencyName(amount);
+		total = total + currencyName(total);
+		this.sendReply(username + " was given " + amount + ". " + username + " now has " + total + ".");
+		if (Users.get(username)) Users(username).popup(user.name + " has given you " + amount + ". You now have " + total + ".");
+		logMoney(username + " was given " + amount + " by " + user.name + ". " + username + " now has " + total);
 	},
 	givebphelp: ["/givebp [user], [amount] - Give a user a certain amount of Battle Points."],
 
@@ -203,72 +161,55 @@ exports.commands = {
 		if (!this.can('forcewin')) return false;
 		if (!target || target.indexOf(',') < 0) return this.parse('/help takebp');
 
-		var parts = target.split(',');
-		var username = parts[0];
-		var amount = isBP(parts[1]);
+		let parts = target.split(',');
+		let username = parts[0];
+		let amount = isMoney(parts[1]);
 
-		if (typeof amount === 'string') return this.sendReply(amount);
+		if (typeof amount === 'string') return this.errorReply(amount);
 
-		var _this = this;
-		Database.read('bp', toId(username), function (err, initial) {
-			if (err) throw err;
-			if (!initial) initial = 0;
-			Database.write('bp', initial - amount, toId(username), function (err, total) {
-				if (err) throw err;
-				amount = amount + currencyName(amount);
-				total = total + currencyName(total);
-				_this.sendReply(username + " lost " + amount + ". " + username + " now has " + total + ".");
-				if (Users.get(username)) Users.get(username).popup(user.name + " has taken " + amount + " from you. You now have " + total + ".");
-				logBP(username + " had " + amount + " taken away by " + user.name + ".");
-			});
-		});
+		let total = Db('bp').set(toId(username), Db('bp').get(toId(username), 0) - amount).get(toId(username));
+		amount = amount + currencyName(amount);
+		total = total + currencyName(total);
+		this.sendReply(username + " losted " + amount + ". " + username + " now has " + total + ".");
+		if (Users.get(username)) Users(username).popup(user.name + " has taken " + amount + " from you. You now have " + total + ".");
+		logMoney(username + " had " + amount + " taken away by " + user.name + ". " + username + " now has " + total);
 	},
 	takebphelp: ["/takebp [user], [amount] - Take a certain amount of Battle Points from a user."],
 
 	resetbp: function (target, room, user) {
 		if (!this.can('forcewin')) return false;
-		Database.write('bp', 0, toId(target), function (err, total) {
-			if (err) throw err;
-			this.sendReply(target + " now has " + total + currencyName(total) + ".");
-			logBP(user.name + " reset the BP of " + target + ".");
-		}.bind(this));
+		Db('bp').set(toId(target), 0);
+		this.sendReply(target + " now has 0 Battle Points.");
+		logMoney(user.name + " reset the Battle Points of " + target + ".");
 	},
 	resetbphelp: ["/resetbp [user] - Reset user's Battle Points to zero."],
 
-	transfer: 'transferbp',
 	transferbp: function (target, room, user) {
 		if (!target || target.indexOf(',') < 0) return this.parse('/help transferbp');
 
-		var parts = target.split(',');
-		var username = parts[0];
-		var amount = isBP(parts[1]);
+		let parts = target.split(',');
+		let username = parts[0];
+		let uid = toId(username);
+		let amount = isMoney(parts[1]);
 
-		if (toId(username) === user.userid) return this.sendReply("You cannot transfer to yourself.");
-		if (username.length > 19) return this.sendReply("Username cannot be longer than 19 characters.");
-		if (typeof amount === 'string') return this.sendReply(amount);
+		if (toId(username) === user.userid) return this.errorReply("You cannot transfer to yourself.");
+		if (username.length > 19) return this.errorReply("Username cannot be longer than 19 characters.");
+		if (typeof amount === 'string') return this.errorReply(amount);
+		if (amount > Db('bp').get(user.userid, 0)) return this.errorReply("You cannot transfer more Battle Points than what you have.");
 
-		var _this = this;
-		Database.read('bp', user.userid, function (err, userTotal) {
-			if (err) throw err;
-			if (!userTotal) userTotal = 0;
-			if (amount > userTotal) return _this.sendReply("You cannot transfer more Battle Points than what you have.");
-			Database.read('bp', toId(username), function (err, targetTotal) {
-				if (err) throw err;
-				if (!targetTotal) targetTotal = 0;
-				Database.write('bp', userTotal - amount, user.userid, function (err, userTotal) {
-					Database.write('bp', targetTotal + amount, toId(username), function (err, targetTotal) {
-						amount = amount + currencyName(amount);
-						userTotal = userTotal + currencyName(userTotal);
-						targetTotal = targetTotal + currencyName(targetTotal);
-						_this.sendReply("You have successfully transferred " + amount + " to " + username + ". You now have " + userTotal + ".");
-						if (Users.get(username)) Users.get(username).popup(user.name + " has transferred " + amount + ". You now have " + targetTotal + ".");
-						logBP(user.name + " transferred " + amount + " to " + username + ". " + user.name + " now has " + userTotal + " and " + username + " now has " + targetTotal + ".");
-					});
-				});
-			});
-		});
+		Db('bp')
+			.set(user.userid, Db('bp').get(user.userid) - amount)
+			.set(uid, Db('bp').get(uid, 0) + amount);
+
+		let userTotal = Db('bp').get(user.userid) + currencyName(Db('bp').get(user.userid));
+		let targetTotal = Db('bp').get(uid) + currencyName(Db('bp').get(uid));
+		amount = amount + currencyName(amount);
+
+		this.sendReply("You have successfully transferred " + amount + ". You now have " + userTotal + ".");
+		if (Users.get(username)) Users(username).popup(user.name + " has transferred " + amount + ". You now have " + targetTotal + ".");
+		logMoney(user.name + " transferred " + amount + " to " + username + ". " + user.name + " now has " + userTotal + " and " + username + " now has " + targetTotal + ".");
 	},
-	transferbphelp: ["/transfer [user], [amount] - Transfer a certain amount of Battle Points to a user."],
+	transferbphelp: ["/transferbp [user], [amount] - Transfer a certain amount of Battle Points to a user."],
 
 	store: 'shop',
 	shop: function (target, room, user) {
@@ -279,21 +220,14 @@ exports.commands = {
 
 	buy: function (target, room, user) {
 		if (!target) return this.parse('/help buy');
-		var _this = this;
-		Database.read('bp', user.userid, function (err, amount) {
-			if (err) throw err;
-			if (!amount) amount = 0;
-			var cost = findItem.call(_this, target, amount);
-			if (!cost) return room.update();
-			Database.write('bp', amount - cost, user.userid, function (err, total) {
-				if (err) throw err;
-				_this.sendReply("You have bought " + target + " for " + cost +  currencyName(cost) + ". You now have " + total + currencyName(total) + " left.");
-				room.addRaw(user.name + " has bought <b>" + target + "</b> from the shop.");
-				logBP(user.name + " has bought " + target + " from the shop. This user now has " + total + currencyName(total) + ".");
-				handleBoughtItem.call(_this, target.toLowerCase(), user, cost);
-				room.update();
-			});
-		});
+		let amount = Db('bp').get(user.userid, 0);
+		let cost = findItem.call(this, target, amount);
+		if (!cost) return;
+		let total = Db('bp').set(user.userid, amount - cost).get(user.userid);
+		this.sendReply("You have bought " + target + " for " + cost + currencyName(cost) + ". You now have " + total + currencyName(total) + " left.");
+		room.addRaw(user.name + " has bought <b>" + target + "</b> from the shop.");
+		logMoney(user.name + " has bought " + target + " from the shop. This user now has " + total + currencyName(total) + ".");
+		handleBoughtItem.call(this, target.toLowerCase(), user, cost);
 	},
 	buyhelp: ["/buy [command] - Buys an item from the shop."],
 
@@ -327,37 +261,17 @@ exports.commands = {
 	},
 	resetsymbolhelp: ["/resetsymbol - Resets your custom symbol."],
 
-	givetitle: function (target, room, user) {
-		if (!this.can('forcewin')) return false;
-		if (!target || target.indexOf(',') < 0) return this.parse('/help givetitle');
-
-		var parts = target.split(',');
-		var username = parts[0];
-		var title = parts[1];
-
-		if (typeof amount === 'string') return this.sendReply(amount);
-
-		var _this = this;
-		Database.read('title', toId(username), function (err, initial) {
-			if (err) throw err;
-			Database.write('title', title, toId(username), function (err, total) {
-				if (err) throw err;
-				_this.sendReply(username + " was given the profile title " + title + ".");
-			});
-		});
-	},
-	givetitlehelp: ["/givetitle [message] - Give a user a profile title."],
-
 	bplog: function (target, room, user, connection) {
 		if (!this.can('modlog')) return;
-		var numLines = 15;
-		var matching = true;
+		target = toId(target);
+		let numLines = 15;
+		let matching = true;
 		if (target.match(/\d/g) && !isNaN(target)) {
 			numLines = Number(target);
 			matching = false;
 		}
-		var topMsg = "Displaying the last " + numLines + " lines of transactions:\n";
-		var file = path.join(__dirname, '../logs/bp.txt');
+		let topMsg = "Displaying the last " + numLines + " lines of transactions:\n";
+		let file = path.join(__dirname, '../logs/bp.txt');
 		fs.exists(file, function (exists) {
 			if (!exists) return connection.popup("No transactions.");
 			fs.readFile(file, 'utf8', function (err, data) {
@@ -373,25 +287,24 @@ exports.commands = {
 	},
 
 	bpladder: 'richestuser',
+	moneyladder: 'richestuser',
 	richladder: 'richestuser',
 	richestusers: 'richestuser',
 	richestuser: function (target, room, user) {
 		if (!this.runBroadcast()) return;
-		var _this = this;
-		var display = '<center><u><b>BP Ladder</b></u></center><br><table border="1" cellspacing="0" cellpadding="5" width="100%"><tbody><tr><th>Rank</th><th>Username</th><th>BP</th></tr>';
-		Database.sortDesc('bp', 10, function (err, users) {
-			if (err) throw err;
-			if (!users.length) {
-				_this.sendReplyBox("Battle Points ladder is empty.");
-			} else {
-				users.forEach(function (user, index) {
-					display += "<tr><td>" + (index + 1) + "</td><td>" + user.username + "</td><td>" + user.bp + "</td></tr>";
-				});
-				display += "</tbody></table>";
-				_this.sendReply("|raw|" + display);
-			}
-			room.update();
+		let display = '<center><u><b>Battle Points Ladder</b></u></center><br><table border="1" cellspacing="0" cellpadding="5" width="100%"><tbody><tr><th>Rank</th><th>Username</th><th>BP</th></tr>';
+		let keys = Object.keys(Db('bp').object()).map(function (name) {
+			return {name: name, money: Db('bp').get(name)};
 		});
+		if (!keys.length) return this.sendReplyBox("Battle Points ladder is empty.");
+		keys.sort(function (a, b) {
+			return b.money - a.money;
+		});
+		keys.slice(0, 10).forEach(function (user, index) {
+			display += "<tr><td>" + (index + 1) + "</td><td>" + user.name + "</td><td>" + user.money + "</td></tr>";
+		});
+		display += "</tbody></table>";
+		this.sendReply("|raw|" + display);
 	},
 
 	dicegame: 'startdice',
@@ -401,9 +314,9 @@ exports.commands = {
 		if (!target) return this.parse('/help startdice');
 		if (!this.canTalk()) return this.errorReply("You can not start dice games while unable to speak.");
 
-		var amount = isBP(target);
+		let amount = isMoney(target);
 
-		if (typeof amount === 'string') return this.sendReply(amount);
+		if (typeof amount === 'string') return this.errorReply(amount);
 		if (!room.dice) room.dice = {};
 		if (room.dice.started) return this.errorReply("A dice game has already started in this room.");
 
@@ -420,45 +333,29 @@ exports.commands = {
 		if (!room.dice || (room.dice.p1 && room.dice.p2)) return this.errorReply("There is no dice game in it's signup phase in this room.");
 		if (!this.canTalk()) return this.errorReply("You may not join dice games while unable to speak.");
 		if (room.dice.p1 === user.userid) return this.errorReply("You already entered this dice game.");
-		var _this = this;
-		Database.read('bp', user.userid, function (err, userBP) {
-			if (err) throw err;
-			if (!userBP) userBP = 0;
-			if (userBP < room.dice.bet) return _this.errorReply("You don't have enough Battle Points to join this game.");
-			Database.write('bp', userBP - room.dice.bet, user.userid, function (err) {
-				if (err) throw err;
-				if (!room.dice.p1) {
-					room.dice.p1 = user.userid;
-					room.addRaw("<b>" + user.name + " has joined the dice game.</b>");
-					return room.update();
-				}
-				room.dice.p2 = user.userid;
-				room.addRaw("<b>" + user.name + " has joined the dice game.</b>");
-				var p1Number = Math.floor(6 * Math.random()) + 1;
-				var p2Number = Math.floor(6 * Math.random()) + 1;
-				var output = "<div class='infobox'>Game has two players, starting now.<br>Rolling the dice.<br>" + room.dice.p1 + " has rolled a " + p1Number + ".<br>" + room.dice.p2 + " has rolled a " + p2Number + ".<br>";
-				while (p1Number === p2Number) {
-					output += "Tie... rolling again.<br>";
-					p1Number = Math.floor(6 * Math.random()) + 1;
-					p2Number = Math.floor(6 * Math.random()) + 1;
-					output += room.dice.p1 + " has rolled a " + p1Number + ".<br>" + room.dice.p2 + " has rolled a " + p2Number + ".<br>";
-				}
-				var winner = room.dice[p1Number > p2Number ? 'p1' : 'p2'];
-				var loser = room.dice[p1Number < p2Number ? 'p1' : 'p2'];
-				var bet = room.dice.bet;
-				output += "<font color=#24678d><b>" + winner + "</b></font> has won <font color=#24678d><b>" + bet + "</b></font>" + currencyName(bet) + ".<br>Better luck next time " + loser + "!</div>";
-				room.addRaw(output);
-				room.update();
-				delete room.dice;
-				Database.read('bp', winner, function (err, total) {
-					if (err) throw err;
-					if (!total) total = 0;
-					Database.write('bp', total + bet * 2, winner, function (err) {
-						if (err) throw err;
-					});
-				});
-			});
-		});
+		if (Db('bp').get(user.userid, 0) < room.dice.bet) return this.errorReply("You don't have enough Battle Points to join this game.");
+		Db('bp').set(user.userid, Db('bp').get(user.userid) - room.dice.bet);
+		if (!room.dice.p1) {
+			room.dice.p1 = user.userid;
+			room.addRaw("<b>" + user.name + " has joined the dice game.</b>");
+			return;
+		}
+		room.dice.p2 = user.userid;
+		room.addRaw("<b>" + user.name + " has joined the dice game.</b>");
+		let p1Number = Math.floor(6 * Math.random()) + 1;
+		let p2Number = Math.floor(6 * Math.random()) + 1;
+		let output = "<div class='infobox'>Game has two players, starting now.<br>Rolling the dice.<br>" + room.dice.p1 + " has rolled a " + p1Number + ".<br>" + room.dice.p2 + " has rolled a " + p2Number + ".<br>";
+		while (p1Number === p2Number) {
+			output += "Tie... rolling again.<br>";
+			p1Number = Math.floor(6 * Math.random()) + 1;
+			p2Number = Math.floor(6 * Math.random()) + 1;
+			output += room.dice.p1 + " has rolled a " + p1Number + ".<br>" + room.dice.p2 + " has rolled a " + p2Number + ".<br>";
+		}
+		let winner = room.dice[p1Number > p2Number ? 'p1' : 'p2'];
+		output += "<font color=#24678d><b>" + winner + "</b></font> has won <font color=#24678d><b>" + room.dice.bet + "</b></font>" + currencyName(room.dice.bet) + ".<br>Better luck next time " + room.dice[p1Number < p2Number ? 'p1' : 'p2'] + "!</div>";
+		room.addRaw(output);
+		Db('bp').set(winner, Db('bp').get(winner, 0) + room.dice.bet * 2);
+		delete room.dice;
 	},
 
 	enddice: function (target, room, user) {
@@ -466,100 +363,40 @@ exports.commands = {
 		if (!room.dice) return this.errorReply("There is no dice game in this room.");
 		if ((Date.now() - room.dice.startTime) < 15000 && !user.can('broadcast', null, room)) return this.errorReply("Regular users may not end a dice game within the first minute of it starting.");
 		if (room.dice.p2) return this.errorReply("Dice game has already started.");
-		var dice = room.dice;
-		if (dice.p1) {
-			Database.read('bp', dice.p1, function (err, total) {
-				if (err) throw err;
-				if (!total) total = 0;
-				Database.write('bp', total + dice.bet, dice.p1, function (err) {
-					if (err) throw err;
-				});
-			});
-		}
-		delete room.dice;
+		if (room.dice.p1) Db('bp').set(room.dice.p1, Db('bp').get(room.dice.p1, 0) + room.dice.bet);
 		room.addRaw("<b>" + user.name + " ended the dice game.</b>");
-	},
-
-	ticket: 'tickets',
-	tickets: function (target, room, user) {
-		if (!this.runBroadcast()) return;
-		Database.read('tickets', user.userid, function (err, tickets) {
-				if (err) throw err;
-				if (!tickets || !tickets.length) {
-					this.sendReplyBox("You have no tickets.");
-				} else {
-					this.sendReplyBox("You have a total of " + tickets.length + " ticket(s). These are your ticket's ids: " + tickets.join(", ") + ".");
-				}
-				room.update();
-			}.bind(this));
-	},
-
-	picklottery: function (target, room, user) {
-		if (!this.can('picklottery')) return false;
-		var _this = this;
-		Database.users(function (err, users) {
-			if (err) throw err;
-			users = users.filter(function (user) {
-				return user.tickets && user.tickets.length > 0;
-			});
-			var tickets = [];
-			users.forEach(function (user) {
-				if (!Array.isArray(user.tickets)) user.tickets = user.tickets.split(', ');
-				user.tickets.forEach(function (ticket) {
-					tickets.push({username: user.username, ticket: ticket});
-				});
-			});
-			var winningIndex = Math.floor(Math.random() * tickets.length);
-			var winner = tickets[winningIndex];
-			Database.get('pot', function (err, pot) {
-				if (err) throw err;
-				var winnings = pot;
-				if (!winner) return _this.sendReply("No one has bought tickets.");
-				Database.read('bp', winner.username, function (err, amount) {
-					if (err) throw err;
-					if (!amount) amount = 0;
-					Database.write('bp', amount + winnings, winner.username, function (err, total) {
-						if (err) throw err;
-						var msg = "<center><h2>Lottery!</h2><h4><font color='#e54322'><b>" + winner.username + "</b></font> has won the lottery with the ticket id of " + winner.ticket + "! This user has gained " + winnings + currencyName(winnings) + " and now has a total of " + total + currencyName(total) + ".</h4></center>";
-						_this.parse('/declare ' + msg);
-						room.update();
-						Database.set('pot', 5, function (err) {
-							if (err) throw err;
-							users.forEach(function (user) {
-								Database.write('tickets', null, user.username, function (err) {
-									if (err) throw err;
-								});
-							});
-						});
-					});
-				});
-			});
-		});
-	},
-
-	jackpot: 'pot',
-	pot: function (target, room, user) {
-		if (!this.runBroadcast()) return;
-		Database.get('pot', function (err, pot) {
-			if (err) throw err;
-			if (!pot) pot = 5;
-			this.sendReplyBox("The current jackpot is " + pot + currencyName(pot) + ".");
-		}.bind(this));
+		delete room.dice;
 	},
 
 	bpstats: 'economystats',
+	bp: 'economystats',
 	economystats: function (target, room, user) {
 		if (!this.runBroadcast()) return;
-		var _this = this;
-		Database.total('bp', function (err, total) {
-			Database.countUsers(function (err, numUsers) {
-				var average = Math.floor(total / numUsers);
-				var output = "There is " + total + currencyName(total) + " circulating in the economy. ";
-				output += "The average user has " + average + currencyName(average) + ".";
-				_this.sendReplyBox(output);
-			});
-			room.update();
-		});
+		const users = Object.keys(Db('bp').object());
+		const total = users.reduce(function (acc, cur) {
+			return acc + Db('bp').get(cur);
+		}, 0);
+		let average = Math.floor(total / users.length) || '0';
+		let output = "There " + (total > 1 ? "are " : "is ") + total + currencyName(total) + " circulating in the economy. ";
+		output += "The average user has " + average + currencyName(average) + ".";
+		this.sendReplyBox(output);
 	},
+
+	givetitle: function (target, room, user) {
+		if (!this.can('forcewin')) return false;
+		if (!target || target.indexOf(',') < 0) return this.parse('/help givetitle');
+
+		var parts = target.split(',');
+		var username = parts[0];
+		var title = parts[1];
+
+		if (typeof amount === 'string') return this.sendReply(amount);
+
+
+		Db('title').set(toId(username), title);
+		this.sendReply(username + " was given the profile title " + title + ".");
+		logMoney(username + " was given a profile title by " + user.name + ".");
+	},
+	givetitlehelp: ["/givetitle [user], [title] - Give a user a profile title."],
 
 };

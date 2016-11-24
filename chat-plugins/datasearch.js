@@ -86,7 +86,7 @@ exports.commands = {
 	ds: 'dexsearch',
 	dsearch: 'dexsearch',
 	dexsearch: function (target, room, user, connection, cmd, message) {
-		if (!this.runBroadcast()) return;
+		if (!this.canBroadcast()) return;
 		if (!target) return this.parse('/help dexsearch');
 
 		return runSearch({
@@ -123,7 +123,7 @@ exports.commands = {
 	rollpokemon: 'randompokemon',
 	randpoke: 'randompokemon',
 	randompokemon: function (target, room, user, connection, cmd, message) {
-		if (!this.runBroadcast()) return;
+		if (!this.canBroadcast()) return;
 		let targets = target.split(",");
 		let targetsBuffer = [];
 		let qty;
@@ -166,7 +166,7 @@ exports.commands = {
 	ms: 'movesearch',
 	msearch: 'movesearch',
 	movesearch: function (target, room, user, connection, cmd, message) {
-		if (!this.runBroadcast()) return;
+		if (!this.canBroadcast()) return;
 		if (!target) return this.parse('/help movesearch');
 
 		return runSearch({
@@ -199,7 +199,7 @@ exports.commands = {
 	'!itemsearch': true,
 	isearch: 'itemsearch',
 	itemsearch: function (target, room, user, connection, cmd, message) {
-		if (!this.runBroadcast()) return;
+		if (!this.canBroadcast()) return;
 		if (!target) return this.parse('/help itemsearch');
 
 		return runSearch({
@@ -238,7 +238,7 @@ exports.commands = {
 	bw2learn: 'learn',
 	oraslearn: 'learn',
 	learn: function (target, room, user, connection, cmd, message) {
-		if (!this.runBroadcast()) return;
+		if (!this.canBroadcast()) return;
 		if (!target) return this.parse('/help learn');
 
 		return runSearch({

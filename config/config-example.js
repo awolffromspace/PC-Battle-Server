@@ -155,7 +155,7 @@ exports.watchconfig = true;
 exports.logchat = true;
 
 // logchallenges - whether to log challenge battles. Useful for tournament servers.
-exports.logchallenges = true;
+exports.logchallenges = false;
 
 // loguserstats - how often (in milliseconds) to write user stats to the
 // lobby log. This has no effect if `logchat` is disabled.
@@ -181,17 +181,6 @@ exports.tellsexpiryage = 1000 * 60 * 60 * 24 * 7;
 // offline messaging completely. Set to `'autoconfirmed'` to allow only autoconfirmed users
 // to send offline messages.
 exports.tellrank = ' ';
-
-// database use to store user's money, tickets, etc.
-exports.database = 'lowdb';
-
-// mysql configuration to create the connection to the database.
-exports.mysql = {
-	host: 'localhost',
-	user: 'me',
-	password: 'secret',
-	database: 'my_db'
-};
 
 // Custom avatars.
 // This allows you to specify custom avatar images for users on your server.
@@ -583,6 +572,8 @@ exports.customavatars = {
 	'noanoodles': 'nodles.png',
 	'noav': 'nodles.png',
 	'nodles': 'nodles.png',
+	'digitalesper': 'digitalesper.png',
+	'snflr': 'snflr.png',
 	'nakasu': 'nakasu.gif',
 	'pmseth': 'savash.png',
 	'savashy': 'savash.png',
@@ -599,10 +590,6 @@ exports.customavatars = {
 	'squeetz': 'squeetz.png',
 	'whatagimmick': 'squeetz.png',
 	'brcklesnar': 'brcklesnar.jpg',
-	'noanoodles': 'noanoodles.png',
-	'noatan': 'noanoodles.png',
-	'digitalesper': 'digitalesper.png',
-	'snflr': 'snflr.png',
 	'elektraheart': 'elektraheart.gif',
 	'lordgrizz': 'lordgrizz.jpg',
 	'serrh': 'serrh.gif',

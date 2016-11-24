@@ -1,8 +1,10 @@
-var color = require('../config/color');
+'use strict';
+
+let color = require('../config/color');
 
 exports.parseEmoticons = parseEmoticons;
 
-var emotes = {
+let emotes = {
 	':4head:': 'http://cbc.pokecommunity.com/config/emoticons/4head.png',
 	':absol:': 'http://cbc.pokecommunity.com/config/emoticons/absol.png',
 	':aggron:': 'http://cbc.pokecommunity.com/config/emoticons/aggron.png',
@@ -101,6 +103,7 @@ var emotes = {
 	':lickilicky:': 'http://cbc.pokecommunity.com/config/emoticons/lickilicky.png',
 	':lickitung:': 'http://cbc.pokecommunity.com/config/emoticons/lickitung.gif',
 	':lileep:': 'http://cbc.pokecommunity.com/config/emoticons/lileep.png',
+	':link:': 'http://cbc.pokecommunity.com/config/emoticons/link.png',
 	':loudred:': 'http://cbc.pokecommunity.com/config/emoticons/loudred.png',
 	':lucio:': 'http://cbc.pokecommunity.com/config/emoticons/lucio.png',
 	':ludicolo:': 'http://cbc.pokecommunity.com/config/emoticons/ludicolo.png',
@@ -171,6 +174,7 @@ var emotes = {
 	':snivy:': 'http://cbc.pokecommunity.com/config/emoticons/snivy.png',
 	':snorlax:': 'http://cbc.pokecommunity.com/config/emoticons/snorlax.png',
 	':soldier76:': 'http://cbc.pokecommunity.com/config/emoticons/soldier76.png',
+	':sombra:': 'http://cbc.pokecommunity.com/config/emoticons/sombra.png',
 	':spasm:': 'http://cbc.pokecommunity.com/config/emoticons/spasm.gif',
 	':spheal:': 'http://cbc.pokecommunity.com/config/emoticons/spheal.png',
 	':spinda:': 'http://cbc.pokecommunity.com/config/emoticons/spinda.png',
@@ -215,32 +219,31 @@ var emotes = {
 	':zzz:': 'http://cbc.pokecommunity.com/config/emoticons/zzz.gif',
 };
 
-var emotesKeys = Object.keys(emotes);
-var patterns = [];
-var metachars = /[[\]{}()*+?.\\|^$\-,&#\s]/g;
+let emotesKeys = Object.keys(emotes);
+let patterns = [];
+let metachars = /[[\]{}()*+?.\\|^$\-,&#\s]/g;
 
-for (var i in emotes) {
+for (let i in emotes) {
 	if (emotes.hasOwnProperty(i)) {
 		patterns.push('(' + i.replace(metachars, '\\$&') + ')');
 	}
 }
-var patternRegex = new RegExp(patterns.join('|'), 'g');
+let patternRegex = new RegExp(patterns.join('|'), 'g');
 
 /**
- * Parse emoticons in message.
- *
- * @param {String} message
- * @param {Object} room
- * @param {Object} user
- * @param {Boolean} pm - returns a string if it is in private messages
- * @returns {Boolean|String}
- */
+* Parse emoticons in message.
+*
+* @param {String} message
+* @param {Object} room
+* @param {Object} user
+* @param {Boolean} pm - returns a string if it is in private messages
+* @returns {Boolean|String}
+*/
 function parseEmoticons(message, room, user, pm) {
 	if (typeof message !== 'string' || (!pm && room.disableEmoticons)) return false;
 
-	var match = false;
-	var len = emotesKeys.length;
-
+	let match = false;
+	let len = emotesKeys.length;
 
 	while (len--) {
 		if (message && message.indexOf(emotesKeys[len]) >= 0) {
@@ -252,7 +255,7 @@ function parseEmoticons(message, room, user, pm) {
 	if (!match) return false;
 
 	// escape HTML
-	message = Tools.escapeHTML(message);
+	message = Chat.escapeHTML(message);
 
 	// add emotes
 	message = message.replace(patternRegex, function (match) {
@@ -263,7 +266,7 @@ function parseEmoticons(message, room, user, pm) {
 		if (match === ':ana:' || match === ':mercy:' || match === ':tracer:') return typeof emote != 'undefined' ?
 			'<img src="' + emote + '" title="' + match + '" width="35" height="33"/>' :
 			match;
-		if (match === ':bastion:' || match === ':dva:' || match === ':hanzo:' || match === ':junkrat:' || match === ':mccree:' || match === ':mei:' || match === ':pharah:' || match === ':reaper:' || match === ':reinhardt:' || match === ':roadhog:' || match === ':soldier76:' || match === ':torbjorn:' || match === ':winston:' || match === ':zarya:') return typeof emote != 'undefined' ?
+		if (match === ':bastion:' || match === ':dva:' || match === ':hanzo:' || match === ':junkrat:' || match === ':mccree:' || match === ':mei:' || match === ':pharah:' || match === ':reaper:' || match === ':reinhardt:' || match === ':roadhog:' || match === ':soldier76:' || match === ':sombra:' || match === ':torbjorn:' || match === ':winston:' || match === ':zarya:') return typeof emote != 'undefined' ?
 			'<img src="' + emote + '" title="' + match + '" width="37" height="33"/>' :
 			match;
 		if (match === ':bed:') return typeof emote != 'undefined' ?
@@ -361,53 +364,51 @@ function parseEmoticons(message, room, user, pm) {
 	// **bold**
 	message = message.replace(/\*\*([^< ](?:[^<]*?[^< ])?)\*\*/g, '<b>$1</b>');
 
-	var group = user.getIdentity().charAt(0);
-	if (room.auth) group = room.auth[user.userid] || group;
+	let group = user.getIdentity().charAt(0);
+	if (room && room.auth) group = room.auth[user.userid] || group;
+	if (pm && !user.hiding) group = user.group;
 
-	var style = "background:none;border:0;padding:0 5px 0 0;font-family:Verdana,Helvetica,Arial,sans-serif;font-size:9pt;cursor:pointer";
+	if (pm) return "<div class='chat' style='display:inline'>" + "<em class='mine'>" + message + "</em></div>";
 
+	let style = "background:none;border:0;padding:0 5px 0 0;font-family:Verdana,Helvetica,Arial,sans-serif;font-size:9pt;cursor:pointer";
 	message = "<div class='chat'>" + "<small>" + group + "</small>" + "<button name='parseCommand' value='/user " + user.name + "' style='" + style + "'>" + "<b><font color='" + color(user.userid) + "'>" + user.name + ":</font></b>" + "</button><em class='mine'>" + message + "</em></div>";
-	if (pm) return message;
 
 	room.addRaw(message);
+
+	room.update();
 
 	return true;
 }
 
 /**
- * Create a two column table listing emoticons.
- *
- * @return {String} emotes table
- */
+* Create a two column table listing emoticons.
+*
+* @return {String} emotes table
+*/
 function create_table() {
-	var emotes_name = Object.keys(emotes);
-	var emotes_list = [];
-	var emotes_group_list = [];
-	var len = emotes_name.length;
-	var i;
+	let emotes_name = Object.keys(emotes);
+	let emotes_list = [];
+	let emotes_group_list = [];
+	let len = emotes_name.length;
 
-	for (i = 0; i < len; i++) {
-		emotes_list.push("<td>" +
-			"<img src='" + emotes[emotes_name[i]] + "'' title='" + emotes_name[i] + "' height='30' width='30' />" +
-			emotes_name[i] + "</td>");
+	for (let i = 0; i < len; i++) {
+		emotes_list.push("<td style='padding: 5px; box-shadow: 0px 0px 2px rgba(0, 0, 0, 0.5) inset; border-radius: 5px;'>" + "<img src='" + emotes[emotes_name[i]] + "'' title='" + emotes_name[i] + "' height='50' width='50' style='vertical-align: middle;  padding-right: 5px;' />" + emotes_name[i] + "</td>");
 	}
 
-	var emotes_list_right = emotes_list.splice(len / 2, len / 2);
-
-	for (i = 0; i < len / 2; i++) {
-		var emote1 = emotes_list[i],
-			emote2 = emotes_list_right[i];
-		if (emote2) {
-			emotes_group_list.push("<tr>" + emote1 + emote2 + "</tr>");
-		} else {
-			emotes_group_list.push("<tr>" + emote1 + "</tr>");
-		}
+	for (let i = 0; i < len; i += 4) {
+		let emoteOutput = [emotes_list[i], emotes_list[i + 1], emotes_list[i + 2], emotes_list[i + 3]];
+		if (i < len) emotes_group_list.push("<tr>" + emoteOutput.join('') + "</tr>");
 	}
 
-	return "<div class='infobox'><center><b>List of Emoticons</b></center>" + "<div class='infobox-limited'><table border='1' cellspacing='0' cellpadding='5' width='100%'>" + "<tbody>" + emotes_group_list.join("") + "</tbody>" + "</table></div></div>";
+	return (
+		"<div class='infobox'><center><font style='font-weight: bold; text-decoration: underline; color: #555;'>List of Emoticons</font></center>" +
+		"<div style='max-height: 300px; overflow-y: scroll; padding: 5px 0px;'><table style='background: rgba(245, 245, 245, 0.4); border: 1px solid #BBB;' width='100%'>" +
+		emotes_group_list.join("") +
+		"</table></div></div>"
+	);
 }
 
-var emotes_table = create_table();
+let emotes_table = create_table();
 
 exports.commands = {
 	blockemote: 'blockemoticons',
@@ -430,9 +431,7 @@ exports.commands = {
 	},
 	unblockemoticonshelp: ["/unblockemoticons - Unblocks emoticons in private messages. Block them with /blockemoticons."],
 
-	emote: 'emoticons',
 	emotes: 'emoticons',
-	emoticon: 'emoticons',
 	emoticons: function (target, room, user) {
 		if (!this.runBroadcast()) return;
 		this.sendReply("|raw|" + emotes_table);
@@ -442,7 +441,7 @@ exports.commands = {
 	toggleemote: 'toggleemoticons',
 	toggleemotes: 'toggleemoticons',
 	toggleemoticons: function (target, room, user) {
-		if (!this.can('warn', null, room)) return false;
+		if (!this.can('declare', null, room)) return false;
 		room.disableEmoticons = !room.disableEmoticons;
 		this.sendReply("Disallowing emoticons is set to " + room.disableEmoticons + " in this room.");
 		if (room.disableEmoticons) {
@@ -452,4 +451,13 @@ exports.commands = {
 		}
 	},
 	toggleemoticonshelp: ["/toggleemoticons - Toggle emoticons on or off."],
+
+	rande: 'randemote',
+	randemote: function (target, room, user) {
+		if (!this.runBroadcast()) return;
+		let rng = Math.floor(Math.random() * emotesKeys.length);
+		let randomEmote = emotesKeys[rng];
+		this.sendReplyBox("<img src='" + emotes[randomEmote] + "' title='" + randomEmote + "' height='50' width='50' />");
+	},
+	randemotehelp: ["/randemote - Get a random emote."],
 };

@@ -2,17 +2,19 @@
  * Miscellaneous commands
  */
 
-var fs = require('fs');
-var moment = require('moment');
-var request = require('request');
+'use strict';
+/*eslint no-restricted-modules: [0]*/
+
+let moment = require('moment');
+let request = require('request');
 
 function clearRoom(room) {
-	var len = (room.log && room.log.length) || 0;
-	var users = [];
+	let len = (room.log && room.log.length) || 0;
+	let users = [];
 	while (len--) {
 		room.log[len] = '';
 	}
-	for (var u in room.users) {
+	for (let u in room.users) {
 		users.push(u);
 		Users.get(u).leaveRoom(room, Users.get(u).connections[0]);
 	}
@@ -34,15 +36,12 @@ exports.commands = {
 
 	gclearall: 'globalclearall',
 	globalclearall: function (target, room, user) {
-		if (!this.can('makeroom')) return;
+		if (!this.can('makeroom')) return false;
 
-		for (var u in Users.users) {
-			Users.users[u].popup("All rooms are being cleared.");
+		for (let u in Users.users) {
+			Users.users[u].popup("All rooms are being clear.");
 		}
-
-		for (var r in Rooms.rooms) {
-			clearRoom(Rooms.rooms[r]);
-		}
+		Rooms.rooms.forEach(clearRoom);
 	},
 
 	masspm: 'pmall',
@@ -50,27 +49,14 @@ exports.commands = {
 		if (!this.can('pmall')) return false;
 		if (!target) return this.parse('/help pmall');
 
-		var pmName = ' Server PM [Do not reply]';
+		let pmName = ' Server PM [Do not reply]';
 
-		for (var i in Users.users) {
-			var message = '|pm|' + pmName + '|' + Users.users[i].getIdentity() + '|' + target;
-			Users.users[i].send(message);
-		}
+		Users.users.forEach(function (user) {
+			let message = '|pm|' + pmName + '|' + user.getIdentity() + '|' + target;
+			user.send(message);
+		});
 	},
 	pmallhelp: ["/pmall [message] - PM all users in the server."],
-
-	rmall: function (target, room, user) {
-		if (!this.can('rmall', null, room)) return false;
-		if (!target) return this.parse('/help rmall');
-
-		var pmName = ' Room PM [Do not reply]';
-
-		for (var i in room.users) {
-			var message = '|pm|' + pmName + '|' + room.users[i].getIdentity() + '|' + target;
-			room.users[i].send(message);
-		}
-	},
-	rmallhelp: ["/rmall [message] - PM all users in the room."],
 
 	staffpm: 'pmallstaff',
 	pmstaff: 'pmallstaff',
@@ -78,30 +64,32 @@ exports.commands = {
 		if (!this.can('forcewin')) return false;
 		if (!target) return this.parse('/help pmallstaff');
 
-		var pmName = ' Staff PM [Do not reply]';
+		let pmName = ' Staff PM [Do not reply]';
 
-		for (var i in Users.users) {
-			if (Users.users[i].isStaff) {
-				Users.users[i].send('|pm|' + pmName + '|' + Users.users[i].group + Users.users[i].name + '|' + target);
-			}
-		}
+		Users.users.forEach(function (user) {
+			if (!user.isStaff) return;
+			let message = '|pm|' + pmName + '|' + user.getIdentity() + '|' + target;
+			user.send(message);
+		});
 	},
 	pmallstaffhelp: ["/pmallstaff [message] - Sends a PM to every staff member online."],
 
 	regdate: function (target, room, user) {
 		if (!this.runBroadcast()) return;
 		if (!target || !toId(target)) return this.parse('/help regdate');
-		var username = toId(target);
+		let username = toId(target);
 		request('http://pokemonshowdown.com/users/' + username, function (error, response, body) {
 			if (error && response.statusCode !== 200) {
-				this.sendReplyBox(Tools.escapeHTML(target) + " is not registered.");
+				this.sendReplyBox(Chat.escapeHTML(target) + " is not registered.");
 				return room.update();
 			}
-			var regdate = body.split('<small>')[1].split('</small>')[0].replace(/(<em>|<\/em>)/g, '');
+			let regdate = body.split('<small>')[1].split('</small>')[0].replace(/(<em>|<\/em>)/g, '');
 			if (regdate === '(Unregistered)') {
-				this.sendReplyBox(Tools.escapeHTML(target) + " is not registered.");
+				this.sendReplyBox(Chat.escapeHTML(target) + " is not registered.");
+			} else if (regdate === '(Account disabled)') {
+				this.sendReplyBox(Chat.escapeHTML(target) + "'s account is disabled.");
 			} else {
-				this.sendReplyBox(Tools.escapeHTML(target) + " was registered on " + regdate.slice(7) + ".");
+				this.sendReplyBox(Chat.escapeHTML(target) + " was registered on " + regdate.slice(7) + ".");
 			}
 			room.update();
 		}.bind(this));
@@ -115,16 +103,22 @@ exports.commands = {
 	},
 	showdownboilerplatehelp: ["/showdownboilerplate - Links to the Showdown-Boilerplate repository on Github."],
 
-	seen: function () {
+	seen: function (target, room, user) {
 		if (!this.runBroadcast()) return;
-		this.sendReply("Please use .seen instead.");
+		if (!target) return this.parse('/help seen');
+		let targetUser = Users.get(target);
+		if (targetUser && targetUser.connected) return this.sendReplyBox(targetUser.name + " is <b>currently online</b>.");
+		target = Chat.escapeHTML(target);
+		let seen = Db('seen').get(toId(target));
+		if (!seen) return this.sendReplyBox(target + " has never been online on this server.");
+		this.sendReplyBox(target + " was last seen <b>" + moment(seen).fromNow() + "</b>.");
 	},
 	seenhelp: ["/seen - Shows when the user last connected on the server."],
 
 	tell: function (target, room, user, connection) {
 		if (!target) return this.parse('/help tell');
 		target = this.splitTarget(target);
-		var targetUser = this.targetUser;
+		let targetUser = this.targetUser;
 		if (!target) {
 			this.sendReply("You forgot the comma.");
 			return this.parse('/help tell');
@@ -144,10 +138,10 @@ exports.commands = {
 				(!Config.tellrank ? "disabled" : "only available to users of rank " + Config.tellrank + " and above") + ".");
 		}
 
-		var userid = toId(this.targetUsername);
+		let userid = toId(this.targetUsername);
 		if (userid.length > 18) return this.popupReply("\"" + this.targetUsername + "\" is not a legal username.");
 
-		var sendSuccess = Tells.addTell(user, userid, target);
+		let sendSuccess = Tells.addTell(user, userid, target);
 		if (!sendSuccess) {
 			if (sendSuccess === false) {
 				return this.popupReply("User " + this.targetUsername + " has too many offline messages queued.");

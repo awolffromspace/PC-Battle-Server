@@ -139,7 +139,7 @@ exports.commands = {
 			buf += `<br />Private rooms: ${privaterooms}`;
 		}
 
-		if (user.can('alts', targetUser)) {
+		if (user.can('alts', targetUser) || (room.isPrivate !== true && user.can('mute', targetUser, room) && targetUser.userid in room.users)) {
 			let roomPunishments = ``;
 			for (let i = 0; i < Rooms.global.chatRooms.length; i++) {
 				const curRoom = Rooms.global.chatRooms[i];
@@ -906,6 +906,10 @@ exports.commands = {
 			if (!evSet) {
 				if (lowercase === 'invested' || lowercase === 'max') {
 					evSet = true;
+					if (lowercase === 'max' && !natureSet) {
+						nature = 1.1;
+						natureSet = true;
+					}
 				} else if (lowercase === 'uninvested') {
 					ev = 0;
 					evSet = true;
@@ -1025,12 +1029,19 @@ exports.commands = {
 	groups: function (target, room, user) {
 		if (!this.runBroadcast()) return;
 		this.sendReplyBox(
-			"+ <b>Voices</b> - Respected regulars. They can create and moderate tournaments; start and end polls; use /html, /declare, /showimage, /announce; and talk during moderated chat.<br />" +
-			"\u2605 <b>Players</b> - Members who have won a notable competition or bought a black star through the /shop (temporary).<br />" +
-			"@ <b>Moderators</b> - Moderate the battle server and provide feedback on staff decisions. They can use most commands.<br />" +
-			"* <b>Bots</b> - They are bots that help moderate the battle server.<br />" +
-			"~ <b>Administrators</b> - Manage the battle server. They can use all commands.<br />" +
-			"# <b>Room Owners</b> - Manage rooms and can almost totally control them."
+			"<b>Room Rank</b><br />" +
+			"+ <b>Voice</b> - They can use ! commands like !groups, and talk during moderated chat<br />" +
+			"% <b>Driver</b> - The above, and they can mute and warn<br />" +
+			"@ <b>Moderator</b> - The above, and they can room ban users<br />" +
+			"* <b>Bot</b> - Like Moderator, but makes it clear that this user is a bot<br />" +
+			"# <b>Room Owner</b> - They are leaders of the room and can almost totally control it<br /><br />" +
+			"<b>Global Rank</b><br />" +
+			"+ <b>Global Voice</b> - They can use ! commands like !groups, and talk during moderated chat<br />" +
+			"% <b>Global Driver</b> - The above, and they can also lock users and check for alts<br />" +
+			"@ <b>Global Moderator</b> - The above, and they can globally ban users<br />" +
+			"* <b>Global Bot</b> - Like Moderator, but makes it clear that this user is a bot<br />" +
+			"&amp; <b>Global Leader</b> - The above, and they can promote to global moderator and force ties<br />" +
+			"~ <b>Global Administrator</b> -  They can do anything, like change what this message says"
 		);
 	},
 	groupshelp: ["/groups - Explains what the symbols (like % and @) before people's names mean.",
@@ -1055,30 +1066,25 @@ exports.commands = {
 		"!opensource - Show everyone that information. Requires: + % @ * # & ~"],
 
 	'!staff': true,
-	stafflist: 'staff',
-	staffalts: 'staff',
-	staffalt: 'staff',
 	staff: function (target, room, user) {
 		if (!this.runBroadcast()) return;
 		this.sendReplyBox(
 			"<b>~ Administrators</b><br />" +
 			"- Achromatic<br />" +
-			"- Anti (Papa Anti)<br />" +
+			"- Aurora (Tyranitar)<br />" +
 			"- Ausaudriel (Audy)<br />" +
-			"- Castform (Bruxish, Carol's Cookies, Chase, Chaseform, Eleven, jellicentfan1, Lаnа Del Phox, Michonne, Negan, Weаther Ball)<br />" +
-			"- Dragon (bellossom, Death by Chansey, Lailah, Mamori Minamoto, Megumiii, Princess Zelda, Sakura Wars, Terra Branford)<br />" +
+			"- Eleven (Bruxish, Carol's Cookies, Castform, Chase, Chaseform, jellicentfan1, Lаnа Del Phox, Michonne, Negan, Weаther Ball)<br />" +
+			"- Dragon (bellossom, Death by Chansey, Esper Terra, Lailah, Mamori Minamoto, Megumiii, Princess Zelda, Sakura Wars, Terra Branford)<br />" +
 			"- Hiroshi Sotomura<br />" +
 			"- Rukario (PPN)<br />" +
-			"- Sheep (Cirnysheep)<br />" +
+			"- Sheep (Cirnysheep, janna, jannasheep, mareep)<br />" +
 			"- Sylphiel<br />" +
 			"- wolf (wofl)<br /><br />" +
 			"<b>@ Moderators</b><br />" +
-			"- Archy<br />" +
-			"- Aurora (Tyranitar)<br />" +
 			"- Christos (sphealosophy)<br />" +
-			"- Noa (Rohan-Sensei, Sunflora)<br />" +
+			"- Noa (maple sugar, Rohan-Sensei, Sunflora)<br />" +
 			"- Omicron (Carousels, Megido, omicorn, omicronhuh, Postcards)<br />" +
-			"- Syndrome (Daddy, Fuck Kevin Durant, King Syn, Morning Bliss, Muhammad Ali, Reaper, Steph Carried, Tracer, Widowmaker)<br /><br />" +
+			"- Syndrome (Comme des Garcon, Daddy, Fuck Kevin Durant, King Syn, Morning Bliss, Muhammad Ali, Reaper, Steph Carried, Tracer, Who is Sombra?, Widowmaker)<br /><br />" +
 			"<a href=\"http://www.pokecommunity.com/showthread.php?t=289012#staff\">Click here for more details.</a>"
 		);
 	},
@@ -1344,7 +1350,6 @@ exports.commands = {
 			"<br />" +
 			"<strong>Room owners (#)</strong> can also use:<br />" +
 			"- /roomintro <em>intro</em>: sets the room introduction that will be displayed for all users joining the room<br />" +
-			"- /roomdesc <em>description</em>: sets the room description that will be displayed on the room list<br />" +
 			"- /rules <em>rules link</em>: set the room rules link seen when using /rules<br />" +
 			"- /roommod, /roomdriver <em>username</em>: appoint a room moderator/driver<br />" +
 			"- /roomdemod, /roomdedriver <em>username</em>: remove a room moderator/driver<br />" +
@@ -1853,7 +1858,7 @@ exports.commands = {
 	},
 	htmlboxhelp: [
 		"/htmlbox [message] - Displays a message, parsing HTML code contained.",
-		"!htmlbox [message] - Shows everyone a message, parsing HTML code contained. Requires: ~ & * with global authority OR # * with room authority",
+		"!htmlbox [message] - Shows everyone a message, parsing HTML code contained. Requires: ~ & #",
 	],
 };
 

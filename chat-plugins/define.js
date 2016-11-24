@@ -1,7 +1,10 @@
-var fs = require('fs');
-var request = require('request');
+'use strict';
+/*eslint no-restricted-modules: [0]*/
 
-var urbanCache;
+let fs = require('fs');
+let request = require('request');
+
+let urbanCache;
 try {
 	urbanCache = JSON.parse(fs.readFileSync('../config/udcache.json', 'utf8'));
 } catch (e) {
@@ -23,25 +26,25 @@ exports.commands = {
 		if (!this.runBroadcast()) return;
 		if (!this.canTalk()) return this.errorReply("You cannot do this while unable to speak.");
 
-		var options = {
+		let options = {
 			url: 'http://api.wordnik.com:80/v4/word.json/' + target + '/definitions?limit=3&sourceDictionaries=all' +
-			'&useCanonical=false&includeTags=false&api_key=a2a73e7b926c924fad7001ca3111acd55af2ffabf50eb4ae5'
+			'&useCanonical=false&includeTags=false&api_key=a2a73e7b926c924fad7001ca3111acd55af2ffabf50eb4ae5',
 		};
 
-		var self = this;
+		let self = this;
 
 		function callback(error, response, body) {
 			if (!error && response.statusCode === 200) {
-				var page = JSON.parse(body);
-				var output = "<font color=#24678d><b>Definitions for " + target + ":</b></font><br />";
+				let page = JSON.parse(body);
+				let output = "<font color=#24678d><b>Definitions for " + target + ":</b></font><br />";
 				if (!page[0]) {
 					self.sendReplyBox("No results for <b>\"" + target + "\"</b>.");
 					return room.update();
 				} else {
-					var count = 1;
-					for (var u in page) {
+					let count = 1;
+					for (let u in page) {
 						if (count > 3) break;
-						output += "(<b>" + count + "</b>) " + Tools.escapeHTML(page[u]['text']) + "<br />";
+						output += "(<b>" + count + "</b>) " + Chat.escapeHTML(page[u]['text']) + "<br />";
 						count++;
 					}
 					self.sendReplyBox(output);
@@ -61,40 +64,38 @@ exports.commands = {
 		if (!this.can('declare', null, room)) return false;
 		if (!this.canTalk()) return this.errorReply("You cannot do this while unable to speak.");
 
-		var options = {
+		let options = {
 			url: 'http://www.urbandictionary.com/iphone/search/define',
 			term: target,
 			headers: {
-				'Referer': 'http://m.urbandictionary.com'
+				'Referer': 'http://m.urbandictionary.com',
 			},
 			qs: {
-				'term': target
-			}
+				'term': target,
+			},
 		};
 
-		var milliseconds = ((44640 * 60) * 1000);
-
 		if (urbanCache[target.toLowerCase().replace(/ /g, '')] && Math.round(Math.abs((urbanCache[target.toLowerCase().replace(/ /g, '')].time - Date.now()) / (24 * 60 * 60 * 1000))) < 31) {
-			return this.sendReplyBox("<b>" + Tools.escapeHTML(target) + ":</b> " + urbanCache[target.toLowerCase().replace(/ /g, '')].definition.substr(0, 400));
+			return this.sendReplyBox("<b>" + Chat.escapeHTML(target) + ":</b> " + urbanCache[target.toLowerCase().replace(/ /g, '')].definition.substr(0, 400));
 		}
 
-		var self = this;
+		let self = this;
 
 		function callback(error, response, body) {
 			if (!error && response.statusCode === 200) {
-				var page = JSON.parse(body);
-				var definitions = page['list'];
+				let page = JSON.parse(body);
+				let definitions = page['list'];
 				if (page['result_type'] === 'no_results') {
-					self.sendReplyBox("No results for <b>\"" + Tools.escapeHTML(target) + "\"</b>.");
+					self.sendReplyBox("No results for <b>\"" + Chat.escapeHTML(target) + "\"</b>.");
 					return room.update();
 				} else {
 					if (!definitions[0]['word'] || !definitions[0]['definition']) {
-						self.sendReplyBox("No results for <b>\"" + Tools.escapeHTML(target) + "\"</b>.");
+						self.sendReplyBox("No results for <b>\"" + Chat.escapeHTML(target) + "\"</b>.");
 						return room.update();
 					}
-					var output = "<b>" + Tools.escapeHTML(definitions[0]['word']) + ":</b> " + Tools.escapeHTML(definitions[0]['definition']).replace(/\r\n/g, '<br />').replace(/\n/g, ' ');
+					let output = "<b>" + Chat.escapeHTML(definitions[0]['word']) + ":</b> " + Chat.escapeHTML(definitions[0]['definition']).replace(/\r\n/g, '<br />').replace(/\n/g, ' ');
 					if (output.length > 400) output = output.slice(0, 400) + '...';
-					cacheUrbanWord(target, Tools.escapeHTML(definitions[0]['definition']).replace(/\r\n/g, '<br />').replace(/\n/g, ' '));
+					cacheUrbanWord(target, Chat.escapeHTML(definitions[0]['definition']).replace(/\r\n/g, '<br />').replace(/\n/g, ' '));
 					self.sendReplyBox(output);
 					return room.update();
 				}

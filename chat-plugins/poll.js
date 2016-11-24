@@ -5,6 +5,8 @@
 
 'use strict';
 
+const moment = require('moment');
+
 class Poll {
 	constructor(room, questionData, options) {
 		if (room.pollNumber) {
@@ -20,6 +22,8 @@ class Poll {
 		this.totalVotes = 0;
 		this.timeout = null;
 		this.timeoutMins = 0;
+		this.startTime = Date.now();
+		this.startedUser = questionData.username;
 
 		this.options = new Map();
 		for (let i = 0; i < options.length; i++) {
@@ -32,7 +36,7 @@ class Poll {
 		let userid = user.userid;
 
 		if (userid in this.voters || ip in this.voterIps) {
-			return user.sendTo(this.room, "You have already voted for this poll.");
+			user.sendTo(this.room, "You have already voted for this poll.");
 		}
 
 		this.voters[userid] = option;
@@ -58,32 +62,44 @@ class Poll {
 	}
 
 	generateVotes() {
-		let output = '<div class="infobox"><p style="margin: 2px 0 5px 0"><span style="border:1px solid #6A6;color:#484;border-radius:4px;padding:0 3px"><i class="fa fa-bar-chart"></i> Poll</span> <strong style="font-size:11pt">' + this.getQuestionMarkup() + '</strong></p>';
+		let count = 0;
+		let output = '<div style="max-height: 310px; overflow-y: auto;  border-top-right-radius: 4px; border-top-left-radius: 4px;"><table cellspacing="0" style="width: 100%; border: 1px solid #6688aa; border-bottom: none; border-top-right-radius: 4px; border-top-left-radius: 4px;"><tr><td colspan="4" class="poll-td" style="background: rgba(229,234,237,1); background: rgba(229,234,237,1); border-bottom: 1px solid #6688aa; border-top-right-radius: 4px; border-top-left-radius: 4px;"><span style="border: 1px solid #3B763B; color: #2D5A2D; border-radius: 4px; padding: 0 3px;"><i class="fa fa-bar-chart"></i> Poll</span> <strong style="font-size: 11pt; color: #224466">' + this.getQuestionMarkup() + '</strong>';
 		this.options.forEach((option, number) => {
-			output += '<div style="margin-top: 5px"><button class="button" value="/poll vote ' + number + '" name="send" title="Vote for ' + number + '. ' + Chat.escapeHTML(option.name) + '">' + number + '. <strong>' + this.getOptionMarkup(option) + '</strong></button></div>';
+			count++;
+			if (count === 1) output += "<tr>";
+			output += '<td class="poll-td"><button style="background: rgba(232,232,232,1); border: 1px solid #aaaaaa; border-radius: 4px; transition-duration: 0.5s; transition-timing-function: linear;" value="/poll vote ' + number + '" name="send" title="Vote for ' + number + '. ' + Chat.escapeHTML(option.name) + '">' + Chat.escapeHTML(option.name) + '</button></td>';
+			if (count >= 4) {
+				output += "</tr>";
+				count = 0;
+			}
 		});
-		output += '<div style="margin-top: 7px; padding-left: 12px"><button value="/poll results" name="send" title="View results - you will not be able to vote after viewing results"><small>(View results)</small></button></div>';
-		output += '</div>';
+		output += '</table></div><div style="padding: 8px 0px; text-align: center; border: 1px solid #6688aa; border-top: none; border-bottom-right-radius: 4px; border-bottom-left-radius: 4px;"><button value="/poll results" name="send" title="View results - you will not be able to vote after viewing results" class="poll-results-btn" style="background: rgba(232,232,232,1); border: 1px solid #aaaaaa; border-radius: 4px; transition-duration: 0.5s; transition-timing-function: linear;"><small>(View results)</small></button></div>';
 
 		return output;
 	}
 
 	generateResults(ended, option) {
-		let icon = '<span style="border:1px solid #' + (ended ? '777;color:#555' : '6A6;color:#484') + ';border-radius:4px;padding:0 3px"><i class="fa fa-bar-chart"></i> ' + (ended ? "Poll ended" : "Poll") + '</span>';
-		let output = '<div class="infobox"><p style="margin: 2px 0 5px 0">' + icon + ' <strong style="font-size:11pt">' + this.getQuestionMarkup() + '</strong></p>';
+		let icon = '<span style="border: 1px solid #' + (ended ? '777; color: #555' : '6688aa; color: #2D5A2D') + '; border-radius: 4px; padding: 0 3px;"><i class="fa fa-bar-chart"></i> ' + (ended ? "Poll ended" : "Poll") + '</span>';
+		let totalVotes = '<br /><span style="font-style: italic; font-size: 9pt; color: black;">[Total Votes: ' + this.totalVotes + '] (Started by ' + this.startedUser + ' ' + moment(this.startTime).fromNow() + '.)</span></div>';
+		let output = '<div style="width: 100%; border: 1px solid #6688aa; border-radius: 4px;"><div class="poll-td" style="background: rgba(229,234,237,1); background: rgba(229,234,237,1); border-bottom: 1px solid #6688aa; border-top-right-radius: 4px; border-top-left-radius: 4px;">' + icon + ' <strong style="font-size: 11pt; color: #224466;">' + this.getQuestionMarkup() + '</strong>';
+		output += totalVotes;
+		output += '<div style="padding: 8px 15px;"><font color="grey"><small><center>(Options with 0 votes are not shown)</center></small></font><br />';
+		output += '<table cellspacing="0" style="width: 100%;margin-top: 3px;">';
 		let iter = this.options.entries();
 
 		let i = iter.next();
 		let c = 0;
 		let colors = ['#79A', '#8A8', '#88B'];
 		while (!i.done) {
-			let percentage = Math.round((i.value[1].votes * 100) / (this.totalVotes || 1));
-			output += '<div style="margin-top: 3px">' + i.value[0] + '. <strong>' + (i.value[0] === option ? '<em>' : '') + this.getOptionMarkup(i.value[1]) + (i.value[0] === option ? '</em>' : '') + '</strong> <small>(' + i.value[1].votes + ' vote' + (i.value[1].votes === 1 ? '' : 's') + ')</small><br /><span style="font-size:7pt;background:' + colors[c % 3] + ';padding-right:' + (percentage * 3) + 'px"></span><small>&nbsp;' + percentage + '%</small></div>';
+			if (i.value[1].votes && i.value[1].votes !== 0) {
+				let percentage = Math.round((i.value[1].votes * 100) / (this.totalVotes || 1));
+				output += '<tr><td><strong>' + (i.value[0] === option ? '<em>' : '') + Chat.escapeHTML(i.value[1].name) + (i.value[0] === option ? '</em>' : '') + '</strong> <small>(' + i.value[1].votes + ' vote' + (i.value[1].votes === 1 ? '' : 's') + ')</small></td><td><span style="font-size: 7pt; background: ' + colors[c % 3] + '; padding-right: ' + (percentage * 3) + 'px; border-radius: 4px;"></span><small>&nbsp;' + percentage + '%</small></td></tr>';
+			}
 			i = iter.next();
 			c++;
 		}
 		if (option === 0 && !ended) output += '<div><small>(You can\'t vote after viewing results)</small></div>';
-		output += '</div>';
+		output += '</table>';
 
 		return output;
 	}
@@ -210,12 +226,17 @@ exports.commands = {
 			if (supportHTML) params = params.map(parameter => this.canHTML(parameter));
 			if (params.some(parameter => !parameter)) return;
 
-			const options = params.splice(1);
-			if (options.length > 8) {
-				return this.errorReply("Too many options for poll (maximum is 8).");
+			let options = [];
+
+			for (let i = 1; i < params.length; i++) {
+				options.push(params[i]);
 			}
 
-			room.poll = new Poll(room, {source: params[0], supportHTML: supportHTML}, options);
+			if (options.length > 36) {
+				return this.errorReply("Too many options for poll (maximum is 36).");
+			}
+
+			room.poll = new Poll(room, {source: params[0], supportHTML: supportHTML, username: user.name}, options);
 			room.poll.display();
 
 			this.logEntry("" + user.name + " used " + message);
@@ -309,6 +330,12 @@ exports.commands = {
 		},
 		displayhelp: ["/poll display - Displays the poll"],
 
+		votes: function (target, room, user) {
+			if (!room.poll) return this.errorReply("There is no poll running in this room.");
+			if (!this.runBroadcast()) return;
+			this.sendReplyBox("Total Votes: " + room.poll.totalVotes);
+		},
+
 		'': function (target, room, user) {
 			this.parse('/help poll');
 		},
@@ -322,8 +349,54 @@ exports.commands = {
 		"/poll timer [minutes] - Sets the poll to automatically end after [minutes]. Requires: % @ * # & ~",
 		"/poll results - Shows the results of the poll without voting. NOTE: you can't go back and vote after using this.",
 		"/poll display - Displays the poll",
-		"/poll end - Ends a poll and displays the results. Requires: % @ * # & ~",
+		"/poll end - Ends a poll and displays the results. Requires: % @ # & ~",
 	],
+
+	votes: function (target, room, user) {
+		if (!room.poll) return this.errorReply("There is no poll running in this room.");
+		if (!this.runBroadcast()) return;
+		room.poll.update();
+		let votes = room.poll.totalVotes;
+		return this.sendReplyBox("Total Votes: " + votes);
+	},
+	ep: 'endpoll',
+	endpoll: function (target, room, user) {
+		this.parse('/poll end');
+	},
+	pr: 'pollremind',
+	pollremind: function (target, room, user) {
+		if (!room.poll) return this.errorReply("There is no poll running in this room.");
+		if (!this.runBroadcast()) return;
+		room.poll.update();
+		if (this.broadcasting) {
+			room.update();
+			room.poll.display(user, this.broadcasting);
+		} else {
+			this.parse('/poll display');
+		}
+	},
+	tpoll: 'tourpoll',
+	tournamentpoll: 'tourpoll',
+	tourneypoll: 'tourpoll',
+	tourpoll: function (target, room, user) {
+		const formats = ['[Gen 7] Pokebank OU', '[Gen 7] Pokebank Ubers', '[Gen 7] Pokebank LC', '[Gen 6] OU', '[Gen 6] Monotype', 'Random', 'Battle Factory', '1v1 Random', 'High Tier Random', 'Low Tier Random', 'Uber Random', 'LC Random', 'Monotype Random', 'Generational Random', 'Color Random', 'Inverse Random', 'Community Random', 'Metronome 3v3 Random', 'Super Staff Bros. Melee', 'Hackmons Cup', 'Doubles Random', '[Gen 6] Random', '[Gen 5] Random', '[Gen 2] Random', '[Gen 1] Random'];
+		this.parse('/poll new Tournament format?, ' + formats);
+	},
+	teampoll: function (target, room, user) {
+		const formats = ['[Gen 7] Pokebank OU', '[Gen 7] Pokebank Ubers', '[Gen 7] Pokebank LC', '[Gen 6] OU', '[Gen 6] Ubers', '[Gen 6] UU', '[Gen 6] RU', '[Gen 6] NU', '[Gen 6] PU', 'VGC 2016', '[Gen 6] Monotype'];
+		this.parse('/poll new Tournament format?, ' + formats);
+	},
+	randbatpoll: 'randompoll',
+	randbatspoll: 'randompoll',
+	randpoll: 'randompoll',
+	randompoll: function (target, room, user) {
+		const formats = ['Random', 'Battle Factory', '1v1 Random', 'High Tier Random', 'Low Tier Random', 'Uber Random', 'LC Random', 'Monotype Random', 'Generational Random', 'Kanto Random', 'Johto Random', 'Hoenn Random', 'Hoenn Weather Random', 'Sinnoh Random', 'Unova Random', 'Kalos Random', 'Color Random', 'Inverse Random', 'Community Random', 'Super Smash Bros. Random', 'Orb Random', 'Metronome 3v3 Random', 'Super Staff Bros. Melee', 'Hackmons Cup', 'Doubles Random', 'Triples Random', '[Gen 6] Random', '[Gen 5] Random', '[Gen 2] Random', '[Gen 1] Random'];
+		this.parse('/poll new Tournament format?, ' + formats);
+	},
+	vote: function (target, room, user) {
+		if (!target) return this.errorReply("Usage: /vote [poll option number] - votes for the [option] in the current poll.");
+		this.parse('/poll vote ' + target);
+	},
 };
 
 process.nextTick(() => {

@@ -56,6 +56,7 @@ exports.BattleScripts = {
 			sourceEffect = this.getEffect('lockedmove');
 		}
 		pokemon.moveUsed(move);
+		if (zMove) pokemon.side.zMoveUsed = true;
 		this.useMove(move, pokemon, target, sourceEffect, zMove);
 		this.singleEvent('AfterMove', move, null, pokemon, target, move);
 		this.runEvent('AfterMove', pokemon, target, move);
@@ -348,7 +349,7 @@ exports.BattleScripts = {
 
 		if (move.breaksProtect) {
 			let broke = false;
-			for (let i in {kingsshield:1, protect:1, spikyshield:1}) {
+			for (let i in {banefulbunker:1, kingsshield:1, protect:1, spikyshield:1}) {
 				if (target.removeVolatile(i)) broke = true;
 			}
 			if (this.gen >= 6 || target.side !== pokemon.side) {
@@ -751,16 +752,13 @@ exports.BattleScripts = {
 	runZMove: function (move, pokemon, target, sourceEffect) {
 		// Limit one Z move per side
 		let zMove = this.getZMove(move, pokemon);
-		if (zMove) {
-			pokemon.side.zMoveUsed = true;
-		}
 		this.runMove(move, pokemon, target, sourceEffect, zMove);
 	},
 
 	canMegaEvo: function (pokemon) {
 		let altForme = pokemon.baseTemplate.otherFormes && this.getTemplate(pokemon.baseTemplate.otherFormes[0]);
-		if (altForme && altForme.isMega && altForme.requiredMove && pokemon.moves.includes(toId(altForme.requiredMove))) return altForme.species;
 		let item = pokemon.getItem();
+		if (altForme && altForme.isMega && altForme.requiredMove && pokemon.moves.includes(toId(altForme.requiredMove)) && !item.zMove) return altForme.species;
 		if (item.megaEvolves !== pokemon.baseTemplate.baseSpecies || item.megaStone === pokemon.species) return false;
 		return item.megaStone;
 	},
@@ -880,68 +878,43 @@ exports.BattleScripts = {
 		let natures = Object.keys(this.data.Natures);
 		let items = Object.keys(this.data.Items);
 
-		let hasDexNumber = {};
-		let formes = [[], [], [], [], [], []];
-
-		// Pick six random pokemon--no repeats, even among formes
-		// Also need to either normalize for formes or select formes at random
-		// Unreleased are okay but no CAP
-
-		let num;
-		for (let i = 0; i < 6; i++) {
-			do {
-				num = this.random(802) + 1;
-			} while (num in hasDexNumber);
-			hasDexNumber[num] = i;
-		}
-
-		for (let id in this.data.Pokedex) {
-			if (!(this.data.Pokedex[id].num in hasDexNumber)) continue;
-			let template = this.getTemplate(id);
-			if (template.gen <= this.gen && template.species !== 'Pichu-Spiky-eared' && template.species.substr(0, 8) !== 'Pikachu-') {
-				formes[hasDexNumber[template.num]].push(template.species);
-			}
-		}
+		let random6 = this.random6Pokemon();
 
 		for (let i = 0; i < 6; i++) {
-			let poke = formes[i][this.random(formes[i].length)];
-			let template = this.getTemplate(poke);
+			let species = random6[i];
+			let template = this.getTemplate(species);
 
 			// Random legal item
 			let item = '';
-			do {
-				item = items[this.random(items.length)];
-			} while (this.data.Items[item].gen > this.gen || this.data.Items[item].isNonstandard);
+			if (this.gen >= 2) {
+				do {
+					item = items[this.random(items.length)];
+				} while (this.getItem(item).gen > this.gen || this.data.Items[item].isNonstandard);
+			}
 
 			// Make sure forme is legal
 			if (template.battleOnly || template.requiredItems && !template.requiredItems.some(req => toId(req) === item)) {
 				template = this.getTemplate(template.baseSpecies);
-				poke = template.name;
+				species = template.name;
 			}
 
-			// Make sure forme/item combo is correct
-			switch (poke) {
-			case 'Giratina':
-				while (item === 'griseousorb') item = items[this.random(items.length)];
-				break;
-			case 'Arceus':
-				while (item.substr(-5) === 'plate') item = items[this.random(items.length)];
-				break;
-			case 'Genesect':
-				while (item.substr(-5) === 'drive') item = items[this.random(items.length)];
-				break;
-			case 'Silvally':
-				while (item.substr(-6) === 'memory') item = items[this.random(items.length)];
+			// Make sure that a base forme does not hold any forme-modifier items.
+			let itemData = this.getItem(item);
+			if (itemData.forcedForme && species === this.getTemplate(itemData.forcedForme).baseSpecies) {
+				do {
+					item = items[this.random(items.length)];
+					itemData = this.getItem(item);
+				} while (itemData.gen > this.gen || itemData.isNonstandard || itemData.forcedForme && species === this.getTemplate(itemData.forcedForme).baseSpecies);
 			}
 
 			// Random ability
 			let abilities = Object.values(template.abilities);
-			let ability = abilities[this.random(abilities.length)];
+			let ability = this.gen <= 2 ? 'None' : abilities[this.random(abilities.length)];
 
 			// Four random unique moves from the movepool
 			let moves;
 			let pool = ['struggle'];
-			if (poke === 'Smeargle') {
+			if (species === 'Smeargle') {
 				pool = Object.keys(this.data.Movedex).filter(moveid => !(moveid in {'chatter':1, 'struggle':1, 'paleowave':1, 'shadowstrike':1, 'magikarpsrevenge':1}));
 			} else if (template.learnset) {
 				pool = Object.keys(template.learnset);
@@ -949,7 +922,8 @@ exports.BattleScripts = {
 					pool = Array.from(new Set(pool.concat(Object.keys(this.getTemplate(template.baseSpecies).learnset))));
 				}
 			} else {
-				pool = Object.keys(this.getTemplate(template.baseSpecies).learnset);
+				const learnset = this.getTemplate(template.baseSpecies).learnset;
+				pool = Object.keys(learnset);
 			}
 			if (pool.length <= 4) {
 				moves = pool;
@@ -1026,30 +1000,21 @@ exports.BattleScripts = {
 
 		return team;
 	},
-	randomHCTeam: function (side) {
-		let team = [];
-
-		let itemPool = Object.keys(this.data.Items);
-		let abilityPool = Object.keys(this.data.Abilities);
-		let movePool = Object.keys(this.data.Movedex);
-		let naturePool = Object.keys(this.data.Natures);
-
-		let hasDexNumber = {};
-		let formes = [[], [], [], [], [], []];
-
+	random6Pokemon: function () {
 		// Pick six random pokemon--no repeats, even among formes
 		// Also need to either normalize for formes or select formes at random
 		// Unreleased are okay but no CAP
-
-		let num;
 		let last = [0, 151, 251, 386, 493, 649, 721, 802][this.gen];
+		let hasDexNumber = {};
 		for (let i = 0; i < 6; i++) {
+			let num;
 			do {
 				num = this.random(last) + 1;
 			} while (num in hasDexNumber);
 			hasDexNumber[num] = i;
 		}
 
+		let formes = [[], [], [], [], [], []];
 		for (let id in this.data.Pokedex) {
 			if (!(this.data.Pokedex[id].num in hasDexNumber)) continue;
 			let template = this.getTemplate(id);
@@ -1058,25 +1023,51 @@ exports.BattleScripts = {
 			}
 		}
 
+		let sixPokemon = [];
+		for (let i = 0; i < 6; i++) {
+			if (!formes[i].length) {
+				// console.log("Could not find pokemon " + i);
+				// for (var k in hasDexNumber) {
+				// 	if (hasDexNumber[k] === i) {
+				// 		console.log("dexNumber was " + k);
+				// 		console.log("dex found: " + JSON.stringify(Object.values(this.data.Pokedex).filter(t => t.num == Number(k)).map(t => t.species)));
+				// 	}
+				// }
+				throw new Error("Invalid pokemon gen " + this.gen + ": " + JSON.stringify(formes) + " numbers " + JSON.stringify(hasDexNumber));
+			}
+			sixPokemon.push(formes[i][this.random(formes[i].length)]);
+		}
+		return sixPokemon;
+	},
+	randomHCTeam: function (side) {
+		let team = [];
+
+		let itemPool = Object.keys(this.data.Items);
+		let abilityPool = Object.keys(this.data.Abilities);
+		let movePool = Object.keys(this.data.Movedex);
+		let naturePool = Object.keys(this.data.Natures);
+
+		let random6 = this.random6Pokemon();
+
 		for (let i = 0; i < 6; i++) {
 			// Choose forme
-			let pokemon = formes[i][this.random(formes[i].length)];
-			let template = this.getTemplate(pokemon);
+			let template = this.getTemplate(random6[i]);
 
 			// Random unique item
 			let item = '';
-			do {
-				item = this.sampleNoReplace(itemPool);
-			} while (this.data.Items[item].gen > this.gen || this.data.Items[item].isNonstandard);
-
-			// Genesect forms are a sprite difference based on its Drives
-			if (template.species.substr(0, 9) === 'Genesect-' && item !== toId(template.requiredItem)) pokemon = 'Genesect';
+			if (this.gen >= 2) {
+				do {
+					item = this.sampleNoReplace(itemPool);
+				} while (this.getItem(item).gen > this.gen || this.data.Items[item].isNonstandard);
+			}
 
 			// Random unique ability
-			let ability = '';
-			do {
-				ability = this.sampleNoReplace(abilityPool);
-			} while (this.getAbility(ability).gen > this.gen || this.data.Abilities[ability].isNonstandard);
+			let ability = 'None';
+			if (this.gen >= 3) {
+				do {
+					ability = this.sampleNoReplace(abilityPool);
+				} while (this.getAbility(ability).gen > this.gen || this.data.Abilities[ability].isNonstandard);
+			}
 
 			// Random unique moves
 			let m = [];
@@ -1207,7 +1198,7 @@ exports.BattleScripts = {
 			let move = this.getMove(moves[k]);
 			let moveid = move.id;
 			let movetype = move.type;
-			if (moveid === 'judgment') movetype = Object.keys(hasType)[0];
+			if (moveid === 'judgment' || moveid === 'multiattack') movetype = Object.keys(hasType)[0];
 			if (move.damage || move.damageCallback) {
 				// Moves that do a set amount of damage:
 				counter['damage']++;
@@ -1793,7 +1784,6 @@ exports.BattleScripts = {
 					(hasType['Water'] && !counter['Water'] && (!hasType['Ice'] || !counter['Ice']) && !hasAbility['Protean']) ||
 					((hasAbility['Adaptability'] && !counter.setupType && template.types.length > 1 && (!counter[template.types[0]] || !counter[template.types[1]])) ||
 					((hasAbility['Aerilate'] || hasAbility['Pixilate'] || hasAbility['Refrigerate']) && !counter['Normal']) ||
-					(hasAbility['Bad Dreams'] && movePool.includes('darkvoid')) ||
 					(hasAbility['Contrary'] && !counter['contrary'] && template.species !== 'Shuckle') ||
 					(hasAbility['Dark Aura'] && !counter['Dark']) ||
 					(hasAbility['Gale Wings'] && !counter['Flying']) ||
@@ -1824,14 +1814,6 @@ exports.BattleScripts = {
 				if (rejected && (movePool.length - availableHP || availableHP && (move.id === 'hiddenpower' || !hasMove['hiddenpower']))) {
 					moves.splice(k, 1);
 					break;
-				}
-
-				// Handle Hidden Power IVs
-				if (move.id === 'hiddenpower') {
-					let HPivs = this.getType(move.type).HPivs;
-					for (let iv in HPivs) {
-						ivs[iv] = HPivs[iv];
-					}
 				}
 			}
 			if (moves.length === 4 && !counter.stab && !hasMove['metalburst'] && (counter['physicalpool'] || counter['specialpool'])) {
@@ -1875,11 +1857,6 @@ exports.BattleScripts = {
 		// Moveset modifications
 		if (hasMove['autotomize'] && hasMove['heavyslam']) {
 			moves[moves.indexOf('autotomize')] = 'rockpolish';
-		}
-
-		// If Hidden Power has been removed, reset the IVs
-		if (!hasMove['hiddenpower']) {
-			ivs = {hp: 31, atk: 31, def: 31, spa: 31, spd: 31, spe: 31};
 		}
 
 		let abilities = Object.values(baseTemplate.abilities);
@@ -2016,7 +1993,13 @@ exports.BattleScripts = {
 
 		item = 'Leftovers';
 		if (template.requiredItems) {
-			item = template.requiredItems[this.random(template.requiredItems.length)];
+			if (template.baseSpecies === 'Arceus' && hasMove['judgment']) {
+				// Judgment doesn't change type with Z-Crystals
+				let items = template.requiredItems.filter(item => item.endsWith('Plate'));
+				item = items[this.random(items.length)];
+			} else {
+				item = template.requiredItems[this.random(template.requiredItems.length)];
+			}
 		} else if (hasMove['magikarpsrevenge']) {
 			// PoTD Magikarp
 			item = 'Choice Band';
@@ -2027,7 +2010,7 @@ exports.BattleScripts = {
 		// First, the extra high-priority items
 		} else if (template.species === 'Clamperl' && !hasMove['shellsmash']) {
 			item = 'DeepSeaTooth';
-		} else if (template.species === 'Cubone' || template.species === 'Marowak') {
+		} else if (template.species === 'Cubone' || template.baseSpecies === 'Marowak') {
 			item = 'Thick Club';
 		} else if (template.species === 'Dedenne') {
 			item = 'Petaya Berry';
@@ -2055,10 +2038,10 @@ exports.BattleScripts = {
 		} else if (ability === 'Magic Guard' && hasMove['psychoshift']) {
 			item = 'Flame Orb';
 		} else if (hasMove['switcheroo'] || hasMove['trick']) {
-			let randomNum = this.random(2);
-			if (counter.Physical >= 3 && (template.baseStats.spe >= 95 || randomNum)) {
+			let randomNum = this.random(3);
+			if (counter.Physical >= 3 && (template.baseStats.spe < 60 || template.baseStats.spe > 108 || randomNum)) {
 				item = 'Choice Band';
-			} else if (counter.Special >= 3 && (template.baseStats.spe >= 95 || randomNum)) {
+			} else if (counter.Special >= 3 && (template.baseStats.spe < 60 || template.baseStats.spe > 108 || randomNum)) {
 				item = 'Choice Specs';
 			} else {
 				item = 'Choice Scarf';
@@ -2086,7 +2069,7 @@ exports.BattleScripts = {
 		} else if (hasMove['acrobatics']) {
 			item = 'Flying Gem';
 		} else if ((ability === 'Guts' || hasMove['facade']) && !hasMove['sleeptalk']) {
-			item = hasMove['drainpunch'] ? 'Flame Orb' : 'Toxic Orb';
+			item = hasType['Fire'] ? 'Toxic Orb' : 'Flame Orb';
 		} else if (ability === 'Unburden') {
 			if (hasMove['fakeout']) {
 				item = 'Normal Gem';
@@ -2109,10 +2092,10 @@ exports.BattleScripts = {
 		} else if (((ability === 'Speed Boost' && !hasMove['substitute']) || (ability === 'Stance Change')) && counter.Physical + counter.Special > 2) {
 			item = 'Life Orb';
 		} else if (counter.Physical >= 4 && !hasMove['bodyslam'] && !hasMove['dragontail'] && !hasMove['fakeout'] && !hasMove['flamecharge'] && !hasMove['rapidspin'] && !hasMove['suckerpunch']) {
-			item = template.baseStats.spe > 82 && template.baseStats.spe < 109 && !counter['priority'] && this.random(3) ? 'Choice Scarf' : 'Choice Band';
+			item = template.baseStats.spe >= 60 && template.baseStats.spe <= 108 && !counter['priority'] && this.random(3) ? 'Choice Scarf' : 'Choice Band';
 		} else if (counter.Special >= 4 && !hasMove['acidspray'] && !hasMove['chargebeam'] && !hasMove['fierydance']) {
-			item = template.baseStats.spe > 82 && template.baseStats.spe < 109 && !counter['priority'] && this.random(3) ? 'Choice Scarf' : 'Choice Specs';
-		} else if (counter.Special >= 3 && hasMove['uturn'] && template.baseStats.spe > 82 && template.baseStats.spe < 109 && !counter['priority'] && this.random(3)) {
+			item = template.baseStats.spe >= 60 && template.baseStats.spe <= 108 && !counter['priority'] && this.random(3) ? 'Choice Scarf' : 'Choice Specs';
+		} else if (counter.Special >= 3 && hasMove['uturn'] && template.baseStats.spe >= 60 && template.baseStats.spe <= 108 && !counter['priority'] && this.random(3)) {
 			item = 'Choice Scarf';
 		} else if (ability === 'Defeatist' || hasMove['eruption'] || hasMove['waterspout']) {
 			item = counter.Status <= 1 ? 'Expert Belt' : 'Leftovers';
@@ -2187,10 +2170,10 @@ exports.BattleScripts = {
 		};
 		let customScale = {
 			// Between OU and Uber
-			Aegislash: 74, Blaziken: 74, 'Blaziken-Mega': 74, Genesect: 74, 'Genesect-Burn': 74, 'Genesect-Chill': 74, 'Genesect-Douse': 74, 'Genesect-Shock': 74, Greninja: 74, 'Lucario-Mega': 74, 'Mawile-Mega': 74,
+			// Blaziken: 74, 'Blaziken-Mega': 74, 'Lucario-Mega': 74,
 
 			// Banned Ability
-			Gothitelle: 74, Ninetales: 77, Politoed: 77, Wobbuffet: 74,
+			// Gothitelle: 74, Wobbuffet: 74,
 
 			// Holistic judgement
 			Unown: 100,
@@ -2199,7 +2182,7 @@ exports.BattleScripts = {
 		if (tier.charAt(0) === '(') {
 			tier = tier.slice(1, -1);
 		}
-		let level = levelScale[tier] || 90;
+		let level = levelScale[tier] || 75;
 		if (customScale[template.name]) level = customScale[template.name];
 
 		if (template.name === 'Slurpuff' && !counter.setupType) level = 81;
@@ -2320,33 +2303,21 @@ exports.BattleScripts = {
 
 			// Adjust rate for species with multiple formes
 			switch (template.baseSpecies) {
-			case 'Arceus':
+			case 'Arceus': case 'Silvally':
 				if (this.random(18) >= 1) continue;
-				break;
-			case 'Pikachu':
-				if (this.random(7) >= 1) continue;
-				continue;
-			case 'Genesect':
-				if (this.random(5) >= 1) continue;
-				break;
-			case 'Castform': case 'Gourgeist':
-				if (this.random(4) >= 1) continue;
 				break;
 			case 'Basculin': case 'Cherrim': case 'Hoopa': case 'Meloetta': case 'Meowstic':
 				if (this.random(2) >= 1) continue;
 				break;
-			case 'Meloetta':
-				if (this.random(2) >= 1) continue;
-				break;
-			case 'Meowstic':
-				if (this.random(2) >= 1) continue;
-				break;
-			case 'Pikachu':
-				// Cosplay Pikachu formes have 20% the normal rate (1/30 the normal rate each)
-				if (template.species !== 'Pikachu' && this.random(30) >= 1) continue;
-			case 'Pumpkaboo':
+			case 'Castform': case 'Gourgeist': case 'Pumpkaboo':
 				if (this.random(4) >= 1) continue;
 				break;
+			case 'Genesect':
+				if (this.random(5) >= 1) continue;
+				break;
+			case 'Pikachu':
+				if (this.random(7) >= 1) continue;
+				continue;
 			}
 
 			if (potd && potd.exists) {
@@ -3512,7 +3483,7 @@ exports.BattleScripts = {
 		let pokemonPool = [];
 		for (let id in this.data.FormatsData) {
 			let template = this.getTemplate(id);
-			if (!template.isMega && !template.isPrimal && !template.isNonstandard && template.randomBattleMoves) {
+			if (template.gen <= this.gen && !template.isMega && !template.isPrimal && !template.isNonstandard && template.randomBattleMoves) {
 				pokemonPool.push(id);
 			}
 		}
@@ -3548,50 +3519,28 @@ exports.BattleScripts = {
 			case 'LC Uber':
 			case 'NFE':
 				if (puCount > 1) continue;
-			case 'Unreleased':
-				// Unreleased Pokémon have 20% the normal rate
-				if (this.random(5) >= 1) continue;
-				break;
-			case 'CAP':
-				// CAPs have 20% the normal rate
+			case 'Unreleased': case 'CAP':
+				// Unreleased and CAP have 20% the normal rate
 				if (this.random(5) >= 1) continue;
 			}
 
 			// Adjust rate for species with multiple formes
 			switch (template.baseSpecies) {
-			case 'Arceus':
+			case 'Arceus': case 'Silvally':
 				if (this.random(18) >= 1) continue;
 				break;
-			case 'Basculin':
+			case 'Basculin': case 'Cherrim': case 'Hoopa': case 'Meloetta': case 'Meowstic':
 				if (this.random(2) >= 1) continue;
 				break;
-			case 'Castform':
-				if (this.random(2) >= 1) continue;
-				break;
-			case 'Cherrim':
-				if (this.random(2) >= 1) continue;
+			case 'Castform': case 'Gourgeist': case 'Pumpkaboo':
+				if (this.random(4) >= 1) continue;
 				break;
 			case 'Genesect':
 				if (this.random(5) >= 1) continue;
 				break;
-			case 'Gourgeist':
-				if (this.random(4) >= 1) continue;
-				break;
-			case 'Hoopa':
-				if (this.random(2) >= 1) continue;
-				break;
-			case 'Meloetta':
-				if (this.random(2) >= 1) continue;
-				break;
-			case 'Meowstic':
-				if (this.random(2) >= 1) continue;
-				break;
 			case 'Pikachu':
-				// Cosplay Pikachu formes have 20% the normal rate (1/30 the normal rate each)
-				if (template.species !== 'Pikachu' && this.random(30) >= 1) continue;
-			case 'Pumpkaboo':
-				if (this.random(4) >= 1) continue;
-				break;
+				if (this.random(7) >= 1) continue;
+				continue;
 			}
 
 			// Limit 2 of any type
@@ -3605,10 +3554,15 @@ exports.BattleScripts = {
 			}
 			if (skip) continue;
 
-			let set = this.randomSet(template, pokemon.length, teamDetails);
+			let set = this[this.gameType === 'singles' ? 'randomSet' : 'randomDoublesSet'](template, pokemon.length, teamDetails);
 
 			// Illusion shouldn't be the last Pokemon of the team
-			if (set.ability === 'Illusion' && pokemonLeft > 4) continue;
+			if (set.ability === 'Illusion' && pokemon.length > 4) continue;
+
+			// Pokemon shouldn't have Physical and Special setup on the same set
+			let incompatibleMoves = ['bellydrum', 'swordsdance', 'calmmind', 'nastyplot'];
+			let intersectMoves = set.moves.filter(move => incompatibleMoves.includes(move));
+			if (intersectMoves.length > 1) continue;
 
 			// Limit 1 of any type combination
 			let typeCombo = types.join();
@@ -3701,47 +3655,28 @@ exports.BattleScripts = {
 			case 'LC Uber':
 			case 'NFE':
 				if (puCount > 1) continue;
-			case 'Unreleased':
-				// Unreleased Pokémon have 20% the normal rate
-				if (this.random(5) >= 1) continue;
-				break;
-			case 'CAP':
-				// CAPs have 20% the normal rate
+			case 'Unreleased': case 'CAP':
+				// Unreleased and CAP have 20% the normal rate
 				if (this.random(5) >= 1) continue;
 			}
 
 			// Adjust rate for species with multiple formes
 			switch (template.baseSpecies) {
-			case 'Arceus':
+			case 'Arceus': case 'Silvally':
 				if (this.random(18) >= 1) continue;
 				break;
-			case 'Basculin':
+			case 'Basculin': case 'Cherrim': case 'Hoopa': case 'Meloetta': case 'Meowstic':
 				if (this.random(2) >= 1) continue;
 				break;
-			case 'Castform':
-				if (this.random(2) >= 1) continue;
-				break;
-			case 'Cherrim':
-				if (this.random(2) >= 1) continue;
+			case 'Castform': case 'Gourgeist': case 'Pumpkaboo':
+				if (this.random(4) >= 1) continue;
 				break;
 			case 'Genesect':
 				if (this.random(5) >= 1) continue;
 				break;
-			case 'Gourgeist':
-				if (this.random(4) >= 1) continue;
-				break;
-			case 'Meloetta':
-				if (this.random(2) >= 1) continue;
-				break;
-			case 'Meowstic':
-				if (this.random(2) >= 1) continue;
-				break;
 			case 'Pikachu':
-				// Cosplay Pikachu formes have 20% the normal rate (1/30 the normal rate each)
-				if (template.species !== 'Pikachu' && this.random(30) >= 1) continue;
-			case 'Pumpkaboo':
-				if (this.random(4) >= 1) continue;
-				break;
+				if (this.random(7) >= 1) continue;
+				continue;
 			}
 
 			// Limit 2 of any type
@@ -3755,10 +3690,15 @@ exports.BattleScripts = {
 			}
 			if (skip) continue;
 
-			let set = this.randomSet(template, pokemon.length, teamDetails);
+			let set = this[this.gameType === 'singles' ? 'randomSet' : 'randomDoublesSet'](template, pokemon.length, teamDetails);
 
 			// Illusion shouldn't be the last Pokemon of the team
-			if (set.ability === 'Illusion' && pokemonLeft > 4) continue;
+			if (set.ability === 'Illusion' && pokemon.length > 4) continue;
+
+			// Pokemon shouldn't have Physical and Special setup on the same set
+			let incompatibleMoves = ['bellydrum', 'swordsdance', 'calmmind', 'nastyplot'];
+			let intersectMoves = set.moves.filter(move => incompatibleMoves.includes(move));
+			if (intersectMoves.length > 1) continue;
 
 			// Limit 1 of any type combination
 			let typeCombo = types.join();
@@ -3858,47 +3798,28 @@ exports.BattleScripts = {
 			case 'LC Uber':
 			case 'NFE':
 				if (puCount > 1) continue;
-			case 'Unreleased':
-				// Unreleased Pokémon have 20% the normal rate
-				if (this.random(5) >= 1) continue;
-				break;
-			case 'CAP':
-				// CAPs have 20% the normal rate
+			case 'Unreleased': case 'CAP':
+				// Unreleased and CAP have 20% the normal rate
 				if (this.random(5) >= 1) continue;
 			}
 
 			// Adjust rate for species with multiple formes
 			switch (template.baseSpecies) {
-			case 'Arceus':
+			case 'Arceus': case 'Silvally':
 				if (this.random(18) >= 1) continue;
 				break;
-			case 'Basculin':
+			case 'Basculin': case 'Cherrim': case 'Hoopa': case 'Meloetta': case 'Meowstic':
 				if (this.random(2) >= 1) continue;
 				break;
-			case 'Castform':
-				if (this.random(2) >= 1) continue;
-				break;
-			case 'Cherrim':
-				if (this.random(2) >= 1) continue;
+			case 'Castform': case 'Gourgeist': case 'Pumpkaboo':
+				if (this.random(4) >= 1) continue;
 				break;
 			case 'Genesect':
 				if (this.random(5) >= 1) continue;
 				break;
-			case 'Gourgeist':
-				if (this.random(4) >= 1) continue;
-				break;
-			case 'Meloetta':
-				if (this.random(2) >= 1) continue;
-				break;
-			case 'Meowstic':
-				if (this.random(2) >= 1) continue;
-				break;
 			case 'Pikachu':
-				// Cosplay Pikachu formes have 20% the normal rate (1/30 the normal rate each)
-				if (template.species !== 'Pikachu' && this.random(30) >= 1) continue;
-			case 'Pumpkaboo':
-				if (this.random(4) >= 1) continue;
-				break;
+				if (this.random(7) >= 1) continue;
+				continue;
 			}
 
 			// Limit 2 of any type
@@ -3912,7 +3833,7 @@ exports.BattleScripts = {
 			}
 			if (skip) continue;
 
-			let set = this.randomSet(template, pokemon.length, teamDetails);
+			let set = this[this.gameType === 'singles' ? 'randomSet' : 'randomDoublesSet'](template, pokemon.length, teamDetails);
 
 			if (template.id === 'gothitelle') {
 				set.species = 'Gothitelle';
@@ -3929,7 +3850,12 @@ exports.BattleScripts = {
 			}
 
 			// Illusion shouldn't be the last Pokemon of the team
-			if (set.ability === 'Illusion' && pokemonLeft > 4) continue;
+			if (set.ability === 'Illusion' && pokemon.length > 4) continue;
+
+			// Pokemon shouldn't have Physical and Special setup on the same set
+			let incompatibleMoves = ['bellydrum', 'swordsdance', 'calmmind', 'nastyplot'];
+			let intersectMoves = set.moves.filter(move => incompatibleMoves.includes(move));
+			if (intersectMoves.length > 1) continue;
 
 			// Limit 1 of any type combination
 			let typeCombo = types.join();
@@ -4013,47 +3939,28 @@ exports.BattleScripts = {
 			case 'LC Uber':
 			case 'NFE':
 				if (puCount > 1) continue;
-			case 'Unreleased':
-				// Unreleased Pokémon have 20% the normal rate
-				if (this.random(5) >= 1) continue;
-				break;
-			case 'CAP':
-				// CAPs have 20% the normal rate
+			case 'Unreleased': case 'CAP':
+				// Unreleased and CAP have 20% the normal rate
 				if (this.random(5) >= 1) continue;
 			}
 
 			// Adjust rate for species with multiple formes
 			switch (template.baseSpecies) {
-			case 'Arceus':
+			case 'Arceus': case 'Silvally':
 				if (this.random(18) >= 1) continue;
 				break;
-			case 'Basculin':
+			case 'Basculin': case 'Cherrim': case 'Hoopa': case 'Meloetta': case 'Meowstic':
 				if (this.random(2) >= 1) continue;
 				break;
-			case 'Castform':
-				if (this.random(2) >= 1) continue;
-				break;
-			case 'Cherrim':
-				if (this.random(2) >= 1) continue;
+			case 'Castform': case 'Gourgeist': case 'Pumpkaboo':
+				if (this.random(4) >= 1) continue;
 				break;
 			case 'Genesect':
 				if (this.random(5) >= 1) continue;
 				break;
-			case 'Gourgeist':
-				if (this.random(4) >= 1) continue;
-				break;
-			case 'Meloetta':
-				if (this.random(2) >= 1) continue;
-				break;
-			case 'Meowstic':
-				if (this.random(2) >= 1) continue;
-				break;
 			case 'Pikachu':
-				// Cosplay Pikachu formes have 20% the normal rate (1/30 the normal rate each)
-				if (template.species !== 'Pikachu' && this.random(30) >= 1) continue;
-			case 'Pumpkaboo':
-				if (this.random(4) >= 1) continue;
-				break;
+				if (this.random(7) >= 1) continue;
+				continue;
 			}
 
 			// Limit 2 of any type
@@ -4067,10 +3974,15 @@ exports.BattleScripts = {
 			}
 			if (skip) continue;
 
-			let set = this.randomSet(template, pokemon.length, teamDetails);
+			let set = this[this.gameType === 'singles' ? 'randomSet' : 'randomDoublesSet'](template, pokemon.length, teamDetails);
 
 			// Illusion shouldn't be the last Pokemon of the team
-			if (set.ability === 'Illusion' && pokemonLeft > 4) continue;
+			if (set.ability === 'Illusion' && pokemon.length > 4) continue;
+
+			// Pokemon shouldn't have Physical and Special setup on the same set
+			let incompatibleMoves = ['bellydrum', 'swordsdance', 'calmmind', 'nastyplot'];
+			let intersectMoves = set.moves.filter(move => incompatibleMoves.includes(move));
+			if (intersectMoves.length > 1) continue;
 
 			// Limit 1 of any type combination
 			let typeCombo = types.join();
@@ -4161,50 +4073,28 @@ exports.BattleScripts = {
 				// PUs are limited to 2 but have a 20% chance of being added anyway.
 				if (puCount > 1 && this.random(5) >= 1) continue;
 				break;
-			case 'Unreleased':
-				// Unreleased Pokémon have 20% the normal rate
-				if (this.random(5) >= 1) continue;
-				break;
-			case 'CAP':
-				// CAPs have 20% the normal rate
+			case 'Unreleased': case 'CAP':
+				// Unreleased and CAP have 20% the normal rate
 				if (this.random(5) >= 1) continue;
 			}
 
 			// Adjust rate for species with multiple formes
 			switch (template.baseSpecies) {
-			case 'Arceus':
+			case 'Arceus': case 'Silvally':
 				if (this.random(18) >= 1) continue;
 				break;
-			case 'Basculin':
+			case 'Basculin': case 'Cherrim': case 'Hoopa': case 'Meloetta': case 'Meowstic':
 				if (this.random(2) >= 1) continue;
 				break;
-			case 'Castform':
-				if (this.random(2) >= 1) continue;
-				break;
-			case 'Cherrim':
-				if (this.random(2) >= 1) continue;
+			case 'Castform': case 'Gourgeist': case 'Pumpkaboo':
+				if (this.random(4) >= 1) continue;
 				break;
 			case 'Genesect':
 				if (this.random(5) >= 1) continue;
 				break;
-			case 'Gourgeist':
-				if (this.random(4) >= 1) continue;
-				break;
-			case 'Hoopa':
-				if (this.random(2) >= 1) continue;
-				break;
-			case 'Meloetta':
-				if (this.random(2) >= 1) continue;
-				break;
-			case 'Meowstic':
-				if (this.random(2) >= 1) continue;
-				break;
 			case 'Pikachu':
-				// Cosplay Pikachu formes have 20% the normal rate (1/30 the normal rate each)
-				if (template.species !== 'Pikachu' && this.random(30) >= 1) continue;
-			case 'Pumpkaboo':
-				if (this.random(4) >= 1) continue;
-				break;
+				if (this.random(7) >= 1) continue;
+				continue;
 			}
 
 			// Limit 2 of any type
@@ -4218,12 +4108,17 @@ exports.BattleScripts = {
 			}
 			if (skip) continue;
 
-			let set = this.randomSet(template, pokemon.length, teamDetails);
+			let set = this[this.gameType === 'singles' ? 'randomSet' : 'randomDoublesSet'](template, pokemon.length, teamDetails);
 
 			set.level = 5;
 
 			// Illusion shouldn't be the last Pokemon of the team
-			if (set.ability === 'Illusion' && pokemonLeft > 4) continue;
+			if (set.ability === 'Illusion' && pokemon.length > 4) continue;
+
+			// Pokemon shouldn't have Physical and Special setup on the same set
+			let incompatibleMoves = ['bellydrum', 'swordsdance', 'calmmind', 'nastyplot'];
+			let intersectMoves = set.moves.filter(move => incompatibleMoves.includes(move));
+			if (intersectMoves.length > 1) continue;
 
 			// Limit 1 of any type combination
 			let typeCombo = types.join();
@@ -4348,50 +4243,28 @@ exports.BattleScripts = {
 			case 'LC Uber':
 			case 'NFE':
 				if (puCount > 1) continue;
-			case 'Unreleased':
-				// Unreleased Pokémon have 20% the normal rate
-				if (this.random(5) >= 1) continue;
-				break;
-			case 'CAP':
-				// CAPs have 20% the normal rate
+			case 'Unreleased': case 'CAP':
+				// Unreleased and CAP have 20% the normal rate
 				if (this.random(5) >= 1) continue;
 			}
 
 			// Adjust rate for species with multiple formes
 			switch (template.baseSpecies) {
-			case 'Arceus':
+			case 'Arceus': case 'Silvally':
 				if (this.random(18) >= 1) continue;
 				break;
-			case 'Basculin':
+			case 'Basculin': case 'Cherrim': case 'Hoopa': case 'Meloetta': case 'Meowstic':
 				if (this.random(2) >= 1) continue;
 				break;
-			case 'Castform':
-				if (this.random(2) >= 1) continue;
-				break;
-			case 'Cherrim':
-				if (this.random(2) >= 1) continue;
+			case 'Castform': case 'Gourgeist': case 'Pumpkaboo':
+				if (this.random(4) >= 1) continue;
 				break;
 			case 'Genesect':
 				if (this.random(5) >= 1) continue;
 				break;
-			case 'Gourgeist':
-				if (this.random(4) >= 1) continue;
-				break;
-			case 'Hoopa':
-				if (this.random(2) >= 1) continue;
-				break;
-			case 'Meloetta':
-				if (this.random(2) >= 1) continue;
-				break;
-			case 'Meowstic':
-				if (this.random(2) >= 1) continue;
-				break;
 			case 'Pikachu':
-				// Cosplay Pikachu formes have 20% the normal rate (1/30 the normal rate each)
-				if (template.species !== 'Pikachu' && this.random(30) >= 1) continue;
-			case 'Pumpkaboo':
-				if (this.random(4) >= 1) continue;
-				break;
+				if (this.random(7) >= 1) continue;
+				continue;
 			}
 
 			// Limit 2 of any type
@@ -4405,10 +4278,15 @@ exports.BattleScripts = {
 			}
 			if (skip) continue;
 
-			let set = this.randomSet(template, pokemon.length, teamDetails);
+			let set = this[this.gameType === 'singles' ? 'randomSet' : 'randomDoublesSet'](template, pokemon.length, teamDetails);
 
 			// Illusion shouldn't be the last Pokemon of the team
-			if (set.ability === 'Illusion' && pokemonLeft > 4) continue;
+			if (set.ability === 'Illusion' && pokemon.length > 4) continue;
+
+			// Pokemon shouldn't have Physical and Special setup on the same set
+			let incompatibleMoves = ['bellydrum', 'swordsdance', 'calmmind', 'nastyplot'];
+			let intersectMoves = set.moves.filter(move => incompatibleMoves.includes(move));
+			if (intersectMoves.length > 1) continue;
 
 			// Limit 1 of any type combination
 			let typeCombo = types.join();
@@ -4498,50 +4376,28 @@ exports.BattleScripts = {
 			case 'LC Uber':
 			case 'NFE':
 				if (puCount > 1) continue;
-			case 'Unreleased':
-				// Unreleased Pokémon have 20% the normal rate
-				if (this.random(5) >= 1) continue;
-				break;
-			case 'CAP':
-				// CAPs have 20% the normal rate
+			case 'Unreleased': case 'CAP':
+				// Unreleased and CAP have 20% the normal rate
 				if (this.random(5) >= 1) continue;
 			}
 
 			// Adjust rate for species with multiple formes
 			switch (template.baseSpecies) {
-			case 'Arceus':
+			case 'Arceus': case 'Silvally':
 				if (this.random(18) >= 1) continue;
 				break;
-			case 'Basculin':
+			case 'Basculin': case 'Cherrim': case 'Hoopa': case 'Meloetta': case 'Meowstic':
 				if (this.random(2) >= 1) continue;
 				break;
-			case 'Castform':
-				if (this.random(2) >= 1) continue;
-				break;
-			case 'Cherrim':
-				if (this.random(2) >= 1) continue;
+			case 'Castform': case 'Gourgeist': case 'Pumpkaboo':
+				if (this.random(4) >= 1) continue;
 				break;
 			case 'Genesect':
 				if (this.random(5) >= 1) continue;
 				break;
-			case 'Gourgeist':
-				if (this.random(4) >= 1) continue;
-				break;
-			case 'Hoopa':
-				if (this.random(2) >= 1) continue;
-				break;
-			case 'Meloetta':
-				if (this.random(2) >= 1) continue;
-				break;
-			case 'Meowstic':
-				if (this.random(2) >= 1) continue;
-				break;
 			case 'Pikachu':
-				// Cosplay Pikachu formes have 20% the normal rate (1/30 the normal rate each)
-				if (template.species !== 'Pikachu' && this.random(30) >= 1) continue;
-			case 'Pumpkaboo':
-				if (this.random(4) >= 1) continue;
-				break;
+				if (this.random(7) >= 1) continue;
+				continue;
 			}
 
 			// Limit 2 of any type
@@ -4555,10 +4411,15 @@ exports.BattleScripts = {
 			}
 			if (skip) continue;
 
-			let set = this.randomSet(template, pokemon.length, teamDetails);
+			let set = this[this.gameType === 'singles' ? 'randomSet' : 'randomDoublesSet'](template, pokemon.length, teamDetails);
 
 			// Illusion shouldn't be the last Pokemon of the team
-			if (set.ability === 'Illusion' && pokemonLeft > 4) continue;
+			if (set.ability === 'Illusion' && pokemon.length > 4) continue;
+
+			// Pokemon shouldn't have Physical and Special setup on the same set
+			let incompatibleMoves = ['bellydrum', 'swordsdance', 'calmmind', 'nastyplot'];
+			let intersectMoves = set.moves.filter(move => incompatibleMoves.includes(move));
+			if (intersectMoves.length > 1) continue;
 
 			// Limit 1 of any type combination
 			let typeCombo = types.join();
@@ -4647,50 +4508,28 @@ exports.BattleScripts = {
 			case 'LC Uber':
 			case 'NFE':
 				if (puCount > 1) continue;
-			case 'Unreleased':
-				// Unreleased Pokémon have 20% the normal rate
-				if (this.random(5) >= 1) continue;
-				break;
-			case 'CAP':
-				// CAPs have 20% the normal rate
+			case 'Unreleased': case 'CAP':
+				// Unreleased and CAP have 20% the normal rate
 				if (this.random(5) >= 1) continue;
 			}
 
 			// Adjust rate for species with multiple formes
 			switch (template.baseSpecies) {
-			case 'Arceus':
+			case 'Arceus': case 'Silvally':
 				if (this.random(18) >= 1) continue;
 				break;
-			case 'Basculin':
+			case 'Basculin': case 'Cherrim': case 'Hoopa': case 'Meloetta': case 'Meowstic':
 				if (this.random(2) >= 1) continue;
 				break;
-			case 'Castform':
-				if (this.random(2) >= 1) continue;
-				break;
-			case 'Cherrim':
-				if (this.random(2) >= 1) continue;
+			case 'Castform': case 'Gourgeist': case 'Pumpkaboo':
+				if (this.random(4) >= 1) continue;
 				break;
 			case 'Genesect':
 				if (this.random(5) >= 1) continue;
 				break;
-			case 'Gourgeist':
-				if (this.random(4) >= 1) continue;
-				break;
-			case 'Hoopa':
-				if (this.random(2) >= 1) continue;
-				break;
-			case 'Meloetta':
-				if (this.random(2) >= 1) continue;
-				break;
-			case 'Meowstic':
-				if (this.random(2) >= 1) continue;
-				break;
 			case 'Pikachu':
-				// Cosplay Pikachu formes have 20% the normal rate (1/30 the normal rate each)
-				if (template.species !== 'Pikachu' && this.random(30) >= 1) continue;
-			case 'Pumpkaboo':
-				if (this.random(4) >= 1) continue;
-				break;
+				if (this.random(7) >= 1) continue;
+				continue;
 			}
 
 			// Limit 2 of any type
@@ -4704,10 +4543,15 @@ exports.BattleScripts = {
 			}
 			if (skip) continue;
 
-			let set = this.randomSet(template, pokemon.length, teamDetails);
+			let set = this[this.gameType === 'singles' ? 'randomSet' : 'randomDoublesSet'](template, pokemon.length, teamDetails);
 
 			// Illusion shouldn't be the last Pokemon of the team
-			if (set.ability === 'Illusion' && pokemonLeft > 4) continue;
+			if (set.ability === 'Illusion' && pokemon.length > 4) continue;
+
+			// Pokemon shouldn't have Physical and Special setup on the same set
+			let incompatibleMoves = ['bellydrum', 'swordsdance', 'calmmind', 'nastyplot'];
+			let intersectMoves = set.moves.filter(move => incompatibleMoves.includes(move));
+			if (intersectMoves.length > 1) continue;
 
 			// Limit 1 of any type combination
 			let typeCombo = types.join();
@@ -4797,50 +4641,28 @@ exports.BattleScripts = {
 			case 'LC Uber':
 			case 'NFE':
 				if (puCount > 1) continue;
-			case 'Unreleased':
-				// Unreleased Pokémon have 20% the normal rate
-				if (this.random(5) >= 1) continue;
-				break;
-			case 'CAP':
-				// CAPs have 20% the normal rate
+			case 'Unreleased': case 'CAP':
+				// Unreleased and CAP have 20% the normal rate
 				if (this.random(5) >= 1) continue;
 			}
 
 			// Adjust rate for species with multiple formes
 			switch (template.baseSpecies) {
-			case 'Arceus':
+			case 'Arceus': case 'Silvally':
 				if (this.random(18) >= 1) continue;
 				break;
-			case 'Basculin':
+			case 'Basculin': case 'Cherrim': case 'Hoopa': case 'Meloetta': case 'Meowstic':
 				if (this.random(2) >= 1) continue;
 				break;
-			case 'Castform':
-				if (this.random(2) >= 1) continue;
-				break;
-			case 'Cherrim':
-				if (this.random(2) >= 1) continue;
+			case 'Castform': case 'Gourgeist': case 'Pumpkaboo':
+				if (this.random(4) >= 1) continue;
 				break;
 			case 'Genesect':
 				if (this.random(5) >= 1) continue;
 				break;
-			case 'Gourgeist':
-				if (this.random(4) >= 1) continue;
-				break;
-			case 'Hoopa':
-				if (this.random(2) >= 1) continue;
-				break;
-			case 'Meloetta':
-				if (this.random(2) >= 1) continue;
-				break;
-			case 'Meowstic':
-				if (this.random(2) >= 1) continue;
-				break;
 			case 'Pikachu':
-				// Cosplay Pikachu formes have 20% the normal rate (1/30 the normal rate each)
-				if (template.species !== 'Pikachu' && this.random(30) >= 1) continue;
-			case 'Pumpkaboo':
-				if (this.random(4) >= 1) continue;
-				break;
+				if (this.random(7) >= 1) continue;
+				continue;
 			}
 
 			// Limit 2 of any type
@@ -4854,10 +4676,15 @@ exports.BattleScripts = {
 			}
 			if (skip) continue;
 
-			let set = this.randomSet(template, pokemon.length, teamDetails);
+			let set = this[this.gameType === 'singles' ? 'randomSet' : 'randomDoublesSet'](template, pokemon.length, teamDetails);
 
 			// Illusion shouldn't be the last Pokemon of the team
-			if (set.ability === 'Illusion' && pokemonLeft > 4) continue;
+			if (set.ability === 'Illusion' && pokemon.length > 4) continue;
+
+			// Pokemon shouldn't have Physical and Special setup on the same set
+			let incompatibleMoves = ['bellydrum', 'swordsdance', 'calmmind', 'nastyplot'];
+			let intersectMoves = set.moves.filter(move => incompatibleMoves.includes(move));
+			if (intersectMoves.length > 1) continue;
 
 			// Limit 1 of any type combination
 			let typeCombo = types.join();
@@ -4964,56 +4791,39 @@ exports.BattleScripts = {
 			case 'LC Uber':
 			case 'NFE':
 				if (puCount > 1) continue;
-			case 'Unreleased':
-				// Unreleased Pokémon have 20% the normal rate
-				if (this.random(5) >= 1) continue;
-				break;
-			case 'CAP':
-				// CAPs have 20% the normal rate
+			case 'Unreleased': case 'CAP':
+				// Unreleased and CAP have 20% the normal rate
 				if (this.random(5) >= 1) continue;
 			}
 
 			// Adjust rate for species with multiple formes
 			switch (template.baseSpecies) {
-			case 'Arceus':
+			case 'Arceus': case 'Silvally':
 				if (this.random(18) >= 1) continue;
 				break;
-			case 'Basculin':
+			case 'Basculin': case 'Cherrim': case 'Hoopa': case 'Meloetta': case 'Meowstic':
 				if (this.random(2) >= 1) continue;
 				break;
-			case 'Castform':
-				if (this.random(2) >= 1) continue;
-				break;
-			case 'Cherrim':
-				if (this.random(2) >= 1) continue;
+			case 'Castform': case 'Gourgeist': case 'Pumpkaboo':
+				if (this.random(4) >= 1) continue;
 				break;
 			case 'Genesect':
 				if (this.random(5) >= 1) continue;
 				break;
-			case 'Gourgeist':
-				if (this.random(4) >= 1) continue;
-				break;
-			case 'Hoopa':
-				if (this.random(2) >= 1) continue;
-				break;
-			case 'Meloetta':
-				if (this.random(2) >= 1) continue;
-				break;
-			case 'Meowstic':
-				if (this.random(2) >= 1) continue;
-				break;
 			case 'Pikachu':
-				// Cosplay Pikachu formes have 20% the normal rate (1/30 the normal rate each)
-				if (template.species !== 'Pikachu' && this.random(30) >= 1) continue;
-			case 'Pumpkaboo':
-				if (this.random(4) >= 1) continue;
-				break;
+				if (this.random(7) >= 1) continue;
+				continue;
 			}
 
-			let set = this.randomSet(template, pokemon.length, teamDetails);
+			let set = this[this.gameType === 'singles' ? 'randomSet' : 'randomDoublesSet'](template, pokemon.length, teamDetails);
 
 			// Illusion shouldn't be the last Pokemon of the team
-			if (set.ability === 'Illusion' && pokemonLeft > 4) continue;
+			if (set.ability === 'Illusion' && pokemon.length > 4) continue;
+
+			// Pokemon shouldn't have Physical and Special setup on the same set
+			let incompatibleMoves = ['bellydrum', 'swordsdance', 'calmmind', 'nastyplot'];
+			let intersectMoves = set.moves.filter(move => incompatibleMoves.includes(move));
+			if (intersectMoves.length > 1) continue;
 
 			// Limit the number of Megas to one
 			let forme = template.otherFormes && this.getTemplate(template.otherFormes[0]);
@@ -5086,50 +4896,28 @@ exports.BattleScripts = {
 			case 'LC Uber':
 			case 'NFE':
 				if (puCount > 1) continue;
-			case 'Unreleased':
-				// Unreleased Pokémon have 20% the normal rate
-				if (this.random(5) >= 1) continue;
-				break;
-			case 'CAP':
-				// CAPs have 20% the normal rate
+			case 'Unreleased': case 'CAP':
+				// Unreleased and CAP have 20% the normal rate
 				if (this.random(5) >= 1) continue;
 			}
 
 			// Adjust rate for species with multiple formes
 			switch (template.baseSpecies) {
-			case 'Arceus':
+			case 'Arceus': case 'Silvally':
 				if (this.random(18) >= 1) continue;
 				break;
-			case 'Basculin':
+			case 'Basculin': case 'Cherrim': case 'Hoopa': case 'Meloetta': case 'Meowstic':
 				if (this.random(2) >= 1) continue;
 				break;
-			case 'Castform':
-				if (this.random(2) >= 1) continue;
-				break;
-			case 'Cherrim':
-				if (this.random(2) >= 1) continue;
+			case 'Castform': case 'Gourgeist': case 'Pumpkaboo':
+				if (this.random(4) >= 1) continue;
 				break;
 			case 'Genesect':
 				if (this.random(5) >= 1) continue;
 				break;
-			case 'Gourgeist':
-				if (this.random(4) >= 1) continue;
-				break;
-			case 'Hoopa':
-				if (this.random(2) >= 1) continue;
-				break;
-			case 'Meloetta':
-				if (this.random(2) >= 1) continue;
-				break;
-			case 'Meowstic':
-				if (this.random(2) >= 1) continue;
-				break;
 			case 'Pikachu':
-				// Cosplay Pikachu formes have 20% the normal rate (1/30 the normal rate each)
-				if (template.species !== 'Pikachu' && this.random(30) >= 1) continue;
-			case 'Pumpkaboo':
-				if (this.random(4) >= 1) continue;
-				break;
+				if (this.random(7) >= 1) continue;
+				continue;
 			}
 
 			// Limit 2 of any type
@@ -5143,10 +4931,15 @@ exports.BattleScripts = {
 			}
 			if (skip) continue;
 
-			let set = this.randomSet(template, pokemon.length, teamDetails);
+			let set = this[this.gameType === 'singles' ? 'randomSet' : 'randomDoublesSet'](template, pokemon.length, teamDetails);
 
 			// Illusion shouldn't be the last Pokemon of the team
-			if (set.ability === 'Illusion' && pokemonLeft > 4) continue;
+			if (set.ability === 'Illusion' && pokemon.length > 4) continue;
+
+			// Pokemon shouldn't have Physical and Special setup on the same set
+			let incompatibleMoves = ['bellydrum', 'swordsdance', 'calmmind', 'nastyplot'];
+			let intersectMoves = set.moves.filter(move => incompatibleMoves.includes(move));
+			if (intersectMoves.length > 1) continue;
 
 			// Limit 1 of any type combination
 			let typeCombo = types.join();
@@ -5237,50 +5030,28 @@ exports.BattleScripts = {
 			case 'LC Uber':
 			case 'NFE':
 				if (puCount > 1) continue;
-			case 'Unreleased':
-				// Unreleased Pokémon have 20% the normal rate
-				if (this.random(5) >= 1) continue;
-				break;
-			case 'CAP':
-				// CAPs have 20% the normal rate
+			case 'Unreleased': case 'CAP':
+				// Unreleased and CAP have 20% the normal rate
 				if (this.random(5) >= 1) continue;
 			}
 
 			// Adjust rate for species with multiple formes
 			switch (template.baseSpecies) {
-			case 'Arceus':
+			case 'Arceus': case 'Silvally':
 				if (this.random(18) >= 1) continue;
 				break;
-			case 'Basculin':
+			case 'Basculin': case 'Cherrim': case 'Hoopa': case 'Meloetta': case 'Meowstic':
 				if (this.random(2) >= 1) continue;
 				break;
-			case 'Castform':
-				if (this.random(2) >= 1) continue;
-				break;
-			case 'Cherrim':
-				if (this.random(2) >= 1) continue;
+			case 'Castform': case 'Gourgeist': case 'Pumpkaboo':
+				if (this.random(4) >= 1) continue;
 				break;
 			case 'Genesect':
 				if (this.random(5) >= 1) continue;
 				break;
-			case 'Gourgeist':
-				if (this.random(4) >= 1) continue;
-				break;
-			case 'Hoopa':
-				if (this.random(2) >= 1) continue;
-				break;
-			case 'Meloetta':
-				if (this.random(2) >= 1) continue;
-				break;
-			case 'Meowstic':
-				if (this.random(2) >= 1) continue;
-				break;
 			case 'Pikachu':
-				// Cosplay Pikachu formes have 20% the normal rate (1/30 the normal rate each)
-				if (template.species !== 'Pikachu' && this.random(30) >= 1) continue;
-			case 'Pumpkaboo':
-				if (this.random(4) >= 1) continue;
-				break;
+				if (this.random(7) >= 1) continue;
+				continue;
 			}
 
 			// Limit 2 of any type
@@ -5294,10 +5065,15 @@ exports.BattleScripts = {
 			}
 			if (skip) continue;
 
-			let set = this.randomSet(template, pokemon.length, teamDetails);
+			let set = this[this.gameType === 'singles' ? 'randomSet' : 'randomDoublesSet'](template, pokemon.length, teamDetails);
 
 			// Illusion shouldn't be the last Pokemon of the team
-			if (set.ability === 'Illusion' && pokemonLeft > 4) continue;
+			if (set.ability === 'Illusion' && pokemon.length > 4) continue;
+
+			// Pokemon shouldn't have Physical and Special setup on the same set
+			let incompatibleMoves = ['bellydrum', 'swordsdance', 'calmmind', 'nastyplot'];
+			let intersectMoves = set.moves.filter(move => incompatibleMoves.includes(move));
+			if (intersectMoves.length > 1) continue;
 
 			// Limit 1 of any type combination
 			let typeCombo = types.join();
@@ -5385,50 +5161,28 @@ exports.BattleScripts = {
 			case 'LC Uber':
 			case 'NFE':
 				if (puCount > 1) continue;
-			case 'Unreleased':
-				// Unreleased Pokémon have 20% the normal rate
-				if (this.random(5) >= 1) continue;
-				break;
-			case 'CAP':
-				// CAPs have 20% the normal rate
+			case 'Unreleased': case 'CAP':
+				// Unreleased and CAP have 20% the normal rate
 				if (this.random(5) >= 1) continue;
 			}
 
 			// Adjust rate for species with multiple formes
 			switch (template.baseSpecies) {
-			case 'Arceus':
+			case 'Arceus': case 'Silvally':
 				if (this.random(18) >= 1) continue;
 				break;
-			case 'Basculin':
+			case 'Basculin': case 'Cherrim': case 'Hoopa': case 'Meloetta': case 'Meowstic':
 				if (this.random(2) >= 1) continue;
 				break;
-			case 'Castform':
-				if (this.random(2) >= 1) continue;
-				break;
-			case 'Cherrim':
-				if (this.random(2) >= 1) continue;
+			case 'Castform': case 'Gourgeist': case 'Pumpkaboo':
+				if (this.random(4) >= 1) continue;
 				break;
 			case 'Genesect':
 				if (this.random(5) >= 1) continue;
 				break;
-			case 'Gourgeist':
-				if (this.random(4) >= 1) continue;
-				break;
-			case 'Hoopa':
-				if (this.random(2) >= 1) continue;
-				break;
-			case 'Meloetta':
-				if (this.random(2) >= 1) continue;
-				break;
-			case 'Meowstic':
-				if (this.random(2) >= 1) continue;
-				break;
 			case 'Pikachu':
-				// Cosplay Pikachu formes have 20% the normal rate (1/30 the normal rate each)
-				if (template.species !== 'Pikachu' && this.random(30) >= 1) continue;
-			case 'Pumpkaboo':
-				if (this.random(4) >= 1) continue;
-				break;
+				if (this.random(7) >= 1) continue;
+				continue;
 			}
 
 			// Limit 2 of any type
@@ -5442,10 +5196,15 @@ exports.BattleScripts = {
 			}
 			if (skip) continue;
 
-			let set = this.randomSet(template, pokemon.length, teamDetails);
+			let set = this[this.gameType === 'singles' ? 'randomSet' : 'randomDoublesSet'](template, pokemon.length, teamDetails);
 
 			// Illusion shouldn't be the last Pokemon of the team
-			if (set.ability === 'Illusion' && pokemonLeft > 4) continue;
+			if (set.ability === 'Illusion' && pokemon.length > 4) continue;
+
+			// Pokemon shouldn't have Physical and Special setup on the same set
+			let incompatibleMoves = ['bellydrum', 'swordsdance', 'calmmind', 'nastyplot'];
+			let intersectMoves = set.moves.filter(move => incompatibleMoves.includes(move));
+			if (intersectMoves.length > 1) continue;
 
 			// Limit 1 of any type combination
 			let typeCombo = types.join();
@@ -5541,50 +5300,28 @@ exports.BattleScripts = {
 			case 'LC Uber':
 			case 'NFE':
 				if (puCount > 1) continue;
-			case 'Unreleased':
-				// Unreleased Pokémon have 20% the normal rate
-				if (this.random(5) >= 1) continue;
-				break;
-			case 'CAP':
-				// CAPs have 20% the normal rate
+			case 'Unreleased': case 'CAP':
+				// Unreleased and CAP have 20% the normal rate
 				if (this.random(5) >= 1) continue;
 			}
 
 			// Adjust rate for species with multiple formes
 			switch (template.baseSpecies) {
-			case 'Arceus':
+			case 'Arceus': case 'Silvally':
 				if (this.random(18) >= 1) continue;
 				break;
-			case 'Basculin':
+			case 'Basculin': case 'Cherrim': case 'Hoopa': case 'Meloetta': case 'Meowstic':
 				if (this.random(2) >= 1) continue;
 				break;
-			case 'Castform':
-				if (this.random(2) >= 1) continue;
-				break;
-			case 'Cherrim':
-				if (this.random(2) >= 1) continue;
+			case 'Castform': case 'Gourgeist': case 'Pumpkaboo':
+				if (this.random(4) >= 1) continue;
 				break;
 			case 'Genesect':
 				if (this.random(5) >= 1) continue;
 				break;
-			case 'Gourgeist':
-				if (this.random(4) >= 1) continue;
-				break;
-			case 'Hoopa':
-				if (this.random(2) >= 1) continue;
-				break;
-			case 'Meloetta':
-				if (this.random(2) >= 1) continue;
-				break;
-			case 'Meowstic':
-				if (this.random(2) >= 1) continue;
-				break;
 			case 'Pikachu':
-				// Cosplay Pikachu formes have 20% the normal rate (1/30 the normal rate each)
-				if (template.species !== 'Pikachu' && this.random(30) >= 1) continue;
-			case 'Pumpkaboo':
-				if (this.random(4) >= 1) continue;
-				break;
+				if (this.random(7) >= 1) continue;
+				continue;
 			}
 
 			// Limit 2 of any type
@@ -5598,10 +5335,15 @@ exports.BattleScripts = {
 			}
 			if (skip) continue;
 
-			let set = this.randomSet(template, pokemon.length, teamDetails);
+			let set = this[this.gameType === 'singles' ? 'randomSet' : 'randomDoublesSet'](template, pokemon.length, teamDetails);
 
 			// Illusion shouldn't be the last Pokemon of the team
-			if (set.ability === 'Illusion' && pokemonLeft > 4) continue;
+			if (set.ability === 'Illusion' && pokemon.length > 4) continue;
+
+			// Pokemon shouldn't have Physical and Special setup on the same set
+			let incompatibleMoves = ['bellydrum', 'swordsdance', 'calmmind', 'nastyplot'];
+			let intersectMoves = set.moves.filter(move => incompatibleMoves.includes(move));
+			if (intersectMoves.length > 1) continue;
 
 			// Limit 1 of any type combination
 			let typeCombo = types.join();
@@ -5692,12 +5434,8 @@ exports.BattleScripts = {
 			case 'LC Uber':
 			case 'NFE':
 				if (puCount > 1) continue;
-			case 'Unreleased':
-				// Unreleased Pokémon have 20% the normal rate
-				if (this.random(5) >= 1) continue;
-				break;
-			case 'CAP':
-				// CAPs have 20% the normal rate
+			case 'Unreleased': case 'CAP':
+				// Unreleased and CAP have 20% the normal rate
 				if (this.random(5) >= 1) continue;
 			}
 
@@ -5712,7 +5450,7 @@ exports.BattleScripts = {
 			}
 			if (skip) continue;
 
-			let set = this.randomSet(template, pokemon.length, teamDetails);
+			let set = this[this.gameType === 'singles' ? 'randomSet' : 'randomDoublesSet'](template, pokemon.length, teamDetails);
 
 			if (template.id === 'absol') {
 				set.species = 'Absol';
@@ -6175,7 +5913,12 @@ exports.BattleScripts = {
 			}
 
 			// Illusion shouldn't be the last Pokemon of the team
-			if (set.ability === 'Illusion' && pokemonLeft > 4) continue;
+			if (set.ability === 'Illusion' && pokemon.length > 4) continue;
+
+			// Pokemon shouldn't have Physical and Special setup on the same set
+			let incompatibleMoves = ['bellydrum', 'swordsdance', 'calmmind', 'nastyplot'];
+			let intersectMoves = set.moves.filter(move => incompatibleMoves.includes(move));
+			if (intersectMoves.length > 1) continue;
 
 			// Limit 1 of any type combination
 			let typeCombo = types.join();
@@ -6264,50 +6007,28 @@ exports.BattleScripts = {
 			case 'LC Uber':
 			case 'NFE':
 				if (puCount > 1) continue;
-			case 'Unreleased':
-				// Unreleased Pokémon have 20% the normal rate
-				if (this.random(5) >= 1) continue;
-				break;
-			case 'CAP':
-				// CAPs have 20% the normal rate
+			case 'Unreleased': case 'CAP':
+				// Unreleased and CAP have 20% the normal rate
 				if (this.random(5) >= 1) continue;
 			}
 
 			// Adjust rate for species with multiple formes
 			switch (template.baseSpecies) {
-			case 'Arceus':
+			case 'Arceus': case 'Silvally':
 				if (this.random(18) >= 1) continue;
 				break;
-			case 'Basculin':
+			case 'Basculin': case 'Cherrim': case 'Hoopa': case 'Meloetta': case 'Meowstic':
 				if (this.random(2) >= 1) continue;
 				break;
-			case 'Castform':
-				if (this.random(2) >= 1) continue;
-				break;
-			case 'Cherrim':
-				if (this.random(2) >= 1) continue;
+			case 'Castform': case 'Gourgeist': case 'Pumpkaboo':
+				if (this.random(4) >= 1) continue;
 				break;
 			case 'Genesect':
 				if (this.random(5) >= 1) continue;
 				break;
-			case 'Gourgeist':
-				if (this.random(4) >= 1) continue;
-				break;
-			case 'Hoopa':
-				if (this.random(2) >= 1) continue;
-				break;
-			case 'Meloetta':
-				if (this.random(2) >= 1) continue;
-				break;
-			case 'Meowstic':
-				if (this.random(2) >= 1) continue;
-				break;
 			case 'Pikachu':
-				// Cosplay Pikachu formes have 20% the normal rate (1/30 the normal rate each)
-				if (template.species !== 'Pikachu' && this.random(30) >= 1) continue;
-			case 'Pumpkaboo':
-				if (this.random(4) >= 1) continue;
-				break;
+				if (this.random(7) >= 1) continue;
+				continue;
 			}
 
 			// Limit 2 of any type
@@ -6344,10 +6065,15 @@ exports.BattleScripts = {
 				template = lead;
 			}
 
-			let set = this.randomSet(template, pokemon.length, teamDetails);
+			let set = this[this.gameType === 'singles' ? 'randomSet' : 'randomDoublesSet'](template, pokemon.length, teamDetails);
 
 			// Illusion shouldn't be the last Pokemon of the team
-			if (set.ability === 'Illusion' && pokemonLeft > 4) continue;
+			if (set.ability === 'Illusion' && pokemon.length > 4) continue;
+
+			// Pokemon shouldn't have Physical and Special setup on the same set
+			let incompatibleMoves = ['bellydrum', 'swordsdance', 'calmmind', 'nastyplot'];
+			let intersectMoves = set.moves.filter(move => incompatibleMoves.includes(move));
+			if (intersectMoves.length > 1) continue;
 
 			// Limit 1 of any type combination
 			let typeCombo = types.join();
@@ -6439,50 +6165,28 @@ exports.BattleScripts = {
 			case 'LC Uber':
 			case 'NFE':
 				if (puCount > 1) continue;
-			case 'Unreleased':
-				// Unreleased Pokémon have 20% the normal rate
-				if (this.random(5) >= 1) continue;
-				break;
-			case 'CAP':
-				// CAPs have 20% the normal rate
+			case 'Unreleased': case 'CAP':
+				// Unreleased and CAP have 20% the normal rate
 				if (this.random(5) >= 1) continue;
 			}
 
 			// Adjust rate for species with multiple formes
 			switch (template.baseSpecies) {
-			case 'Arceus':
+			case 'Arceus': case 'Silvally':
 				if (this.random(18) >= 1) continue;
 				break;
-			case 'Basculin':
+			case 'Basculin': case 'Cherrim': case 'Hoopa': case 'Meloetta': case 'Meowstic':
 				if (this.random(2) >= 1) continue;
 				break;
-			case 'Castform':
-				if (this.random(2) >= 1) continue;
-				break;
-			case 'Cherrim':
-				if (this.random(2) >= 1) continue;
+			case 'Castform': case 'Gourgeist': case 'Pumpkaboo':
+				if (this.random(4) >= 1) continue;
 				break;
 			case 'Genesect':
 				if (this.random(5) >= 1) continue;
 				break;
-			case 'Gourgeist':
-				if (this.random(4) >= 1) continue;
-				break;
-			case 'Hoopa':
-				if (this.random(2) >= 1) continue;
-				break;
-			case 'Meloetta':
-				if (this.random(2) >= 1) continue;
-				break;
-			case 'Meowstic':
-				if (this.random(2) >= 1) continue;
-				break;
 			case 'Pikachu':
-				// Cosplay Pikachu formes have 20% the normal rate (1/30 the normal rate each)
-				if (template.species !== 'Pikachu' && this.random(30) >= 1) continue;
-			case 'Pumpkaboo':
-				if (this.random(4) >= 1) continue;
-				break;
+				if (this.random(7) >= 1) continue;
+				continue;
 			}
 
 			// Limit 2 of any type
@@ -6496,10 +6200,15 @@ exports.BattleScripts = {
 			}
 			if (skip) continue;
 
-			let set = this.randomSet(template, pokemon.length, teamDetails);
+			let set = this[this.gameType === 'singles' ? 'randomSet' : 'randomDoublesSet'](template, pokemon.length, teamDetails);
 
 			// Illusion shouldn't be the last Pokemon of the team
-			if (set.ability === 'Illusion' && pokemonLeft > 4) continue;
+			if (set.ability === 'Illusion' && pokemon.length > 4) continue;
+
+			// Pokemon shouldn't have Physical and Special setup on the same set
+			let incompatibleMoves = ['bellydrum', 'swordsdance', 'calmmind', 'nastyplot'];
+			let intersectMoves = set.moves.filter(move => incompatibleMoves.includes(move));
+			if (intersectMoves.length > 1) continue;
 
 			// Limit 1 of any type combination
 			let typeCombo = types.join();
@@ -6556,7 +6265,7 @@ exports.BattleScripts = {
 		let pokemonPool = [];
 		for (let id in this.data.FormatsData) {
 			let template = this.getTemplate(id);
-			if (!template.isMega && !template.isPrimal && !template.isNonstandard && template.randomBattleMoves) {
+			if (template.gen <= this.gen && !template.isMega && !template.isPrimal && !template.isNonstandard && template.randomBattleMoves) {
 				pokemonPool.push(id);
 			}
 		}
@@ -6595,50 +6304,28 @@ exports.BattleScripts = {
 			case 'LC Uber':
 			case 'NFE':
 				if (puCount > 1) continue;
-			case 'Unreleased':
-				// Unreleased Pokémon have 20% the normal rate
-				if (this.random(5) >= 1) continue;
-				break;
-			case 'CAP':
-				// CAPs have 20% the normal rate
+			case 'Unreleased': case 'CAP':
+				// Unreleased and CAP have 20% the normal rate
 				if (this.random(5) >= 1) continue;
 			}
 
 			// Adjust rate for species with multiple formes
 			switch (template.baseSpecies) {
-			case 'Arceus':
+			case 'Arceus': case 'Silvally':
 				if (this.random(18) >= 1) continue;
 				break;
-			case 'Basculin':
+			case 'Basculin': case 'Cherrim': case 'Hoopa': case 'Meloetta': case 'Meowstic':
 				if (this.random(2) >= 1) continue;
 				break;
-			case 'Castform':
-				if (this.random(2) >= 1) continue;
-				break;
-			case 'Cherrim':
-				if (this.random(2) >= 1) continue;
+			case 'Castform': case 'Gourgeist': case 'Pumpkaboo':
+				if (this.random(4) >= 1) continue;
 				break;
 			case 'Genesect':
 				if (this.random(5) >= 1) continue;
 				break;
-			case 'Gourgeist':
-				if (this.random(4) >= 1) continue;
-				break;
-			case 'Hoopa':
-				if (this.random(2) >= 1) continue;
-				break;
-			case 'Meloetta':
-				if (this.random(2) >= 1) continue;
-				break;
-			case 'Meowstic':
-				if (this.random(2) >= 1) continue;
-				break;
 			case 'Pikachu':
-				// Cosplay Pikachu formes have 20% the normal rate (1/30 the normal rate each)
-				if (template.species !== 'Pikachu' && this.random(30) >= 1) continue;
-			case 'Pumpkaboo':
-				if (this.random(4) >= 1) continue;
-				break;
+				if (this.random(7) >= 1) continue;
+				continue;
 			}
 
 			// Limit 2 of any type
@@ -6652,7 +6339,7 @@ exports.BattleScripts = {
 			}
 			if (skip) continue;
 
-			let set = this.randomSet(template, pokemon.length, teamDetails);
+			let set = this[this.gameType === 'singles' ? 'randomSet' : 'randomDoublesSet'](template, pokemon.length, teamDetails);
 
 			set.moves = ['Metronome'];
 
@@ -6661,7 +6348,12 @@ exports.BattleScripts = {
 			}
 
 			// Illusion shouldn't be the last Pokemon of the team
-			if (set.ability === 'Illusion' && pokemonLeft > 4) continue;
+			if (set.ability === 'Illusion' && pokemon.length > 4) continue;
+
+			// Pokemon shouldn't have Physical and Special setup on the same set
+			let incompatibleMoves = ['bellydrum', 'swordsdance', 'calmmind', 'nastyplot'];
+			let intersectMoves = set.moves.filter(move => incompatibleMoves.includes(move));
+			if (intersectMoves.length > 1) continue;
 
 			// Limit 1 of any type combination
 			let typeCombo = types.join();
@@ -6796,50 +6488,28 @@ exports.BattleScripts = {
 			case 'LC Uber':
 			case 'NFE':
 				if (puCount > 1) continue;
-			case 'Unreleased':
-				// Unreleased Pokémon have 20% the normal rate
-				if (this.random(5) >= 1) continue;
-				break;
-			case 'CAP':
-				// CAPs have 20% the normal rate
+			case 'Unreleased': case 'CAP':
+				// Unreleased and CAP have 20% the normal rate
 				if (this.random(5) >= 1) continue;
 			}
 
 			// Adjust rate for species with multiple formes
 			switch (template.baseSpecies) {
-			case 'Arceus':
+			case 'Arceus': case 'Silvally':
 				if (this.random(18) >= 1) continue;
 				break;
-			case 'Basculin':
+			case 'Basculin': case 'Cherrim': case 'Hoopa': case 'Meloetta': case 'Meowstic':
 				if (this.random(2) >= 1) continue;
 				break;
-			case 'Castform':
-				if (this.random(2) >= 1) continue;
-				break;
-			case 'Cherrim':
-				if (this.random(2) >= 1) continue;
+			case 'Castform': case 'Gourgeist': case 'Pumpkaboo':
+				if (this.random(4) >= 1) continue;
 				break;
 			case 'Genesect':
 				if (this.random(5) >= 1) continue;
 				break;
-			case 'Gourgeist':
-				if (this.random(4) >= 1) continue;
-				break;
-			case 'Hoopa':
-				if (this.random(2) >= 1) continue;
-				break;
-			case 'Meloetta':
-				if (this.random(2) >= 1) continue;
-				break;
-			case 'Meowstic':
-				if (this.random(2) >= 1) continue;
-				break;
 			case 'Pikachu':
-				// Cosplay Pikachu formes have 20% the normal rate (1/30 the normal rate each)
-				if (template.species !== 'Pikachu' && this.random(30) >= 1) continue;
-			case 'Pumpkaboo':
-				if (this.random(4) >= 1) continue;
-				break;
+				if (this.random(7) >= 1) continue;
+				continue;
 			}
 
 			// Limit 2 of any type
@@ -6857,10 +6527,15 @@ exports.BattleScripts = {
 				template = 'castform';
 			}
 
-			let set = this.randomSet(template, pokemon.length, teamDetails);
+			let set = this[this.gameType === 'singles' ? 'randomSet' : 'randomDoublesSet'](template, pokemon.length, teamDetails);
 
 			// Illusion shouldn't be the last Pokemon of the team
-			if (set.ability === 'Illusion' && pokemonLeft > 4) continue;
+			if (set.ability === 'Illusion' && pokemon.length > 4) continue;
+
+			// Pokemon shouldn't have Physical and Special setup on the same set
+			let incompatibleMoves = ['bellydrum', 'swordsdance', 'calmmind', 'nastyplot'];
+			let intersectMoves = set.moves.filter(move => incompatibleMoves.includes(move));
+			if (intersectMoves.length > 1) continue;
 
 			// Limit 1 of any type combination
 			let typeCombo = types.join();
@@ -6910,66 +6585,6 @@ exports.BattleScripts = {
 		}
 		return pokemon;
 	},
-	randomSummerSendoffSets: require('./summer-send-off-sets.json'),
-	randomSummerSendoffSet: function (template, slot, teamOwner) {
-		let speciesId = toId(template.species);
-		let setList = this.randomSummerSendoffSets[teamOwner][speciesId].sets;
-		let effectivePool = [];
-
-		for (let i = 0, l = setList.length; i < l; i++) {
-			let curSet = setList[i];
-			let curSetVariants = [];
-			for (let j = 0, m = curSet.moves.length; j < m; j++) {
-				let variantIndex = this.random(curSet.moves[j].length);
-				curSetVariants.push(variantIndex);
-			}
-			effectivePool.push({set: curSet, moveVariants: curSetVariants});
-		}
-
-		let setData = effectivePool[this.random(effectivePool.length)];
-		let moves = [];
-		for (let i = 0; i < setData.set.moves.length; i++) {
-			let moveSlot = setData.set.moves[i];
-			moves.push(setData.moveVariants ? moveSlot[setData.moveVariants[i]] : moveSlot[this.random(moveSlot.length)]);
-		}
-
-		return {
-			name: setData.set.name || setData.set.species,
-			species: setData.set.species,
-			gender: setData.set.gender || template.gender || (this.random() ? 'M' : 'F'),
-			item: setData.set.item || '',
-			ability: setData.set.ability || template.abilities['0'],
-			shiny: typeof setData.set.shiny === 'undefined' ? !this.random(1024) : setData.set.shiny,
-			level: 100,
-			happiness: typeof setData.set.happiness === 'undefined' ? 255 : setData.set.happiness,
-			evs: setData.set.evs || {hp: 84, atk: 84, def: 84, spa: 84, spd: 84, spe: 84},
-			ivs: setData.set.ivs || {hp: 31, atk: 31, def: 31, spa: 31, spd: 31, spe: 31},
-			nature: setData.set.nature || 'Serious',
-			moves: moves
-		};
-	},
-	randomSummerSendoffTeam: function () {
-		let availableTeams = ['Chase', 'AmourPearlShipper', 'Nah', 'static', 'gio7sm', 'LegendaryGaming', 'Archy', 'punkysaur'];
-		let chosenTeam;
-		chosenTeam = availableTeams[this.random(availableTeams.length)];
-
-		let pokemonLeft = 0;
-		let pokemon = [];
-
-		let pokemonPool = Object.keys(this.randomSummerSendoffSets[chosenTeam]);
-
-		while (pokemonPool.length && pokemonLeft < 6) {
-			let template = this.getTemplate(this.sampleNoReplace(pokemonPool));
-			if (!template.exists) continue;
-
-			let set = this.randomSummerSendoffSet(template, pokemon.length, chosenTeam);
-			if (!set) continue;
-
-			pokemon.push(set);
-			pokemonLeft++;
-		}
-		return pokemon;
-	},
 	randomHalloweenTeam: function (side) {
 		let pokemonLeft = 0;
 		let pokemon = [];
@@ -7013,50 +6628,28 @@ exports.BattleScripts = {
 			case 'LC Uber':
 			case 'NFE':
 				if (puCount > 1) continue;
-			case 'Unreleased':
-				// Unreleased Pokémon have 20% the normal rate
-				if (this.random(5) >= 1) continue;
-				break;
-			case 'CAP':
-				// CAPs have 20% the normal rate
+			case 'Unreleased': case 'CAP':
+				// Unreleased and CAP have 20% the normal rate
 				if (this.random(5) >= 1) continue;
 			}
 
 			// Adjust rate for species with multiple formes
 			switch (template.baseSpecies) {
-			case 'Arceus':
+			case 'Arceus': case 'Silvally':
 				if (this.random(18) >= 1) continue;
 				break;
-			case 'Basculin':
+			case 'Basculin': case 'Cherrim': case 'Hoopa': case 'Meloetta': case 'Meowstic':
 				if (this.random(2) >= 1) continue;
 				break;
-			case 'Castform':
-				if (this.random(2) >= 1) continue;
-				break;
-			case 'Cherrim':
-				if (this.random(2) >= 1) continue;
+			case 'Castform': case 'Gourgeist': case 'Pumpkaboo':
+				if (this.random(4) >= 1) continue;
 				break;
 			case 'Genesect':
 				if (this.random(5) >= 1) continue;
 				break;
-			case 'Gourgeist':
-				if (this.random(4) >= 1) continue;
-				break;
-			case 'Hoopa':
-				if (this.random(2) >= 1) continue;
-				break;
-			case 'Meloetta':
-				if (this.random(2) >= 1) continue;
-				break;
-			case 'Meowstic':
-				if (this.random(2) >= 1) continue;
-				break;
 			case 'Pikachu':
-				// Cosplay Pikachu formes have 20% the normal rate (1/30 the normal rate each)
-				if (template.species !== 'Pikachu' && this.random(30) >= 1) continue;
-			case 'Pumpkaboo':
-				if (this.random(4) >= 1) continue;
-				break;
+				if (this.random(7) >= 1) continue;
+				continue;
 			}
 
 			// Limit 2 of any type
@@ -7070,12 +6663,17 @@ exports.BattleScripts = {
 			}
 			if (skip) continue;
 
-			let set = this.randomSet(template, pokemon.length, teamDetails);
+			let set = this[this.gameType === 'singles' ? 'randomSet' : 'randomDoublesSet'](template, pokemon.length, teamDetails);
 
 			set.moves[4] = 'Trick-o-Treat';
 
 			// Illusion shouldn't be the last Pokemon of the team
-			if (set.ability === 'Illusion' && pokemonLeft > 4) continue;
+			if (set.ability === 'Illusion' && pokemon.length > 4) continue;
+
+			// Pokemon shouldn't have Physical and Special setup on the same set
+			let incompatibleMoves = ['bellydrum', 'swordsdance', 'calmmind', 'nastyplot'];
+			let intersectMoves = set.moves.filter(move => incompatibleMoves.includes(move));
+			if (intersectMoves.length > 1) continue;
 
 			// Limit 1 of any type combination
 			let typeCombo = types.join();
@@ -7132,7 +6730,7 @@ exports.BattleScripts = {
 		let pokemonPool = [];
 		for (let id in this.data.FormatsData) {
 			let template = this.getTemplate(id);
-			if (!template.isMega && !template.isPrimal && !template.isNonstandard && template.randomBattleMoves) {
+			if (template.gen <= this.gen && !template.isMega && !template.isPrimal && !template.isNonstandard && template.randomBattleMoves) {
 				pokemonPool.push(id);
 			}
 		}
@@ -7168,50 +6766,28 @@ exports.BattleScripts = {
 			case 'LC Uber':
 			case 'NFE':
 				if (puCount > 1) continue;
-			case 'Unreleased':
-				// Unreleased Pokémon have 20% the normal rate
-				if (this.random(5) >= 1) continue;
-				break;
-			case 'CAP':
-				// CAPs have 20% the normal rate
+			case 'Unreleased': case 'CAP':
+				// Unreleased and CAP have 20% the normal rate
 				if (this.random(5) >= 1) continue;
 			}
 
 			// Adjust rate for species with multiple formes
 			switch (template.baseSpecies) {
-			case 'Arceus':
+			case 'Arceus': case 'Silvally':
 				if (this.random(18) >= 1) continue;
 				break;
-			case 'Basculin':
+			case 'Basculin': case 'Cherrim': case 'Hoopa': case 'Meloetta': case 'Meowstic':
 				if (this.random(2) >= 1) continue;
 				break;
-			case 'Castform':
-				if (this.random(2) >= 1) continue;
-				break;
-			case 'Cherrim':
-				if (this.random(2) >= 1) continue;
+			case 'Castform': case 'Gourgeist': case 'Pumpkaboo':
+				if (this.random(4) >= 1) continue;
 				break;
 			case 'Genesect':
 				if (this.random(5) >= 1) continue;
 				break;
-			case 'Gourgeist':
-				if (this.random(4) >= 1) continue;
-				break;
-			case 'Hoopa':
-				if (this.random(2) >= 1) continue;
-				break;
-			case 'Meloetta':
-				if (this.random(2) >= 1) continue;
-				break;
-			case 'Meowstic':
-				if (this.random(2) >= 1) continue;
-				break;
 			case 'Pikachu':
-				// Cosplay Pikachu formes have 20% the normal rate (1/30 the normal rate each)
-				if (template.species !== 'Pikachu' && this.random(30) >= 1) continue;
-			case 'Pumpkaboo':
-				if (this.random(4) >= 1) continue;
-				break;
+				if (this.random(7) >= 1) continue;
+				continue;
 			}
 
 			// Limit 2 of any type
@@ -7231,10 +6807,15 @@ exports.BattleScripts = {
 				template = leadPokemon;
 			}
 
-			let set = this.randomSet(template, pokemon.length, teamDetails);
+			let set = this[this.gameType === 'singles' ? 'randomSet' : 'randomDoublesSet'](template, pokemon.length, teamDetails);
 
 			// Illusion shouldn't be the last Pokemon of the team
-			if (set.ability === 'Illusion' && pokemonLeft > 4) continue;
+			if (set.ability === 'Illusion' && pokemon.length > 4) continue;
+
+			// Pokemon shouldn't have Physical and Special setup on the same set
+			let incompatibleMoves = ['bellydrum', 'swordsdance', 'calmmind', 'nastyplot'];
+			let intersectMoves = set.moves.filter(move => incompatibleMoves.includes(move));
+			if (intersectMoves.length > 1) continue;
 
 			// Limit 1 of any type combination
 			let typeCombo = types.join();

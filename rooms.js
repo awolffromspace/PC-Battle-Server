@@ -397,17 +397,18 @@ class GlobalRoom {
 			return this.formatList;
 		}
 		this.formatList = '|formats' + (Ladders.formatsListPrefix || '');
-		let curSection = '';
+		let section = '', prevSection = '';
+		let curColumn = 1;
 		for (let i in Tools.data.Formats) {
 			let format = Tools.data.Formats[i];
+			if (format.section) section = format.section;
+			if (format.column) curColumn = format.column;
+			if (!format.name) continue;
 			if (!format.challengeShow && !format.searchShow && !format.tournamentShow) continue;
 
-			let section = format.section;
-			if (section === undefined) section = format.mod;
-			if (!section) section = '';
-			if (section !== curSection) {
-				curSection = section;
-				this.formatList += '|,' + (format.column || 1) + '|' + section;
+			if (section !== prevSection) {
+				prevSection = section;
+				this.formatList += '|,' + curColumn + '|' + section;
 			}
 			this.formatList += '|' + format.name;
 			let displayCode = 0;
@@ -491,7 +492,7 @@ class GlobalRoom {
 
 		user.prepBattle(formatid, 'search', null).then(result => this.finishSearchBattle(user, formatid, result));
 
-		if (!user.locked && !user.nameLocked) {
+		if (!user.locked) {
 			let searcher = toId(user)
 			if (Rooms.lobby.disableLadderMessages) return false;
 			if (Rooms.lobby) Rooms.lobby.addRaw(searcher + ' is searching for a battle (' + formatid + ')!');
@@ -909,7 +910,7 @@ class BattleRoom extends Room {
 		// Declare variables here in case we need them for non-rated battles logging.
 		let p1score = 0.5;
 		let winnerid = toId(winner);
-		let color = '#1fa6cc';
+		let color = '#d96421';
 
 		// Check if the battle was rated to update the ladder, return its response, and log the battle.
 		if (this.rated) {
@@ -939,26 +940,12 @@ class BattleRoom extends Room {
 			// Battle Point Winnings
 			//
 
-			if (this.format === 'lotf26ubers') {
-				let wid = toId(winner);
-				Database.read('bp', wid, function (err, initial) {
-					if (err) throw err;
-					if (!initial) initial = 0;
-					Database.write('bp', initial + 2, wid, function (err) {
-						if (err) throw err;
-					});
-				});
-				this.push("|raw|<b><font color='" + color + "'>" + Tools.escapeHTML(winner) + "</font> has won " + "<font color='" + color + "'>2</font> Battle Points for winning the rated Ladder of the Week battle!</b>");
-			} else if (this.format !== '1v1random' && this.format !== '1v1challengecup' && this.format !== '1v1') {
-				let wid = toId(winner);
-				Database.read('bp', wid, function (err, initial) {
-					if (err) throw err;
-					if (!initial) initial = 0;
-					Database.write('bp', initial + 1, wid, function (err) {
-						if (err) throw err;
-					});
-				});
-				this.push("|raw|<b><font color='" + color + "'>" + Tools.escapeHTML(winner) + "</font> has won " + "<font color='" + color + "'>1</font> Battle Point for winning the rated battle!</b>");
+			if (this.format === 'lotf27gen7pokebankou') {
+				Db('bp').set(winnerid, Db('bp').get(winnerid, 0) + 2);
+				this.push("|raw|<b><font color='" + color + "'>" + Chat.escapeHTML(winnerid) + "</font> has won " + "<font color='" + color + "'>2</font>" + " Battle Points for winning the rated Ladder of the Fortnight battle!</b>");
+			} else if (this.format !== 'gen71v1random' && this.format !== 'gen71v1challengecup' && this.format !== '1v1') {
+				Db('bp').set(winnerid, Db('bp').get(winnerid, 0) + 1);
+				this.push("|raw|<b><font color='" + color + "'>" + Chat.escapeHTML(winnerid) + "</font> has won " + "<font color='" + color + "'>1</font>" + " Battle Point for winning the rated battle!</b>");
 			}
 		} else if (Config.logchallenges) {
 			// Log challenges if the challenge logging config is enabled.
@@ -980,13 +967,10 @@ class BattleRoom extends Room {
 		}
 		if (this.tour) {
 			this.tour.onBattleWin(this, winnerid);
-			this.tour = null;
-			if (this.format !== '1v1random' && this.format !== '1v1challengecup' && this.format !== '1v1') {
-				this.push("|raw|<b><font color='" + color + "'>" + Tools.escapeHTML(winner) + "</font> has won " + "<font color='" + color + "'>1</font> Battle Point for winning the tournament battle!</b>");
+			if (this.format !== 'gen71v1random' && this.format !== 'gen71v1challengecup' && this.format !== '1v1') {
+				this.push("|raw|<b><font color='" + color + "'>" + Chat.escapeHTML(winnerid) + "</font> has won " + "<font color='" + color + "'>1</font>" + " Battle Point for winning the tournament battle!</b>");
 			}
 		}
-		let p1 = this.p1;
-		let p2 = this.p2;
 		this.update();
 	}
 	// logNum = 0    : spectator log (no exact HP)
@@ -1566,7 +1550,7 @@ class ChatRoom extends Room {
 	}
 	getIntroMessage(user) {
 		let message = '';
-		if (this.introMessage) message += '\n|raw|<div class="infobox"><div>' + this.introMessage.replace(/\n/g, '') + '</div>';
+		if (this.introMessage) message += '\n|raw|<div class="infobox infobox-roomintro"><div>' + this.introMessage.replace(/\n/g, '') + '</div>';
 		if (this.staffMessage && user.can('mute', null, this)) message += (message ? '<br />' : '\n|raw|<div class="infobox">') + '(Staff intro:)<br /><div>' + this.staffMessage.replace(/\n/g, '') + '</div>';
 		if (this.modchat) {
 			message += (message ? '<br />' : '\n|raw|<div class="infobox">') + '<div class="broadcast-red">' +

@@ -243,6 +243,16 @@ class Tournament {
 		this.room.update();
 	}
 
+	allowAlts() {
+		this.isAllowAlts = true;
+		this.update();
+	}
+
+	disallowAlts() {
+		this.isAllowAlts = false;
+		this.update();
+	}
+
 	addUser(user, isAllowAlts, output) {
 		if (!user.named) {
 			output.sendReply('|tournament|error|UserNotNamed');
@@ -256,6 +266,12 @@ class Tournament {
 
 		if (this.playerCap && this.playerCount >= this.playerCap) {
 			output.sendReply('|tournament|error|Full');
+			return;
+		}
+
+		let gameCount = user.games.size;
+		if (gameCount > 4) {
+			output.errorReply("Due to high load, you are limited to 4 games at the same time.");
 			return;
 		}
 
@@ -292,17 +308,6 @@ class Tournament {
 			}
 		}
 	}
-
-	allowAlts() {
-		this.isAllowAlts = true;
-		this.update();
-	}
-
-	disallowAlts() {
-		this.isAllowAlts = false;
-		this.update();
-	}
-
 	removeUser(user, output) {
 		if (!(user.userid in this.players)) {
 			output.sendReply('|tournament|error|UserNotAdded');
@@ -833,30 +838,18 @@ class Tournament {
 		// Tournament Battle Winnings
 		//
 
+		let result = 'draw';
 		let tourSize = this.generator.users.size;
 		let sizeRequiredToEarn = 3;
-		let result = 'draw';
 		if (from === winner) {
 			result = 'win';
-			if (tourSize >= sizeRequiredToEarn && this.format !== '1v1random' && this.format !== '1v1challengecup' && this.format !== '1v1') {
-				Database.read('bp', toId(from), function (err, initial) {
-					if (err) throw err;
-					if (!initial) initial = 0;
-					Database.write('bp', initial + 1, toId(from), function (err) {
-						if (err) throw err;
-					});
-				});
+			if (tourSize >= sizeRequiredToEarn && this.format !== 'gen71v1random' && this.format !== 'gen71v1challengecup' && this.format !== '1v1') {
+				Db('bp').set(from, Db('bp').get(from, 0) + 1);
 			}
 		} else if (to === winner) {
 			result = 'loss';
-			if (tourSize >= sizeRequiredToEarn && this.format !== '1v1random' && this.format !== '1v1challengecup' && this.format !== '1v1') {
-				Database.read('bp', toId(to), function (err, initial) {
-					if (err) throw err;
-					if (!initial) initial = 0;
-					Database.write('bp', initial + 1, toId(to), function (err) {
-						if (err) throw err;
-					});
-				});
+			if (tourSize >= sizeRequiredToEarn && this.format !== 'gen71v1random' && this.format !== 'gen71v1challengecup' && this.format !== '1v1') {
+				Db('bp').set(to, Db('bp').get(to, 0) + 1);
 			}
 		}
 
@@ -907,17 +900,12 @@ class Tournament {
 		}));
 		this.isEnded = true;
 		if (this.autoDisqualifyTimer) clearTimeout(this.autoDisqualifyTimer);
-		delete exports.tournaments[this.room.id];
-		delete this.room.game;
-		for (let i in this.players) {
-			this.players[i].destroy();
-		}
 
 		//
 		// Tournament Winnings
 		//
 
-		let color = '#1fa6cc';
+		let color = '#d96421';
 		let sizeRequiredToEarn = 3;
 		let currencyName = function (amount) {
 			let name = " Battle Point";
@@ -939,28 +927,21 @@ class Tournament {
 		let tourSize = this.generator.users.size;
 
 		if (tourSize >= sizeRequiredToEarn) {
-			let firstBP = Math.round(tourSize / 2);
-			let secondBP = Math.round(firstBP / 2);
+			let firstMoney = Math.round(tourSize / 2);
+			let secondMoney = Math.round(firstMoney / 2);
 
-			Database.read('bp', wid, function (err, initial) {
-				if (err) throw err;
-				if (!initial) initial = 0;
-				Database.write('bp', initial + firstBP, wid, function (err) {
-					if (err) throw err;
-				});
-			});
-			this.room.addRaw("<b><font color='" + color + "'>" + Tools.escapeHTML(winner) + "</font> has won " + "<font color='" + color + "'>" + firstBP + "</font>" + currencyName(firstBP) + " for winning the tournament!</b>");
+			Db('bp').set(wid, Db('bp').get(wid, 0) + firstMoney);
+			this.room.addRaw("<b><font color='" + color + "'>" + Chat.escapeHTML(winner) + "</font> has won " + "<font color='" + color + "'>" + firstMoney + "</font>" + currencyName(firstMoney) + " for winning the tournament!</b>");
 
 			if (runnerUp) {
-				Database.read('bp', rid, function (err, initial) {
-					if (err) throw err;
-					if (!initial) initial = 0;
-					Database.write('bp', initial + secondBP, rid, function (err) {
-						if (err) throw err;
-					});
-				});
-				this.room.addRaw("<b><font color='" + color + "'>" + Tools.escapeHTML(runnerUp) + "</font> has won " +  "<font color='" + color + "'>" + secondBP + "</font>" + currencyName(secondBP) + " for winning the tournament!</b>");
+				Db('bp').set(rid, Db('bp').get(rid, 0) + secondMoney);
+				this.room.addRaw("<b><font color='" + color + "'>" + Chat.escapeHTML(runnerUp) + "</font> has won " +  "<font color='" + color + "'>" + secondMoney + "</font>" + currencyName(secondMoney) + " for winning the tournament!</b>");
 			}
+		}
+		delete exports.tournaments[this.room.id];
+		delete this.room.game;
+		for (let i in this.players) {
+			this.players[i].destroy();
 		}
 	}
 }
@@ -1271,11 +1252,11 @@ let commands = {
 	globalmoderation: {
 		allowalts: function (tournament, user) {
 			tournament.allowAlts(this);
-			this.sendModCommand("(" + user.name + " allowed alts in the tournament.)");
+			this.privateModCommand("(" + user.name + " allowed alts in the tournament.)");
 		},
 		disallowalts: function (tournament, user) {
 			tournament.disallowAlts(this);
-			this.sendModCommand("(" + user.name + " disallowed alts in the tournament.)");
+			this.privateModCommand("(" + user.name + " disallowed alts in the tournament.)");
 		},
 	},
 };
