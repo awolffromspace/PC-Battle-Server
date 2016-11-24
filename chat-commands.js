@@ -1891,7 +1891,7 @@ exports.commands = {
 	html: 'htmldeclare',
 	htmldeclare: function (target, room, user) {
 		if (!target) return this.parse('/help htmldeclare');
-		if (!this.can('declare', null, room)) return false;
+		if (!this.can('gdeclare', null, room)) return false;
 		if (!this.canTalk()) return;
 
 		this.add('|raw|<b>' + target + '</b>');
@@ -1902,7 +1902,7 @@ exports.commands = {
 	gdeclare: 'globaldeclare',
 	globaldeclare: function (target, room, user) {
 		if (!target) return this.parse('/help globaldeclare');
-		if (!this.can('declare')) return false;
+		if (!this.can('gdeclare')) return false;
 
 		Rooms.rooms.forEach((curRoom, id) => {
 			if (id !== 'global') curRoom.addRaw('<div class="broadcast-blue"><b>' + target + '</b></div>').update();
