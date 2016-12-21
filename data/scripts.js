@@ -5254,6 +5254,136 @@ exports.BattleScripts = {
 		}
 		return pokemon;
 	},
+	randomAlolaTeam: function (side) {
+		let pokemonLeft = 0;
+		let pokemon = [];
+
+		let pokemonPool = ['rowlet', 'dartrix', 'decidueye', 'litten', 'torracat', 'incineroar', 'popplio', 'brionne', 'primarina', 'pikipek', 'trumbeak', 'toucannon', 'yungoos', 'gumshoos', 'rattataalola', 'raticatealola', 'caterpie', 'metapod', 'butterfree', 'ledyba', 'ledian', 'spinarak', 'ariados', 'pichu', 'pikachu', 'raichualola', 'grubbin', 'charjabug', 'vikavolt', 'bonsly', 'sudowoodo', 'happiny', 'chansey', 'blissey', 'munchlax', 'snorlax', 'slowpoke', 'slowbro', 'slowking', 'wingull', 'pelipper', 'abra', 'kadabra', 'alakazam', 'meowthalola', 'persianalola', 'magnemite', 'magneton', 'magnezone', 'grimeralola', 'mukalola', 'growlithe', 'arcanine', 'drowzee', 'hypno', 'makuhita', 'hariyama', 'smeargle', 'crabrawler', 'crabominable', 'gastly', 'haunter', 'gengar', 'drifloon', 'drifblim', 'misdreavus', 'mismaguis', 'zubat', 'golbat', 'crobat', 'diglettalola', 'dugtrioalola', 'spearow', 'fearow', 'rufflet', 'braviary', 'vullaby', 'mandibuzz', 'mankey', 'primeape', 'delibird', 'oricorio', 'cutiefly', 'ribombee', 'petilil', 'lilligant', 'cottonee', 'whimsicott', 'psyduck', 'golduck', 'magikarp', 'magikarp', 'gyarados', 'barboach', 'whiscash', 'machop', 'machoke', 'machamp', 'roggenrola', 'boldore', 'gigalith', 'carbink', 'sableye', 'rockruff', 'lycanroc', 'spinda', 'tentacool', 'tentacruel', 'finneon', 'lumineon', 'wishiwashi', 'luvdisc', 'corsola', 'mareanie', 'toxapex', 'shellder', 'cloyster', 'bagon', 'shellgon', 'salamence', 'lillipup', 'herdier', 'stoutland', 'eevee', 'vaporeon', 'jolteon', 'espeon', 'umbreon', 'leafeon', 'glaceon', 'sylveon', 'mudbray', 'mudsdale', 'igglybuff', 'jigglypuff', 'wigglytuff', 'tauros', 'miltank', 'surskit', 'masquerain', 'dewpider', 'araquanid', 'fomantis', 'lurantis', 'morelull', 'shiinotic', 'paras', 'parasect', 'poliwag', 'poliwhirl', 'poliwrath', 'politoed', 'goldeen', 'seaking', 'feebas', 'milotic', 'alomomola', 'fletchling', 'fletchinder', 'talonflame', 'salandit', 'salazzle', 'cubone', 'marowakalola', 'kangaskhan', 'magby', 'magmar', 'magmortar', 'stufful', 'bewear', 'bounsweet', 'steenee', 'tsareena', 'comfey', 'oranguru', 'passimian', 'goomy', 'sliggoo', 'goodra', 'castform', 'wimpod', 'golisopod', 'staryu', 'starmie', 'sandygast', 'palossand', 'cranidos', 'rampardos', 'shieldon', 'bastiodon', 'archen', 'archeops', 'tirtouga', 'carracosta', 'phantump', 'trevenant', 'nosepass', 'probopass', 'pyukumuku', 'chinchou', 'lanturn', 'typenull', 'silvally', 'zygarde', 'trubbish', 'garbodor', 'skarmory', 'ditto', 'cleffa', 'clefairy', 'clefable', 'minior', 'beldum', 'metang', 'metagross', 'porygon', 'porygon2', 'porygonz', 'pancham', 'pangoro', 'komala', 'torkoal', 'turtonator', 'togedemaru', 'elekid', 'electabuzz', 'electivire', 'geodude', 'graveler', 'golem', 'sandile', 'krokorok', 'krookodile', 'trapinch', 'vibrave', 'flygon', 'gible', 'gabite', 'garchomp', 'klefki', 'mimikyu', 'bruxish', 'drampa', 'absol', 'snorunt', 'glalie', 'froslass', 'sneasel', 'weavile', 'sandshrewalola', 'sandslashalola', 'vulpixalola', 'ninetalesalola', 'vanillite', 'vanillish', 'vanilluxe', 'snubbull', 'granbull', 'shellos', 'gastrodon', 'relicanth', 'dhelmise', 'carvanha', 'sharpedo', 'wailmer', 'wailord', 'lapras', 'exeggcute', 'exeggutoralola', 'jangmoo', 'hakamoo', 'kommoo', 'emolga', 'scyther', 'scizor', 'murkrow', 'honchkrow', 'riolu', 'lucario', 'dratini', 'dragonair', 'dragonite', 'aerodactyl', 'tapukoko', 'tapulele', 'tapubulu', 'tapufini', 'cosmog', 'cosmoem', 'solgaleo', 'lunala', 'nihilego', 'buzzwole', 'pheromosa', 'xurkitree', 'celesteela', 'kartana', 'guzzlord', 'necrozma', 'magearna', 'marshadow'];
+
+		let typeCount = {};
+		let typeComboCount = {};
+		let baseFormes = {};
+		let uberCount = 0;
+		let puCount = 0;
+		let teamDetails = {};
+
+		while (pokemonPool.length && pokemonLeft < 6) {
+			let template = this.getTemplate(this.sampleNoReplace(pokemonPool));
+			if (!template.exists) continue;
+
+			// Limit to one of each species (Species Clause)
+			if (baseFormes[template.baseSpecies]) continue;
+
+			// Useless in Random Battle without greatly lowering the levels of everything else
+			if (template.species === 'Unown') continue;
+
+			let tier = template.tier;
+			switch (tier) {
+			case 'Uber':
+				// Ubers are limited to 2 but have a 20% chance of being added anyway.
+				if (uberCount > 1 && this.random(5) >= 1) continue;
+				break;
+			case 'PU':
+				// PUs are limited to 2 but have a 20% chance of being added anyway.
+				if (puCount > 1 && this.random(5) >= 1) continue;
+				break;
+			case 'LC':
+			case 'LC Uber':
+			case 'NFE':
+				if (puCount > 1) continue;
+			case 'Unreleased': case 'CAP':
+				// Unreleased and CAP have 20% the normal rate
+				if (this.random(5) >= 1) continue;
+			}
+
+			// Adjust rate for species with multiple formes
+			switch (template.baseSpecies) {
+			case 'Arceus': case 'Silvally':
+				if (this.random(18) >= 1) continue;
+				break;
+			case 'Basculin': case 'Cherrim': case 'Hoopa': case 'Meloetta': case 'Meowstic':
+				if (this.random(2) >= 1) continue;
+				break;
+			case 'Castform': case 'Gourgeist': case 'Pumpkaboo':
+				if (this.random(4) >= 1) continue;
+				break;
+			case 'Genesect':
+				if (this.random(5) >= 1) continue;
+				break;
+			case 'Pikachu':
+				if (this.random(7) >= 1) continue;
+				continue;
+			}
+
+			// Limit 2 of any type
+			let types = template.types;
+			let skip = false;
+			for (let t = 0; t < types.length; t++) {
+				if (typeCount[types[t]] > 1 && this.random(5) >= 1) {
+					skip = true;
+					break;
+				}
+			}
+			if (skip) continue;
+
+			let set = this[this.gameType === 'singles' ? 'randomSet' : 'randomDoublesSet'](template, pokemon.length, teamDetails);
+
+			// Illusion shouldn't be the last Pokemon of the team
+			if (set.ability === 'Illusion' && pokemon.length > 4) continue;
+
+			// Pokemon shouldn't have Physical and Special setup on the same set
+			let incompatibleMoves = ['bellydrum', 'swordsdance', 'calmmind', 'nastyplot'];
+			let intersectMoves = set.moves.filter(move => incompatibleMoves.includes(move));
+			if (intersectMoves.length > 1) continue;
+
+			// Limit 1 of any type combination
+			let typeCombo = types.join();
+			if (set.ability === 'Drought' || set.ability === 'Drizzle' || set.ability === 'Sand Stream') {
+				// Drought, Drizzle and Sand Stream don't count towards the type combo limit
+				typeCombo = set.ability;
+			}
+			if (typeCombo in typeComboCount) continue;
+
+			// Limit the number of Megas to one
+			let forme = template.otherFormes && this.getTemplate(template.otherFormes[0]);
+			let isMegaSet = this.getItem(set.item).megaStone || (forme && forme.isMega && forme.requiredMove && set.moves.includes(toId(forme.requiredMove)));
+			if (isMegaSet && teamDetails.megaCount > 0) continue;
+
+			// Okay, the set passes, add it to our team
+			pokemon.push(set);
+
+			// Now that our Pokemon has passed all checks, we can increment our counters
+			baseFormes[template.baseSpecies] = 1;
+			pokemonLeft++;
+
+			// Increment type counters
+			for (let t = 0; t < types.length; t++) {
+				if (types[t] in typeCount) {
+					typeCount[types[t]]++;
+				} else {
+					typeCount[types[t]] = 1;
+				}
+			}
+			typeComboCount[typeCombo] = 1;
+
+			// Increment Uber/NU counters
+			if (tier === 'Uber') {
+				uberCount++;
+			} else if (tier === 'PU' || tier === 'NFE' || tier === 'LC' || tier === 'LC Uber') {
+				puCount++;
+			}
+
+			// Team has Mega/weather/hazards
+			if (this.getItem(set.item).megaStone) teamDetails['megaCount'] = 1;
+			if (set.ability === 'Snow Warning') teamDetails['hail'] = 1;
+			if (set.ability === 'Drizzle' || set.moves.includes('raindance')) teamDetails['rain'] = 1;
+			if (set.ability === 'Sand Stream') teamDetails['sand'] = 1;
+			if (set.moves.includes('stealthrock')) teamDetails['stealthRock'] = 1;
+			if (set.moves.includes('toxicspikes')) teamDetails['toxicSpikes'] = 1;
+			if (set.moves.includes('defog') || set.moves.includes('rapidspin')) teamDetails['hazardClear'] = 1;
+		}
+		return pokemon;
+	},
 	randomColorTeam: function (side) {
 		let pokemonLeft = 0;
 		let pokemon = [];

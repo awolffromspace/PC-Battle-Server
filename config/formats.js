@@ -11,17 +11,13 @@ exports.Formats = [
 		section: "SM Singles (beta)",
 	},
 	{
-		name: "[LotF 27 / Gen 7] Pokebank OU",
-		desc: [
-			"&bullet; <a href=\"https://www.smogon.com/forums/threads/3587188/\">OU Metagame Discussion</a>",
-			"&bullet; <a href=\"https://www.smogon.com/forums/threads/3587177/\">OU Banlist</a>",
-		],
+		name: "[LotW 28] Alola Random",
 
 		mod: 'gen7',
-		ruleset: ['Pokemon', 'Standard', 'Team Preview', 'Baton Pass Clause'],
-		banlist: ['Uber', 'Bank-Uber', 'Power Construct', 'Shadow Tag'],
+		team: 'randomAlola',
+		ruleset: ['[Gen 7] Random (no PotD)'],
 		onBegin: function () {
-			this.add('raw|This is the Ladder of the Fortnight! Use the "Battle!" button to try and win the LotW. The winner is the user who is #1 on the ladder by 10 PM ET on Saturday. They receive a <img src="http://cbc.pokecommunity.com/config/user-list-images/trophy.png" /> beside their name for a week.');
+			this.add('raw|This is the Ladder of the Week! Use the "Battle!" button to try and win the LotW. The winner is the user who is #1 on the ladder by 10 PM ET on Saturday. They receive a <img src="http://cbc.pokecommunity.com/config/user-list-images/trophy.png" /> beside their name for a week.');
 		},
 	},
 	{
@@ -217,6 +213,13 @@ exports.Formats = [
 		name: "Kalos Random",
 
 		team: 'randomKalos',
+		ruleset: ['[Gen 7] Random (no PotD)'],
+	},
+	{
+		name: "[Gen 7] Alola Random",
+
+		mod: 'gen7',
+		team: 'randomAlola',
 		ruleset: ['[Gen 7] Random (no PotD)'],
 	},
 	{

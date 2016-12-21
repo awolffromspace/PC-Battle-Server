@@ -213,6 +213,7 @@ exports.customavatars = {
 	'deathbychansey': 'megumiii.png',
 	'megumiii': 'megumiii.png',
 	'lailh': 'megumiii.png',
+	'esperterr': 'esperterr.png',
 	'altairis': 'altairis.png',
 	'winry': 'altairis.png',
 	'sanguine': 'sanguine.gif',
