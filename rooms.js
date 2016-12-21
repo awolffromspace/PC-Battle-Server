@@ -940,7 +940,7 @@ class BattleRoom extends Room {
 			// Battle Point Winnings
 			//
 
-			if (this.format === 'lotf28alolarandom') {
+			if (this.format === 'lotw28alolarandom') {
 				Db('bp').set(winnerid, Db('bp').get(winnerid, 0) + 2);
 				this.push("|raw|<b><font color='" + color + "'>" + Chat.escapeHTML(winnerid) + "</font> has won " + "<font color='" + color + "'>2</font>" + " Battle Points for winning the rated Ladder of the Fortnight battle!</b>");
 			} else if (this.format !== 'gen71v1random' && this.format !== 'gen71v1challengecup' && this.format !== '1v1') {
