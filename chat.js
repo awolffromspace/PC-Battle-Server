@@ -451,7 +451,7 @@ class CommandContext {
 		this.room.logEntry(data);
 	}
 	addModCommand(text, logOnlyText) {
-		this.add('|c|' + this.user.getIdentity(this.room) + '|/log ' + text);
+		this.room.addLogMessage(this.user, text);
 		this.room.modlog(text + (logOnlyText || ""));
 	}
 	logModCommand(text) {
@@ -527,7 +527,7 @@ class CommandContext {
 
 		if (room && room.id === 'global') {
 			// should never happen
-			console.log(`Command tried to write to global: ${user.name}: ${message}`);
+			// console.log(`Command tried to write to global: ${user.name}: ${message}`);
 			return false;
 		}
 		if (!user.named) {
@@ -612,6 +612,10 @@ class CommandContext {
 				return false;
 			}
 
+			if (!this.checkBanwords(room, user.name)) {
+				this.errorReply(`Your username contains a phrase banned by this room.`);
+				return false;
+			}
 			if (!this.checkBanwords(room, message) && !user.can('mute', null, room)) {
 				this.errorReply("Your message contained banned words.");
 				return false;
@@ -714,7 +718,7 @@ class CommandContext {
 		}
 
 		// check for mismatched tags
-		let tags = html.toLowerCase().match(/<\/?(div|a|button|b|i|u|center|font)\b/g);
+		let tags = html.toLowerCase().match(/<\/?(div|a|button|b|strong|em|i|u|center|font|marquee|blink|details|summary|code)\b/g);
 		if (tags) {
 			let stack = [];
 			for (let i = 0; i < tags.length; i++) {
@@ -749,34 +753,26 @@ class CommandContext {
 		this.splitTarget(target, exactName);
 		return this.targetUser;
 	}
-	splitTarget(target, exactName) {
+	splitOne(target) {
 		let commaIndex = target.indexOf(',');
 		if (commaIndex < 0) {
-			let targetUser = Users.get(target, exactName);
-			this.targetUser = targetUser;
-			this.inputUsername = target.trim();
-			this.targetUsername = targetUser ? targetUser.name : target;
-			return '';
+			return [target, ''];
 		}
-		this.inputUsername = target.substr(0, commaIndex);
-		let targetUser = Users.get(this.inputUsername, exactName);
-		if (targetUser) {
-			this.targetUser = targetUser;
-			this.targetUsername = targetUser.name;
-		} else {
-			this.targetUser = null;
-			this.targetUsername = this.inputUsername;
-		}
-		return target.substr(commaIndex + 1).trim();
+		return [target.substr(0, commaIndex), target.substr(commaIndex + 1).trim()];
+	}
+	splitTarget(target, exactName) {
+		let [name, rest] = this.splitOne(target);
+
+		this.targetUser = Users.get(name, exactName);
+		this.inputUsername = name.trim();
+		this.targetUsername = this.targetUser ? this.targetUser.name : this.inputUsername;
+		return rest;
 	}
 	splitTargetText(target) {
-		let commaIndex = target.indexOf(',');
-		if (commaIndex < 0) {
-			this.targetUsername = target;
-			return '';
-		}
-		this.targetUsername = target.substr(0, commaIndex);
-		return target.substr(commaIndex + 1).trim();
+		let [first, rest] = this.splitOne(target);
+
+		this.targetUsername = first.trim();
+		return rest.trim();
 	}
 }
 Chat.CommandContext = CommandContext;
@@ -940,11 +936,19 @@ Chat.toDurationString = function (number, options) {
 	// https://github.com/tc39/ecma402/issues/47
 	const date = new Date(+number);
 	const parts = [date.getUTCFullYear() - 1970, date.getUTCMonth(), date.getUTCDate() - 1, date.getUTCHours(), date.getUTCMinutes(), date.getUTCSeconds()];
+	const roundingBoundaries = [6, 15, 12, 30, 30];
 	const unitNames = ["second", "minute", "hour", "day", "month", "year"];
 	const positiveIndex = parts.findIndex(elem => elem > 0);
+	const precision = (options && options.precision ? options.precision : parts.length);
 	if (options && options.hhmmss) {
 		let string = parts.slice(positiveIndex).map(value => value < 10 ? "0" + value : "" + value).join(":");
 		return string.length === 2 ? "00:" + string : string;
 	}
-	return parts.slice(positiveIndex).reverse().map((value, index) => value ? value + " " + unitNames[index] + (value > 1 ? "s" : "") : "").reverse().join(" ").trim();
+	// round least significant displayed unit
+	if (positiveIndex + precision < parts.length && precision > 0 && positiveIndex >= 0) {
+		if (parts[positiveIndex + precision] >= roundingBoundaries[positiveIndex + precision - 1]) {
+			parts[positiveIndex + precision - 1]++;
+		}
+	}
+	return parts.slice(positiveIndex).reverse().map((value, index) => value ? value + " " + unitNames[index] + (value > 1 ? "s" : "") : "").reverse().slice(0, precision).join(" ").trim();
 };

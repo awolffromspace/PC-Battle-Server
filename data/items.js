@@ -118,7 +118,7 @@ exports.BattleItems = {
 			type: "Dragon",
 		},
 		onUpdate: function (pokemon) {
-			if (pokemon.hp <= pokemon.maxhp / 2) {
+			if (pokemon.hp <= pokemon.maxhp / 4 || (pokemon.hp <= pokemon.maxhp / 2 && pokemon.hasAbility('gluttony'))) {
 				pokemon.eatItem();
 			}
 		},
@@ -126,14 +126,14 @@ exports.BattleItems = {
 			if (!this.runEvent('TryHeal', pokemon)) return false;
 		},
 		onEat: function (pokemon) {
-			this.heal(pokemon.maxhp / 8);
+			this.heal(pokemon.maxhp / 2);
 			if (pokemon.getNature().minus === 'spd') {
 				pokemon.addVolatile('confusion');
 			}
 		},
 		num: 162,
 		gen: 3,
-		desc: "Restores 1/8 max HP when at 1/2 max HP or less. May confuse. Single use.",
+		desc: "Restores 1/2 max HP at 1/4 max HP or less; confuses if -SpD Nature. Single use.",
 	},
 	"airballoon": {
 		id: "airballoon",
@@ -381,6 +381,7 @@ exports.BattleItems = {
 	"belueberry": {
 		id: "belueberry",
 		name: "Belue Berry",
+		isUnreleased: true,
 		spritenum: 21,
 		isBerry: true,
 		naturalGift: {
@@ -419,7 +420,7 @@ exports.BattleItems = {
 		},
 		onTryHealPriority: 1,
 		onTryHeal: function (damage, target, source, effect) {
-			let heals = {drain: 1, leechseed: 1, ingrain: 1, aquaring: 1};
+			let heals = {drain: 1, leechseed: 1, ingrain: 1, aquaring: 1, strengthsap: 1};
 			if (heals[effect.id]) {
 				return Math.ceil((damage * 1.3) - 0.5); // Big Root rounds half down
 			}
@@ -998,6 +999,7 @@ exports.BattleItems = {
 	"cornnberry": {
 		id: "cornnberry",
 		name: "Cornn Berry",
+		isUnreleased: true,
 		spritenum: 81,
 		isBerry: true,
 		naturalGift: {
@@ -1023,6 +1025,7 @@ exports.BattleItems = {
 	"custapberry": {
 		id: "custapberry",
 		name: "Custap Berry",
+		isUnreleased: true,
 		spritenum: 86,
 		isBerry: true,
 		naturalGift: {
@@ -1336,6 +1339,7 @@ exports.BattleItems = {
 	"durinberry": {
 		id: "durinberry",
 		name: "Durin Berry",
+		isUnreleased: true,
 		spritenum: 114,
 		isBerry: true,
 		naturalGift: {
@@ -1499,6 +1503,7 @@ exports.BattleItems = {
 	"enigmaberry": {
 		id: "enigmaberry",
 		name: "Enigma Berry",
+		isUnreleased: true,
 		spritenum: 124,
 		isBerry: true,
 		naturalGift: {
@@ -1673,7 +1678,7 @@ exports.BattleItems = {
 			type: "Bug",
 		},
 		onUpdate: function (pokemon) {
-			if (pokemon.hp <= pokemon.maxhp / 2) {
+			if (pokemon.hp <= pokemon.maxhp / 4 || (pokemon.hp <= pokemon.maxhp / 2 && pokemon.hasAbility('gluttony'))) {
 				pokemon.eatItem();
 			}
 		},
@@ -1681,14 +1686,14 @@ exports.BattleItems = {
 			if (!this.runEvent('TryHeal', pokemon)) return false;
 		},
 		onEat: function (pokemon) {
-			this.heal(pokemon.maxhp / 8);
+			this.heal(pokemon.maxhp / 2);
 			if (pokemon.getNature().minus === 'atk') {
 				pokemon.addVolatile('confusion');
 			}
 		},
 		num: 159,
 		gen: 3,
-		desc: "Restores 1/8 max HP when at 1/2 max HP or less. May confuse. Single use.",
+		desc: "Restores 1/2 max HP at 1/4 max HP or less; confuses if -Atk Nature. Single use.",
 	},
 	"firegem": {
 		id: "firegem",
@@ -2375,7 +2380,7 @@ exports.BattleItems = {
 			type: "Dark",
 		},
 		onUpdate: function (pokemon) {
-			if (pokemon.hp <= pokemon.maxhp / 2) {
+			if (pokemon.hp <= pokemon.maxhp / 4 || (pokemon.hp <= pokemon.maxhp / 2 && pokemon.hasAbility('gluttony'))) {
 				pokemon.eatItem();
 			}
 		},
@@ -2383,14 +2388,14 @@ exports.BattleItems = {
 			if (!this.runEvent('TryHeal', pokemon)) return false;
 		},
 		onEat: function (pokemon) {
-			this.heal(pokemon.maxhp / 8);
+			this.heal(pokemon.maxhp / 2);
 			if (pokemon.getNature().minus === 'def') {
 				pokemon.addVolatile('confusion');
 			}
 		},
 		num: 163,
 		gen: 3,
-		desc: "Restores 1/8 max HP when at 1/2 max HP or less. May confuse. Single use.",
+		desc: "Restores 1/2 max HP at 1/4 max HP or less; confuses if -Def Nature. Single use.",
 	},
 	"icegem": {
 		id: "icegem",
@@ -2551,6 +2556,7 @@ exports.BattleItems = {
 	"jabocaberry": {
 		id: "jabocaberry",
 		name: "Jaboca Berry",
+		isUnreleased: true,
 		spritenum: 230,
 		isBerry: true,
 		naturalGift: {
@@ -2560,7 +2566,7 @@ exports.BattleItems = {
 		onAfterDamage: function (damage, target, source, move) {
 			if (source && source !== target && move && move.category === 'Physical') {
 				if (target.eatItem()) {
-					this.damage(source.maxhp / 8, source, target, null, true);
+					this.damage(source.maxhp / 8, source, target);
 				}
 			}
 		},
@@ -2796,6 +2802,7 @@ exports.BattleItems = {
 			type: "Fighting",
 		},
 		onUpdate: function (pokemon) {
+			if (!pokemon.hp) return;
 			let move = pokemon.getMoveData(pokemon.lastMove);
 			if (move && move.pp === 0) {
 				pokemon.addVolatile('leppaberry');
@@ -2920,7 +2927,7 @@ exports.BattleItems = {
 		// implemented in the corresponding thing
 		num: 269,
 		gen: 4,
-		desc: "Holder's use of Light Screen or Reflect lasts 8 turns instead of 5.",
+		desc: "Holder's use of Aurora Veil, Light Screen, or Reflect lasts 8 turns instead of 5.",
 	},
 	"lopunnite": {
 		id: "lopunnite",
@@ -3049,7 +3056,9 @@ exports.BattleItems = {
 	"machobrace": {
 		id: "machobrace",
 		name: "Macho Brace",
+		isUnreleased: true,
 		spritenum: 269,
+		ignoreKlutz: true,
 		fling: {
 			basePower: 60,
 		},
@@ -3058,7 +3067,7 @@ exports.BattleItems = {
 		},
 		num: 215,
 		gen: 3,
-		desc: "Holder's Speed is halved.",
+		desc: "Holder's Speed is halved. The Ability Klutz does not ignore this effect.",
 	},
 	"magnet": {
 		id: "magnet",
@@ -3087,7 +3096,7 @@ exports.BattleItems = {
 			type: "Ghost",
 		},
 		onUpdate: function (pokemon) {
-			if (pokemon.hp <= pokemon.maxhp / 2) {
+			if (pokemon.hp <= pokemon.maxhp / 4 || (pokemon.hp <= pokemon.maxhp / 2 && pokemon.hasAbility('gluttony'))) {
 				pokemon.eatItem();
 			}
 		},
@@ -3095,18 +3104,19 @@ exports.BattleItems = {
 			if (!this.runEvent('TryHeal', pokemon)) return false;
 		},
 		onEat: function (pokemon) {
-			this.heal(pokemon.maxhp / 8);
+			this.heal(pokemon.maxhp / 2);
 			if (pokemon.getNature().minus === 'spe') {
 				pokemon.addVolatile('confusion');
 			}
 		},
 		num: 161,
 		gen: 3,
-		desc: "Restores 1/8 max HP when at 1/2 max HP or less. May confuse. Single use.",
+		desc: "Restores 1/2 max HP at 1/4 max HP or less; confuses if -Spe Nature. Single use.",
 	},
 	"magostberry": {
 		id: "magostberry",
 		name: "Magost Berry",
+		isUnreleased: true,
 		spritenum: 275,
 		isBerry: true,
 		naturalGift: {
@@ -3169,6 +3179,7 @@ exports.BattleItems = {
 	"marshadiumz": {
 		id: "marshadiumz",
 		name: "Marshadium Z",
+		isUnreleased: true,
 		spritenum: 654,
 		onTakeItem: false,
 		zMove: "Soul-Stealing 7-Star Strike",
@@ -3366,6 +3377,7 @@ exports.BattleItems = {
 	"mewniumz": {
 		id: "mewniumz",
 		name: "Mewnium Z",
+		isUnreleased: true,
 		spritenum: 658,
 		onTakeItem: false,
 		zMove: "Genesis Supernova",
@@ -3408,6 +3420,7 @@ exports.BattleItems = {
 	"micleberry": {
 		id: "micleberry",
 		name: "Micle Berry",
+		isUnreleased: true,
 		spritenum: 290,
 		isBerry: true,
 		naturalGift: {
@@ -3536,6 +3549,7 @@ exports.BattleItems = {
 	"nanabberry": {
 		id: "nanabberry",
 		name: "Nanab Berry",
+		isUnreleased: true,
 		spritenum: 302,
 		isBerry: true,
 		naturalGift: {
@@ -3583,6 +3597,7 @@ exports.BattleItems = {
 	"nomelberry": {
 		id: "nomelberry",
 		name: "Nomel Berry",
+		isUnreleased: true,
 		spritenum: 306,
 		isBerry: true,
 		naturalGift: {
@@ -3701,6 +3716,7 @@ exports.BattleItems = {
 	"pamtreberry": {
 		id: "pamtreberry",
 		name: "Pamtre Berry",
+		isUnreleased: true,
 		spritenum: 323,
 		isBerry: true,
 		naturalGift: {
@@ -3861,6 +3877,7 @@ exports.BattleItems = {
 	"pikashuniumz": {
 		id: "pikashuniumz",
 		name: "Pikashunium Z",
+		isUnreleased: true,
 		spritenum: 659,
 		onTakeItem: false,
 		zMove: "10,000,000 Volt Thunderbolt",
@@ -4019,6 +4036,66 @@ exports.BattleItems = {
 		gen: 3,
 		desc: "Cannot be eaten by the holder. No effect when eaten with Bug Bite or Pluck.",
 	},
+	"poweranklet": {
+		id: "poweranklet",
+		name: "Power Anklet",
+		spritenum: 354,
+		ignoreKlutz: true,
+		fling: {
+			basePower: 70,
+		},
+		onModifySpe: function (spe) {
+			return this.chainModify(0.5);
+		},
+		num: 293,
+		gen: 4,
+		desc: "Holder's Speed is halved. The Ability Klutz does not ignore this effect.",
+	},
+	"powerband": {
+		id: "powerband",
+		name: "Power Band",
+		spritenum: 355,
+		ignoreKlutz: true,
+		fling: {
+			basePower: 70,
+		},
+		onModifySpe: function (spe) {
+			return this.chainModify(0.5);
+		},
+		num: 292,
+		gen: 4,
+		desc: "Holder's Speed is halved. The Ability Klutz does not ignore this effect.",
+	},
+	"powerbelt": {
+		id: "powerbelt",
+		name: "Power Belt",
+		spritenum: 356,
+		ignoreKlutz: true,
+		fling: {
+			basePower: 70,
+		},
+		onModifySpe: function (spe) {
+			return this.chainModify(0.5);
+		},
+		num: 290,
+		gen: 4,
+		desc: "Holder's Speed is halved. The Ability Klutz does not ignore this effect.",
+	},
+	"powerbracer": {
+		id: "powerbracer",
+		name: "Power Bracer",
+		spritenum: 357,
+		ignoreKlutz: true,
+		fling: {
+			basePower: 70,
+		},
+		onModifySpe: function (spe) {
+			return this.chainModify(0.5);
+		},
+		num: 289,
+		gen: 4,
+		desc: "Holder's Speed is halved. The Ability Klutz does not ignore this effect.",
+	},
 	"powerherb": {
 		id: "powerherb",
 		onChargeMove: function (pokemon, target, move) {
@@ -4035,6 +4112,36 @@ exports.BattleItems = {
 		num: 271,
 		gen: 4,
 		desc: "Holder's two-turn moves complete in one turn (except Sky Drop). Single use.",
+	},
+	"powerlens": {
+		id: "powerlens",
+		name: "Power Lens",
+		spritenum: 359,
+		ignoreKlutz: true,
+		fling: {
+			basePower: 70,
+		},
+		onModifySpe: function (spe) {
+			return this.chainModify(0.5);
+		},
+		num: 291,
+		gen: 4,
+		desc: "Holder's Speed is halved. The Ability Klutz does not ignore this effect.",
+	},
+	"powerweight": {
+		id: "powerweight",
+		name: "Power Weight",
+		spritenum: 360,
+		ignoreKlutz: true,
+		fling: {
+			basePower: 70,
+		},
+		onModifySpe: function (spe) {
+			return this.chainModify(0.5);
+		},
+		num: 294,
+		gen: 4,
+		desc: "Holder's Speed is halved. The Ability Klutz does not ignore this effect.",
 	},
 	"premierball": {
 		id: "premierball",
@@ -4193,6 +4300,7 @@ exports.BattleItems = {
 	"rabutaberry": {
 		id: "rabutaberry",
 		name: "Rabuta Berry",
+		isUnreleased: true,
 		spritenum: 375,
 		isBerry: true,
 		naturalGift: {
@@ -4280,6 +4388,7 @@ exports.BattleItems = {
 	"razzberry": {
 		id: "razzberry",
 		name: "Razz Berry",
+		isUnreleased: true,
 		spritenum: 384,
 		isBerry: true,
 		naturalGift: {
@@ -4523,6 +4632,7 @@ exports.BattleItems = {
 	"rowapberry": {
 		id: "rowapberry",
 		name: "Rowap Berry",
+		isUnreleased: true,
 		spritenum: 420,
 		isBerry: true,
 		naturalGift: {
@@ -4532,7 +4642,7 @@ exports.BattleItems = {
 		onAfterDamage: function (damage, target, source, move) {
 			if (source && source !== target && move && move.category === 'Special') {
 				if (target.eatItem()) {
-					this.damage(source.maxhp / 8, source, target, null, true);
+					this.damage(source.maxhp / 8, source, target);
 				}
 			}
 		},
@@ -4978,6 +5088,7 @@ exports.BattleItems = {
 	"spelonberry": {
 		id: "spelonberry",
 		name: "Spelon Berry",
+		isUnreleased: true,
 		spritenum: 462,
 		isBerry: true,
 		naturalGift: {
@@ -5338,7 +5449,7 @@ exports.BattleItems = {
 	},
 	"twistedspoon": {
 		id: "twistedspoon",
-		name: "TwistedSpoon",
+		name: "Twisted Spoon",
 		spritenum: 520,
 		fling: {
 			basePower: 30,
@@ -5464,6 +5575,7 @@ exports.BattleItems = {
 	"watmelberry": {
 		id: "watmelberry",
 		name: "Watmel Berry",
+		isUnreleased: true,
 		spritenum: 530,
 		isBerry: true,
 		naturalGift: {
@@ -5511,6 +5623,7 @@ exports.BattleItems = {
 	"wepearberry": {
 		id: "wepearberry",
 		name: "Wepear Berry",
+		isUnreleased: true,
 		spritenum: 533,
 		isBerry: true,
 		naturalGift: {
@@ -5586,7 +5699,7 @@ exports.BattleItems = {
 			type: "Rock",
 		},
 		onUpdate: function (pokemon) {
-			if (pokemon.hp <= pokemon.maxhp / 2) {
+			if (pokemon.hp <= pokemon.maxhp / 4 || (pokemon.hp <= pokemon.maxhp / 2 && pokemon.hasAbility('gluttony'))) {
 				pokemon.eatItem();
 			}
 		},
@@ -5594,14 +5707,14 @@ exports.BattleItems = {
 			if (!this.runEvent('TryHeal', pokemon)) return false;
 		},
 		onEat: function (pokemon) {
-			this.heal(pokemon.maxhp / 8);
+			this.heal(pokemon.maxhp / 2);
 			if (pokemon.getNature().minus === 'spa') {
 				pokemon.addVolatile('confusion');
 			}
 		},
 		num: 160,
 		gen: 3,
-		desc: "Restores 1/8 max HP when at 1/2 max HP or less. May confuse. Single use.",
+		desc: "Restores 1/2 max HP at 1/4 max HP or less; confuses if -SpA Nature. Single use.",
 	},
 	"wiseglasses": {
 		id: "wiseglasses",

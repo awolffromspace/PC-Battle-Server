@@ -133,8 +133,7 @@ exports.BattleMovedex = {
 		accuracy: true,
 		basePower: 1,
 		category: "Physical",
-		desc: "No additional effect.",
-		shortDesc: "No additional effect.",
+		shortDesc: "Power is equal to the base move's Z-Power.",
 		id: "aciddownpour",
 		isViable: true,
 		name: "Acid Downpour",
@@ -228,7 +227,7 @@ exports.BattleMovedex = {
 		secondary: false,
 		target: "adjacentAllyOrSelf",
 		type: "Normal",
-		zMoveEffect: 'crit1',
+		zMoveEffect: 'crit2',
 		contestType: "Tough",
 	},
 	"aerialace": {
@@ -367,8 +366,7 @@ exports.BattleMovedex = {
 		accuracy: true,
 		basePower: 1,
 		category: "Physical",
-		desc: "No additional effect.",
-		shortDesc: "No additional effect.",
+		shortDesc: "Power is equal to the base move's Z-Power.",
 		id: "alloutpummeling",
 		isViable: true,
 		name: "All-Out Pummeling",
@@ -639,7 +637,7 @@ exports.BattleMovedex = {
 					let noAssist = {
 						assist:1, belch:1, bestow:1, bounce:1, chatter:1, circlethrow:1, copycat:1, counter:1, covet:1, destinybond:1, detect:1, dig:1, dive:1, dragontail:1, endure:1, feint:1, fly:1, focuspunch:1, followme:1, helpinghand:1, kingsshield:1, matblock:1, mefirst:1, metronome:1, mimic:1, mirrorcoat:1, mirrormove:1, naturepower:1, phantomforce:1, protect:1, ragepowder:1, roar:1, shadowforce:1, sketch:1, skydrop:1, sleeptalk:1, snatch:1, spikyshield:1, struggle:1, switcheroo:1, thief:1, transform:1, trick:1, whirlwind:1,
 					};
-					if (!noAssist[move] && !move.isZ) {
+					if (!noAssist[move] && !this.getMove(move).isZ) {
 						moves.push(move);
 					}
 				}
@@ -1024,7 +1022,7 @@ exports.BattleMovedex = {
 					}
 				}
 				if (move.flags['contact']) {
-					source.trySetStatus('psn');
+					source.trySetStatus('psn', target);
 				}
 				return null;
 			},
@@ -1107,7 +1105,7 @@ exports.BattleMovedex = {
 		name: "Beak Blast",
 		pp: 15,
 		priority: -3,
-		flags: {protect: 1},
+		flags: {bullet: 1, protect: 1},
 		beforeTurnCallback: function (pokemon) {
 			pokemon.addVolatile('beakblast');
 		},
@@ -1121,6 +1119,12 @@ exports.BattleMovedex = {
 					source.trySetStatus('brn', pokemon);
 				}
 			},
+		},
+		onMoveAborted: function (pokemon) {
+			pokemon.removeVolatile('beakblast');
+		},
+		onAfterMove: function (pokemon) {
+			pokemon.removeVolatile('beakblast');
 		},
 		secondary: false,
 		target: "normal",
@@ -1229,14 +1233,13 @@ exports.BattleMovedex = {
 		pp: 15,
 		priority: 0,
 		flags: {mirror: 1, authentic: 1, mystery: 1},
-		onHit: function (target, source) {
+		onHit: function (target, source, move) {
 			if (target.item) {
 				return false;
 			}
 			let yourItem = source.takeItem();
-			if (!yourItem || (yourItem.onTakeItem && yourItem.onTakeItem(yourItem, target) === false)) {
-				return false;
-			}
+			if (!yourItem) return false;
+			if (!this.singleEvent('TakeItem', yourItem, source.itemData, source, target, move, yourItem)) return;
 			if (!target.setItem(yourItem)) {
 				source.item = yourItem.id;
 				return false;
@@ -1309,6 +1312,9 @@ exports.BattleMovedex = {
 				}
 				this.add('-activate', pokemon, 'move: Bide');
 			},
+			onMoveAborted: function (pokemon) {
+				pokemon.removeVolatile('bide');
+			},
 			onEnd: function (pokemon) {
 				this.add('-end', pokemon, 'move: Bide', '[silent]');
 			},
@@ -1364,8 +1370,7 @@ exports.BattleMovedex = {
 		accuracy: true,
 		basePower: 1,
 		category: "Physical",
-		desc: "No additional effect.",
-		shortDesc: "No additional effect.",
+		shortDesc: "Power is equal to the base move's Z-Power.",
 		id: "blackholeeclipse",
 		isViable: true,
 		name: "Black Hole Eclipse",
@@ -1475,8 +1480,7 @@ exports.BattleMovedex = {
 		accuracy: true,
 		basePower: 1,
 		category: "Physical",
-		desc: "No additional effect.",
-		shortDesc: "No additional effect.",
+		shortDesc: "Power is equal to the base move's Z-Power.",
 		id: "bloomdoom",
 		isViable: true,
 		name: "Bloom Doom",
@@ -1713,8 +1717,7 @@ exports.BattleMovedex = {
 		accuracy: true,
 		basePower: 1,
 		category: "Physical",
-		desc: "No additional effect.",
-		shortDesc: "No additional effect.",
+		shortDesc: "Power is equal to the base move's Z-Power.",
 		id: "breakneckblitz",
 		isViable: true,
 		name: "Breakneck Blitz",
@@ -1984,7 +1987,7 @@ exports.BattleMovedex = {
 		accuracy: 100,
 		basePower: 130,
 		category: "Special",
-		desc: "Until the user is no longer active, Fire-type users lose their Fire type and pure Fire-type users become Normal type.",
+		desc: "User must be Fire-type. User's Fire-type changes to ???-type until it switches out. User's secondary type (if any) is unaffected even by Roost.",
 		shortDesc: "User's Fire-type is removed until it switches out.",
 		id: "burnup",
 		name: "Burn Up",
@@ -1997,6 +2000,7 @@ exports.BattleMovedex = {
 		self: {
 			onHit: function (pokemon) {
 				pokemon.setType(pokemon.getTypes(true).map(type => type === "Fire" ? "???" : type));
+				this.add('-start', pokemon, 'typechange', pokemon.types.join('/'), '[from] move: Burn Up');
 			},
 		},
 		secondary: false,
@@ -2497,8 +2501,7 @@ exports.BattleMovedex = {
 		accuracy: true,
 		basePower: 1,
 		category: "Physical",
-		desc: "No additional effect.",
-		shortDesc: "No additional effect.",
+		shortDesc: "Power is equal to the base move's Z-Power.",
 		id: "continentalcrush",
 		isViable: true,
 		name: "Continental Crush",
@@ -2587,7 +2590,7 @@ exports.BattleMovedex = {
 		flags: {},
 		onHit: function (pokemon) {
 			let noCopycat = {assist:1, bestow:1, chatter:1, circlethrow:1, copycat:1, counter:1, covet:1, destinybond:1, detect:1, dragontail:1, endure:1, feint:1, focuspunch:1, followme:1, helpinghand:1, mefirst:1, metronome:1, mimic:1, mirrorcoat:1, mirrormove:1, naturepower:1, protect:1, ragepowder:1, roar:1, sketch:1, sleeptalk:1, snatch:1, struggle:1, switcheroo:1, thief:1, transform:1, trick:1, whirlwind:1};
-			if (!this.lastMove || noCopycat[this.lastMove]) {
+			if (!this.lastMove || noCopycat[this.lastMove] || this.getMove(this.lastMove).isZ) {
 				return false;
 			}
 			this.useMove(this.lastMove, pokemon);
@@ -2626,8 +2629,7 @@ exports.BattleMovedex = {
 		accuracy: true,
 		basePower: 1,
 		category: "Physical",
-		desc: "No additional effect.",
-		shortDesc: "No additional effect.",
+		shortDesc: "Power is equal to the base move's Z-Power.",
 		id: "corkscrewcrash",
 		isViable: true,
 		name: "Corkscrew Crash",
@@ -3050,12 +3052,12 @@ exports.BattleMovedex = {
 		priority: 0,
 		flags: {protect: 1, reflectable: 1, mirror: 1},
 		status: 'slp',
-		onTry: function (pokemon) {
-			if (pokemon.template.species === 'Darkrai') {
+		onTry: function (pokemon, target, move) {
+			if (pokemon.template.species === 'Darkrai' || move.hasBounced) {
 				return;
 			}
+			this.add('-fail', pokemon, 'move: Dark Void');
 			this.add('-hint', "Only a Pokemon whose form is Darkrai can use this move.");
-			this.add('-fail', pokemon, 'move: Dark Void'); // TODO: client-side
 			return null;
 		},
 		secondary: false,
@@ -3167,7 +3169,7 @@ exports.BattleMovedex = {
 		flags: {protect: 1, reflectable: 1, mirror: 1, authentic: 1},
 		onHit: function (target, source, move) {
 			if (!target.volatiles['substitute'] || move.infiltrates) this.boost({evasion:-1});
-			let removeTarget = {reflect:1, lightscreen:1, safeguard:1, mist:1, spikes:1, toxicspikes:1, stealthrock:1, stickyweb:1};
+			let removeTarget = {reflect:1, lightscreen:1, auroraveil: 1, safeguard:1, mist:1, spikes:1, toxicspikes:1, stealthrock:1, stickyweb:1};
 			let removeAll = {spikes:1, toxicspikes:1, stealthrock:1, stickyweb:1};
 			for (let targetCondition in removeTarget) {
 				if (target.side.removeSideCondition(targetCondition)) {
@@ -3202,10 +3204,7 @@ exports.BattleMovedex = {
 		flags: {authentic: 1},
 		volatileStatus: 'destinybond',
 		onPrepareHit: function (pokemon) {
-			return this.runEvent('StallMove', pokemon);
-		},
-		onHit: function (pokemon) {
-			pokemon.addVolatile('retaliationstall');
+			return !pokemon.removeVolatile('destinybond');
 		},
 		effect: {
 			onStart: function (pokemon) {
@@ -3218,9 +3217,13 @@ exports.BattleMovedex = {
 					source.faint();
 				}
 			},
-			onBeforeMovePriority: 100,
-			onBeforeMove: function (pokemon) {
+			onBeforeMovePriority: -1,
+			onBeforeMove: function (pokemon, target, move) {
+				if (move.id === 'destinybond') return;
 				this.debug('removing Destiny Bond before attack');
+				pokemon.removeVolatile('destinybond');
+			},
+			onMoveAborted: function (pokemon, target, move) {
 				pokemon.removeVolatile('destinybond');
 			},
 			onBeforeSwitchOutPriority: 1,
@@ -3266,8 +3269,7 @@ exports.BattleMovedex = {
 		accuracy: true,
 		basePower: 1,
 		category: "Physical",
-		desc: "No additional effect.",
-		shortDesc: "No additional effect.",
+		shortDesc: "Power is equal to the base move's Z-Power.",
 		id: "devastatingdrake",
 		name: "Devastating Drake",
 		pp: 1,
@@ -3398,7 +3400,7 @@ exports.BattleMovedex = {
 						}
 					}
 				}
-				this.debug('Move doesn\'t exist ???');
+				// this can happen if Disable works on a Z-move
 				return false;
 			},
 			onResidualOrder: 14,
@@ -3567,6 +3569,7 @@ exports.BattleMovedex = {
 					accuracy: 100,
 					basePower: 140,
 					category: "Special",
+					priority: 0,
 					flags: {},
 					effectType: 'Move',
 					isFutureMove: true,
@@ -3941,7 +3944,7 @@ exports.BattleMovedex = {
 		flags: {protect: 1, mirror: 1, heal: 1},
 		drain: [1, 2],
 		onTryHit: function (target) {
-			if (target.status !== 'slp') {
+			if (target.status !== 'slp' && !target.hasAbility('comatose')) {
 				this.add('-immune', target, '[msg]');
 				return null;
 			}
@@ -4312,7 +4315,7 @@ exports.BattleMovedex = {
 		basePower: 0,
 		category: "Status",
 		desc: "For 5 turns, the target's held item has no effect. An item's effect of causing forme changes is unaffected, but any other effects from such items are negated. During the effect, Fling and Natural Gift are prevented from being used by the target. Items thrown at the target with Fling will still activate for it. If the target uses Baton Pass, the replacement will remain unable to use items.",
-		shortDesc: "For 5 turns, the target can't use any items.",
+		shortDesc: "For 5 turns, the target's item has no effect.",
 		id: "embargo",
 		name: "Embargo",
 		pp: 15,
@@ -4376,7 +4379,7 @@ exports.BattleMovedex = {
 			onStart: function (target) {
 				let noEncore = {encore:1, mimic:1, mirrormove:1, sketch:1, struggle:1, transform:1};
 				let moveIndex = target.moves.indexOf(target.lastMove);
-				if (!target.lastMove || noEncore[target.lastMove] || (target.moveset[moveIndex] && target.moveset[moveIndex].pp <= 0)) {
+				if (!target.lastMove || this.getMove(target.lastMove).isZ || noEncore[target.lastMove] || (target.moveset[moveIndex] && target.moveset[moveIndex].pp <= 0)) {
 					// it failed
 					delete target.volatiles['encore'];
 					return false;
@@ -4521,8 +4524,8 @@ exports.BattleMovedex = {
 		flags: {protect: 1, reflectable: 1, mirror: 1, mystery: 1},
 		onTryHit: function (target, source) {
 			if (target === source) return false;
-			let bannedTargetAbilities = {multitype:1, stancechange:1, truant:1, schooling:1};
-			let bannedSourceAbilities = {flowergift:1, forecast:1, illusion:1, imposter:1, multitype:1, stancechange:1, trace:1, zenmode:1};
+			let bannedTargetAbilities = {comatose:1, multitype:1, schooling:1, stancechange:1, truant:1};
+			let bannedSourceAbilities = {comatose:1, flowergift:1, forecast:1, illusion:1, imposter:1, multitype:1, stancechange:1, trace:1, zenmode:1};
 			if (bannedTargetAbilities[target.ability] || bannedSourceAbilities[source.ability] || target.ability === source.ability) {
 				return false;
 			}
@@ -5419,14 +5422,14 @@ exports.BattleMovedex = {
 		pp: 10,
 		priority: 0,
 		flags: {protect: 1, mirror: 1, mystery: 1},
-		beforeMoveCallback: function (pokemon) {
-			if (pokemon.ignoringItem()) return;
-			let item = pokemon.getItem();
-			let noFling = item.onTakeItem && item.onTakeItem(item, pokemon) === false;
-			if (item.fling && !noFling) {
-				pokemon.addVolatile('fling');
-				pokemon.setItem('');
-				this.runEvent('AfterUseItem', pokemon, null, null, item);
+		beforeMoveCallback: function (source, target, move) {
+			if (source.ignoringItem()) return;
+			let item = source.getItem();
+			if (!this.singleEvent('TakeItem', item, source.itemData, source, source, move, item)) return;
+			if (item.fling) {
+				source.addVolatile('fling');
+				source.setItem('');
+				this.runEvent('AfterUseItem', source, null, null, item);
 			}
 		},
 		onPrepareHit: function (target, source, move) {
@@ -5641,8 +5644,12 @@ exports.BattleMovedex = {
 		flags: {snatch: 1},
 		volatileStatus: 'focusenergy',
 		effect: {
-			onStart: function (pokemon) {
-				this.add('-start', pokemon, 'move: Focus Energy');
+			onStart: function (target, source, effect) {
+				if (effect && effect.id === 'zpower') {
+					this.add('-start', target, 'move: Focus Energy', '[zeffect]');
+				} else {
+					this.add('-start', target, 'move: Focus Energy');
+				}
 			},
 			onModifyCritRatio: function (critRatio) {
 				return critRatio + 2;
@@ -5710,8 +5717,12 @@ exports.BattleMovedex = {
 		},
 		effect: {
 			duration: 1,
-			onStart: function (pokemon) {
-				this.add('-singleturn', pokemon, 'move: Follow Me');
+			onStart: function (target, source, effect) {
+				if (effect && effect.id === 'zpower') {
+					this.add('-singleturn', target, 'move: Follow Me', '[zeffect]');
+				} else {
+					this.add('-singleturn', target, 'move: Follow Me');
+				}
 			},
 			onFoeRedirectTargetPriority: 1,
 			onFoeRedirectTarget: function (target, source, source2, move) {
@@ -5781,7 +5792,7 @@ exports.BattleMovedex = {
 		secondary: false,
 		target: "normal",
 		type: "Normal",
-		zMoveEffect: 'crit1',
+		zMoveEffect: 'crit2',
 		contestType: "Clever",
 	},
 	"forestscurse": {
@@ -6111,6 +6122,7 @@ exports.BattleMovedex = {
 					accuracy: 100,
 					basePower: 120,
 					category: "Special",
+					priority: 0,
 					flags: {},
 					ignoreImmunity: false,
 					effectType: 'Move',
@@ -6141,7 +6153,7 @@ exports.BattleMovedex = {
 		flags: {protect: 1, reflectable: 1, mirror: 1, mystery: 1},
 		volatileStatus: 'gastroacid',
 		onTryHit: function (pokemon) {
-			let bannedAbilities = {multitype:1, stancechange:1, schooling:1};
+			let bannedAbilities = {comatose:1, multitype:1, schooling:1, stancechange:1};
 			if (bannedAbilities[pokemon.ability]) {
 				return false;
 			}
@@ -6311,8 +6323,7 @@ exports.BattleMovedex = {
 		accuracy: true,
 		basePower: 1,
 		category: "Physical",
-		desc: "No additional effect.",
-		shortDesc: "No additional effect.",
+		shortDesc: "Power is equal to the base move's Z-Power.",
 		id: "gigavolthavoc",
 		isViable: true,
 		name: "Gigavolt Havoc",
@@ -6804,6 +6815,10 @@ exports.BattleMovedex = {
 		accuracy: true,
 		basePower: 0,
 		damageCallback: function (pokemon, target) {
+			if (target.volatiles['banefulbunker'] || target.volatiles['kingsshield'] || target.side.sideConditions['matblock'] || target.volatiles['protect'] || target.volatiles['spikyshield']) {
+				this.add('-message', target.name + " couldn't fully protect itself and got hurt! (placeholder)");
+				return this.clampIntRange(Math.ceil(Math.floor(target.hp * 3 / 4) / 4 - 0.5), 1);
+			}
 			return this.clampIntRange(Math.floor(target.hp * 3 / 4), 1);
 		},
 		category: "Special",
@@ -7304,7 +7319,7 @@ exports.BattleMovedex = {
 		secondary: false,
 		target: "normal",
 		type: "Psychic",
-		zMoveEffect: 'crit1',
+		zMoveEffect: 'crit2',
 		contestType: "Clever",
 	},
 	"heatcrash": {
@@ -7386,7 +7401,7 @@ exports.BattleMovedex = {
 			return 40;
 		},
 		category: "Physical",
-		desc: "The power of this move depends on (user's weight / target's weight), rounded down. Power is equal to 120 if the result is 5 or more, 100 if 4, 80 if 3, 60 if 2, and 40 if 1 or less.",
+		desc: "The power of this move depends on (user's weight / target's weight), rounded down. Power is equal to 120 if the result is 5 or more, 100 if 4, 80 if 3, 60 if 2, and 40 if 1 or less. Damage doubles and no accuracy check is done if the target has used Minimize while active.",
 		shortDesc: "More power the heavier the user than the target.",
 		id: "heavyslam",
 		isViable: true,
@@ -7440,7 +7455,7 @@ exports.BattleMovedex = {
 		accuracy: 100,
 		basePower: 65,
 		basePowerCallback: function (pokemon, target, move) {
-			if (target.status) return move.basePower * 2;
+			if (target.status || target.hasAbility('comatose')) return move.basePower * 2;
 			return move.basePower;
 		},
 		category: "Special",
@@ -7996,8 +8011,7 @@ exports.BattleMovedex = {
 		accuracy: true,
 		basePower: 1,
 		category: "Physical",
-		desc: "No additional effect.",
-		shortDesc: "No additional effect.",
+		shortDesc: "Power is equal to the base move's Z-Power.",
 		id: "hydrovortex",
 		isViable: true,
 		name: "Hydro Vortex",
@@ -8498,8 +8512,7 @@ exports.BattleMovedex = {
 		accuracy: true,
 		basePower: 1,
 		category: "Physical",
-		desc: "No additional effect.",
-		shortDesc: "No additional effect.",
+		shortDesc: "Power is equal to the base move's Z-Power.",
 		id: "infernooverdrive",
 		isViable: true,
 		name: "Inferno Overdrive",
@@ -8580,14 +8593,16 @@ exports.BattleMovedex = {
 		priority: 0,
 		flags: {protect: 1, authentic: 1, mystery: 1},
 		onHit: function (target, source) {
+			if (!target.lastMove) return false;
+			let lastMove = this.getMove(target.lastMove);
 			let noInstruct = {
-				instruct:1, // TODO: fill this up
+				beakblast:1, bide:1, copycat:1, focuspunch:1, iceball:1, instruct:1, mefirst:1, metronome:1, mimic:1, mirrormove:1, outrage:1, petaldance:1, rollout:1, shelltrap:1, sleeptalk:1, thrash:1, // TODO: fill this up
 			};
-			if (!target.lastMove || this.getMove(target.lastMove).isZ || noInstruct[target.lastMove]) {
+			if (noInstruct[lastMove.id] || lastMove.isZ || lastMove.flags['charge'] || lastMove.flags['recharge'] || target.volatiles['beakblast'] || target.volatiles['focuspunch'] || target.volatiles['shelltrap']) {
 				return false;
 			}
 			this.add('-singleturn', target, 'move: Instruct', '[of] ' + source);
-			this.useMove(target.lastMove, target);
+			this.runMove(target.lastMove, target, target.lastMoveTargetLoc);
 		},
 		secondary: false,
 		target: "normal",
@@ -8787,7 +8802,7 @@ exports.BattleMovedex = {
 		basePower: 0,
 		category: "Status",
 		desc: "The user is protected from most attacks made by other Pokemon during this turn, and Pokemon trying to make contact with the user have their Attack lowered by 2 stages. Non-damaging moves go through this protection. This move has a 1/X chance of being successful, where X starts at 1 and triples each time this move is successfully used. X resets to 1 if this move fails or if the user's last move used is not Detect, Endure, King's Shield, Protect, Quick Guard, Spiky Shield, or Wide Guard. Fails if the user moves last this turn.",
-		shortDesc: "Protects from attacks. Contact try: lowers Atk by 2.",
+		shortDesc: "Protects from attacks. Contact: lowers Atk by 2.",
 		id: "kingsshield",
 		isViable: true,
 		name: "King's Shield",
@@ -8850,10 +8865,10 @@ exports.BattleMovedex = {
 		priority: 0,
 		flags: {contact: 1, protect: 1, mirror: 1},
 		onBasePowerPriority: 4,
-		onBasePower: function (basePower, pokemon, target) {
+		onBasePower: function (basePower, source, target, move) {
 			let item = target.getItem();
-			let noKnockOff = item.onTakeItem && item.onTakeItem(item, target) === false;
-			if (item.id && !noKnockOff) {
+			if (!this.singleEvent('TakeItem', item, target.itemData, target, source, move, item)) return;
+			if (item.id) {
 				return this.chainModify(1.5);
 			}
 		},
@@ -10262,7 +10277,7 @@ exports.BattleMovedex = {
 		accuracy: true,
 		basePower: 0,
 		category: "Status",
-		desc: "Raises the user's evasiveness by 2 stages. Whether or not the user's evasiveness was changed, Body Slam, Dragon Rush, Flying Press, Heat Crash, Phantom Force, Shadow Force, Steamroller, and Stomp will not check accuracy and have their damage doubled if used against the user while it is active.",
+		desc: "Raises the user's evasiveness by 2 stages. Whether or not the user's evasiveness was changed, Body Slam, Dragon Rush, Flying Press, Heat Crash, Heavy Slam, Phantom Force, Shadow Force, Steamroller, and Stomp will not check accuracy and have their damage doubled if used against the user while it is active.",
 		shortDesc: "Raises the user's evasiveness by 2.",
 		id: "minimize",
 		name: "Minimize",
@@ -10273,12 +10288,12 @@ exports.BattleMovedex = {
 		effect: {
 			noCopy: true,
 			onSourceModifyDamage: function (damage, source, target, move) {
-				if (move.id in {'stomp':1, 'steamroller':1, 'bodyslam':1, 'flyingpress':1, 'dragonrush':1, 'phantomforce':1, 'heatcrash':1, 'shadowforce':1}) {
+				if (move.id in {'stomp':1, 'steamroller':1, 'bodyslam':1, 'flyingpress':1, 'dragonrush':1, 'phantomforce':1, 'heatcrash':1, 'shadowforce':1, 'heavyslam':1}) {
 					return this.chainModify(2);
 				}
 			},
 			onAccuracy: function (accuracy, target, source, move) {
-				if (move.id in {'stomp':1, 'steamroller':1, 'bodyslam':1, 'flyingpress':1, 'dragonrush':1, 'phantomforce':1, 'heatcrash':1, 'shadowforce':1}) {
+				if (move.id in {'stomp':1, 'steamroller':1, 'bodyslam':1, 'flyingpress':1, 'dragonrush':1, 'phantomforce':1, 'heatcrash':1, 'shadowforce':1, 'heavyslam':1}) {
 					return true;
 				}
 				return accuracy;
@@ -10976,8 +10991,7 @@ exports.BattleMovedex = {
 		accuracy: true,
 		basePower: 1,
 		category: "Physical",
-		desc: "No additional effect.",
-		shortDesc: "No additional effect.",
+		shortDesc: "Power is equal to the base move's Z-Power.",
 		id: "neverendingnightmare",
 		isViable: true,
 		name: "Never-Ending Nightmare",
@@ -11069,7 +11083,7 @@ exports.BattleMovedex = {
 		effect: {
 			noCopy: true,
 			onStart: function (pokemon) {
-				if (pokemon.status !== 'slp') {
+				if (pokemon.status !== 'slp' && !pokemon.hasAbility('comatose')) {
 					return false;
 				}
 				this.add('-start', pokemon, 'Nightmare');
@@ -11079,7 +11093,7 @@ exports.BattleMovedex = {
 				this.damage(pokemon.maxhp / 4);
 			},
 			onUpdate: function (pokemon) {
-				if (pokemon.status !== 'slp') {
+				if (pokemon.status !== 'slp' && !pokemon.hasAbility('comatose')) {
 					pokemon.removeVolatile('nightmare');
 					this.add('-end', pokemon, 'Nightmare', '[silent]');
 				}
@@ -11817,7 +11831,7 @@ exports.BattleMovedex = {
 		name: "Pollen Puff",
 		pp: 15,
 		priority: 0,
-		flags: {protect: 1, mirror: 1},
+		flags: {bullet: 1, protect: 1, mirror: 1},
 		onTryHit: function (target, source, move) {
 			if (source.side === target.side) {
 				move.basePower = 0;
@@ -12305,7 +12319,7 @@ exports.BattleMovedex = {
 		accuracy: true,
 		basePower: 0,
 		category: "Status",
-		desc: "For 5 turns, the terrain becomes Psychic Terrain. During the effect, the power of Psychic-type attacks made by grounded Pokemon is multiplied by 1.5 and grounded Pokemon cannot be hit by moves with priority greater than 0. Camouflage transforms the user into a Psychic type, Nature Power becomes Psychic, and Secret Power has a 30% chance to do something. Fails if the current terrain is Psychic Terrain.",
+		desc: "For 5 turns, the terrain becomes Psychic Terrain. During the effect, the power of Psychic-type attacks made by grounded Pokemon is multiplied by 1.5 and grounded Pokemon cannot be hit by moves with priority greater than 0, unless the target is an ally. Camouflage transforms the user into a Psychic type, Nature Power becomes Psychic, and Secret Power has a 30% chance to lower the target's Speed by 1 stage. Fails if the current terrain is Psychic Terrain.",
 		shortDesc: "5 turns. Grounded: +Psychic power, priority-safe.",
 		id: "psychicterrain",
 		name: "Psychic Terrain",
@@ -12323,7 +12337,7 @@ exports.BattleMovedex = {
 			},
 			onTryHitPriority: 4,
 			onTryHit: function (target, source, effect) {
-				if (!target.isGrounded() || target.isSemiInvulnerable()) return;
+				if (!target.isGrounded() || target.isSemiInvulnerable() || target.side === source.side) return;
 				if (effect && (effect.priority <= 0.1 || effect.target === 'self')) {
 					return;
 				}
@@ -12532,7 +12546,7 @@ exports.BattleMovedex = {
 		basePower: 0,
 		category: "Status",
 		desc: "The target is cured if it has a major status condition. If the target was cured, the user restores 1/2 of its maximum HP, rounded half up.",
-		shortDesc: "Heals the target by 50% of its max HP.",
+		shortDesc: "Cures target's status; heals user 1/2 maxHP if so.",
 		id: "purify",
 		name: "Purify",
 		pp: 20,
@@ -12607,7 +12621,7 @@ exports.BattleMovedex = {
 							}
 						}
 					}
-					this.runMove('pursuit', sources[i], pokemon);
+					this.runMove('pursuit', sources[i], this.getTargetLoc(pokemon, sources[i]));
 				}
 			},
 		},
@@ -13207,7 +13221,9 @@ exports.BattleMovedex = {
 		priority: 0,
 		flags: {protect: 1, mirror: 1},
 		onModifyMove: function (move, pokemon) {
-			move.type = pokemon.types[0]; // TODO: test with users other than Oricorio
+			let type = pokemon.types[0];
+			if (type === "Bird") type = "???";
+			move.type = type;
 		},
 		secondary: false,
 		target: "normal",
@@ -13330,7 +13346,7 @@ exports.BattleMovedex = {
 		name: "Rock Blast",
 		pp: 10,
 		priority: 0,
-		flags: {protect: 1, mirror: 1},
+		flags: {bullet: 1, protect: 1, mirror: 1},
 		multihit: [2, 5],
 		secondary: false,
 		target: "normal",
@@ -13501,7 +13517,7 @@ exports.BattleMovedex = {
 		priority: 0,
 		flags: {authentic: 1, mystery: 1},
 		onTryHit: function (target, source) {
-			let bannedAbilities = {flowergift:1, forecast:1, illusion:1, imposter:1, multitype:1, trace:1, wonderguard:1, zenmode:1};
+			let bannedAbilities = {comatose:1, flowergift:1, forecast:1, illusion:1, imposter:1, multitype:1, trace:1, wonderguard:1, zenmode:1};
 			if (bannedAbilities[target.ability] || source.ability === 'multitype' || target.ability === source.ability) {
 				return false;
 			}
@@ -13848,8 +13864,7 @@ exports.BattleMovedex = {
 		accuracy: true,
 		basePower: 1,
 		category: "Physical",
-		desc: "No additional effect.",
-		shortDesc: "No additional effect.",
+		shortDesc: "Power is equal to the base move's Z-Power.",
 		id: "savagespinout",
 		name: "Savage Spin-Out",
 		pp: 1,
@@ -14294,8 +14309,7 @@ exports.BattleMovedex = {
 		accuracy: true,
 		basePower: 1,
 		category: "Physical",
-		desc: "No additional effect.",
-		shortDesc: "No additional effect.",
+		shortDesc: "Power is equal to the base move's Z-Power.",
 		id: "shatteredpsyche",
 		isViable: true,
 		name: "Shattered Psyche",
@@ -14314,7 +14328,7 @@ exports.BattleMovedex = {
 		basePower: 0,
 		category: "Special",
 		desc: "Deals damage to the target equal to the target's maximum HP. Ignores accuracy and evasiveness modifiers. This attack's accuracy is equal to (user's level - target's level + 30)%, and fails if the target is at a higher level. Pokemon with Ice typing or with the Ability Sturdy are immune.",
-		shortDesc: "OHKOs a non-Ice target. Fails if user is a lower level.",
+		shortDesc: "OHKOs non-Ice targets. Fails if user's lower level.",
 		id: "sheercold",
 		name: "Sheer Cold",
 		pp: 5,
@@ -14358,7 +14372,7 @@ exports.BattleMovedex = {
 		accuracy: 100,
 		basePower: 150,
 		category: "Special",
-		desc: "Fails unless the user is hit by a physical attack this turn before it can execute the move.",
+		desc: "Fails unless the user is hit by a physical attack from an opponent this turn before it can execute the move.",
 		shortDesc: "User must take physical damage before moving.",
 		id: "shelltrap",
 		name: "Shell Trap",
@@ -14380,7 +14394,7 @@ exports.BattleMovedex = {
 				this.add('-singleturn', pokemon, 'move: Shell Trap');
 			},
 			onHit: function (pokemon, source, move) {
-				if (move.category === 'Physical') {
+				if (pokemon.side !== source.side && move.category === 'Physical') {
 					pokemon.volatiles['shelltrap'].gotHit = true;
 				}
 			},
@@ -14522,7 +14536,7 @@ exports.BattleMovedex = {
 		priority: 0,
 		flags: {protect: 1, reflectable: 1, mirror: 1, mystery: 1},
 		onTryHit: function (pokemon) {
-			let bannedAbilities = {multitype:1, simple:1, stancechange:1, truant:1};
+			let bannedAbilities = {comatose:1, multitype:1, simple:1, stancechange:1, truant:1};
 			if (bannedAbilities[pokemon.ability]) {
 				return false;
 			}
@@ -14630,7 +14644,7 @@ exports.BattleMovedex = {
 		priority: 0,
 		flags: {protect: 1, mirror: 1, authentic: 1, mystery: 1},
 		onTryHit: function (target, source) {
-			let bannedAbilities = {illusion:1, multitype:1, stancechange:1, wonderguard:1, schooling:1};
+			let bannedAbilities = {comatose:1, illusion:1, multitype:1, schooling:1, stancechange:1, wonderguard:1};
 			if (bannedAbilities[target.ability] || bannedAbilities[source.ability]) {
 				return false;
 			}
@@ -14956,16 +14970,16 @@ exports.BattleMovedex = {
 		flags: {},
 		sleepUsable: true,
 		onTryHit: function (pokemon) {
-			if (pokemon.status !== 'slp') return false;
+			if (pokemon.status !== 'slp' && !pokemon.hasAbility('comatose')) return false;
 		},
 		onHit: function (pokemon) {
 			let moves = [];
 			for (let i = 0; i < pokemon.moveset.length; i++) {
 				let move = pokemon.moveset[i].id;
-				let NoSleepTalk = {
-					assist:1, belch:1, bide:1, chatter:1, copycat:1, focuspunch:1, mefirst:1, metronome:1, mimic:1, mirrormove:1, naturepower:1, sketch:1, sleeptalk:1, uproar:1,
+				let noSleepTalk = {
+					assist:1, beakblast:1, belch:1, bide:1, chatter:1, copycat:1, focuspunch:1, mefirst:1, metronome:1, mimic:1, mirrormove:1, naturepower:1, shelltrap:1, sketch:1, sleeptalk:1, uproar:1,
 				};
-				if (move && !(NoSleepTalk[move] || this.getMove(move).flags['charge'])) {
+				if (move && !(noSleepTalk[move] || this.getMove(move).flags['charge'] || (this.getMove(move).isZ && this.getMove(move).basePower !== 1))) {
 					moves.push(move);
 				}
 			}
@@ -14979,7 +14993,7 @@ exports.BattleMovedex = {
 		secondary: false,
 		target: "self",
 		type: "Normal",
-		zMoveEffect: 'crit1',
+		zMoveEffect: 'crit2',
 		contestType: "Cute",
 	},
 	"sludge": {
@@ -15253,7 +15267,7 @@ exports.BattleMovedex = {
 		flags: {protect: 1, mirror: 1, sound: 1, authentic: 1},
 		sleepUsable: true,
 		onTryHit: function (target, source) {
-			if (source.status !== 'slp') return false;
+			if (source.status !== 'slp' && !source.hasAbility('comatose')) return false;
 		},
 		secondary: {
 			chance: 30,
@@ -15272,6 +15286,7 @@ exports.BattleMovedex = {
 		desc: "The target's raised stat stages are stolen from it and applied to the user before dealing damage.",
 		shortDesc: "Steals target's boosts before dealing damage.",
 		id: "spectralthief",
+		isUnreleased: true,
 		isViable: true,
 		name: "Spectral Thief",
 		pp: 10,
@@ -16329,8 +16344,7 @@ exports.BattleMovedex = {
 		accuracy: true,
 		basePower: 1,
 		category: "Physical",
-		desc: "No additional effect.",
-		shortDesc: "No additional effect.",
+		shortDesc: "Power is equal to the base move's Z-Power.",
 		id: "subzeroslammer",
 		isViable: true,
 		name: "Subzero Slammer",
@@ -16480,8 +16494,7 @@ exports.BattleMovedex = {
 		accuracy: true,
 		basePower: 1,
 		category: "Physical",
-		desc: "No additional effect.",
-		shortDesc: "No additional effect.",
+		shortDesc: "Power is equal to the base move's Z-Power.",
 		id: "supersonicskystrike",
 		isViable: true,
 		name: "Supersonic Skystrike",
@@ -16638,11 +16651,15 @@ exports.BattleMovedex = {
 				return null;
 			}
 		},
-		onHit: function (target, source) {
+		onHit: function (target, source, move) {
 			let yourItem = target.takeItem(source);
 			let myItem = source.takeItem();
-			if (target.item || source.item || (!yourItem && !myItem) ||
-					(myItem.onTakeItem && myItem.onTakeItem(myItem, target) === false)) {
+			if (target.item || source.item || (!yourItem && !myItem)) {
+				if (yourItem) target.item = yourItem.id;
+				if (myItem) source.item = myItem.id;
+				return false;
+			}
+			if (!this.singleEvent('TakeItem', myItem, source.itemData, source, target, move, myItem)) {
 				if (yourItem) target.item = yourItem.id;
 				if (myItem) source.item = myItem.id;
 				return false;
@@ -16852,7 +16869,7 @@ exports.BattleMovedex = {
 		secondary: false,
 		target: "allySide",
 		type: "Flying",
-		zMoveEffect: 'crit1',
+		zMoveEffect: 'crit2',
 		contestType: "Cool",
 	},
 	"takedown": {
@@ -16910,7 +16927,7 @@ exports.BattleMovedex = {
 			},
 			onBeforeMovePriority: 5,
 			onBeforeMove: function (attacker, defender, move) {
-				if (move.category === 'Status') {
+				if (!move.isZ && move.category === 'Status') {
 					this.add('cant', attacker, 'move: Taunt', move);
 					return false;
 				}
@@ -16971,8 +16988,7 @@ exports.BattleMovedex = {
 		accuracy: true,
 		basePower: 1,
 		category: "Physical",
-		desc: "No additional effect.",
-		shortDesc: "No additional effect.",
+		shortDesc: "Power is equal to the base move's Z-Power.",
 		id: "tectonicrage",
 		isViable: true,
 		name: "Tectonic Rage",
@@ -17588,11 +17604,15 @@ exports.BattleMovedex = {
 				return null;
 			}
 		},
-		onHit: function (target, source) {
+		onHit: function (target, source, move) {
 			let yourItem = target.takeItem(source);
 			let myItem = source.takeItem();
-			if (target.item || source.item || (!yourItem && !myItem) ||
-					(myItem.onTakeItem && myItem.onTakeItem(myItem, target) === false)) {
+			if (target.item || source.item || (!yourItem && !myItem)) {
+				if (yourItem) target.item = yourItem.id;
+				if (myItem) source.item = myItem.id;
+				return false;
+			}
+			if (!this.singleEvent('TakeItem', myItem, source.itemData, source, target, move, myItem)) {
 				if (yourItem) target.item = yourItem.id;
 				if (myItem) source.item = myItem.id;
 				return false;
@@ -17639,8 +17659,6 @@ exports.BattleMovedex = {
 				const decision = this.willMove(target);
 				if (decision && decision.move.id === 'curse') {
 					decision.targetLoc = -1;
-					decision.targetSide = target.side;
-					decision.targetPosition = 0;
 				}
 			}
 		},
@@ -17812,8 +17830,7 @@ exports.BattleMovedex = {
 		accuracy: true,
 		basePower: 1,
 		category: "Physical",
-		desc: "No additional effect.",
-		shortDesc: "No additional effect.",
+		shortDesc: "Power is equal to the base move's Z-Power.",
 		id: "twinkletackle",
 		isViable: true,
 		name: "Twinkle Tackle",
@@ -18117,7 +18134,7 @@ exports.BattleMovedex = {
 		accuracy: 100,
 		basePower: 70,
 		basePowerCallback: function (pokemon, target, move) {
-			if (target.status === 'slp') return move.basePower * 2;
+			if (target.status === 'slp' || target.hasAbility('comatose')) return move.basePower * 2;
 			return move.basePower;
 		},
 		category: "Physical",
@@ -18337,8 +18354,14 @@ exports.BattleMovedex = {
 		num: 594,
 		accuracy: 100,
 		basePower: 15,
+		basePowerCallback: function (pokemon, target, move) {
+			if (pokemon.template.species === 'Greninja-Ash' && pokemon.hasAbility('battlebond')) {
+				return move.basePower + 5;
+			}
+			return move.basePower;
+		},
 		category: "Special",
-		desc: "Hits two to five times. Has a 1/3 chance to hit two or three times, and a 1/6 chance to hit four or five times. If one of the hits breaks the target's substitute, it will take damage for the remaining hits. If the user has the Ability Skill Link, this move will always hit five times. Power is multiplied by 1.5 if the user is Ash-Greninja.",
+		desc: "Hits two to five times. Has a 1/3 chance to hit two or three times, and a 1/6 chance to hit four or five times. If one of the hits breaks the target's substitute, it will take damage for the remaining hits. If the user has the Ability Skill Link, this move will always hit five times. Base power is 20 if the user is Ash-Greninja.",
 		shortDesc: "Hits 2-5 times in one turn.",
 		id: "watershuriken",
 		name: "Water Shuriken",
@@ -18436,8 +18459,8 @@ exports.BattleMovedex = {
 		accuracy: true,
 		basePower: 0,
 		category: "Status",
-		desc: "The user and its party members are protected from damaging attacks made by other Pokemon, including allies, during this turn that target all adjacent foes or all adjacent Pokemon. This move modifies the same 1/X chance of being successful used by other protection moves, where X starts at 1 and triples each time this move is successfully used, but does not use the chance to check for failure. X resets to 1 if this move fails or if the user's last move used is not Detect, Endure, King's Shield, Protect, Quick Guard, Spiky Shield, or Wide Guard. Fails if the user moves last this turn or if this move is already in effect for the user's side.",
-		shortDesc: "Protects allies from multi-target hits this turn.",
+		desc: "The user and its party members are protected from moves made by other Pokemon, including allies, during this turn that target all adjacent foes or all adjacent Pokemon. This move modifies the same 1/X chance of being successful used by other protection moves, where X starts at 1 and triples each time this move is successfully used, but does not use the chance to check for failure. X resets to 1 if this move fails or if the user's last move used is not Baneful Bunker, Detect, Endure, King's Shield, Protect, Quick Guard, Spiky Shield, or Wide Guard. Fails if the user moves last this turn or if this move is already in effect for the user's side.",
+		shortDesc: "Protects allies from multi-target moves this turn.",
 		id: "wideguard",
 		name: "Wide Guard",
 		pp: 10,
@@ -18457,8 +18480,8 @@ exports.BattleMovedex = {
 			},
 			onTryHitPriority: 4,
 			onTryHit: function (target, source, effect) {
-				// Wide Guard blocks damaging spread moves
-				if (effect && (effect.category === 'Status' || (effect.target !== 'allAdjacent' && effect.target !== 'allAdjacentFoes'))) {
+				// Wide Guard blocks all spread moves
+				if (effect && effect.target !== 'allAdjacent' && effect.target !== 'allAdjacentFoes') {
 					return;
 				}
 				this.add('-activate', target, 'move: Wide Guard');
@@ -18683,7 +18706,7 @@ exports.BattleMovedex = {
 		priority: 0,
 		flags: {protect: 1, reflectable: 1, mirror: 1, mystery: 1},
 		onTryHit: function (pokemon) {
-			let bannedAbilities = {insomnia:1, multitype:1, stancechange:1, truant:1, schooling:1};
+			let bannedAbilities = {comatose:1, insomnia:1, multitype:1, schooling:1, stancechange:1, truant:1};
 			if (bannedAbilities[pokemon.ability]) {
 				return false;
 			}
