@@ -199,7 +199,8 @@ exports.commands = {
 			}
 			room.modchat = target;
 			break;
-		}}
+		}
+		}
 		if (currentModchat === room.modchat) {
 			return this.errorReply("Modchat is already set to " + currentModchat + ".");
 		}

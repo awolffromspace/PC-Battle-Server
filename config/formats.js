@@ -2240,6 +2240,59 @@ exports.Formats = [
 				requiredFamilies[familyId]++;
 				if (requiredFamilies[familyId] > 2) return [`You are limited to up to two inheritances from each evolution family by the Donor Clause.`, `(You inherit more than twice from ${this.getTemplate(familyId).species}).`];
 			}
+
+			this.format.noChangeForme = false;
+			let problems = this.tools.getFormat('Pokemon').onChangeSet.call(this.tools, set, this.format) || [];
+			this.format.noChangeForme = true;
+
+			if (problems.length) return problems;
+
+			let species = toId(set.species);
+			let template = this.tools.getTemplate(species);
+			if (!template.exists) return [`The Pokemon "${set.species}" does not exist.`];
+			if (template.isUnreleased) return [`${template.species} is unreleased.`];
+			if (template.tier === 'Uber' || template.species in this.format.banlistTable) return [`${template.species} is banned.`];
+
+			let name = set.name;
+
+			let abilityId = toId(set.ability);
+			if (!abilityId || !(abilityId in this.tools.data.Abilities)) return [`${name} needs to have a valid ability.`];
+			let pokemonWithAbility = this.format.abilityMap[abilityId];
+			if (!pokemonWithAbility) return [`"${set.ability}" is not available on a legal Pokemon.`];
+
+			let canonicalSource = ''; // Specific for the basic implementation of Donor Clause (see onValidateTeam).
+			let validSources = set.abilitySources = []; // evolutionary families
+			for (let i = 0; i < pokemonWithAbility.length; i++) {
+				let donorTemplate = this.tools.getTemplate(pokemonWithAbility[i]);
+				let evoFamily = this.format.getEvoFamily(donorTemplate);
+
+				if (validSources.indexOf(evoFamily) >= 0) continue;
+
+				if (set.name === set.species) delete set.name;
+				set.species = donorTemplate.species;
+				problems = this.validateSet(set, teamHas) || [];
+				if (!problems.length) {
+					canonicalSource = donorTemplate.species;
+					validSources.push(evoFamily);
+				}
+				if (validSources.length > 1) {
+					// Specific for the basic implementation of Donor Clause (see onValidateTeam).
+					break;
+				}
+			}
+
+			set.species = template.species;
+			if (!validSources.length && pokemonWithAbility.length > 1) {
+				return [`${template.species}'s set is illegal.`];
+			}
+			if (!validSources.length) {
+				problems.unshift(`${template.species} has an illegal set with an ability from ${this.tools.getTemplate(pokemonWithAbility[0]).name}.`);
+				return problems;
+			}
+
+			// Protocol: Include the data of the donor species in the `name` data slot.
+			// Afterwards, we are going to reset the name to what the user intended. :]
+			set.name = `${set.name || set.species} (${canonicalSource})`;
 		},
 		onBegin: function () {
 			for (let pokemon of this.p1.pokemon.concat(this.p2.pokemon)) {
