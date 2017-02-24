@@ -35,7 +35,7 @@ const SIGNUP_PHASE = 'signups';
 const QUESTION_PHASE = 'question';
 const INTERMISSION_PHASE = 'intermission';
 
-const MINIMUM_PLAYERS = 3;
+const MINIMUM_PLAYERS = 1;
 
 const START_TIMEOUT = 30 * 1000;
 const QUESTION_INTERVAL = 12 * 1000 + 500;
