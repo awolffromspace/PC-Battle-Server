@@ -557,11 +557,11 @@ exports.BattleAbilities = {
 		shortDesc: "After another Pokemon uses a dance move, this Pokemon uses the same move.",
 		id: "dancer",
 		onAnyAfterMove: function (source, target, move) {
-			if (!this.effectData.target.hp || source === this.effectData.target) return;
+			if (!this.effectData.target.hp || source === this.effectData.target || move.isExternal) return;
 			if (move.id.includes('dance') && move.id !== 'raindance') {
 				this.faintMessages();
 				this.add('-activate', this.effectData.target, 'ability: Dancer');
-				this.useMove(move, this.effectData.target);
+				this.runMove(move, this.effectData.target, 0, this.getAbility('dancer'), undefined, true);
 			}
 		},
 		name: "Dancer",
@@ -3691,6 +3691,7 @@ exports.BattleAbilities = {
 		desc: "On switch-in, this Pokemon copies a random adjacent opposing Pokemon's Ability. If there is no Ability that can be copied at that time, this Ability will activate as soon as an Ability can be copied. Abilities that cannot be copied are Comatose, Disguise, Flower Gift, Forecast, Illusion, Imposter, Multitype, Schooling, Stance Change, Trace, and Zen Mode.",
 		shortDesc: "On switch-in, or when it can, this Pokemon copies a random adjacent foe's Ability.",
 		onUpdate: function (pokemon) {
+			if (!pokemon.isStarted) return;
 			let possibleTargets = [];
 			for (let i = 0; i < pokemon.side.foe.active.length; i++) {
 				if (pokemon.side.foe.active[i] && !pokemon.side.foe.active[i].fainted) possibleTargets.push(pokemon.side.foe.active[i]);
