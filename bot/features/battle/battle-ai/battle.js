@@ -80,6 +80,19 @@ var Battle = exports.Battle = (function () {
 				case "team":
 					var team = [];
 					for (var j = 0; j < decision[i].team.length; j++) team.push(decision[i].team[j] + 1);
+					var first = team[0] || 1;
+					for (var j = first - 1; j > 0; j--) {
+						if (team.indexOf(j) === -1) {
+							team.push(j);
+						}
+					}
+					if (this.request && this.request.side && this.request.side.pokemon) {
+						for (var j = 1; j <= this.request.side.pokemon.length; j++) {
+							if (team.indexOf(j) === -1) {
+								team.push(j);
+							}
+						}
+					}
 					str += "team " + team.join("");
 					break;
 				case "move":
@@ -196,9 +209,12 @@ var Battle = exports.Battle = (function () {
 		try {
 			mod = modules.choose(this);
 			if (mod) {
-				this.lock = false;
-				this.sendDecision(mod.decide(this, decisions));
-				return;
+				var decision = mod.decide(this, decisions);
+				if (decision instanceof Array) {
+					this.lock = false;
+					this.sendDecision(decision);
+					return;
+				}
 			}
 		} catch (ex) {
 			debug(ex.stack);
