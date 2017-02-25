@@ -2393,8 +2393,7 @@ exports.BattleScripts = {
 			// Limit to one of each species (Species Clause)
 			if (baseFormes[template.baseSpecies]) continue;
 
-			// Useless in Random Battle without greatly lowering the levels of everything else
-			if (template.species === 'Unown') continue;
+			if (template.species === 'Unown' || template.species === 'Cosmog' || template.species === 'Cosmoem') continue;
 
 			let tier = template.tier;
 			switch (tier) {
@@ -2402,14 +2401,13 @@ exports.BattleScripts = {
 				// Ubers are limited to 2 but have a 20% chance of being added anyway.
 				if (uberCount > 1 && this.random(5) >= 1) continue;
 				break;
+			case 'LC Uber':
+			case 'LC':
+			case 'NFE':
 			case 'PU':
 				// PUs are limited to 2 but have a 20% chance of being added anyway.
 				if (puCount > 1 && this.random(5) >= 1) continue;
 				break;
-			case 'LC':
-			case 'LC Uber':
-			case 'NFE':
-				if (puCount > 1) continue;
 			case 'Unreleased': case 'CAP':
 				// Unreleased and CAP have 20% the normal rate
 				if (this.random(5) >= 1) continue;
@@ -2420,18 +2418,18 @@ exports.BattleScripts = {
 			case 'Arceus': case 'Silvally':
 				if (this.random(18) >= 1) continue;
 				break;
-			case 'Basculin': case 'Cherrim': case 'Greninja': case 'Hoopa': case 'Meloetta': case 'Meowstic':
-				if (this.random(2) >= 1) continue;
-				break;
-			case 'Castform': case 'Gourgeist': case 'Oricorio': case 'Pumpkaboo':
-				if (this.random(4) >= 1) continue;
-				break;
-			case 'Genesect':
-				if (this.random(5) >= 1) continue;
-				break;
 			case 'Pikachu':
 				if (this.random(7) >= 1) continue;
 				continue;
+			case 'Genesect':
+				if (this.random(5) >= 1) continue;
+				break;
+			case 'Castform': case 'Pumpkaboo': case 'Gourgeist': case 'Oricorio':
+				if (this.random(4) >= 1) continue;
+				break;
+			case 'Basculin': case 'Cherrim': case 'Greninja': case 'Hoopa': case 'Meloetta': case 'Meowstic':
+				if (this.random(2) >= 1) continue;
+				break;
 			}
 
 			if (potd && potd.exists) {
@@ -2481,11 +2479,6 @@ exports.BattleScripts = {
 			} else {
 				if (typeComboCount[typeCombo] >= (isMonotype ? 2 : 1)) continue;
 			}
-
-			// Limit the number of Megas to one
-			let forme = template.otherFormes && this.getTemplate(template.otherFormes[0]);
-			let isMegaSet = this.getItem(set.item).megaStone || (forme && forme.isMega && forme.requiredMove && set.moves.includes(toId(forme.requiredMove)));
-			if (isMegaSet && teamDetails.megaCount > 0) continue;
 
 			// Okay, the set passes, add it to our team
 			pokemon.push(set);
@@ -3548,12 +3541,21 @@ exports.BattleScripts = {
 		return pokemon;
 	},
 	randomNoPotDTeam: function (side) {
-		let pokemonLeft = 0;
 		let pokemon = [];
+
+		// For Monotype
+		let isMonotype = this.format === 'gen7monotyperandom';
+		let typePool = Object.keys(this.data.TypeChart);
+		let type = typePool[this.random(typePool.length)];
 
 		let pokemonPool = [];
 		for (let id in this.data.FormatsData) {
 			let template = this.getTemplate(id);
+			if (isMonotype) {
+				let types = template.types;
+				if (template.battleOnly) types = this.getTemplate(template.baseSpecies).types;
+				if (types.indexOf(type) < 0) continue;
+			}
 			if (template.gen <= this.gen && !template.isMega && !template.isPrimal && !template.isNonstandard && template.randomBattleMoves) {
 				pokemonPool.push(id);
 			}
@@ -3566,15 +3568,14 @@ exports.BattleScripts = {
 		let puCount = 0;
 		let teamDetails = {};
 
-		while (pokemonPool.length && pokemonLeft < 6) {
+		while (pokemonPool.length && pokemon.length < 6) {
 			let template = this.getTemplate(this.sampleNoReplace(pokemonPool));
 			if (!template.exists) continue;
 
 			// Limit to one of each species (Species Clause)
 			if (baseFormes[template.baseSpecies]) continue;
 
-			// Useless in Random Battle without greatly lowering the levels of everything else
-			if (template.species === 'Unown') continue;
+			if (template.species === 'Unown' || template.species === 'Cosmog' || template.species === 'Cosmoem') continue;
 
 			let tier = template.tier;
 			switch (tier) {
@@ -3582,14 +3583,13 @@ exports.BattleScripts = {
 				// Ubers are limited to 2 but have a 20% chance of being added anyway.
 				if (uberCount > 1 && this.random(5) >= 1) continue;
 				break;
+			case 'LC Uber':
+			case 'LC':
+			case 'NFE':
 			case 'PU':
 				// PUs are limited to 2 but have a 20% chance of being added anyway.
 				if (puCount > 1 && this.random(5) >= 1) continue;
 				break;
-			case 'LC':
-			case 'LC Uber':
-			case 'NFE':
-				if (puCount > 1) continue;
 			case 'Unreleased': case 'CAP':
 				// Unreleased and CAP have 20% the normal rate
 				if (this.random(5) >= 1) continue;
@@ -3600,30 +3600,33 @@ exports.BattleScripts = {
 			case 'Arceus': case 'Silvally':
 				if (this.random(18) >= 1) continue;
 				break;
-			case 'Basculin': case 'Cherrim': case 'Hoopa': case 'Meloetta': case 'Meowstic':
-				if (this.random(2) >= 1) continue;
-				break;
-			case 'Castform': case 'Gourgeist': case 'Pumpkaboo':
-				if (this.random(4) >= 1) continue;
-				break;
-			case 'Genesect':
-				if (this.random(5) >= 1) continue;
-				break;
 			case 'Pikachu':
 				if (this.random(7) >= 1) continue;
 				continue;
+			case 'Genesect':
+				if (this.random(5) >= 1) continue;
+				break;
+			case 'Castform': case 'Pumpkaboo': case 'Gourgeist': case 'Oricorio':
+				if (this.random(4) >= 1) continue;
+				break;
+			case 'Basculin': case 'Cherrim': case 'Greninja': case 'Hoopa': case 'Meloetta': case 'Meowstic':
+				if (this.random(2) >= 1) continue;
+				break;
 			}
 
-			// Limit 2 of any type
 			let types = template.types;
-			let skip = false;
-			for (let t = 0; t < types.length; t++) {
-				if (typeCount[types[t]] > 1 && this.random(5) >= 1) {
-					skip = true;
-					break;
+
+			if (!isMonotype) {
+				// Limit 2 of any type
+				let skip = false;
+				for (let t = 0; t < types.length; t++) {
+					if (typeCount[types[t]] > 1 && this.random(5) >= 1) {
+						skip = true;
+						break;
+					}
 				}
+				if (skip) continue;
 			}
-			if (skip) continue;
 
 			let set = this[this.gameType === 'singles' ? 'randomSet' : 'randomDoublesSet'](template, pokemon.length, teamDetails);
 
@@ -3635,25 +3638,21 @@ exports.BattleScripts = {
 			let intersectMoves = set.moves.filter(move => incompatibleMoves.includes(move));
 			if (intersectMoves.length > 1) continue;
 
-			// Limit 1 of any type combination
-			let typeCombo = types.join();
+			// Limit 1 of any type combination, 2 in monotype
+			let typeCombo = types.slice().sort().join();
 			if (set.ability === 'Drought' || set.ability === 'Drizzle' || set.ability === 'Sand Stream') {
 				// Drought, Drizzle and Sand Stream don't count towards the type combo limit
 				typeCombo = set.ability;
+				if (typeCombo in typeComboCount) continue;
+			} else {
+				if (typeComboCount[typeCombo] >= (isMonotype ? 2 : 1)) continue;
 			}
-			if (typeCombo in typeComboCount) continue;
-
-			// Limit the number of Megas to one
-			let forme = template.otherFormes && this.getTemplate(template.otherFormes[0]);
-			let isMegaSet = this.getItem(set.item).megaStone || (forme && forme.isMega && forme.requiredMove && set.moves.includes(toId(forme.requiredMove)));
-			if (isMegaSet && teamDetails.megaCount > 0) continue;
 
 			// Okay, the set passes, add it to our team
 			pokemon.push(set);
 
 			// Now that our Pokemon has passed all checks, we can increment our counters
 			baseFormes[template.baseSpecies] = 1;
-			pokemonLeft++;
 
 			// Increment type counters
 			for (let t = 0; t < types.length; t++) {
@@ -3663,9 +3662,13 @@ exports.BattleScripts = {
 					typeCount[types[t]] = 1;
 				}
 			}
-			typeComboCount[typeCombo] = 1;
+			if (typeCombo in typeComboCount) {
+				typeComboCount[typeCombo]++;
+			} else {
+				typeComboCount[typeCombo] = 1;
+			}
 
-			// Increment Uber/NU counters
+			// Increment Uber/PU counters
 			if (tier === 'Uber') {
 				uberCount++;
 			} else if (tier === 'PU' || tier === 'NFE' || tier === 'LC' || tier === 'LC Uber') {
@@ -3673,7 +3676,9 @@ exports.BattleScripts = {
 			}
 
 			// Team has Mega/weather/hazards
-			if (this.getItem(set.item).megaStone) teamDetails['megaCount'] = 1;
+			let item = this.getItem(set.item);
+			if (item.megaStone) teamDetails['megaStone'] = 1;
+			if (item.zMove) teamDetails['zMove'] = 1;
 			if (set.ability === 'Snow Warning') teamDetails['hail'] = 1;
 			if (set.ability === 'Drizzle' || set.moves.includes('raindance')) teamDetails['rain'] = 1;
 			if (set.ability === 'Sand Stream') teamDetails['sand'] = 1;
@@ -3684,8 +3689,12 @@ exports.BattleScripts = {
 		return pokemon;
 	},
 	randomHighTierTeam: function (side) {
-		let pokemonLeft = 0;
 		let pokemon = [];
+
+		// For Monotype
+		let isMonotype = this.format === 'gen7monotyperandom';
+		let typePool = Object.keys(this.data.TypeChart);
+		let type = typePool[this.random(typePool.length)];
 
 		let pokemonPool = ['altaria', 'azumarill', 'bisharp', 'breloom', 'celebi', 'chansey', 'charizard', 'clefable', 'conkeldurr', 'diancie', 'dragonite', 'excadrill', 'ferrothorn', 'gallade', 'garchomp', 'gardevoir', 'gengar', 'gliscor', 'gyarados', 'heatran',
 		'jirachi', 'keldeo', 'kyuremblack', 'landorustherian', 'latias', 'latios', 'lopunny', 'magnezone', 'mamoswine', 'manaphy', 'mandibuzz', 'manectric', 'metagross', 'mew', 'raikou', 'rotomwash', 'sableye', 'scizor', 'skarmory', 'slowbro', 'starmie', 'sylveon', 'talonflame',
@@ -3702,30 +3711,17 @@ exports.BattleScripts = {
 		let puCount = 0;
 		let teamDetails = {};
 
-		while (pokemonPool.length && pokemonLeft < 6) {
+		while (pokemonPool.length && pokemon.length < 6) {
 			let template = this.getTemplate(this.sampleNoReplace(pokemonPool));
 			if (!template.exists) continue;
 
 			// Limit to one of each species (Species Clause)
 			if (baseFormes[template.baseSpecies]) continue;
 
-			// Useless in Random Battle without greatly lowering the levels of everything else
-			if (template.species === 'Unown') continue;
+			if (template.species === 'Unown' || template.species === 'Cosmog' || template.species === 'Cosmoem') continue;
 
 			let tier = template.tier;
 			switch (tier) {
-			case 'Uber':
-				// Ubers are limited to 2 but have a 20% chance of being added anyway.
-				if (uberCount > 1 && this.random(5) >= 1) continue;
-				break;
-			case 'PU':
-				// PUs are limited to 2 but have a 20% chance of being added anyway.
-				if (puCount > 1 && this.random(5) >= 1) continue;
-				break;
-			case 'LC':
-			case 'LC Uber':
-			case 'NFE':
-				if (puCount > 1) continue;
 			case 'Unreleased': case 'CAP':
 				// Unreleased and CAP have 20% the normal rate
 				if (this.random(5) >= 1) continue;
@@ -3736,30 +3732,33 @@ exports.BattleScripts = {
 			case 'Arceus': case 'Silvally':
 				if (this.random(18) >= 1) continue;
 				break;
-			case 'Basculin': case 'Cherrim': case 'Hoopa': case 'Meloetta': case 'Meowstic':
-				if (this.random(2) >= 1) continue;
-				break;
-			case 'Castform': case 'Gourgeist': case 'Pumpkaboo':
-				if (this.random(4) >= 1) continue;
-				break;
-			case 'Genesect':
-				if (this.random(5) >= 1) continue;
-				break;
 			case 'Pikachu':
 				if (this.random(7) >= 1) continue;
 				continue;
+			case 'Genesect':
+				if (this.random(5) >= 1) continue;
+				break;
+			case 'Castform': case 'Pumpkaboo': case 'Gourgeist': case 'Oricorio':
+				if (this.random(4) >= 1) continue;
+				break;
+			case 'Basculin': case 'Cherrim': case 'Greninja': case 'Hoopa': case 'Meloetta': case 'Meowstic':
+				if (this.random(2) >= 1) continue;
+				break;
 			}
 
-			// Limit 2 of any type
 			let types = template.types;
-			let skip = false;
-			for (let t = 0; t < types.length; t++) {
-				if (typeCount[types[t]] > 1 && this.random(5) >= 1) {
-					skip = true;
-					break;
+
+			if (!isMonotype) {
+				// Limit 2 of any type
+				let skip = false;
+				for (let t = 0; t < types.length; t++) {
+					if (typeCount[types[t]] > 1 && this.random(5) >= 1) {
+						skip = true;
+						break;
+					}
 				}
+				if (skip) continue;
 			}
-			if (skip) continue;
 
 			let set = this[this.gameType === 'singles' ? 'randomSet' : 'randomDoublesSet'](template, pokemon.length, teamDetails);
 
@@ -3771,25 +3770,21 @@ exports.BattleScripts = {
 			let intersectMoves = set.moves.filter(move => incompatibleMoves.includes(move));
 			if (intersectMoves.length > 1) continue;
 
-			// Limit 1 of any type combination
-			let typeCombo = types.join();
+			// Limit 1 of any type combination, 2 in monotype
+			let typeCombo = types.slice().sort().join();
 			if (set.ability === 'Drought' || set.ability === 'Drizzle' || set.ability === 'Sand Stream') {
 				// Drought, Drizzle and Sand Stream don't count towards the type combo limit
 				typeCombo = set.ability;
+				if (typeCombo in typeComboCount) continue;
+			} else {
+				if (typeComboCount[typeCombo] >= (isMonotype ? 2 : 1)) continue;
 			}
-			if (typeCombo in typeComboCount) continue;
-
-			// Limit the number of Megas to one
-			let forme = template.otherFormes && this.getTemplate(template.otherFormes[0]);
-			let isMegaSet = this.getItem(set.item).megaStone || (forme && forme.isMega && forme.requiredMove && set.moves.includes(toId(forme.requiredMove)));
-			if (isMegaSet && teamDetails.megaCount > 0) continue;
 
 			// Okay, the set passes, add it to our team
 			pokemon.push(set);
 
 			// Now that our Pokemon has passed all checks, we can increment our counters
 			baseFormes[template.baseSpecies] = 1;
-			pokemonLeft++;
 
 			// Increment type counters
 			for (let t = 0; t < types.length; t++) {
@@ -3799,17 +3794,16 @@ exports.BattleScripts = {
 					typeCount[types[t]] = 1;
 				}
 			}
-			typeComboCount[typeCombo] = 1;
-
-			// Increment Uber/NU counters
-			if (tier === 'Uber') {
-				uberCount++;
-			} else if (tier === 'PU' || tier === 'NFE' || tier === 'LC' || tier === 'LC Uber') {
-				puCount++;
+			if (typeCombo in typeComboCount) {
+				typeComboCount[typeCombo]++;
+			} else {
+				typeComboCount[typeCombo] = 1;
 			}
 
 			// Team has Mega/weather/hazards
-			if (this.getItem(set.item).megaStone) teamDetails['megaCount'] = 1;
+			let item = this.getItem(set.item);
+			if (item.megaStone) teamDetails['megaStone'] = 1;
+			if (item.zMove) teamDetails['zMove'] = 1;
 			if (set.ability === 'Snow Warning') teamDetails['hail'] = 1;
 			if (set.ability === 'Drizzle' || set.moves.includes('raindance')) teamDetails['rain'] = 1;
 			if (set.ability === 'Sand Stream') teamDetails['sand'] = 1;
@@ -3820,8 +3814,12 @@ exports.BattleScripts = {
 		return pokemon;
 	},
 	randomLowTierTeam: function (side) {
-		let pokemonLeft = 0;
 		let pokemon = [];
+
+		// For Monotype
+		let isMonotype = this.format === 'gen7monotyperandom';
+		let typePool = Object.keys(this.data.TypeChart);
+		let type = typePool[this.random(typePool.length)];
 
 		let pokemonPool = ['accelgor', 'alomomola', 'ambipom', 'aromatisse', 'banette', 'braviary', 'bronzong', 'cinccino', 'clawitzer', 'cobalion', 'cofagrigus', 'delphox', 'drapion', 'druddigon', 'dugtrio', 'eelektross', 'emboar', 'escavalier', 'exploud',
 		'fletchinder', 'gastrodon', 'glalie', 'golbat', 'hitmonchan', 'hitmonlee', 'hitmontop', 'houndoom', 'jellicent', 'jolteon', 'kabutops', 'magneton', 'meloetta', 'meloettapirouette', 'omastar', 'registeel', 'reuniclus', 'rhyperior', 'rotommow', 'shiftry', 'skuntank', 'spiritomb',
@@ -3845,30 +3843,17 @@ exports.BattleScripts = {
 		let puCount = 0;
 		let teamDetails = {};
 
-		while (pokemonPool.length && pokemonLeft < 6) {
+		while (pokemonPool.length && pokemon.length < 6) {
 			let template = this.getTemplate(this.sampleNoReplace(pokemonPool));
 			if (!template.exists) continue;
 
 			// Limit to one of each species (Species Clause)
 			if (baseFormes[template.baseSpecies]) continue;
 
-			// Useless in Random Battle without greatly lowering the levels of everything else
-			if (template.species === 'Unown') continue;
+			if (template.species === 'Unown' || template.species === 'Cosmog' || template.species === 'Cosmoem') continue;
 
 			let tier = template.tier;
 			switch (tier) {
-			case 'Uber':
-				// Ubers are limited to 2 but have a 20% chance of being added anyway.
-				if (uberCount > 1 && this.random(5) >= 1) continue;
-				break;
-			case 'PU':
-				// PUs are limited to 2 but have a 20% chance of being added anyway.
-				if (puCount > 1 && this.random(5) >= 1) continue;
-				break;
-			case 'LC':
-			case 'LC Uber':
-			case 'NFE':
-				if (puCount > 1) continue;
 			case 'Unreleased': case 'CAP':
 				// Unreleased and CAP have 20% the normal rate
 				if (this.random(5) >= 1) continue;
@@ -3879,46 +3864,35 @@ exports.BattleScripts = {
 			case 'Arceus': case 'Silvally':
 				if (this.random(18) >= 1) continue;
 				break;
-			case 'Basculin': case 'Cherrim': case 'Hoopa': case 'Meloetta': case 'Meowstic':
-				if (this.random(2) >= 1) continue;
-				break;
-			case 'Castform': case 'Gourgeist': case 'Pumpkaboo':
-				if (this.random(4) >= 1) continue;
-				break;
-			case 'Genesect':
-				if (this.random(5) >= 1) continue;
-				break;
 			case 'Pikachu':
 				if (this.random(7) >= 1) continue;
 				continue;
+			case 'Genesect':
+				if (this.random(5) >= 1) continue;
+				break;
+			case 'Castform': case 'Pumpkaboo': case 'Gourgeist': case 'Oricorio':
+				if (this.random(4) >= 1) continue;
+				break;
+			case 'Basculin': case 'Cherrim': case 'Greninja': case 'Hoopa': case 'Meloetta': case 'Meowstic':
+				if (this.random(2) >= 1) continue;
+				break;
 			}
 
-			// Limit 2 of any type
 			let types = template.types;
-			let skip = false;
-			for (let t = 0; t < types.length; t++) {
-				if (typeCount[types[t]] > 1 && this.random(5) >= 1) {
-					skip = true;
-					break;
+
+			if (!isMonotype) {
+				// Limit 2 of any type
+				let skip = false;
+				for (let t = 0; t < types.length; t++) {
+					if (typeCount[types[t]] > 1 && this.random(5) >= 1) {
+						skip = true;
+						break;
+					}
 				}
+				if (skip) continue;
 			}
-			if (skip) continue;
 
 			let set = this[this.gameType === 'singles' ? 'randomSet' : 'randomDoublesSet'](template, pokemon.length, teamDetails);
-
-			if (template.id === 'gothitelle') {
-				set.species = 'Gothitelle';
-				set.ability = 'Frisk';
-			} else if (template.id === 'wobbuffet') {
-				set.species = 'Wobbuffet';
-				set.ability = 'Telepathy';
-			} else if (template.id === 'ninetales') {
-				set.species = 'Ninetales';
-				set.ability = 'Flash Fire';
-			} else if (template.id === 'politoed') {
-				set.species = 'Politoed';
-				set.ability = 'Water Absorb';
-			}
 
 			// Illusion shouldn't be the last Pokemon of the team
 			if (set.ability === 'Illusion' && pokemon.length > 4) continue;
@@ -3928,25 +3902,21 @@ exports.BattleScripts = {
 			let intersectMoves = set.moves.filter(move => incompatibleMoves.includes(move));
 			if (intersectMoves.length > 1) continue;
 
-			// Limit 1 of any type combination
-			let typeCombo = types.join();
+			// Limit 1 of any type combination, 2 in monotype
+			let typeCombo = types.slice().sort().join();
 			if (set.ability === 'Drought' || set.ability === 'Drizzle' || set.ability === 'Sand Stream') {
 				// Drought, Drizzle and Sand Stream don't count towards the type combo limit
 				typeCombo = set.ability;
+				if (typeCombo in typeComboCount) continue;
+			} else {
+				if (typeComboCount[typeCombo] >= (isMonotype ? 2 : 1)) continue;
 			}
-			if (typeCombo in typeComboCount) continue;
-
-			// Limit the number of Megas to one
-			let forme = template.otherFormes && this.getTemplate(template.otherFormes[0]);
-			let isMegaSet = this.getItem(set.item).megaStone || (forme && forme.isMega && forme.requiredMove && set.moves.includes(toId(forme.requiredMove)));
-			if (isMegaSet && teamDetails.megaCount > 0) continue;
 
 			// Okay, the set passes, add it to our team
 			pokemon.push(set);
 
 			// Now that our Pokemon has passed all checks, we can increment our counters
 			baseFormes[template.baseSpecies] = 1;
-			pokemonLeft++;
 
 			// Increment type counters
 			for (let t = 0; t < types.length; t++) {
@@ -3956,17 +3926,16 @@ exports.BattleScripts = {
 					typeCount[types[t]] = 1;
 				}
 			}
-			typeComboCount[typeCombo] = 1;
-
-			// Increment Uber/NU counters
-			if (tier === 'Uber') {
-				uberCount++;
-			} else if (tier === 'PU' || tier === 'NFE' || tier === 'LC' || tier === 'LC Uber') {
-				puCount++;
+			if (typeCombo in typeComboCount) {
+				typeComboCount[typeCombo]++;
+			} else {
+				typeComboCount[typeCombo] = 1;
 			}
 
 			// Team has Mega/weather/hazards
-			if (this.getItem(set.item).megaStone) teamDetails['megaCount'] = 1;
+			let item = this.getItem(set.item);
+			if (item.megaStone) teamDetails['megaStone'] = 1;
+			if (item.zMove) teamDetails['zMove'] = 1;
 			if (set.ability === 'Snow Warning') teamDetails['hail'] = 1;
 			if (set.ability === 'Drizzle' || set.moves.includes('raindance')) teamDetails['rain'] = 1;
 			if (set.ability === 'Sand Stream') teamDetails['sand'] = 1;
@@ -3977,8 +3946,12 @@ exports.BattleScripts = {
 		return pokemon;
 	},
 	randomUberTeam: function (side) {
-		let pokemonLeft = 0;
 		let pokemon = [];
+
+		// For Monotype
+		let isMonotype = this.format === 'gen7monotyperandom';
+		let typePool = Object.keys(this.data.TypeChart);
+		let type = typePool[this.random(typePool.length)];
 
 		let pokemonPool = ['aegislash', 'arceus', 'arceusbug', 'arceusdark', 'arceusdragon', 'arceuselectric', 'arceusfairy', 'arceusfighting', 'arceusfire', 'arceusflying', 'arceusghost', 'arceusgrass', 'arceusground', 'arceusice', 'arceuspoison', 'arceuspsychic', 'arceusrock',
 		'arceussteel', 'arceuswater', 'blaziken', 'darkrai', 'deoxys', 'deoxysattack', 'deoxysdefense', 'deoxysspeed', 'dialga', 'genesect', 'genesectdouse', 'genesectshock', 'genesectburn', 'genesectchill', 'gengar', 'giratina', 'giratinaorigin', 'greninja', 'groudon', 'hooh', 'kangaskhan', 'kyogre', 'kyuremwhite', 'landorus', 'lucario', 'lugia',
@@ -3987,29 +3960,21 @@ exports.BattleScripts = {
 		let typeCount = {};
 		let typeComboCount = {};
 		let baseFormes = {};
+		let uberCount = 0;
 		let puCount = 0;
 		let teamDetails = {};
 
-		while (pokemonPool.length && pokemonLeft < 6) {
+		while (pokemonPool.length && pokemon.length < 6) {
 			let template = this.getTemplate(this.sampleNoReplace(pokemonPool));
 			if (!template.exists) continue;
 
 			// Limit to one of each species (Species Clause)
 			if (baseFormes[template.baseSpecies]) continue;
 
-			// Useless in Random Battle without greatly lowering the levels of everything else
-			if (template.species === 'Unown') continue;
+			if (template.species === 'Unown' || template.species === 'Cosmog' || template.species === 'Cosmoem') continue;
 
 			let tier = template.tier;
 			switch (tier) {
-			case 'PU':
-				// PUs are limited to 2 but have a 20% chance of being added anyway.
-				if (puCount > 1 && this.random(5) >= 1) continue;
-				break;
-			case 'LC':
-			case 'LC Uber':
-			case 'NFE':
-				if (puCount > 1) continue;
 			case 'Unreleased': case 'CAP':
 				// Unreleased and CAP have 20% the normal rate
 				if (this.random(5) >= 1) continue;
@@ -4020,30 +3985,33 @@ exports.BattleScripts = {
 			case 'Arceus': case 'Silvally':
 				if (this.random(18) >= 1) continue;
 				break;
-			case 'Basculin': case 'Cherrim': case 'Hoopa': case 'Meloetta': case 'Meowstic':
-				if (this.random(2) >= 1) continue;
-				break;
-			case 'Castform': case 'Gourgeist': case 'Pumpkaboo':
-				if (this.random(4) >= 1) continue;
-				break;
-			case 'Genesect':
-				if (this.random(5) >= 1) continue;
-				break;
 			case 'Pikachu':
 				if (this.random(7) >= 1) continue;
 				continue;
+			case 'Genesect':
+				if (this.random(5) >= 1) continue;
+				break;
+			case 'Castform': case 'Pumpkaboo': case 'Gourgeist': case 'Oricorio':
+				if (this.random(4) >= 1) continue;
+				break;
+			case 'Basculin': case 'Cherrim': case 'Greninja': case 'Hoopa': case 'Meloetta': case 'Meowstic':
+				if (this.random(2) >= 1) continue;
+				break;
 			}
 
-			// Limit 2 of any type
 			let types = template.types;
-			let skip = false;
-			for (let t = 0; t < types.length; t++) {
-				if (typeCount[types[t]] > 1 && this.random(5) >= 1) {
-					skip = true;
-					break;
+
+			if (!isMonotype) {
+				// Limit 2 of any type
+				let skip = false;
+				for (let t = 0; t < types.length; t++) {
+					if (typeCount[types[t]] > 1 && this.random(5) >= 1) {
+						skip = true;
+						break;
+					}
 				}
+				if (skip) continue;
 			}
-			if (skip) continue;
 
 			let set = this[this.gameType === 'singles' ? 'randomSet' : 'randomDoublesSet'](template, pokemon.length, teamDetails);
 
@@ -4055,25 +4023,21 @@ exports.BattleScripts = {
 			let intersectMoves = set.moves.filter(move => incompatibleMoves.includes(move));
 			if (intersectMoves.length > 1) continue;
 
-			// Limit 1 of any type combination
-			let typeCombo = types.join();
+			// Limit 1 of any type combination, 2 in monotype
+			let typeCombo = types.slice().sort().join();
 			if (set.ability === 'Drought' || set.ability === 'Drizzle' || set.ability === 'Sand Stream') {
 				// Drought, Drizzle and Sand Stream don't count towards the type combo limit
 				typeCombo = set.ability;
+				if (typeCombo in typeComboCount) continue;
+			} else {
+				if (typeComboCount[typeCombo] >= (isMonotype ? 2 : 1)) continue;
 			}
-			if (typeCombo in typeComboCount) continue;
-
-			// Limit the number of Megas to one
-			let forme = template.otherFormes && this.getTemplate(template.otherFormes[0]);
-			let isMegaSet = this.getItem(set.item).megaStone || (forme && forme.isMega && forme.requiredMove && set.moves.includes(toId(forme.requiredMove)));
-			if (isMegaSet && teamDetails.megaCount > 0) continue;
 
 			// Okay, the set passes, add it to our team
 			pokemon.push(set);
 
 			// Now that our Pokemon has passed all checks, we can increment our counters
 			baseFormes[template.baseSpecies] = 1;
-			pokemonLeft++;
 
 			// Increment type counters
 			for (let t = 0; t < types.length; t++) {
@@ -4083,15 +4047,16 @@ exports.BattleScripts = {
 					typeCount[types[t]] = 1;
 				}
 			}
-			typeComboCount[typeCombo] = 1;
-
-			// Increment Uber/NU counters
-			if (tier === 'PU' || tier === 'NFE' || tier === 'LC' || tier === 'LC Uber') {
-				puCount++;
+			if (typeCombo in typeComboCount) {
+				typeComboCount[typeCombo]++;
+			} else {
+				typeComboCount[typeCombo] = 1;
 			}
 
 			// Team has Mega/weather/hazards
-			if (this.getItem(set.item).megaStone) teamDetails['megaCount'] = 1;
+			let item = this.getItem(set.item);
+			if (item.megaStone) teamDetails['megaStone'] = 1;
+			if (item.zMove) teamDetails['zMove'] = 1;
 			if (set.ability === 'Snow Warning') teamDetails['hail'] = 1;
 			if (set.ability === 'Drizzle' || set.moves.includes('raindance')) teamDetails['rain'] = 1;
 			if (set.ability === 'Sand Stream') teamDetails['sand'] = 1;
@@ -4102,8 +4067,12 @@ exports.BattleScripts = {
 		return pokemon;
 	},
 	randomLCTeam: function (side) {
-		let pokemonLeft = 0;
 		let pokemon = [];
+
+		// For Monotype
+		let isMonotype = this.format === 'gen7monotyperandom';
+		let typePool = Object.keys(this.data.TypeChart);
+		let type = typePool[this.random(typePool.length)];
 
 		let pokemonPool = ['abra', 'aipom', 'amaura', 'anorith', 'archen', 'aron', 'axew', 'azurill', 'bagon', 'baltoy', 'barboach', 'beldum', 'bellsprout', 'bergmite', 'bidoof', 'binacle', 'blitzle', 'bonsly', 'bronzor', 'budew', 'buizel', 'bulbasaur', 'buneary', 'bunnelby',
 		'burmy', 'cacnea', 'carvanha', 'caterpie', 'charmander', 'cherubi', 'chespin', 'chikorita', 'chimchar', 'chinchou', 'chingling', 'clamperl', 'clauncher', 'cleffa', 'combee', 'corphish', 'cottonee', 'cranidos', 'croagunk', 'cubchoo', 'cubone', 'cyndaquil', 'darumaka',
@@ -4124,26 +4093,17 @@ exports.BattleScripts = {
 		let puCount = 0;
 		let teamDetails = {};
 
-		while (pokemonPool.length && pokemonLeft < 6) {
+		while (pokemonPool.length && pokemon.length < 6) {
 			let template = this.getTemplate(this.sampleNoReplace(pokemonPool));
 			if (!template.exists) continue;
 
 			// Limit to one of each species (Species Clause)
 			if (baseFormes[template.baseSpecies]) continue;
 
-			// Useless in Random Battle without greatly lowering the levels of everything else
-			if (template.species === 'Unown') continue;
+			if (template.species === 'Unown' || template.species === 'Cosmog' || template.species === 'Cosmoem') continue;
 
 			let tier = template.tier;
 			switch (tier) {
-			case 'Uber':
-				// Ubers are limited to 2 but have a 20% chance of being added anyway.
-				if (uberCount > 1 && this.random(5) >= 1) continue;
-				break;
-			case 'PU':
-				// PUs are limited to 2 but have a 20% chance of being added anyway.
-				if (puCount > 1 && this.random(5) >= 1) continue;
-				break;
 			case 'Unreleased': case 'CAP':
 				// Unreleased and CAP have 20% the normal rate
 				if (this.random(5) >= 1) continue;
@@ -4154,30 +4114,33 @@ exports.BattleScripts = {
 			case 'Arceus': case 'Silvally':
 				if (this.random(18) >= 1) continue;
 				break;
-			case 'Basculin': case 'Cherrim': case 'Hoopa': case 'Meloetta': case 'Meowstic':
-				if (this.random(2) >= 1) continue;
-				break;
-			case 'Castform': case 'Gourgeist': case 'Pumpkaboo':
-				if (this.random(4) >= 1) continue;
-				break;
-			case 'Genesect':
-				if (this.random(5) >= 1) continue;
-				break;
 			case 'Pikachu':
 				if (this.random(7) >= 1) continue;
 				continue;
+			case 'Genesect':
+				if (this.random(5) >= 1) continue;
+				break;
+			case 'Castform': case 'Pumpkaboo': case 'Gourgeist': case 'Oricorio':
+				if (this.random(4) >= 1) continue;
+				break;
+			case 'Basculin': case 'Cherrim': case 'Greninja': case 'Hoopa': case 'Meloetta': case 'Meowstic':
+				if (this.random(2) >= 1) continue;
+				break;
 			}
 
-			// Limit 2 of any type
 			let types = template.types;
-			let skip = false;
-			for (let t = 0; t < types.length; t++) {
-				if (typeCount[types[t]] > 1 && this.random(5) >= 1) {
-					skip = true;
-					break;
+
+			if (!isMonotype) {
+				// Limit 2 of any type
+				let skip = false;
+				for (let t = 0; t < types.length; t++) {
+					if (typeCount[types[t]] > 1 && this.random(5) >= 1) {
+						skip = true;
+						break;
+					}
 				}
+				if (skip) continue;
 			}
-			if (skip) continue;
 
 			let set = this[this.gameType === 'singles' ? 'randomSet' : 'randomDoublesSet'](template, pokemon.length, teamDetails);
 
@@ -4191,25 +4154,21 @@ exports.BattleScripts = {
 			let intersectMoves = set.moves.filter(move => incompatibleMoves.includes(move));
 			if (intersectMoves.length > 1) continue;
 
-			// Limit 1 of any type combination
-			let typeCombo = types.join();
+			// Limit 1 of any type combination, 2 in monotype
+			let typeCombo = types.slice().sort().join();
 			if (set.ability === 'Drought' || set.ability === 'Drizzle' || set.ability === 'Sand Stream') {
 				// Drought, Drizzle and Sand Stream don't count towards the type combo limit
 				typeCombo = set.ability;
+				if (typeCombo in typeComboCount) continue;
+			} else {
+				if (typeComboCount[typeCombo] >= (isMonotype ? 2 : 1)) continue;
 			}
-			if (typeCombo in typeComboCount) continue;
-
-			// Limit the number of Megas to one
-			let forme = template.otherFormes && this.getTemplate(template.otherFormes[0]);
-			let isMegaSet = this.getItem(set.item).megaStone || (forme && forme.isMega && forme.requiredMove && set.moves.includes(toId(forme.requiredMove)));
-			if (isMegaSet && teamDetails.megaCount > 0) continue;
 
 			// Okay, the set passes, add it to our team
 			pokemon.push(set);
 
 			// Now that our Pokemon has passed all checks, we can increment our counters
 			baseFormes[template.baseSpecies] = 1;
-			pokemonLeft++;
 
 			// Increment type counters
 			for (let t = 0; t < types.length; t++) {
@@ -4219,17 +4178,16 @@ exports.BattleScripts = {
 					typeCount[types[t]] = 1;
 				}
 			}
-			typeComboCount[typeCombo] = 1;
-
-			// Increment Uber/NU counters
-			if (tier === 'Uber') {
-				uberCount++;
-			} else if (tier === 'PU') {
-				puCount++;
+			if (typeCombo in typeComboCount) {
+				typeComboCount[typeCombo]++;
+			} else {
+				typeComboCount[typeCombo] = 1;
 			}
 
 			// Team has Mega/weather/hazards
-			if (this.getItem(set.item).megaStone) teamDetails['megaCount'] = 1;
+			let item = this.getItem(set.item);
+			if (item.megaStone) teamDetails['megaStone'] = 1;
+			if (item.zMove) teamDetails['zMove'] = 1;
 			if (set.ability === 'Snow Warning') teamDetails['hail'] = 1;
 			if (set.ability === 'Drizzle' || set.moves.includes('raindance')) teamDetails['rain'] = 1;
 			if (set.ability === 'Sand Stream') teamDetails['sand'] = 1;
