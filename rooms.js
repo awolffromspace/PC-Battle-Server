@@ -951,7 +951,7 @@ class BattleRoom extends Room {
 			if (this.format === 'lotw28alolarandom') {
 				Db('bp').set(winnerid, Db('bp').get(winnerid, 0) + 2);
 				this.push("|raw|<b><font color='" + color + "'>" + Chat.escapeHTML(winnerid) + "</font> has won " + "<font color='" + color + "'>2</font>" + " Battle Points for winning the rated Ladder of the Fortnight battle!</b>");
-			} else if (this.format !== 'gen71v1random' && this.format !== 'gen71v1challengecup' && this.format !== '1v1') {
+			} else if (this.format !== 'gen71v1random' && this.format !== 'gen71v1challengecup' && this.format !== 'gen71v1') {
 				Db('bp').set(winnerid, Db('bp').get(winnerid, 0) + 1);
 				this.push("|raw|<b><font color='" + color + "'>" + Chat.escapeHTML(winnerid) + "</font> has won " + "<font color='" + color + "'>1</font>" + " Battle Point for winning the rated battle!</b>");
 			}
@@ -975,7 +975,7 @@ class BattleRoom extends Room {
 		}
 		if (this.tour) {
 			this.tour.onBattleWin(this, winnerid);
-			if (this.format !== 'gen71v1random' && this.format !== 'gen71v1challengecup' && this.format !== '1v1') {
+			if (this.format !== 'gen71v1random' && this.format !== 'gen71v1challengecup' && this.format !== 'gen71v1') {
 				this.push("|raw|<b><font color='" + color + "'>" + Chat.escapeHTML(winnerid) + "</font> has won " + "<font color='" + color + "'>1</font>" + " Battle Point for winning the tournament battle!</b>");
 			}
 		}

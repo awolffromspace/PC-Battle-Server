@@ -632,7 +632,7 @@ exports.customavatars = {
 };
 
 // custom avatars appear in profile by specifiying server url.
-exports.avatarurl = 'http://cbc.pokecommunity.com/config';
+exports.avatarurl = 'http://cbc.pokecommunity.com/config/avatars/';
 
 // tourroom - specify a room to receive tournament announcements (defaults to
 // the room 'tournaments').
@@ -733,8 +733,8 @@ exports.grouplist = [
 		roomdriver: true,
 		roomsubdriver: true,
 		tournamentsmanagement: true,
-		rmall: true,
 		gamemanagement: true,
+		rmall: true,
 	},
 	{
 		symbol: '-',
@@ -746,8 +746,8 @@ exports.grouplist = [
 		roomonly: true,
 		editroom: true,
 		joinbattle: true,
-		modchatall: true,
 		nooverride: true,
+		modchatall: true,
 	},
 	{
 		symbol: '*',

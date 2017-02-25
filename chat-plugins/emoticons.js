@@ -431,6 +431,7 @@ exports.commands = {
 	},
 	unblockemoticonshelp: ["/unblockemoticons - Unblocks emoticons in private messages. Block them with /blockemoticons."],
 
+	emote: 'emoticons',
 	emotes: 'emoticons',
 	emoticons: function (target, room, user) {
 		if (!this.runBroadcast()) return;
