@@ -733,8 +733,8 @@ exports.grouplist = [
 		roomdriver: true,
 		roomsubdriver: true,
 		tournamentsmanagement: true,
-		rmall: true,
 		gamemanagement: true,
+		rmall: true,
 	},
 	{
 		symbol: '-',
@@ -746,8 +746,8 @@ exports.grouplist = [
 		roomonly: true,
 		editroom: true,
 		joinbattle: true,
-		modchatall: true,
 		nooverride: true,
+		modchatall: true,
 	},
 	{
 		symbol: '*',
