@@ -259,29 +259,30 @@ exports.Formats = [
 		ruleset: ['[Gen 7] Random (no PotD)'],
 	},
 	{
-		name: "High Tier Random",
+		name: "[Gen 7] High Tier Random",
 
-		mod: 'hightierrandom',
+		mod: 'gen7',
 		team: 'randomHighTier',
 		ruleset: ['[Gen 7] Random (no PotD)'],
 	},
 	{
-		name: "Low Tier Random",
+		name: "[Gen 7] Low Tier Random",
 
-		mod: 'lowtierrandom',
+		mod: 'gen7',
 		team: 'randomLowTier',
 		ruleset: ['[Gen 7] Random (no PotD)'],
 	},
 	{
-		name: "Uber Random",
+		name: "[Gen 7] Uber Random",
 
-		mod: 'uberrandom',
+		mod: 'gen7',
 		team: 'randomUber',
 		ruleset: ['[Gen 7] Random (no PotD)'],
 	},
 	{
-		name: "LC Random",
+		name: "[Gen 7] LC Random",
 
+		mod: 'gen7',
 		team: 'randomLC',
 		ruleset: ['[Gen 7] Random (no PotD)'],
 	},
@@ -293,50 +294,51 @@ exports.Formats = [
 		ruleset: ['[Gen 7] Random (no PotD)', 'Same Type Clause'],
 	},
 	{
-		name: "Generational Random",
+		name: "[Gen 7] Generational Random",
 
+		mod: 'gen7',
 		team: 'randomGenerational',
 		ruleset: ['[Gen 7] Random (no PotD)'],
 	},
 	{
-		name: "Kanto Random",
+		name: "[Gen 7] Kanto Random",
 
+		mod: 'gen7',
 		team: 'randomKanto',
 		ruleset: ['[Gen 7] Random (no PotD)'],
 	},
 	{
-		name: "Johto Random",
+		name: "[Gen 7] Johto Random",
 
+		mod: 'gen7',
 		team: 'randomJohto',
 		ruleset: ['[Gen 7] Random (no PotD)'],
 	},
 	{
-		name: "Hoenn Random",
+		name: "[Gen 7] Hoenn Random",
 
+		mod: 'gen7',
 		team: 'randomHoenn',
 		ruleset: ['[Gen 7] Random (no PotD)'],
 	},
 	{
-		name: "Hoenn Weather Random",
+		name: "[Gen 7] Sinnoh Random",
 
-		team: 'randomHoennWeather',
-		ruleset: ['[Gen 7] Random (no PotD)'],
-	},
-	{
-		name: "Sinnoh Random",
-
+		mod: 'gen7',
 		team: 'randomSinnoh',
 		ruleset: ['[Gen 7] Random (no PotD)'],
 	},
 	{
-		name: "Unova Random",
+		name: "[Gen 7] Unova Random",
 
+		mod: 'gen7',
 		team: 'randomUnova',
 		ruleset: ['[Gen 7] Random (no PotD)'],
 	},
 	{
-		name: "Kalos Random",
+		name: "[Gen 7] Kalos Random",
 
+		mod: 'gen7',
 		team: 'randomKalos',
 		ruleset: ['[Gen 7] Random (no PotD)'],
 	},
@@ -360,9 +362,7 @@ exports.Formats = [
 		mod: 'gen7',
 		team: 'randomNoPotD',
 		ruleset: ['[Gen 7] Random (no PotD)'],
-		onNegateImmunity: function (pokemon, type) {
-			if (type in this.data.TypeChart && this.runEvent('Immunity', pokemon, null, null, type)) return false;
-		},
+		onNegateImmunity: false,
 		onEffectiveness: function (typeMod, target, type, move) {
 			// The effectiveness of Freeze Dry on Water isn't reverted
 			if (move && move.id === 'freezedry' && type === 'Water') return;
@@ -371,23 +371,9 @@ exports.Formats = [
 		},
 	},
 	{
-		name: "Community Random",
+		name: "[Gen 7] Orb Random",
 
-		team: 'randomCommunity',
-		ruleset: ['[Gen 7] Random (no PotD)'],
-		onBegin: function () {
-			this.add("raw|Would you like to be in Community Random? If so, <a href='http://www.pokecommunity.com/showthread.php?t=335080'>click here</a>.");
-		},
-	},
-	{
-		name: "Super Smash Bros. Random",
-
-		team: 'randomSmashBros',
-		ruleset: ['[Gen 7] Random (no PotD)'],
-	},
-	{
-		name: "Orb Random",
-
+		mod: 'gen7',
 		team: 'randomOrb',
 		ruleset: ['[Gen 7] Random (no PotD)'],
 	},
@@ -1803,122 +1789,6 @@ exports.Formats = [
 			}
 		},
 	},
-	/* {
-		name: "Winter Wonderland",
-		section: "Randomized Metas",
-		team: 'randomSeasonalWW',
-		onBegin: function() {
-			this.setWeather('Hail');
-			delete this.weatherData.duration;
-		},
-		onModifyMove: function(move) {
-			if (move.id === 'present') {
-				move.category = 'Status';
-				move.basePower = 0;
-				delete move.heal;
-				move.accuracy = 100;
-				switch (this.random(20)) {
-				case 0:
-				case 1:
-				case 2:
-				case 3:
-				case 4:
-					move.onTryHit = function() {
-						this.add('-message', "The present was a bomb!");
-					};
-					move.category = 'Physical';
-					move.basePower = 200;
-					break;
-				case 5:
-					move.onTryHit = function() {
-						this.add('-message', "The present was confusion!");
-					};
-					move.volatileStatus = 'confusion';
-					break;
-				case 6:
-					move.onTryHit = function() {
-						this.add('-message', "The present was Disable!");
-					};
-					move.volatileStatus = 'disable';
-					break;
-				case 7:
-					move.onTryHit = function() {
-						this.add('-message', "The present was a taunt!");
-					};
-					move.volatileStatus = 'taunt';
-					break;
-				case 8:
-					move.onTryHit = function() {
-						this.add('-message', "The present was some seeds!");
-					};
-					move.volatileStatus = 'leechseed';
-					break;
-				case 9:
-					move.onTryHit = function() {
-						this.add('-message', "The present was an embargo!");
-					};
-					move.volatileStatus = 'embargo';
-					break;
-				case 10:
-					move.onTryHit = function() {
-						this.add('-message', "The present was a music box!");
-					};
-					move.volatileStatus = 'perishsong';
-					break;
-				case 11:
-					move.onTryHit = function() {
-						this.add('-message', "The present was a curse!");
-					};
-					move.volatileStatus = 'curse';
-					break;
-				case 12:
-					move.onTryHit = function() {
-						this.add('-message', "The present was Torment!");
-					};
-					move.volatileStatus = 'torment';
-					break;
-				case 13:
-					move.onTryHit = function() {
-						this.add('-message', "The present was a trap!");
-					};
-					move.volatileStatus = 'partiallytrapped';
-					break;
-				case 14:
-					move.onTryHit = function() {
-						this.add('-message', "The present was a root!");
-					};
-					move.volatileStatus = 'ingrain';
-					break;
-				case 15:
-				case 16:
-				case 17:
-					move.onTryHit = function() {
-						this.add('-message', "The present was a makeover!");
-					};
-					var boosts = {};
-					var possibleBoosts = ['atk','def','spa','spd','spe','accuracy'].randomize();
-					boosts[possibleBoosts[0]] = 1;
-					boosts[possibleBoosts[1]] = -1;
-					boosts[possibleBoosts[2]] = -1;
-					move.boosts = boosts;
-					break;
-				case 18:
-					move.onTryHit = function() {
-						this.add('-message', "The present was psychic powers!");
-					};
-					move.volatileStatus = 'telekinesis';
-					break;
-				case 19:
-					move.onTryHit = function() {
-						this.add('-message', "The present was fatigue!");
-					};
-					move.volatileStatus = 'mustrecharge';
-					break;
-				}
-			}
-		},
-		ruleset: ['[Gen 7] Random (no PotD)']
-	},*/
 	{
 		name: "[Gen 7] Hackmons Cup",
 		desc: ["Randomized teams of level-balanced Pok&eacute;mon with absolutely any ability, moves, and item."],
@@ -1967,151 +1837,6 @@ exports.Formats = [
 		gameType: 'triples',
 		team: 'randomHC',
 		searchShow: false,
-		ruleset: ['[Gen 7] Random (no PotD)'],
-	},
-	{
-		name: "Spring Random",
-
-		searchShow: false,
-		mod: 'springrandom',
-		team: 'randomSpring',
-		ruleset: ['[Gen 7] Random (no PotD)'],
-		onBegin: function() {
-			this.setWeather('Hail');
-			delete this.weatherData.duration;
-		},
-		onSwitchIn: function(pokemon, target, move) {
-			if (pokemon.template.species === 'Moltres' || pokemon.template.species === 'Ho-Oh' || pokemon.template.species === 'Groudon' || pokemon.template.species === 'Groudon-Primal') {
-				this.setWeather('Sunny Day');
-				delete this.weatherData.duration;
-			}
-			if (pokemon.template.species === 'Zapdos' || pokemon.template.species === 'Kyogre' || pokemon.template.species === 'Kyogre-Primal' || pokemon.template.species === 'Tornadus' || pokemon.template.species === 'Tornadus-Therian' || pokemon.template.species === 'Thundurus' || pokemon.template.species === 'Thundurus-Therian') {
-				this.setWeather('Rain Dance');
-				delete this.weatherData.duration;
-			}
-			if (pokemon.template.species === 'Lugia' || pokemon.template.species === 'Altaria' || pokemon.template.species === 'Altaria-Mega' || pokemon.template.species === 'Rayquaza' || pokemon.template.species === 'Rayquaza-Mega' || pokemon.template.species === 'Landorus' || pokemon.template.species === 'Landorus-Therian') {
-				this.clearWeather();
-			}
-		},
-		onBeforeMove: function(pokemon) {
-			if (pokemon.side.battle.turn === 4) {
-				this.setWeather('Sunny Day');
-				delete this.weatherData.duration;
-			}
-			if (pokemon.side.battle.turn === 8) {
-				this.setWeather('Rain Dance');
-				delete this.weatherData.duration;
-			}
-			if (pokemon.side.battle.turn === 12) {
-				this.setWeather('Sunny Day');
-				delete this.weatherData.duration;
-			}
-			if (pokemon.side.battle.turn === 16) {
-				this.setWeather('Rain Dance');
-				delete this.weatherData.duration;
-			}
-			if (pokemon.side.battle.turn === 20) {
-				this.setWeather('Sunny Day');
-				delete this.weatherData.duration;
-			}
-			if (pokemon.side.battle.turn === 24) {
-				this.setWeather('Rain Dance');
-				delete this.weatherData.duration;
-			}
-			if (pokemon.side.battle.turn === 24) {
-				this.setWeather('Sunny Day');
-				delete this.weatherData.duration;
-			}
-			if (pokemon.side.battle.turn === 28) {
-				this.setWeather('Rain Dance');
-				delete this.weatherData.duration;
-			}
-			if (pokemon.side.battle.turn === 32) {
-				this.setWeather('Sunny Day');
-				delete this.weatherData.duration;
-			}
-			if (pokemon.side.battle.turn === 36) {
-				this.setWeather('Rain Dance');
-				delete this.weatherData.duration;
-			}
-			if (pokemon.side.battle.turn === 40) {
-				this.setWeather('Sunny Day');
-				delete this.weatherData.duration;
-			}
-			if (pokemon.side.battle.turn === 44) {
-				this.setWeather('Rain Dance');
-				delete this.weatherData.duration;
-			}
-			if (pokemon.side.battle.turn === 48) {
-				this.setWeather('Sunny Day');
-				delete this.weatherData.duration;
-			}
-			if (pokemon.side.battle.turn === 52) {
-				this.setWeather('Rain Dance');
-				delete this.weatherData.duration;
-			}
-			if (pokemon.side.battle.turn === 56) {
-				this.setWeather('Sunny Day');
-				delete this.weatherData.duration;
-			}
-			if (pokemon.side.battle.turn === 60) {
-				this.setWeather('Rain Dance');
-				delete this.weatherData.duration;
-			}
-			if (pokemon.side.battle.turn === 64) {
-				this.setWeather('Sunny Day');
-				delete this.weatherData.duration;
-			}
-			if (pokemon.side.battle.turn === 68) {
-				this.setWeather('Rain Dance');
-				delete this.weatherData.duration;
-			}
-			if (pokemon.side.battle.turn === 72) {
-				this.setWeather('Sunny Day');
-				delete this.weatherData.duration;
-			}
-			if (pokemon.side.battle.turn === 76) {
-				this.setWeather('Rain Dance');
-				delete this.weatherData.duration;
-			}
-			if (pokemon.side.battle.turn === 80) {
-				this.setWeather('Sunny Day');
-				delete this.weatherData.duration;
-			}
-			if (pokemon.side.battle.turn === 84) {
-				this.setWeather('Rain Dance');
-				delete this.weatherData.duration;
-			}
-			if (pokemon.side.battle.turn === 88) {
-				this.setWeather('Sunny Day');
-				delete this.weatherData.duration;
-			}
-			if (pokemon.side.battle.turn === 92) {
-				this.setWeather('Rain Dance');
-				delete this.weatherData.duration;
-			}
-			if (pokemon.side.battle.turn === 96) {
-				this.add('-message', "Wow, this battle is taking forever to end.");
-				this.setWeather('Sunny Day');
-				delete this.weatherData.duration;
-			}
-		},
-	},
-	{
-		name: "Halloween Random",
-
-		searchShow: false,
-		mod: 'halloweenrandom',
-		team: 'randomHalloween',
-		ruleset: ['[Gen 7] Random (no PotD)'],
-	},
-	{
-		name: "[Gen 7] SwagPlay Random",
-
-		mod: 'gen7',
-		searchShow: false,
-		mod: 'swagplayrandom',
-		team: 'randomSwagPlay',
 		ruleset: ['[Gen 7] Random (no PotD)'],
 	},
 
