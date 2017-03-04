@@ -504,10 +504,10 @@ class GlobalRoom {
 
 		if (!user.locked && !Rooms.lobby.isMuted(user)) {
 			if (Rooms.lobby.disableLadderMessages) return false;
-			if (((Date.now() - user.lastSearchTime) < SEARCH_COOLDOWN) && user.lastFormat === formatid) return false;
+			if (((Date.now() - user.lastLadderTime) < SEARCH_COOLDOWN) && user.lastLadderFormat === formatid) return false;
 			if (Rooms.lobby) Rooms.lobby.add('|c|' + user.group + user.name + '|/me is searching for a ' + formatid + ' battle!');
-			user.lastFormat = formatid;
-			user.lastSearchTime = Date.now();
+			user.lastLadderFormat = formatid;
+			user.lastLadderTime = Date.now();
 		}
 	}
 	finishSearchBattle(user, formatid, result) {
