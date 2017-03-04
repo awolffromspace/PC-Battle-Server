@@ -18,6 +18,8 @@ const PERIODIC_MATCH_INTERVAL = 60 * 1000;
 
 const CRASH_REPORT_THROTTLE = 60 * 60 * 1000;
 
+const SEARCH_COOLDOWN = 3 * 60 * 1000;
+
 const fs = require('fs');
 const path = require('path');
 
@@ -500,10 +502,12 @@ class GlobalRoom {
 
 		user.prepBattle(formatid, 'search', null).then(result => this.finishSearchBattle(user, formatid, result));
 
-		if (!user.locked) {
-			let searcher = toId(user)
+		if (!user.locked && !Rooms.lobby.isMuted(user)) {
 			if (Rooms.lobby.disableLadderMessages) return false;
-			if (Rooms.lobby) Rooms.lobby.addRaw(searcher + ' is searching for a battle (' + formatid + ')!');
+			if (((Date.now() - user.lastSearchTime) < SEARCH_COOLDOWN) && user.lastFormat === formatid) return false;
+			if (Rooms.lobby) Rooms.lobby.add('|c|' + user.group + user.name + '|/me is searching for a ' + formatid + ' battle!');
+			user.lastFormat = formatid;
+			user.lastSearchTime = Date.now();
 		}
 	}
 	finishSearchBattle(user, formatid, result) {
