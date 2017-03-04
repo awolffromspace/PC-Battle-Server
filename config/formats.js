@@ -2600,7 +2600,7 @@ exports.Formats = [
 
 	{
 		section: "ORAS Singles",
-		column: 4,
+		column: 3,
 	},
 	{
 		name: "OU",

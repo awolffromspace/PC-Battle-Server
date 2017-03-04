@@ -2401,13 +2401,14 @@ exports.BattleScripts = {
 				// Ubers are limited to 2 but have a 20% chance of being added anyway.
 				if (uberCount > 1 && this.random(5) >= 1) continue;
 				break;
-			case 'LC Uber':
-			case 'LC':
-			case 'NFE':
 			case 'PU':
 				// PUs are limited to 2 but have a 20% chance of being added anyway.
 				if (puCount > 1 && this.random(5) >= 1) continue;
 				break;
+			case 'LC Uber':
+			case 'LC':
+			case 'NFE':
+				if (puCount > 1) continue;
 			case 'Unreleased': case 'CAP':
 				// Unreleased and CAP have 20% the normal rate
 				if (this.random(5) >= 1) continue;
@@ -3583,13 +3584,14 @@ exports.BattleScripts = {
 				// Ubers are limited to 2 but have a 20% chance of being added anyway.
 				if (uberCount > 1 && this.random(5) >= 1) continue;
 				break;
-			case 'LC Uber':
-			case 'LC':
-			case 'NFE':
 			case 'PU':
 				// PUs are limited to 2 but have a 20% chance of being added anyway.
 				if (puCount > 1 && this.random(5) >= 1) continue;
 				break;
+			case 'LC Uber':
+			case 'LC':
+			case 'NFE':
+				if (puCount > 1) continue;
 			case 'Unreleased': case 'CAP':
 				// Unreleased and CAP have 20% the normal rate
 				if (this.random(5) >= 1) continue;
@@ -3893,6 +3895,20 @@ exports.BattleScripts = {
 			}
 
 			let set = this[this.gameType === 'singles' ? 'randomSet' : 'randomDoublesSet'](template, pokemon.length, teamDetails);
+
+			if (template.id === 'gothitelle') {
+				set.species = 'Gothitelle';
+				set.ability = 'Frisk';
+			} else if (template.id === 'wobbuffet') {
+				set.species = 'Wobbuffet';
+				set.ability = 'Telepathy';
+			} else if (template.id === 'ninetales') {
+				set.species = 'Ninetales';
+				set.ability = 'Flash Fire';
+			} else if (template.id === 'politoed') {
+				set.species = 'Politoed';
+				set.ability = 'Water Absorb';
+			}
 
 			// Illusion shouldn't be the last Pokemon of the team
 			if (set.ability === 'Illusion' && pokemon.length > 4) continue;
