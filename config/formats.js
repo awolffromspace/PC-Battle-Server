@@ -2729,7 +2729,7 @@ exports.Formats = [
 		},
 	},
 	{
-		name: "[Gen 6] Random Battle",
+		name: "[Gen 6] Random",
 
 		team: 'random',
 		ruleset: ['PotD', 'Pokemon', 'Sleep Clause Mod', 'HP Percentage Mod', 'Cancel Mod', 'Team Preview'],
@@ -2838,7 +2838,7 @@ exports.Formats = [
 		requirePentagon: true,
 	},
 	{
-		name: "[Gen 6] Random Doubles Battle",
+		name: "[Gen 6] Doubles Random",
 
 		gameType: 'doubles',
 		team: 'random',
@@ -2846,7 +2846,7 @@ exports.Formats = [
 		ruleset: ['[Gen 7] Random'],
 	},
 	{
-		name: "[Gen 6] Random Triples Battle",
+		name: "[Gen 6] Triples Random",
 
 		gameType: 'triples',
 		team: 'random',
@@ -2979,7 +2979,7 @@ exports.Formats = [
 		banlist: ['Dark Void', 'Sky Drop'],
 	},
 	{
-		name: "[Gen 5] Random Battle",
+		name: "[Gen 5] Random",
 
 		mod: 'gen5',
 		team: 'random',
@@ -3178,7 +3178,7 @@ exports.Formats = [
 		ruleset: ['Pokemon', 'Standard'],
 	},
 	{
-		name: "[Gen 2] Random Battle",
+		name: "[Gen 2] Random",
 
 		mod: 'gen2',
 		team: 'random',
@@ -3226,7 +3226,7 @@ exports.Formats = [
 		],
 	},
 	{
-		name: "[Gen 1] Random Battle",
+		name: "[Gen 1] Random",
 
 		mod: 'gen1',
 		team: 'random',
