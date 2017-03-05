@@ -622,11 +622,13 @@ class CommandContext {
 			}
 
 			if (room) {
-				let normalized = message.trim();
-				if (room.id === 'lobby' && (normalized === user.lastMessage) &&
-						((Date.now() - user.lastMessageTime) < MESSAGE_COOLDOWN)) {
-					this.errorReply("You can't send the same message again so soon.");
-					return false;
+				if (user.group === ' ' || user.group === '\u2605' || user.group === '\u2606') {
+					let normalized = message.trim();
+					if (room.id === 'lobby' && (normalized === user.lastMessage) &&
+							((Date.now() - user.lastMessageTime) < MESSAGE_COOLDOWN)) {
+						this.errorReply("You can't send the same message again so soon.");
+						return false;
+					}
 				}
 				user.lastMessage = message;
 				user.lastMessageTime = Date.now();

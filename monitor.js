@@ -115,8 +115,8 @@ const Monitor = module.exports = {
 	 */
 	countPrepBattle: function (ip, connection) {
 		let count = this.battlePreps.increment(ip, 3 * 60 * 1000)[0];
-		if (count > 12) {
-			connection.popup(`Due to high load, you are limited to 12 battles and team validations every 3 minutes.`);
+		if (count > 24) {
+			connection.popup(`Due to high load, you are limited to 24 battles and team validations every 3 minutes.`);
 			return true;
 		}
 	},
