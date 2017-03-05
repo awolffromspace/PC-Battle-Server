@@ -243,12 +243,6 @@ exports.Formats = [
 		ruleset: ['Pokemon', 'Sleep Clause Mod', 'HP Percentage Mod', 'Cancel Mod', 'Team Preview'],
 	},
 	{
-		name: "Battle Factory",
-
-		team: 'randomFactory',
-		ruleset: ['Pokemon', 'Sleep Clause Mod', 'Team Preview', 'HP Percentage Mod', 'Cancel Mod', 'Mega Rayquaza Clause'],
-	},
-	{
 		name: "[Gen 7] 1v1 Random",
 
 		mod: 'gen7',
@@ -398,7 +392,61 @@ exports.Formats = [
 		ruleset: ['[Gen 7] Random (no PotD)'],
 	},
 	{
-		name: "Super Staff Bros. Melee",
+		name: "[Gen 7] Hackmons Cup",
+		desc: ["Randomized teams of level-balanced Pok&eacute;mon with absolutely any ability, moves, and item."],
+
+		mod: 'gen7',
+		team: 'randomHC',
+		ruleset: ['[Gen 7] Random (no PotD)'],
+	},
+	{
+		name: "[Gen 7] Challenge Cup",
+
+		mod: 'gen7',
+		team: 'randomCC',
+		ruleset: ['[Gen 7] Random (no PotD)'],
+	},
+	{
+		name: "[Gen 7] 1v1 Challenge Cup",
+
+		mod: 'gen7',
+		team: 'randomCC',
+		teamLength: {
+			battle: 1,
+		},
+		ruleset: ['[Gen 7] Random (no PotD)'],
+	},
+	{
+		name: "[Gen 7] Doubles Random",
+
+		mod: 'gen7',
+		gameType: 'doubles',
+		team: 'random',
+		ruleset: ['[Gen 7] Random'],
+	},
+	{
+		name: "[Gen 7] Doubles Hackmons Cup",
+
+		mod: 'gen7',
+		gameType: 'doubles',
+		team: 'randomHC',
+		searchShow: false,
+		ruleset: ['[Gen 7] Random (no PotD)'],
+	},
+	{
+		name: "[Gen 6] Random",
+
+		team: 'random',
+		ruleset: ['[Gen 7] Random (no PotD)'],
+	},
+	{
+		name: "[Gen 6] Battle Factory",
+
+		team: 'randomFactory',
+		ruleset: ['[Gen 7] Random (no PotD)', 'Mega Rayquaza Clause'],
+	},
+	{
+		name: "[Gen 6] Super Staff Bros. Melee",
 
 		mod: 'staffbrosmelee',
 		team: 'randomSeasonalMelee',
@@ -1790,54 +1838,56 @@ exports.Formats = [
 		},
 	},
 	{
-		name: "[Gen 7] Hackmons Cup",
-		desc: ["Randomized teams of level-balanced Pok&eacute;mon with absolutely any ability, moves, and item."],
+		name: "[Gen 6] Doubles Random",
 
-		mod: 'gen7',
-		team: 'randomHC',
-		ruleset: ['[Gen 7] Random (no PotD)'],
-	},
-	{
-		name: "[Gen 7] Challenge Cup",
-
-		mod: 'gen7',
-		team: 'randomCC',
-		ruleset: ['[Gen 7] Random (no PotD)'],
-	},
-	{
-		name: "[Gen 7] 1v1 Challenge Cup",
-
-		mod: 'gen7',
-		team: 'randomCC',
-		teamLength: {
-			battle: 1,
-		},
-		ruleset: ['[Gen 7] Random (no PotD)'],
-	},
-	{
-		name: "[Gen 7] Doubles Random",
-
-		mod: 'gen7',
 		gameType: 'doubles',
+		team: 'random',
+		searchShow: false,
+		ruleset: ['[Gen 7] Random'],
+	},
+	{
+		name: "[Gen 6] Triples Random",
+
+		gameType: 'triples',
 		team: 'random',
 		ruleset: ['[Gen 7] Random'],
 	},
 	{
-		name: "[Gen 7] Doubles Hackmons Cup",
-
-		mod: 'gen7',
-		gameType: 'doubles',
-		team: 'randomHC',
-		searchShow: false,
-		ruleset: ['[Gen 7] Random (no PotD)'],
-	},
-	{
-		name: "Triples Hackmons Cup",
+		name: "[Gen 6] Triples Hackmons Cup",
 
 		gameType: 'triples',
 		team: 'randomHC',
 		searchShow: false,
 		ruleset: ['[Gen 7] Random (no PotD)'],
+	},
+	{
+		name: "[Gen 5] Random",
+
+		mod: 'gen5',
+		team: 'random',
+		ruleset: ['[Gen 7] Random'],
+	},
+	{
+		name: "[Gen 2] Random",
+
+		mod: 'gen2',
+		team: 'random',
+		ruleset: ['Pokemon', 'Sleep Clause Mod', 'HP Percentage Mod', 'Cancel Mod'],
+	},
+	{
+		name: "[Gen 1] Random",
+
+		mod: 'gen1',
+		team: 'random',
+		ruleset: ['[Gen 2] Random', 'Freeze Clause Mod'],
+	},
+	{
+		name: "[Gen 1] Challenge Cup",
+
+		mod: 'gen1',
+		team: 'randomCC',
+		searchShow: false,
+		ruleset: ['[Gen 2] Random', 'Freeze Clause Mod'],
 	},
 
 	// Other Metagames
@@ -2288,13 +2338,6 @@ exports.Formats = [
 		ruleset: ['Pokemon', 'Standard NEXT', 'Team Preview'],
 		banlist: ['Uber'],
 	},
-	{
-		name: "XY OU",
-
-		mod: 'xy',
-		ruleset: ['Pokemon', 'Standard', 'Team Preview', 'Swagger Clause', 'Baton Pass Clause'],
-		banlist: ['Uber', 'Shadow Tag', 'Soul Dew', 'Pikachu-Cosplay', 'Pikachu-Rock-Star', 'Pikachu-Belle', 'Pikachu-Pop-Star', 'Pikachu-PhD', 'Pikachu-Libre', 'Hoopa', 'Hoopa-Unbound', 'Volcanion', 'Altarianite', 'Audinite', 'Beedrillite', 'Cameruptite', 'Diancite', 'Galladite', 'Glalitite', 'Latiasite', 'Latiosite', 'Lopunnite', 'Metagrossite', 'Pidgeotite', 'Sablenite', 'Sceptilite', 'Sharpedonite', 'Slowbronite', 'Steelixite', 'Swamperite'],
-	},
 
 	// RoA Spotlight
 	///////////////////////////////////////////////////////////////////
@@ -2454,10 +2497,11 @@ exports.Formats = [
 		},
 	},
 	{
-		name: "[Gen 6] Random",
+		name: "[Gen 6] XY OU",
 
-		team: 'random',
-		ruleset: ['PotD', 'Pokemon', 'Sleep Clause Mod', 'HP Percentage Mod', 'Cancel Mod', 'Team Preview'],
+		mod: 'xy',
+		ruleset: ['Pokemon', 'Standard', 'Team Preview', 'Swagger Clause', 'Baton Pass Clause'],
+		banlist: ['Uber', 'Shadow Tag', 'Soul Dew', 'Pikachu-Cosplay', 'Pikachu-Rock-Star', 'Pikachu-Belle', 'Pikachu-Pop-Star', 'Pikachu-PhD', 'Pikachu-Libre', 'Hoopa', 'Hoopa-Unbound', 'Volcanion', 'Altarianite', 'Audinite', 'Beedrillite', 'Cameruptite', 'Diancite', 'Galladite', 'Glalitite', 'Latiasite', 'Latiosite', 'Lopunnite', 'Metagrossite', 'Pidgeotite', 'Sablenite', 'Sceptilite', 'Sharpedonite', 'Slowbronite', 'Steelixite', 'Swamperite'],
 	},
 	{
 		name: "Custom Game",
@@ -2561,21 +2605,6 @@ exports.Formats = [
 		},
 		ruleset: ['Pokemon', 'Standard GBU', 'Team Preview'],
 		requirePentagon: true,
-	},
-	{
-		name: "[Gen 6] Doubles Random",
-
-		gameType: 'doubles',
-		team: 'random',
-		searchShow: false,
-		ruleset: ['[Gen 7] Random'],
-	},
-	{
-		name: "[Gen 6] Triples Random",
-
-		gameType: 'triples',
-		team: 'random',
-		ruleset: ['[Gen 7] Random'],
 	},
 	{
 		name: "Doubles Custom Game",
@@ -2702,13 +2731,6 @@ exports.Formats = [
 		},
 		ruleset: ['Pokemon', 'Standard GBU', 'Team Preview'],
 		banlist: ['Dark Void', 'Sky Drop'],
-	},
-	{
-		name: "[Gen 5] Random",
-
-		mod: 'gen5',
-		team: 'random',
-		ruleset: ['[Gen 7] Random'],
 	},
 	{
 		name: "[Gen 5] Custom Game",
@@ -2903,13 +2925,6 @@ exports.Formats = [
 		ruleset: ['Pokemon', 'Standard'],
 	},
 	{
-		name: "[Gen 2] Random",
-
-		mod: 'gen2',
-		team: 'random',
-		ruleset: ['Pokemon', 'Standard'],
-	},
-	{
 		name: "[Gen 2] Custom Game",
 
 		mod: 'gen2',
@@ -2949,21 +2964,6 @@ exports.Formats = [
 			'Nidoking + Fury Attack + Thrash', 'Exeggutor + Poison Powder + Stomp', 'Exeggutor + Sleep Powder + Stomp',
 			'Exeggutor + Stun Spore + Stomp', 'Jolteon + Focus Energy + Thunder Shock', 'Flareon + Focus Energy + Ember',
 		],
-	},
-	{
-		name: "[Gen 1] Random",
-
-		mod: 'gen1',
-		team: 'random',
-		ruleset: ['Pokemon', 'Sleep Clause Mod', 'Freeze Clause Mod', 'HP Percentage Mod', 'Cancel Mod'],
-	},
-	{
-		name: "[Gen 1] Challenge Cup",
-
-		mod: 'gen1',
-		team: 'randomCC',
-		challengeShow: false,
-		ruleset: ['Pokemon', 'Sleep Clause Mod', 'Freeze Clause Mod', 'HP Percentage Mod', 'Cancel Mod'],
 	},
 	{
 		name: "[Gen 1] Stadium",
