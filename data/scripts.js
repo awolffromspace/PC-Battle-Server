@@ -4789,6 +4789,12 @@ exports.BattleScripts = {
 			} else if (template.species === 'Gengar') {
 				set.item = 'Life Orb';
 				set.moves = ['Shadow Ball', 'Sludge Wave', 'Focus Blast', 'Thunderbolt'];
+			} else if (template.species === 'Latias') {
+				set.item = 'Soul Dew';
+				set.moves = ['Draco Meteor', 'Psyshock', 'Healing Wish', 'Defog'];
+			} else if (template.species === 'Latios') {
+				set.item = 'Life Orb';
+				set.moves = ['Draco Meteor', 'Psyshock', 'Recover', 'Hidden Power Fire'];
 			} else if (template.species === 'Lucario') {
 				set.item = 'Life Orb';
 				set.moves = ['Close Combat', 'Swords Dance', 'Extreme Speed', 'Iron Tail'];
@@ -4811,6 +4817,12 @@ exports.BattleScripts = {
 				set.item = 'Slowbronite';
 				set.moves = ['Scald', 'Psyshock', 'Slack Off', 'Calm Mind'];
 				teamDetails['megaStone'] = 1;
+			} else if (template.species === 'Swampert') {
+				set.item = 'Leftovers';
+				set.moves = ['Stealth Rock', 'Earthquake', 'Scald', 'Toxic'];
+			} else if (template.species === 'Tyranitar') {
+				set.item = 'Choice Band';
+				set.moves = ['Stone Edge', 'Crunch', 'Pursuit', 'Superpower'];
 			} else if (template.species === 'Venusaur') {
 				set.item = 'Venusaurite';
 				set.moves = ['Giga Drain', 'Sludge Bomb', 'Synthesis', 'Hidden Power Fire'];
@@ -4949,6 +4961,7 @@ exports.BattleScripts = {
 				set.moves = ['Stone Edge', 'Earthquake', 'Pursuit', 'Aerial Ace'];
 			} else if (template.species === 'Aggron') {
 				set.item = 'Choice Band';
+				set.ability = 'Rock Head';
 				set.moves = ['Head Smash', 'Heavy Slam', 'Superpower', 'Ice Punch'];
 			} else if (template.species === 'Altaria') {
 				set.item = 'Life Orb';
@@ -4956,12 +4969,21 @@ exports.BattleScripts = {
 			} else if (template.species === 'Ampharos') {
 				set.item = 'Leftovers';
 				set.moves = ['Heal Bell', 'Volt Switch', 'Hidden Power Ice', 'Focus Blast'];
+			} else if (template.species === 'Audino') {
+				set.item = 'Leftovers';
+				set.moves = ['Wish', 'Protect', 'Knock Off', 'Encore'];
+			} else if (template.species === 'Banette') {
+				set.item = 'Life Orb';
+				set.moves = ['Shadow Claw', 'Sucker Punch', 'Dazzling Gleam', 'Knock Off'];
 			} else if (template.species === 'Beedrill') {
 				set.item = 'Focus Sash';
 				set.moves = ['Toxic Spikes', 'Endeavor', 'X-Scissor', 'Tailwind'];
 			} else if (template.species === 'Blastoise') {
 				set.item = 'Leftovers';
 				set.moves = ['Scald', 'Rapid Spin', 'Toxic', 'Refresh'];
+			} else if (template.species === 'Camerupt') {
+				set.item = 'Choice Specs';
+				set.moves = ['Eruption', 'Fire Blast', 'Earth Power', 'Hidden Power Ice'];
 			} else if (template.species === 'Charizard') {
 				set.item = 'Life Orb';
 				set.moves = ['Fire Blast', 'Air Slash', 'Hidden Power Grass', 'Roost'];
@@ -4987,6 +5009,7 @@ exports.BattleScripts = {
 				set.moves = ['Fake Out', 'Double-Edge', 'Sucker Punch', 'Earthquake'];
 			} else if (template.species === 'Lopunny') {
 				set.item = 'Flame Orb';
+				set.ability = 'Klutz';
 				set.moves = ['Switcheroo', 'Healing Wish', 'Return', 'High Jump Kick'];
 			} else if (template.species === 'Manectric') {
 				set.item = 'Life Orb';
@@ -5150,7 +5173,10 @@ exports.BattleScripts = {
 
 			let set = this[this.gameType === 'singles' ? 'randomSet' : 'randomDoublesSet'](template, pokemon.length, teamDetails);
 
-			if (template.species === 'Gengar') {
+			if (template.species === 'Blaziken') {
+				set.item = 'Life Orb';
+				set.moves = ['Flare Blitz', 'Swords Dance', 'High Jump Kick', 'Stone Edge'];
+			} else if (template.species === 'Gengar') {
 				set.item = 'Gengarite';
 				set.moves = ['Taunt', 'Destiny Bond', 'Focus Blast', 'Shadow Ball'];
 				teamDetails['megaStone'] = 1;
@@ -5162,9 +5188,12 @@ exports.BattleScripts = {
 				set.item = 'Lucarionite';
 				set.moves = ['Swords Dance', 'Close Combat', 'Bullet Punch', 'Iron Tail'];
 				teamDetails['megaStone'] = 1;
+			} else if (template.species === 'Mewtwo') {
+				set.item = 'Life Orb';
+				set.moves = ['Psystrike', 'Focus Blast', 'Ice Beam', 'Fire Blast'];
 			} else if (template.species === 'Salamence') {
 				set.item = 'Salamencite';
-				set.moves = ['Dragon Dance', 'Double-Edge', 'Roost', 'Facade'];
+				set.moves = ['Dragon Dance', 'Double-Edge', 'Roost', 'Earthquake'];
 				teamDetails['megaStone'] = 1;
 			}
 
@@ -5360,8 +5389,7 @@ exports.BattleScripts = {
 				if (template.battleOnly) types = this.getTemplate(template.baseSpecies).types;
 				if (types.indexOf(type) < 0) continue;
 			}
-			let generations = template.gen;
-			if (template.gen <= this.gen && !template.isMega && !template.isPrimal && !template.isNonstandard && template.randomBattleMoves && generations === generation) {
+			if (template.gen === generation && !template.isMega && !template.isPrimal && !template.isNonstandard && template.randomBattleMoves) {
 				pokemonPool.push(id);
 			}
 		}
@@ -5514,8 +5542,7 @@ exports.BattleScripts = {
 				if (template.battleOnly) types = this.getTemplate(template.baseSpecies).types;
 				if (types.indexOf(type) < 0) continue;
 			}
-			let generations = template.gen;
-			if (template.gen <= this.gen && !template.isMega && !template.isPrimal && !template.isNonstandard && template.randomBattleMoves && generations === 1) {
+			if (template.gen === 1 && !template.isMega && !template.isPrimal && !template.isNonstandard && template.randomBattleMoves) {
 				pokemonPool.push(id);
 			}
 		}
@@ -5668,8 +5695,7 @@ exports.BattleScripts = {
 				if (template.battleOnly) types = this.getTemplate(template.baseSpecies).types;
 				if (types.indexOf(type) < 0) continue;
 			}
-			let generations = template.gen;
-			if (template.gen <= this.gen && !template.isMega && !template.isPrimal && !template.isNonstandard && template.randomBattleMoves && generations === 2) {
+			if (template.gen === 2 && !template.isMega && !template.isPrimal && !template.isNonstandard && template.randomBattleMoves) {
 				pokemonPool.push(id);
 			}
 		}
@@ -5822,8 +5848,7 @@ exports.BattleScripts = {
 				if (template.battleOnly) types = this.getTemplate(template.baseSpecies).types;
 				if (types.indexOf(type) < 0) continue;
 			}
-			let generations = template.gen;
-			if (template.gen <= this.gen && !template.isMega && !template.isPrimal && !template.isNonstandard && template.randomBattleMoves && generations === 3) {
+			if (template.gen === 3 && !template.isMega && !template.isPrimal && !template.isNonstandard && template.randomBattleMoves) {
 				pokemonPool.push(id);
 			}
 		}
@@ -5976,8 +6001,7 @@ exports.BattleScripts = {
 				if (template.battleOnly) types = this.getTemplate(template.baseSpecies).types;
 				if (types.indexOf(type) < 0) continue;
 			}
-			let generations = template.gen;
-			if (template.gen <= this.gen && !template.isMega && !template.isPrimal && !template.isNonstandard && template.randomBattleMoves && generations === 4) {
+			if (template.gen === 4 && !template.isMega && !template.isPrimal && !template.isNonstandard && template.randomBattleMoves) {
 				pokemonPool.push(id);
 			}
 		}
@@ -6130,8 +6154,7 @@ exports.BattleScripts = {
 				if (template.battleOnly) types = this.getTemplate(template.baseSpecies).types;
 				if (types.indexOf(type) < 0) continue;
 			}
-			let generations = template.gen;
-			if (template.gen <= this.gen && !template.isMega && !template.isPrimal && !template.isNonstandard && template.randomBattleMoves && generations === 5) {
+			if (template.gen === 5 && !template.isMega && !template.isPrimal && !template.isNonstandard && template.randomBattleMoves) {
 				pokemonPool.push(id);
 			}
 		}
@@ -6284,8 +6307,7 @@ exports.BattleScripts = {
 				if (template.battleOnly) types = this.getTemplate(template.baseSpecies).types;
 				if (types.indexOf(type) < 0) continue;
 			}
-			let generations = template.gen;
-			if (template.gen <= this.gen && !template.isMega && !template.isPrimal && !template.isNonstandard && template.randomBattleMoves && generations === 6) {
+			if (template.gen === 6 && !template.isMega && !template.isPrimal && !template.isNonstandard && template.randomBattleMoves) {
 				pokemonPool.push(id);
 			}
 		}
@@ -6438,8 +6460,7 @@ exports.BattleScripts = {
 				if (template.battleOnly) types = this.getTemplate(template.baseSpecies).types;
 				if (types.indexOf(type) < 0) continue;
 			}
-			let generations = template.gen;
-			if (template.gen <= this.gen && !template.isMega && !template.isPrimal && !template.isNonstandard && template.randomBattleMoves && generations === 7) {
+			if (template.gen === 7 && !template.isMega && !template.isPrimal && !template.isNonstandard && template.randomBattleMoves) {
 				pokemonPool.push(id);
 			}
 		}
