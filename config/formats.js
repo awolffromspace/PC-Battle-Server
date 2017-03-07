@@ -11,7 +11,7 @@ exports.Formats = [
 		section: "SM Singles",
 	},
 	{
-		name: "[LotW 29] [Gen 7] VGC 2017",
+		name: "[LotW 29] VGC 2017",
 		desc: ["&bullet; <a href=\"https://www.smogon.com/forums/threads/3583926/\">VGC 2017 Discussion</a>"],
 
 		mod: 'gen7',
