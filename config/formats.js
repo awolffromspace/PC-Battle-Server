@@ -267,7 +267,7 @@ exports.Formats = [
 		teamLength: {
 			battle: 1
 		},
-		team: 'random',
+		team: 'randomNoPotD',
 		ruleset: ['[Gen 7] Random (no PotD)'],
 	},
 	{
@@ -554,7 +554,7 @@ exports.Formats = [
 				}
 			}
 			if (!this.shownTip) {
-				this.add('raw|<div class=\"broadcast-green\">Huh? But what do all these weird moves do??<br><b>Protip: Refer to the <a href="https://github.com/Zarel/Pokemon-Showdown/blob/master/mods/seasonal/README.md">PLAYER\'S MANUAL</a>!</b></div>');
+				this.add('raw|<div class=\"broadcast-green\">Huh? But what do all these weird moves do??<br><b>Protip: Refer to the <a href="https://github.com/awolffromspace/PC-Battle-Server/blob/master/mods/staffbrosmelee/README.md">PLAYER\'S MANUAL</a>!</b></div>');
 				this.shownTip = true;
 			}
 		},

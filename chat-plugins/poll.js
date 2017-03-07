@@ -379,18 +379,18 @@ exports.commands = {
 	tournamentpoll: 'tourpoll',
 	tourneypoll: 'tourpoll',
 	tourpoll: function (target, room, user) {
-		const formats = ['[Gen 7] Pokebank OU', '[Gen 7] Pokebank Ubers', '[Gen 7] Pokebank LC', '[Gen 6] OU', '[Gen 6] Monotype', 'Random', 'Battle Factory', '1v1 Random', 'High Tier Random', 'Low Tier Random', 'Uber Random', 'LC Random', 'Monotype Random', 'Generational Random', 'Color Random', 'Inverse Random', 'Community Random', 'Metronome 3v3 Random', 'Super Staff Bros. Melee', 'Hackmons Cup', 'Doubles Random', '[Gen 6] Random', '[Gen 5] Random', '[Gen 2] Random', '[Gen 1] Random'];
+		const formats = ['OU', 'Ubers', 'UU', 'RU', 'LC', 'VGC', 'Monotype', 'Random', '1v1 Random', 'High Tier Random', 'Low Tier Random', 'Uber Random', 'LC Random', 'Monotype Random', 'Generational Random', 'Kanto Random', 'Johto Random', 'Hoenn Random', 'Sinnoh Random', 'Unova Random', 'Kalos Random', 'Alola Random', 'Color Random', 'Inverse Random', 'Orb Random', 'Metronome 3v3 Random', 'Hackmons Cup', '[Gen 6] Battle Factory', '[Gen 5] Random', '[Gen 2] Random', '[Gen 1] Random'];
 		this.parse('/poll new Tournament format?, ' + formats);
 	},
 	teampoll: function (target, room, user) {
-		const formats = ['[Gen 7] Pokebank OU', '[Gen 7] Pokebank Ubers', '[Gen 7] Pokebank LC', '[Gen 6] OU', '[Gen 6] Ubers', '[Gen 6] UU', '[Gen 6] RU', '[Gen 6] NU', '[Gen 6] PU', 'VGC 2016', '[Gen 6] Monotype'];
+		const formats = ['OU', 'Ubers', 'UU', 'RU', 'LC', 'VGC', 'Monotype'];
 		this.parse('/poll new Tournament format?, ' + formats);
 	},
 	randbatpoll: 'randompoll',
 	randbatspoll: 'randompoll',
 	randpoll: 'randompoll',
 	randompoll: function (target, room, user) {
-		const formats = ['Random', 'Battle Factory', '1v1 Random', 'High Tier Random', 'Low Tier Random', 'Uber Random', 'LC Random', 'Monotype Random', 'Generational Random', 'Kanto Random', 'Johto Random', 'Hoenn Random', 'Hoenn Weather Random', 'Sinnoh Random', 'Unova Random', 'Kalos Random', 'Color Random', 'Inverse Random', 'Community Random', 'Super Smash Bros. Random', 'Orb Random', 'Metronome 3v3 Random', 'Super Staff Bros. Melee', 'Hackmons Cup', 'Doubles Random', 'Triples Random', '[Gen 6] Random', '[Gen 5] Random', '[Gen 2] Random', '[Gen 1] Random'];
+		const formats = ['Random', '1v1 Random', 'High Tier Random', 'Low Tier Random', 'Uber Random', 'LC Random', 'Monotype Random', 'Generational Random', 'Kanto Random', 'Johto Random', 'Hoenn Random', 'Sinnoh Random', 'Unova Random', 'Kalos Random', 'Alola Random', 'Color Random', 'Inverse Random', 'Orb Random', 'Metronome 3v3 Random', 'Hackmons Cup', '[Gen 6] Battle Factory', '[Gen 5] Random', '[Gen 2] Random', '[Gen 1] Random'];
 		this.parse('/poll new Tournament format?, ' + formats);
 	},
 	vote: function (target, room, user) {
