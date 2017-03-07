@@ -879,7 +879,7 @@ exports.commands = {
 			}
 			return;
 		}
-		if (!this.can('roommod', null, room)) return false;
+		if (!this.can('declare', null, room)) return false;
 		if (target === 'off' || target === 'disable' || target === 'delete') return this.errorReply('Did you mean "/deleteroomintro"?');
 		target = this.canHTML(target);
 		if (!target) return;
