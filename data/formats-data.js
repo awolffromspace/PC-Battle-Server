@@ -5213,6 +5213,8 @@ exports.BattleFormatsData = {
 		tier: "UU",
 	},
 	keldeoresolute: {
+		randomBattleMoves: ["hydropump", "secretsword", "calmmind", "hiddenpowerflying", "hiddenpowerelectric", "substitute", "scald", "icywind"],
+		randomDoubleBattleMoves: ["hydropump", "secretsword", "protect", "hiddenpowerflying", "hiddenpowerelectric", "substitute", "surf", "icywind", "taunt"],
 		eventOnly: true,
 		requiredMove: "Secret Sword",
 	},
