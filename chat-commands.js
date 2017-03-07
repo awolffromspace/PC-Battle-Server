@@ -1220,10 +1220,8 @@ exports.commands = {
 		connection.popup(buffer.join("\n\n"));
 	},
 
-	rb: 'ban',
-	roomban: 'ban',
-	b: 'ban',
-	ban: function (target, room, user, connection) {
+	rb: 'roomban',
+	roomban: function (target, room, user, connection) {
 		if (!target) return this.parse('/help ban');
 		if (!this.canTalk()) return;
 
