@@ -714,10 +714,6 @@ class CommandContext {
 			this.errorReply('If you just want to link to a room, you can do this: <a href="/roomid"><button>button contents</button></a>');
 			return false;
 		}
-		if (/>here.?</i.test(html) || /click here/i.test(html)) {
-			this.errorReply('Do not use "click here"');
-			return false;
-		}
 
 		// check for mismatched tags
 		let tags = html.toLowerCase().match(/<\/?(div|a|button|b|strong|em|i|u|center|font|marquee|blink|details|summary|code)\b/g);
