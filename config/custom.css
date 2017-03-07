@@ -1,8 +1,8 @@
 html,body{margin:0;padding:0}body{background:#07508b url("http://cbc.pokecommunity.com/config/backgrounds/popplio.png") no-repeat fixed left top}
 .mainmenufooter a{color:#f2f2f2}
 .mainmenufooter a:hover{color:white}
-.menugroup .button{color:white;background:#262626!important;border:solid 1px black!important}
-.menugroup .button:hover,.menugroup .button:active{color:white;background:#1a1a1a!important;border:solid 1px black!important}
+.menugroup .button{color:white;background:#2e2e2e!important;border:solid 1px black!important}
+.menugroup .button:hover,.menugroup .button:active{color:white;background:#212121!important;border:solid 1px black!important}
 .mainmenu .menugroup:nth-child(1) .button.disabled,.mainmenu .menugroup:nth-child(1) .button.disabled:hover,.mainmenu .menugroup:nth-child(1) .button.disabled:active{color:white!important}
 .userlist li button:hover{background:rgba(220,228,236,0.4)}
 .userlist li button:active{background:rgba(204,212,220,0.4)}
