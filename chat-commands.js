@@ -1274,9 +1274,8 @@ exports.commands = {
 	},
 	banhelp: ["/roomban [username], [reason] - Bans the user from the room you are in. Requires: @ # & ~"],
 
-	unroomban: 'unban',
-	roomunban: 'unban',
-	unban: function (target, room, user, connection) {
+	unroomban: 'roomunban',
+	roomunban: function (target, room, user, connection) {
 		if (!target) return this.parse('/help unban');
 		if (!this.can('ban', null, room)) return false;
 
