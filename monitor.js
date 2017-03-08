@@ -25,6 +25,15 @@ class TimedCounter extends Map {
 	}
 }
 
+// Config.loglevel is:
+// 0 = everything
+// 1 = debug (same as 0 for now)
+// 2 = notice (default)
+// 3 = warning
+// (4 is currently unused)
+// 5 = supposedly completely silent, but for now a lot of PS output doesn't respect loglevel
+if (Config.loglevel === undefined) Config.loglevel = 2;
+
 const Monitor = module.exports = {
 
 	/*********************************************************
@@ -50,13 +59,13 @@ const Monitor = module.exports = {
 		}
 	},
 	debug: function (text) {
-		// console.log(text);
+		if (Config.loglevel <= 1) console.log(text);
 	},
 	warn: function (text) {
-		console.log(text);
+		if (Config.loglevel <= 3) console.log(text);
 	},
 	notice: function (text) {
-		console.log(text);
+		if (Config.loglevel <= 2) console.log(text);
 	},
 
 	/*********************************************************
@@ -115,8 +124,9 @@ const Monitor = module.exports = {
 	 */
 	countPrepBattle: function (ip, connection) {
 		let count = this.battlePreps.increment(ip, 3 * 60 * 1000)[0];
-		if (count > 24) {
-			connection.popup(`Due to high load, you are limited to 24 battles and team validations every 3 minutes.`);
+		if (count > 25) {
+			if (Punishments.sharedIps.has(ip) && count < 120) return;
+			connection.popup(`Due to high load, you are limited to 25 battles and team validations every 3 minutes.`);
 			return true;
 		}
 	},
