@@ -3058,7 +3058,7 @@ exports.commands = {
 		}
 		if (!this.can('joinbattle', null, room)) return;
 
-		room.auth[targetUser.userid] = '\u2606';
+		room.auth[targetUser.userid] = '-';
 		this.addModCommand("" + name + " was promoted to Player by " + user.name + ".");
 	},
 	addplayerhelp: ["/addplayer [username] - Allow the specified user to join the battle as a player."],

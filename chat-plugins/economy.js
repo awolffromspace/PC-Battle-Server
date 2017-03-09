@@ -6,7 +6,7 @@ let path = require('path');
 
 let shop = [
 	['Star', 'Buy a \u2606 that goes in front of your name and puts you at the top of the user list. It goes away whether you leave for more than one hour or the server restarts.', 1],
-	['BlackStar', 'Buy a \u2605 that goes in front of your name and puts you at the top of the user list. It lasts for four weeks.', 20],
+	['FullStar', 'Buy a \u2605 that goes in front of your name and puts you at the top of the user list. It lasts for four weeks.', 20],
 	['Poof', 'Buy a poof message to be added into your pool of possible poofs. Poofs are custom leave messages that are used via "/poof".', 20],
 	['Adjustment', 'Buy a change for either your avatar or your join phrase. Can only be used once; further changes require additional purchases. Don\'t buy this if you haven\'t bought an avatar or join phrase before. If you have a custom avatar and would like to apply it to other usernames, contact the admin wolf and don\'t buy this.', 30],
 	['Title', 'Buy a user title for your profile. It can be seen via "/profile username". Check "/profile wolf" for an example.', 30],
