@@ -7063,4 +7063,146 @@ exports.BattleScripts = {
 		}
 		return pokemon;
 	},
+	randomSpringTeam: function (side) {
+		let pokemon = [];
+
+		let pokemonPool = [];
+		for (let id in this.data.FormatsData) {
+			let template = this.getTemplate(id);
+			let types = template.types;
+			if (types.indexOf('Grass') < 0 && types.indexOf('Flying') < 0 && types.indexOf('Bug') < 0 && types.indexOf('Fairy') < 0) continue;
+			if (types.indexOf('Ice') >= 0) continue;
+			if (template.gen <= this.gen && !template.isMega && !template.isPrimal && !template.isNonstandard && template.randomBattleMoves) {
+				pokemonPool.push(id);
+			}
+		}
+
+		let typeCount = {};
+		let typeComboCount = {};
+		let baseFormes = {};
+		let uberCount = 0;
+		let puCount = 0;
+		let nfeCount = 0;
+		let teamDetails = {};
+
+		while (pokemonPool.length && pokemon.length < 6) {
+			let template = this.getTemplate(this.sampleNoReplace(pokemonPool));
+			if (!template.exists) continue;
+
+			// Limit to one of each species (Species Clause)
+			if (baseFormes[template.baseSpecies]) continue;
+
+			if (template.species === 'Unown' || template.species === 'Cosmog' || template.species === 'Cosmoem') continue;
+
+			let tier = template.tier;
+			switch (tier) {
+			case 'Uber':
+				// Ubers are limited to 2 but have a 20% chance of being added anyway.
+				if (uberCount > 1 && this.random(5) >= 1) continue;
+				break;
+			case 'PU':
+				// PUs are limited to 1 but have a 20% chance of being added anyway.
+				if (puCount > 0 && this.random(5) >= 1) continue;
+				break;
+			case 'LC Uber':
+			case 'LC':
+			case 'NFE':
+				if (nfeCount > 0) continue;
+				break;
+			case 'Unreleased': case 'CAP':
+				// Unreleased and CAP have 20% the normal rate
+				if (this.random(5) >= 1) continue;
+			}
+
+			// Adjust rate for species with multiple formes
+			switch (template.baseSpecies) {
+			case 'Arceus': case 'Silvally':
+				if (this.random(18) >= 1) continue;
+				break;
+			case 'Pikachu':
+				if (this.random(7) >= 1) continue;
+				continue;
+			case 'Genesect':
+				if (this.random(5) >= 1) continue;
+				break;
+			case 'Castform': case 'Pumpkaboo': case 'Gourgeist': case 'Oricorio':
+				if (this.random(4) >= 1) continue;
+				break;
+			case 'Basculin': case 'Cherrim': case 'Greninja': case 'Hoopa': case 'Meloetta': case 'Meowstic':
+				if (this.random(2) >= 1) continue;
+				break;
+			}
+
+			let types = template.types;
+
+			let set = this[this.gameType === 'singles' ? 'randomSet' : 'randomDoublesSet'](template, pokemon.length, teamDetails);
+
+			if (template.species === 'Tapu Koko') {
+				set.ability = 'Telepathy';
+			} else if (template.species === 'Tapu Lele') {
+				set.ability = 'Telepathy';
+			} else if (template.species === 'Tapu Fini') {
+				set.ability = 'Telepathy';
+			}
+
+			// Illusion shouldn't be the last Pokemon of the team
+			if (set.ability === 'Illusion' && pokemon.length > 4) continue;
+
+			// Pokemon shouldn't have Physical and Special setup on the same set
+			let incompatibleMoves = ['bellydrum', 'swordsdance', 'calmmind', 'nastyplot'];
+			let intersectMoves = set.moves.filter(move => incompatibleMoves.includes(move));
+			if (intersectMoves.length > 1) continue;
+
+			// Limit 1 of any type combination, 2 in monotype
+			let typeCombo = types.slice().sort().join();
+			if (set.ability === 'Drought' || set.ability === 'Drizzle' || set.ability === 'Sand Stream') {
+				// Drought, Drizzle and Sand Stream don't count towards the type combo limit
+				typeCombo = set.ability;
+				if (typeCombo in typeComboCount) continue;
+			} else {
+				if (typeComboCount[typeCombo] >= 1) continue;
+			}
+
+			// Okay, the set passes, add it to our team
+			pokemon.push(set);
+
+			// Now that our Pokemon has passed all checks, we can increment our counters
+			baseFormes[template.baseSpecies] = 1;
+
+			// Increment type counters
+			for (let t = 0; t < types.length; t++) {
+				if (types[t] in typeCount) {
+					typeCount[types[t]]++;
+				} else {
+					typeCount[types[t]] = 1;
+				}
+			}
+			if (typeCombo in typeComboCount) {
+				typeComboCount[typeCombo]++;
+			} else {
+				typeComboCount[typeCombo] = 1;
+			}
+
+			// Increment Uber/PU counters
+			if (tier === 'Uber') {
+				uberCount++;
+			} else if (tier === 'PU') {
+				puCount++;
+			} else if (tier === 'NFE' || tier === 'LC' || tier === 'LC Uber') {
+				nfeCount++;
+			}
+
+			// Team has Mega/weather/hazards
+			let item = this.getItem(set.item);
+			if (item.megaStone) teamDetails['megaStone'] = 1;
+			if (item.zMove) teamDetails['zMove'] = 1;
+			if (set.ability === 'Snow Warning') teamDetails['hail'] = 1;
+			if (set.ability === 'Drizzle' || set.moves.includes('raindance')) teamDetails['rain'] = 1;
+			if (set.ability === 'Sand Stream') teamDetails['sand'] = 1;
+			if (set.moves.includes('stealthrock')) teamDetails['stealthRock'] = 1;
+			if (set.moves.includes('toxicspikes')) teamDetails['toxicSpikes'] = 1;
+			if (set.moves.includes('defog') || set.moves.includes('rapidspin')) teamDetails['hazardClear'] = 1;
+		}
+		return pokemon;
+	},
 };

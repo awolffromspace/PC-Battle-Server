@@ -622,7 +622,7 @@ class CommandContext {
 			}
 
 			if (room) {
-				if (user.group === ' ' || user.group === '\u2605' || user.group === '\u2606') {
+				if (!user.isStaff || !user.group === '+') {
 					let normalized = message.trim();
 					if (room.id === 'lobby' && (normalized === user.lastMessage) &&
 							((Date.now() - user.lastMessageTime) < MESSAGE_COOLDOWN)) {

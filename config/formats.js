@@ -294,6 +294,17 @@ exports.Formats = [
 		ruleset: ['Pokemon', 'Sleep Clause Mod', 'HP Percentage Mod', 'Cancel Mod', 'Team Preview'],
 	},
 	{
+		name: "[Gen 7] Spring Random",
+
+		mod: 'gen7',
+		team: 'randomSpring',
+		ruleset: ['[Gen 7] Random (no PotD)'],
+		onBegin: function() {
+			this.setTerrain('Grassy Terrain');
+			delete this.terrainData.duration;
+		},
+	},
+	{
 		name: "[Gen 7] 1v1 Random",
 
 		mod: 'gen7',
