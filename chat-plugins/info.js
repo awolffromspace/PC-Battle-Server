@@ -1751,7 +1751,7 @@ exports.commands = {
 	 *********************************************************/
 
 	potd: function (target, room, user) {
-		if (!this.can('ban')) return false;
+		if (!this.can('potd')) return false;
 
 		Config.potd = target;
 		Rooms.SimulatorProcess.eval('Config.potd = \'' + toId(target) + '\'');
