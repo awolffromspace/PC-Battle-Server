@@ -732,8 +732,6 @@ exports.grouplist = [
 		roommod: true,
 		roomdriver: true,
 		editroom: true,
-		declare: true,
-		modchatall: true,
 		roomonly: true,
 		tournamentsmanagement: true,
 		gamemanagement: true,
