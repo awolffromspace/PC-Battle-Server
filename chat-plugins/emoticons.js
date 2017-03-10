@@ -193,7 +193,7 @@ let emotes = {
 	':taillow:': 'http://cbc.pokecommunity.com/config/emoticons/taillow.png',
 	':thinkeng:': 'http://cbc.pokecommunity.com/config/emoticons/thinkeng.png',
 	':thonk:': 'http://cbc.pokecommunity.com/config/emoticons/thonk.png',
-	':thonkang:': 'http://cbc.pokecommunity.com/config/emoticons/thonkangpng',
+	':thonkang:': 'http://cbc.pokecommunity.com/config/emoticons/thonkang.png',
 	':thugga:': 'http://cbc.pokecommunity.com/config/emoticons/thugga.png',
 	':torbjorn:': 'http://cbc.pokecommunity.com/config/emoticons/torbjorn.png',
 	':toxic:': 'http://cbc.pokecommunity.com/config/emoticons/toxic.png',
