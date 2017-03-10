@@ -18,7 +18,7 @@ exports.port = 8000;
 exports.serverid = 'pokecommunity';
 
 exports.autoReconnectDelay = 10 * 1000;
-exports.connectionTimeout = 2 * 60 * 1000;
+exports.connectionTimeout = 7 * 24 * 60 * 60 * 1000;
 
 /*
 * Crash Guard
@@ -54,7 +54,7 @@ exports.autoReloginDelay = 60 * 1000;
 * Rooms to join
 */
 
-exports.rooms = ['lobby', 'theshowdowninterviews', 'darkalley', 'kamehouse', 'trl', 'japanese', 'pokmonphoenixrisingmetagame', 'johtoleagueshowdown', , 'pcplayspokkn', 'franais', 'hug', 'portuguese', 'trivia'];
+exports.rooms = ['lobby', 'theshowdowninterviews', 'darkalley', 'kamehouse', 'trl', 'japanese', 'pokmonphoenixrisingmetagame', 'johtoleagueshowdown', 'pcplayspokkn', 'franais', 'hug', 'portuguese', 'trivia'];
 
 /*
 * exports.rooms = 'all'; //For joining all rooms
@@ -241,7 +241,8 @@ exports.moderation = {
 	psServersExcepts: {
 		"showdown": 1,
 		"smogtours": 1,
-		"sim": 1
+		"sim": 1,
+		"pokecommunity": 1
 	},
 
 	zeroToleranceDefaultLevel: 'h',
