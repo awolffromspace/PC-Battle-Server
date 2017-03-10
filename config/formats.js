@@ -62,7 +62,7 @@ exports.Formats = [
 		banlist: ['OU', 'BL', 'Drizzle', 'Power Construct', 'Mewnium Z', 'Baton Pass'],
 	},
 	{
-		name: "[Gen 7] RU (alpha)",
+		name: "[Gen 7] RU (beta)",
 		desc: ["&bullet; <a href=\"https://www.smogon.com/forums/threads/3587352/\">RU Metagame Discussion</a>"],
 
 		mod: 'gen7',
@@ -205,11 +205,22 @@ exports.Formats = [
 
 		mod: 'gen7',
 		gameType: 'doubles',
+		searchShow: false,
 		ruleset: ['Pokemon', 'Standard Doubles', 'Team Preview'],
 		banlist: ['Arceus', 'Dialga', 'Giratina', 'Giratina-Origin', 'Groudon', 'Ho-Oh', 'Kyogre', 'Kyurem-White', 'Lugia',
 			'Lunala', 'Magearna', 'Mewtwo', 'Palkia', 'Rayquaza', 'Reshiram', 'Solgaleo', 'Xerneas', 'Yveltal', 'Zekrom',
 			'Power Construct', 'Eevium Z', 'Dark Void', 'Gravity ++ Grass Whistle', 'Gravity ++ Hypnosis', 'Gravity ++ Lovely Kiss', 'Gravity ++ Sing', 'Gravity ++ Sleep Powder',
 		],
+	},
+	{
+		name: "[Gen 7] Doubles OU (suspect test)",
+		desc: ["&bullet; <a href=\"https://www.smogon.com/forums/threads/3597456/\">np: DOU Stage 1</a>"],
+
+		mod: 'gen7',
+		gameType: 'doubles',
+		challengeShow: false,
+		ruleset: ['[Gen 7] Doubles OU'],
+		banlist: [],
 	},
 	{
 		name: "[Gen 7] Doubles Ubers",
@@ -1967,8 +1978,8 @@ exports.Formats = [
 		],
 
 		mod: 'fullpotential',
-		ruleset: ['[Gen 7] OU'],
-		banlist: ['Dugtrio-Base', 'Pheromosa', 'Shuckle', 'Speed Boost'],
+		ruleset: ['[Gen 7] OU', 'Item Clause'],
+		banlist: ['Dugtrio-Base', 'Pheromosa', 'Shuckle', 'Speed Boost', 'Unburden'],
 	},
 	{
 		name: "[Gen 7] Automagic",
@@ -2075,7 +2086,7 @@ exports.Formats = [
 		],
 	},
 	{
-		name: "[Gen 7] Mix and Mega",
+		name: "[Gen 7] Mix and Mega (suspect test)",
 		desc: [
 			"Mega Stones and Primal Orbs can be used on almost any fully evolved Pok&eacute;mon with no Mega Evolution limit.",
 			"&bullet; <a href=\"https://www.smogon.com/forums/threads/3587740/\">Mix and Mega</a>",
