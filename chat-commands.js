@@ -1587,6 +1587,9 @@ exports.commands = {
 	},
 	unlockhelp: ["/unlock [username] - Unlocks the user. Requires: % @ * & ~"],
 
+	permaban: 'globalban',
+	permanentban: 'globalban',
+	b: 'globalban',
 	ban: 'globalban',
 	forceglobalban: 'globalban',
 	gban: 'globalban',
@@ -1598,9 +1601,6 @@ exports.commands = {
 		if (!targetUser) return this.errorReply("User '" + this.targetUsername + "' not found.");
 		if (target.length > MAX_REASON_LENGTH) {
 			return this.errorReply("The reason is too long. It cannot exceed " + MAX_REASON_LENGTH + " characters.");
-		}
-		if (!target) {
-			return this.errorReply("Global bans require a reason.");
 		}
 		if (!this.can('ban', targetUser)) return false;
 		let name = targetUser.getLastName();
@@ -1615,10 +1615,18 @@ exports.commands = {
 			}
 		});
 
-		targetUser.popup("|modal|" + user.name + " has globally banned you." + (target ? "\n\nReason: " + target : "") + (Config.appealurl ? "\n\nIf you feel that your ban was unjustified, you can appeal:\n" + Config.appealurl : "") + "\n\nYour ban will expire in a few days.");
+		if (cmd.startsWith('permanent') || cmd.startsWith('perma')) {
+			targetUser.popup("|modal|" + user.name + " has globally banned you for an indefinite period of time." + (target ? "\n\nReason: " + target : "") + (Config.appealurl ? "\n\nIf you feel that your ban was unjustified, you can appeal:\n" + Config.appealurl : ""));
+		} else {
+			targetUser.popup("|modal|" + user.name + " has globally banned you." + (target ? "\n\nReason: " + target : "") + (Config.appealurl ? "\n\nIf you feel that your ban was unjustified, you can appeal:\n" + Config.appealurl : "") + "\n\nYour ban will expire in a few days.");
+		}
 
 		let banMessage = "" + name + " was globally banned by " + user.name + "." + (target ? " (" + target + ")" : "");
-		this.addModCommand(banMessage, " (" + targetUser.latestIp + ")");
+		if (cmd.startsWith('permanent') || cmd.startsWith('perma')) {
+			this.addModCommand(banMessage, " (" + targetUser.latestIp + ") (PERMANENT)");
+		} else {
+			this.addModCommand(banMessage, " (" + targetUser.latestIp + ")");
+		}
 
 		// Notify staff room when a user is banned outside of it.
 		if (room.id !== 'staff' && Rooms('staff')) {
@@ -1641,7 +1649,11 @@ exports.commands = {
 
 		this.add('|unlink|hide|' + userid);
 		if (userid !== toId(this.inputUsername)) this.add('|unlink|hide|' + toId(this.inputUsername));
-		Punishments.ban(targetUser, null, null, target);
+		if (cmd.startsWith('permanent') || cmd.startsWith('perma')) {
+			Punishments.permanentBan(targetUser, null, null, target);
+		} else {
+			Punishments.ban(targetUser, null, null, target);
+		}
 		this.globalModlog("BAN", targetUser, " by " + user.name + (target ? ": " + target : ""));
 		return true;
 	},
@@ -1654,15 +1666,45 @@ exports.commands = {
 		if (!this.can('ban')) return false;
 
 		let name = Punishments.unban(target);
+		let permanent = Punishments.permanentUnban(target);
 
 		if (name) {
 			this.addModCommand("" + name + " was globally unbanned by " + user.name + ".");
 			this.globalModlog("UNBAN", name, " by " + user.name);
+		} else if (permanent) {
+			this.addModCommand("" + permanent + " was globally unbanned by " + user.name + ".");
+			this.globalModlog("UNBAN", permanent, " by " + user.name);
 		} else {
 			this.errorReply("User '" + target + "' is not globally banned.");
 		}
 	},
 	unglobalbanhelp: ["/unglobalban [username] - Unban a user. Requires: @ * & ~"],
+
+	offlineban: function (target, room, user, connection, cmd) {
+		if (!target) return this.parse('/help globalban');
+
+		target = this.splitTarget(target);
+		let targetUser = this.targetUser;
+		if (targetUser) return this.errorReply("The target user is online. Please use /permanentban instead.");
+		if (target.length > MAX_REASON_LENGTH) {
+			return this.errorReply("The reason is too long. It cannot exceed " + MAX_REASON_LENGTH + " characters.");
+		}
+		if (!this.can('lockdown')) return false;
+		let name = this.targetUsername;
+		let userid = toId(name);
+
+		let banMessage = "" + name + " was globally banned by " + user.name + "." + (target ? " (" + target + ")" : "");
+		this.privateModCommand(banMessage, " (PERMANENT)");
+
+		// Notify staff room when a user is banned outside of it.
+		if (room.id !== 'staff' && Rooms('staff')) {
+			Rooms('staff').addLogMessage(user, "<<" + room.id + ">> " + banMessage);
+		}
+
+		Punishments.offlineBan(userid, null, null, target);
+		this.globalModlog("BAN", userid, " by " + user.name + (target ? ": " + target : ""));
+		return true;
+	},
 
 	unbanall: function (target, room, user) {
 		if (!this.can('rangeban')) return false;
@@ -2095,9 +2137,6 @@ exports.commands = {
 			return this.errorReply("This user is already blacklisted from this room.");
 		}
 
-		if (!target) {
-			return this.errorReply("Blacklists require a reason.");
-		}
 		if (target.length > MAX_REASON_LENGTH) {
 			return this.errorReply("The reason is too long. It cannot exceed " + MAX_REASON_LENGTH + " characters.");
 		}
