@@ -189,7 +189,7 @@ exports.moderation = {
 		MIN_CAPS_PROPORTION: 0.8,
 
 		MAX_STRETCH: 40,
-		MAX_REPEAT: 20
+		MAX_REPEAT: 10
 	},
 
 	values: {
