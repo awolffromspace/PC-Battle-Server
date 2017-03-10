@@ -241,7 +241,8 @@ exports.moderation = {
 	psServersExcepts: {
 		"showdown": 1,
 		"smogtours": 1,
-		"sim": 1
+		"sim": 1,
+		"pokecommunity": 1
 	},
 
 	zeroToleranceDefaultLevel: 'h',
