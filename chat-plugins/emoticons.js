@@ -191,6 +191,9 @@ let emotes = {
 	':symmetra:': 'http://cbc.pokecommunity.com/config/emoticons/symmetra.png',
 	':taco:': 'http://cbc.pokecommunity.com/config/emoticons/taco.png',
 	':taillow:': 'http://cbc.pokecommunity.com/config/emoticons/taillow.png',
+	':thinkeng:': 'http://cbc.pokecommunity.com/config/emoticons/thinkeng.png',
+	':thonk:': 'http://cbc.pokecommunity.com/config/emoticons/thonk.png',
+	':thonkang:': 'http://cbc.pokecommunity.com/config/emoticons/thonkangpng',
 	':thugga:': 'http://cbc.pokecommunity.com/config/emoticons/thugga.png',
 	':torbjorn:': 'http://cbc.pokecommunity.com/config/emoticons/torbjorn.png',
 	':toxic:': 'http://cbc.pokecommunity.com/config/emoticons/toxic.png',
@@ -343,6 +346,12 @@ function parseEmoticons(message, room, user, pm) {
 			match;
 		if (match === ':symmetra:') return typeof emote != 'undefined' ?
 			'<img src="' + emote + '" title="' + match + '" width="30" height="33"/>' :
+			match;
+		if (match === ':thonk:') return typeof emote != 'undefined' ?
+			'<img src="' + emote + '" title="' + match + '" width="35" height="30"/>' :
+			match;
+		if (match === ':thinkeng:' || match === ':thonkang:') return typeof emote != 'undefined' ?
+			'<img src="' + emote + '" title="' + match + '" width="29" height="30"/>' :
 			match;
 		if (match === ':viper:') return typeof emote != 'undefined' ?
 			'<img src="' + emote + '" title="' + match + '" width="27" height="30"/>' :

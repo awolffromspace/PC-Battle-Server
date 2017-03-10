@@ -1128,20 +1128,19 @@ exports.commands = {
 		this.sendReplyBox(
 			"<b>~ Administrators</b><br />" +
 			"- Achromatic<br />" +
-			"- Aurora (Tyranitar)<br />" +
-			"- Ausaudriel (Audy)<br />" +
-			"- Eleven (Bruxish, Carol's Cookies, Castform, Chase, Chaseform, jellicentfan1, Lаnа Del Phox, Michonne, Negan, Weаther Ball)<br />" +
-			"- Dragon (bellossom, Death by Chansey, Esper Terra, Lailah, Mamori Minamoto, Megumiii, Princess Zelda, Sakura Wars, Terra Branford)<br />" +
-			"- Hiroshi Sotomura<br />" +
+			"- Aurora<br />" +
+			"- Bebop (Audy)<br />" +
+			"- Choice Specs (Choice Specs, Michonne)<br />" +
+			"- Dragon (Aerithhh, Captain Syrup, Esper Terra)<br />" +
 			"- Rukario (PPN)<br />" +
-			"- Sheep (Cirnysheep, janna, jannasheep, mareep)<br />" +
+			"- Sheep (Cirnysheep, mareep)<br />" +
 			"- Sylphiel<br />" +
 			"- wolf (wofl)<br /><br />" +
 			"<b>@ Moderators</b><br />" +
 			"- Christos (sphealosophy)<br />" +
-			"- Noa (maple sugar, Rohan-Sensei, Sunflora)<br />" +
-			"- Omicron (Carousels, Megido, omicorn, omicronhuh, Postcards)<br />" +
-			"- Syndrome (Comme des Garcon, Daddy, Fuck Kevin Durant, King Syn, Morning Bliss, Muhammad Ali, Reaper, Steph Carried, Tracer, Who is Sombra?, Widowmaker)<br /><br />" +
+			"- Noa (Captain Noanoa, Captain Speghatti, sweeeeets)<br />" +
+			"- Omicron (Carousels)<br />" +
+			"- Syndrome<br /><br />" +
 			"<a href=\"http://www.pokecommunity.com/showthread.php?t=289012#staff\">Click here for more details.</a>"
 		);
 	},
