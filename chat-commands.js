@@ -1623,7 +1623,7 @@ exports.commands = {
 
 		let banMessage = "" + name + " was globally banned by " + user.name + "." + (target ? " (" + target + ")" : "");
 		if (cmd.startsWith('permanent') || cmd.startsWith('perma')) {
-			this.addModCommand(banMessage, " (" + targetUser.latestIp + ") (PERMANENT)");
+			this.addModCommand(banMessage, " (" + targetUser.latestIp + ") (permanent)");
 		} else {
 			this.addModCommand(banMessage, " (" + targetUser.latestIp + ")");
 		}
@@ -1693,8 +1693,8 @@ exports.commands = {
 		let name = this.targetUsername;
 		let userid = toId(name);
 
-		let banMessage = "" + name + " was globally banned by " + user.name + "." + (target ? " (" + target + ")" : "");
-		this.privateModCommand(banMessage, " (PERMANENT)");
+		let banMessage = "" + name + " was globally banned by " + user.name + "." + (target ? " (" + target + ")" : " (permanent)");
+		this.privateModCommand(banMessage);
 
 		// Notify staff room when a user is banned outside of it.
 		if (room.id !== 'staff' && Rooms('staff')) {
