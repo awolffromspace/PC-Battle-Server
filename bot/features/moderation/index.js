@@ -112,29 +112,6 @@ function blacklistUser(user, room) {
 	return false;
 }
 
-function isGlobalBanned (user, noregexp) {
-	user = toId(user);
-	if (Settings.settings['gautoban'] && Settings.settings['gautoban'][user]) return true;
-	if (!noregexp && Settings.settings['regexgautoban']) {
-		for (var i in Settings.settings['regexgautoban']) {
-			try {
-				var regexObj = new RegExp(i.substr(1, i.length - 3), 'i');
-				if (regexObj.test(user)) return '#range';
-			} catch (e) {}
-		}
-	}
-	return false;
-}
-
-function blacklistGlobal(user, room) {
-	if (!Settings.settings['gautoban'] || !Settings.settings['gautoban'][user]) {
-		if (!Settings.settings['gautoban']) Settings.settings['gautoban'] = {};
-		Settings.settings['gautoban'][user] = 1;
-		return true;
-	}
-	return false;
-}
-
 function getJoinPhrase (room, user) {
 	user = toId(user);
 	if (Settings.settings['jpdisable'] && Settings.settings['jpdisable'][room]) return false;
@@ -188,8 +165,6 @@ function parseChat (room, time, by, message) {
 	if (Tools.equalOrHigherRank(by, getModException(room))) return;
 	var ban = isBanned(room, by);
 	if (ban) Bot.say(room, '/roomban ' + by + ', ' + trad('ab', room) + ((ban === '#range') ? ' (RegExp)' : ''));
-	var globalBan = isGlobalBanned(by);
-	if (globalBan) Bot.say(room, '/ban ' + by + ', ' + trad('ab', room) + ((globalBan === '#range') ? ' (RegExp)' : ''));
 
 	/* Chat Logs */
 
@@ -496,8 +471,6 @@ function parseJoin (room, by) {
 	if (Tools.equalOrHigherRank(by, Config.moderation.modException)) return;
 	var ban = isBanned(room, by);
 	if (ban) Bot.say(room, '/roomban ' + by + ', ' + trad('ab', room) + ((ban === '#range') ? ' (RegExp)' : ''));
-	var globalBan = isGlobalBanned(by);
-	if (globalBan) Bot.say(room, '/ban ' + by + ', ' + trad('ab', room) + ((globalBan === '#range') ? ' (RegExp)' : ''));
 }
 
 function parseLeave (room, by) {
@@ -511,14 +484,6 @@ function parseRename (room, by, old) {
 		Bot.say(room, '/roomban ' + by + ', ' + trad('ab', room) + ((ban === '#range') ? ' (RegExp)' : ''));
 		if (ban !== '#range' && !isBanned(room, old)) {
 			blacklistUser(room, old); // Blacklist alt
-			SecurityLog.log("User \"" + old + "\" was blacklisted for being alt of \"" + toId(by) + "\" | Room: " + room);
-		}
-	}
-	var globalBan = isGlobalBanned(by);
-	if (globalBan) {
-		Bot.say(room, '/ban ' + by + ', ' + trad('ab', room) + ((globalBan === '#range') ? ' (RegExp)' : ''));
-		if (globalBan !== '#range' && !isGlobalBanned(room, old)) {
-			blacklistGlobal(room, old); // Blacklist alt
 			SecurityLog.log("User \"" + old + "\" was blacklisted for being alt of \"" + toId(by) + "\" | Room: " + room);
 		}
 	}

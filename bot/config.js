@@ -54,7 +54,7 @@ exports.autoReloginDelay = 60 * 1000;
 * Rooms to join
 */
 
-exports.rooms = ['lobby', 'theshowdowninterviews', 'darkalley', 'kamehouse', 'trl', 'japanese', 'pokmonphoenixrisingmetagame', 'johtoleagueshowdown', 'pcplayspokkn', 'franais', 'hug', 'portuguese', 'trivia'];
+exports.rooms = ['lobby', 'theshowdowninterviews', 'darkalley', 'kamehouse', 'trl', 'japanese', 'pokmonphoenixrisingmetagame', 'johtoleagueshowdown', , 'pcplayspokkn', 'franais', 'hug', 'portuguese', 'trivia'];
 
 /*
 * exports.rooms = 'all'; //For joining all rooms
@@ -71,7 +71,7 @@ exports.ignoreRooms = { //Rooms listed here will be ignored by CommandParser (bo
 	//roomid: true
 };
 
-exports.initCmds = []; // Other commands (avatar, blockchallenges, etc)
+exports.initCmds = ['|/avatar 120']; // Other commands (avatar, blockchallenges, etc)
 
 /*
 * Auth configuration
@@ -92,7 +92,7 @@ exports.exceptions = {
 *
 */
 
-exports.ranks = ['\u2605', '+', '=', '%', '@', '*', '-', '&', '#', '~'];
+exports.ranks = ['\u2605', '+', '%', '@', '*', '-', '&', '#', '~'];
 
 exports.globalPermissions = {
 	'voice': '+', //Min rank to broadcast in a server
@@ -112,21 +112,22 @@ exports.defaultPermission = '+';
 
 exports.permissionExceptions = {
 	//command: 'rank'
-	'say': '~',
-	'info': '+',
+	'say': '#',
+	'info': ' ',
 	'wall': '%',
-	'autoban': '~',
-	'gautoban': '~',
-	'banword': '~',
-	'joinphrase': '~',
+	'autoban': '@',
+	'banword': '@',
+	'joinphrase': '@',
 	'challenge': '%',
-	'searchbattle': '~',
+	'searchbattle': '@',
 	'tournament': '@',
 	'games': '+',
-	'jointour': '+'
+	'jointour': '+',
+	'quote': ' ',
+	'joke': ' '
 };
 
-exports.botguide = "http://www.pokecommunity.com/showthread.php?t=289012#botguide";
+exports.botguide = "https://github.com/awolffromspace/PC-Battle-Server/blob/master/bot/commands/README.md";
 
 //When you pm the bot but don't use a command, it replies you this message. Example: "Hi, I'm a bot. Use .help to view a command guide"
 //The var #USER is replaced with the username that pms it
@@ -180,7 +181,7 @@ exports.moderation = {
 	disableModNote: false,
 
 	MOD_CONSTS: {
-		FLOOD_MESSAGE_NUM: 6,
+		FLOOD_MESSAGE_NUM: 5,
 		FLOOD_PER_MSG_MIN: 500, // this is the minimum time between messages for legitimate spam. It's used to determine what "flooding" is caused by lag
 		FLOOD_MESSAGE_TIME: 6 * 1000,
 
@@ -238,7 +239,6 @@ exports.moderation = {
 	],
 
 	psServersExcepts: {
-		"pokecommunity": 1,
 		"showdown": 1,
 		"smogtours": 1,
 		"sim": 1
