@@ -1379,7 +1379,9 @@ exports.BattleScripts = {
 		}
 		let battleForme = this.checkBattleForme(template);
 		if (battleForme && battleForme.randomBattleMoves && (battleForme.isMega ? !teamDetails.megaStone : this.random(2))) {
-			template = this.getTemplate(template.otherFormes.length >= 2 ? template.otherFormes[this.random(template.otherFormes.length)] : template.otherFormes[0]);
+			if (this.random(4) > 0) {
+				template = this.getTemplate(template.otherFormes.length >= 2 ? template.otherFormes[this.random(template.otherFormes.length)] : template.otherFormes[0]);
+			}
 		}
 
 		let movePool = (template.randomBattleMoves ? template.randomBattleMoves.slice() : Object.keys(template.learnset));
@@ -4711,7 +4713,7 @@ exports.BattleScripts = {
 				if (template.battleOnly) types = this.getTemplate(template.baseSpecies).types;
 				if (types.indexOf(type) < 0) continue;
 			}
-			if (template.gen <= this.gen && !template.isMega && !template.isPrimal && !template.isNonstandard && template.randomBattleMoves && template.tier === 'OU' || template.tier === 'UU' || template.tier === 'BL' || template.species === 'Absol' || template.species === 'Aerodactyl' || template.species === 'Blastoise' || template.species === 'Charizard' || template.species === 'Pinsir' || template.species === 'Sableye' || template.species === 'Sharpedo' || template.species === 'Slowbro' || template.species === 'Venusaur') {
+			if (template.gen <= this.gen && !template.isMega && !template.isPrimal && !template.isNonstandard && template.randomBattleMoves && (template.tier === 'OU' || template.tier === 'UU' || template.tier === 'BL' || template.species === 'Absol' || template.species === 'Aerodactyl' || template.species === 'Beedrill' || template.species === 'Blastoise' || template.species === 'Charizard' || template.species === 'Mawile' || template.species === 'Pinsir' || template.species === 'Sableye' || template.species === 'Sharpedo' || template.species === 'Slowbro' || template.species === 'Venusaur')) {
 				pokemonPool.push(id);
 			}
 		}
@@ -4728,7 +4730,7 @@ exports.BattleScripts = {
 			// Limit to one of each species (Species Clause)
 			if (baseFormes[template.baseSpecies]) continue;
 
-			if (template.species === 'Unown' || template.species === 'Cosmog' || template.species === 'Cosmoem' || template.species === 'Absol' && teamDetails['megaStone'] === 1 || template.species === 'Aerodactyl' && teamDetails['megaStone'] === 1 || template.species === 'Blastoise' && teamDetails['megaStone'] === 1 || template.species === 'Charizard' && teamDetails['megaStone'] === 1 || template.species === 'Pinsir' && teamDetails['megaStone'] === 1 || template.species === 'Sableye' && teamDetails['megaStone'] === 1 || template.species === 'Sharpedo' && teamDetails['megaStone'] === 1 || template.species === 'Slowbro' && teamDetails['megaStone'] === 1 || template.species === 'Venusaur' && teamDetails['megaStone'] === 1) continue;
+			if (template.species === 'Unown' || template.species === 'Cosmog' || template.species === 'Cosmoem') continue;
 
 			// Adjust rate for species with multiple formes
 			switch (template.baseSpecies) {
@@ -4746,6 +4748,9 @@ exports.BattleScripts = {
 				break;
 			case 'Basculin': case 'Cherrim': case 'Greninja': case 'Hoopa': case 'Meloetta': case 'Meowstic':
 				if (this.random(2) >= 1) continue;
+				break;
+			case 'Absol': case 'Aerodactyl': case 'Beedrill': case 'Blastoise': case 'Charizard': case 'Mawile': case 'Pinsir': case 'Sableye': case 'Sharpedo': case 'Slowbro': case 'Venusaur':
+				if (teamDetails.megaStone) continue;
 				break;
 			}
 
@@ -4765,70 +4770,11 @@ exports.BattleScripts = {
 
 			let set = this[this.gameType === 'singles' ? 'randomSet' : 'randomDoublesSet'](template, pokemon.length, teamDetails);
 
-			if (template.species === 'Absol') {
-				set.item = 'Absolite';
-				set.moves = ['Swords Dance', 'Knock Off', 'Sucker Punch', 'Superpower'];
-				teamDetails['megaStone'] = 1;
-			} else if (template.species === 'Aerodactyl') {
-				set.item = 'Aerodactylite';
-				set.moves = ['Stone Edge', 'Wing Attack', 'Earthquake', 'Roost'];
-				teamDetails['megaStone'] = 1;
-			} else if (template.species === 'Blastoise') {
-				set.item = 'Blastoisinite';
-				set.moves = ['Rapid Spin', 'Scald', 'Dark Pulse', 'Ice Beam'];
-				teamDetails['megaStone'] = 1;
-			} else if (template.species === 'Charizard') {
-				let dice = this.random(1);
-				if (dice < 1) {
-					set.item = 'Charizardite X';
-					set.moves = ['Dragon Dance', 'Dragon Claw', 'Flare Blitz', 'Roost'];
-					teamDetails['megaStone'] = 1;
-				} else {
-					set.item = 'Charizardite Y';
-					set.moves = ['Fire Blast', 'Solar Beam', 'Focus Blast', 'Roost'];
-					teamDetails['megaStone'] = 1;
-				}
-			} else if (template.species === 'Gengar') {
-				set.item = 'Life Orb';
-				set.moves = ['Shadow Ball', 'Sludge Wave', 'Focus Blast', 'Thunderbolt'];
-			} else if (template.species === 'Latias') {
-				set.item = 'Soul Dew';
-				set.moves = ['Draco Meteor', 'Psyshock', 'Healing Wish', 'Defog'];
-			} else if (template.species === 'Latios') {
-				set.item = 'Life Orb';
-				set.moves = ['Draco Meteor', 'Psyshock', 'Recover', 'Hidden Power Fire'];
-			} else if (template.species === 'Lucario') {
-				set.item = 'Life Orb';
-				set.moves = ['Close Combat', 'Swords Dance', 'Extreme Speed', 'Iron Tail'];
-			} else if (template.species === 'Pinsir') {
-				set.item = 'Pinsirite';
-				set.moves = ['Swords Dance', 'Return', 'Quick Attack', 'Close Combat'];
-				teamDetails['megaStone'] = 1;
-			} else if (template.species === 'Sableye') {
-				set.item = 'Sablenite';
-				set.moves = ['Protect', 'Knock Off', 'Will-O-Wisp', 'Recover'];
-				teamDetails['megaStone'] = 1;
-			} else if (template.species === 'Salamence') {
-				set.item = 'Life Orb';
-				set.moves = ['Dragon Dance', 'Outrage', 'Fire Blast', 'Iron Tail'];
-			} else if (template.species === 'Sharpedo') {
-				set.item = 'Sharpedonite';
-				set.moves = ['Protect', 'Crunch', 'Waterfall', 'Psychic Fangs'];
-				teamDetails['megaStone'] = 1;
-			} else if (template.species === 'Slowbro') {
-				set.item = 'Slowbronite';
-				set.moves = ['Scald', 'Psyshock', 'Slack Off', 'Calm Mind'];
-				teamDetails['megaStone'] = 1;
-			} else if (template.species === 'Swampert') {
-				set.item = 'Leftovers';
-				set.moves = ['Stealth Rock', 'Earthquake', 'Scald', 'Toxic'];
-			} else if (template.species === 'Tyranitar') {
-				set.item = 'Choice Band';
-				set.moves = ['Stone Edge', 'Crunch', 'Pursuit', 'Superpower'];
-			} else if (template.species === 'Venusaur') {
-				set.item = 'Venusaurite';
-				set.moves = ['Giga Drain', 'Sludge Bomb', 'Synthesis', 'Hidden Power Fire'];
-				teamDetails['megaStone'] = 1;
+			let item = this.getItem(set.item);
+			if (template.species === 'Absol' && !item.megaStone || template.species === 'Aerodactyl' && !item.megaStone || template.species === 'Beedrill' && item.megaStone || template.species === 'Blastoise' && !item.megaStone || template.species === 'Charizard' && !item.megaStone || template.species === 'Gengar' && item.megaStone || template.species === 'Latias' && item.megaStone || template.species === 'Latios' && item.megaStone || template.species === 'Lucario' && item.megaStone || template.species === 'Mawile' && item.megaStone || template.species === 'Pinsir' && !item.megaStone || template.species === 'Sableye' && !item.megaStone || template.species === 'Salamence' && item.megaStone || template.species === 'Sharpedo' && !item.megaStone || template.species === 'Slowbro' && !item.megaStone || template.species === 'Swampert' && item.megaStone || template.species === 'Tyranitar' && item.megaStone || template.species === 'Venusaur' && !item.megaStone) continue;
+
+			if (template.baseSpecies === 'Zygarde') {
+				set.ability = 'Aura Break';
 			}
 
 			// Illusion shouldn't be the last Pokemon of the team
@@ -4870,7 +4816,6 @@ exports.BattleScripts = {
 			}
 
 			// Team has Mega/weather/hazards
-			let item = this.getItem(set.item);
 			if (item.megaStone) teamDetails['megaStone'] = 1;
 			if (item.zMove) teamDetails['zMove'] = 1;
 			if (set.ability === 'Snow Warning') teamDetails['hail'] = 1;
@@ -4952,104 +4897,15 @@ exports.BattleScripts = {
 
 			let set = this[this.gameType === 'singles' ? 'randomSet' : 'randomDoublesSet'](template, pokemon.length, teamDetails);
 
-			if (template.species === 'Abomasnow') {
-				set.item = 'Life Orb';
-				set.moves = ['Blizzard', 'Giga Drain', 'Earthquake', 'Ice Shard'];
-			} else if (template.species === 'Absol') {
-				set.item = 'Life Orb';
-				set.moves = ['Knock Off', 'Sucker Punch', 'Superpower', 'Play Rough'];
-			} else if (template.species === 'Aerodactyl') {
-				set.item = 'Life Orb';
-				set.moves = ['Stone Edge', 'Earthquake', 'Pursuit', 'Aerial Ace'];
-			} else if (template.species === 'Aggron') {
-				set.item = 'Choice Band';
-				set.ability = 'Rock Head';
-				set.moves = ['Head Smash', 'Heavy Slam', 'Superpower', 'Ice Punch'];
-			} else if (template.species === 'Altaria') {
-				set.item = 'Life Orb';
-				set.moves = ['Draco Meteor', 'Fire Blast', 'Roost', 'Toxic'];
-			} else if (template.species === 'Ampharos') {
-				set.item = 'Leftovers';
-				set.moves = ['Heal Bell', 'Volt Switch', 'Hidden Power Ice', 'Focus Blast'];
-			} else if (template.species === 'Audino') {
-				set.item = 'Leftovers';
-				set.moves = ['Wish', 'Protect', 'Knock Off', 'Encore'];
-			} else if (template.species === 'Banette') {
-				set.item = 'Life Orb';
-				set.moves = ['Shadow Claw', 'Sucker Punch', 'Dazzling Gleam', 'Knock Off'];
-			} else if (template.species === 'Beedrill') {
-				set.item = 'Focus Sash';
-				set.moves = ['Toxic Spikes', 'Endeavor', 'X-Scissor', 'Tailwind'];
-			} else if (template.species === 'Blastoise') {
-				set.item = 'Leftovers';
-				set.moves = ['Scald', 'Rapid Spin', 'Toxic', 'Refresh'];
-			} else if (template.species === 'Camerupt') {
-				set.item = 'Choice Specs';
-				set.moves = ['Eruption', 'Fire Blast', 'Earth Power', 'Hidden Power Ice'];
-			} else if (template.species === 'Charizard') {
-				set.item = 'Life Orb';
-				set.moves = ['Fire Blast', 'Air Slash', 'Hidden Power Grass', 'Roost'];
-			} else if (template.species === 'Diancie') {
-				set.item = 'Leftovers';
-				set.moves = ['Stealth Rock', 'Moonblast', 'Diamond Storm', 'Heal Bell'];
-			} else if (template.species === 'Gardevoir') {
-				set.item = 'Leftovers';
-				set.moves = ['Calm Mind', 'Moonblast', 'Psyshock', 'Substitute'];
-			} else if (template.species === 'Gallade') {
-				set.item = 'Life Orb';
-				set.moves = ['Swords Dance', 'Close Combat', 'Zen Headbutt', 'Knock Off'];
-			} else if (template.species === 'Gothitelle') {
+			let item = this.getItem(set.item);
+			if (template.species === 'Abomasnow' && item.megaStone || template.species === 'Absol' && item.megaStone || template.species === 'Aerodactyl' && item.megaStone || template.species === 'Aggron' && item.megaStone || template.species === 'Altaria' && item.megaStone || template.species === 'Ampharos' && item.megaStone || template.species === 'Audino' && item.megaStone || template.species === 'Banette' && item.megaStone || template.species === 'Beedrill' && item.megaStone || template.species === 'Blastoise' && item.megaStone || template.species === 'Camerupt' && item.megaStone || template.species === 'Charizard' && item.megaStone || template.species === 'Diancie' && item.megaStone || template.species === 'Gardevoir' && item.megaStone || template.species === 'Heracross' && item.megaStone || template.species === 'Houndoom' && item.megaStone || template.species === 'Kangaskhan' && item.megaStone || template.species === 'Lopunny' && item.megaStone || template.species === 'Lucario' && item.megaStone || template.species === 'Manectric' && item.megaStone || template.species === 'Mawile' && item.megaStone || template.species === 'Medicham' && item.megaStone || template.species === 'Pidgeot' && item.megaStone || template.species === 'Pinsir' && item.megaStone || template.species === 'Sableye' && item.megaStone || template.species === 'Sceptile' && item.megaStone || template.species === 'Sharpedo' && item.megaStone || template.species === 'Slowbro' && item.megaStone || template.species === 'Steelix' && item.megaStone || template.species === 'Venusaur' && item.megaStone) continue;
+
+			if (template.species === 'Gothitelle') {
 				set.ability = 'Frisk';
-			} else if (template.species === 'Heracross') {
-				set.item = 'Choice Band';
-				set.moves = ['Close Combat', 'Megahorn', 'Knock Off', 'Stone Edge'];
-			} else if (template.species === 'Houndoom') {
-				set.item = 'Life Orb';
-				set.moves = ['Nasty Plot', 'Fire Blast', 'Dark Pulse', 'Hidden Power Water'];
-			} else if (template.species === 'Kangaskhan') {
-				set.item = 'Silk Scarf';
-				set.moves = ['Fake Out', 'Double-Edge', 'Sucker Punch', 'Earthquake'];
-			} else if (template.species === 'Lopunny') {
-				set.item = 'Flame Orb';
-				set.ability = 'Klutz';
-				set.moves = ['Switcheroo', 'Healing Wish', 'Return', 'High Jump Kick'];
-			} else if (template.species === 'Manectric') {
-				set.item = 'Life Orb';
-				set.moves = ['Thunderbolt', 'Volt Switch', 'Overheat', 'Hidden Power Grass'];
-			} else if (template.species === 'Mawile') {
-				set.item = 'Life Orb';
-				set.moves = ['Play Rough', 'Iron Head', 'Sucker Punch', 'Swords Dance'];
-			} else if (template.species === 'Medicham') {
-				set.item = 'Life Orb';
-				set.moves = ['High Jump Kick', 'Zen Headbutt', 'Bullet Punch', 'Thunder Punch'];
 			} else if (template.species === 'Ninetales') {
-				set.ability = 'Flash Fire';
-			} else if (template.species === 'Pidgeot') {
-				set.item = 'Leftovers';
-				set.moves = ['Brave Bird', 'Return', 'Defog', 'Roost'];
-			} else if (template.species === 'Pinsir') {
-				set.item = 'Life Orb';
-				set.moves = ['Swords Dance', 'X-Scissor', 'Earthquake', 'Stone Edge'];
+				set.ability = 'Drought';
 			} else if (template.species === 'Politoed') {
-				set.ability = 'Water Absorb';
-			} else if (template.species === 'Sableye') {
-				set.item = 'Leftovers';
-				set.moves = ['Recover', 'Will-O-Wisp', 'Taunt', 'Knock Off'];
-			} else if (template.species === 'Sceptile') {
-				set.item = 'Life Orb';
-				set.moves = ['Leaf Storm', 'Focus Blast', 'Hidden Power Flying', 'Giga Drain'];
-			} else if (template.species === 'Sharpedo') {
-				set.item = 'Life Orb';
-				set.moves = ['Protect', 'Crunch', 'Waterfall', 'Ice Beam'];
-			} else if (template.species === 'Slowbro') {
-				set.item = 'Leftovers';
-				set.moves = ['Scald', 'Slack Off', 'Psyshock', 'Calm Mind'];
-			} else if (template.species === 'Steelix') {
-				set.item = 'Leftovers';
-				set.moves = ['Stealth Rock', 'Earthquake', 'Toxic', 'Heavy Slam'];
-			} else if (template.species === 'Venusaur') {
-				set.item = 'Life Orb';
-				set.moves = ['Leaf Storm', 'Sludge Bomb', 'Synthesis', 'Sleep Powder'];
+				set.ability = 'Drizzle';
 			} else if (template.species === 'Wobbuffet') {
 				set.ability = 'Telepathy';
 			}
@@ -5093,7 +4949,6 @@ exports.BattleScripts = {
 			}
 
 			// Team has Mega/weather/hazards
-			let item = this.getItem(set.item);
 			if (item.megaStone) teamDetails['megaStone'] = 1;
 			if (item.zMove) teamDetails['zMove'] = 1;
 			if (set.ability === 'Snow Warning') teamDetails['hail'] = 1;
@@ -5121,7 +4976,7 @@ exports.BattleScripts = {
 				if (template.battleOnly) types = this.getTemplate(template.baseSpecies).types;
 				if (types.indexOf(type) < 0) continue;
 			}
-			if (template.gen <= this.gen && !template.isMega && !template.isPrimal && !template.isNonstandard && template.randomBattleMoves && template.tier === 'Uber' || template.species === 'Gengar' || template.species === 'Kangaskhan' || template.species === 'Lucario' || template.species === 'Salamence') {
+			if (template.gen <= this.gen && !template.isMega && !template.isPrimal && !template.isNonstandard && template.randomBattleMoves && (template.tier === 'Uber' || template.species === 'Gengar' || template.species === 'Kangaskhan' || template.species === 'Lucario' || template.species === 'Salamence')) {
 				pokemonPool.push(id);
 			}
 		}
@@ -5138,7 +4993,7 @@ exports.BattleScripts = {
 			// Limit to one of each species (Species Clause)
 			if (baseFormes[template.baseSpecies]) continue;
 
-			if (template.species === 'Unown' || template.species === 'Cosmog' || template.species === 'Cosmoem' || template.species === 'Gengar' && teamDetails['megaStone'] === 1 || template.species === 'Kangaskhan' && teamDetails['megaStone'] === 1 || template.species === 'Lucario' && teamDetails['megaStone'] === 1 || template.species === 'Salamence' && teamDetails['megaStone'] === 1) continue;
+			if (template.species === 'Unown' || template.species === 'Cosmog' || template.species === 'Cosmoem') continue;
 
 			// Adjust rate for species with multiple formes
 			switch (template.baseSpecies) {
@@ -5156,6 +5011,9 @@ exports.BattleScripts = {
 				break;
 			case 'Basculin': case 'Cherrim': case 'Greninja': case 'Hoopa': case 'Meloetta': case 'Meowstic':
 				if (this.random(2) >= 1) continue;
+				break;
+			case 'Gengar': case 'Kangaskhan': case 'Lucario': case 'Salamence':
+				if (teamDetails.megaStone) continue;
 				break;
 			}
 
@@ -5175,29 +5033,8 @@ exports.BattleScripts = {
 
 			let set = this[this.gameType === 'singles' ? 'randomSet' : 'randomDoublesSet'](template, pokemon.length, teamDetails);
 
-			if (template.species === 'Blaziken') {
-				set.item = 'Life Orb';
-				set.moves = ['Flare Blitz', 'Swords Dance', 'High Jump Kick', 'Stone Edge'];
-			} else if (template.species === 'Gengar') {
-				set.item = 'Gengarite';
-				set.moves = ['Taunt', 'Destiny Bond', 'Focus Blast', 'Shadow Ball'];
-				teamDetails['megaStone'] = 1;
-			} else if (template.species === 'Kangaskhan') {
-				set.item = 'Kangaskhanite';
-				set.moves = ['Fake Out', 'Return', 'Crunch', 'Power-Up Punch'];
-				teamDetails['megaStone'] = 1;
-			} else if (template.species === 'Lucario') {
-				set.item = 'Lucarionite';
-				set.moves = ['Swords Dance', 'Close Combat', 'Bullet Punch', 'Iron Tail'];
-				teamDetails['megaStone'] = 1;
-			} else if (template.species === 'Mewtwo') {
-				set.item = 'Life Orb';
-				set.moves = ['Psystrike', 'Focus Blast', 'Ice Beam', 'Fire Blast'];
-			} else if (template.species === 'Salamence') {
-				set.item = 'Salamencite';
-				set.moves = ['Dragon Dance', 'Double-Edge', 'Roost', 'Earthquake'];
-				teamDetails['megaStone'] = 1;
-			}
+			let item = this.getItem(set.item);
+			if (template.species === 'Blaziken' && item.megaStone || template.species === 'Gengar' && !item.megaStone || template.species === 'Kangaskhan' && !item.megaStone || template.species === 'Lucario' && !item.megaStone || template.species === 'Salamence' && !item.megaStone) continue;
 
 			// Illusion shouldn't be the last Pokemon of the team
 			if (set.ability === 'Illusion' && pokemon.length > 4) continue;
@@ -5238,7 +5075,6 @@ exports.BattleScripts = {
 			}
 
 			// Team has Mega/weather/hazards
-			let item = this.getItem(set.item);
 			if (item.megaStone) teamDetails['megaStone'] = 1;
 			if (item.zMove) teamDetails['zMove'] = 1;
 			if (set.ability === 'Snow Warning') teamDetails['hail'] = 1;
