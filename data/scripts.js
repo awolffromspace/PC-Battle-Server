@@ -1379,7 +1379,7 @@ exports.BattleScripts = {
 		}
 		let battleForme = this.checkBattleForme(template);
 		if (battleForme && battleForme.randomBattleMoves && (battleForme.isMega ? !teamDetails.megaStone : this.random(2))) {
-			if (this.random(4) > 0) {
+			if (this.random(9) > 0) {
 				template = this.getTemplate(template.otherFormes.length >= 2 ? template.otherFormes[this.random(template.otherFormes.length)] : template.otherFormes[0]);
 			}
 		}
@@ -4773,9 +4773,9 @@ exports.BattleScripts = {
 			let set = this[this.gameType === 'singles' ? 'randomSet' : 'randomDoublesSet'](template, pokemon.length, teamDetails);
 
 			let item = this.getItem(set.item);
-			if (template.species === 'Absol' && !item.megaStone || template.species === 'Aerodactyl' && !item.megaStone || template.species === 'Beedrill' && item.megaStone || template.species === 'Blastoise' && !item.megaStone ||
+			if (template.species === 'Absol' && !item.megaStone || template.species === 'Aerodactyl' && !item.megaStone || template.species === 'Beedrill' && !item.megaStone || template.species === 'Blastoise' && !item.megaStone ||
 			template.species === 'Charizard' && !item.megaStone || template.species === 'Gengar' && item.megaStone || template.species === 'Latias' && item.megaStone || template.species === 'Latios' && item.megaStone ||
-			template.species === 'Lucario' && item.megaStone || template.species === 'Mawile' && item.megaStone || template.species === 'Pinsir' && !item.megaStone || template.species === 'Sableye' && !item.megaStone ||
+			template.species === 'Lucario' && item.megaStone || template.species === 'Mawile' && !item.megaStone || template.species === 'Pinsir' && !item.megaStone || template.species === 'Sableye' && !item.megaStone ||
 			template.species === 'Salamence' && item.megaStone || template.species === 'Sharpedo' && !item.megaStone || template.species === 'Slowbro' && !item.megaStone || template.species === 'Swampert' && item.megaStone ||
 			template.species === 'Tyranitar' && item.megaStone || template.species === 'Venusaur' && !item.megaStone) continue;
 
