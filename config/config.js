@@ -629,6 +629,7 @@ exports.customavatars = {
 	'jnna': 'sheep.png',
 	'mrep': 'sheep.png',
 	'madnessftw': 'madnessftw.png',
+	'mdki': 'mdki.png',
 };
 
 // custom avatars appear in profile by specifiying server url.
