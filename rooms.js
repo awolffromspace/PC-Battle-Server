@@ -523,10 +523,6 @@ class GlobalRoom {
 
 		// Get the user's rating before actually starting to search.
 		Ladders(formatid).getRating(user.userid).then(rating => {
-			newSearch.rating = rating;
-			newSearch.userid = user.userid;
-			this.addSearch(newSearch, user, formatid);
-
 			if (!user.locked && !Rooms.lobby.isMuted(user)) {
 				if (Rooms.lobby.disableLadderMessages) return false;
 				if (((Date.now() - user.lastLadderTime) < SEARCH_COOLDOWN) && user.lastLadderFormat === formatid) return false;
@@ -534,6 +530,10 @@ class GlobalRoom {
 				user.lastLadderFormat = formatid;
 				user.lastLadderTime = Date.now();
 			}
+
+			newSearch.rating = rating;
+			newSearch.userid = user.userid;
+			this.addSearch(newSearch, user, formatid);
 		}, error => {
 			// Rejects iff we retrieved the rating but the user had changed their name;
 			// the search simply doesn't happen in this case.
