@@ -67,7 +67,7 @@ exports.commands = {
 			this.sclog();
 			this.reply(text);
 		} else if (cmd === "delquote") {
-			if (!this.can('jointour')) return false;
+			if (!this.can('autoban')) return false;
 			var id = toId(arg);
 			if (!id) return this.reply(this.trad('noid'));
 			if (!quotes[id]) return this.reply(this.trad('quote') + ' "' + id + '" ' + this.trad('n'));
@@ -127,7 +127,7 @@ exports.commands = {
 			this.sclog();
 			this.reply(text);
 		} else if (cmd === "deljoke") {
-			if (!this.can('jointour')) return false;
+			if (!this.can('autoban')) return false;
 			var id = toId(arg);
 			if (!id) return this.reply(this.trad('noid'));
 			if (!jokes[id]) return this.reply(this.trad('joke') + ' "' + id + '" ' + this.trad('n'));
