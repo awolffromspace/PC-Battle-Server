@@ -78,8 +78,12 @@ const writeTriviaData = (() => {
 				writing = false;
 				if (writePending) {
 					writePending = false;
-					process.nextTick(() => writeTriviaData());
+					setImmediate(() => writeTriviaData());
 				}
+
+				data = null;
+				path = null;
+				tempPath = null;
 			});
 		});
 	};
@@ -374,7 +378,7 @@ class Trivia extends Rooms.RoomGame {
 	// typos can be made and still have the answer be considered correct.
 	verifyAnswer(tarAnswer) {
 		return this.curAnswers.some(answer => (
-			(answer === tarAnswer) || (answer.length > 5 && Tools.levenshtein(tarAnswer, answer) < 3)
+			(answer === tarAnswer) || (answer.length > 5 && Dex.levenshtein(tarAnswer, answer) < 3)
 		));
 	}
 
@@ -771,7 +775,7 @@ const commands = {
 		// This prevents trivia games from modifying the trivia database.
 		questions = Object.assign([], questions);
 		// Randomizes the order of the questions.
-		questions = Tools.shuffle(questions);
+		questions = Dex.shuffle(questions);
 
 		let _Trivia;
 		if (mode === 'first') {

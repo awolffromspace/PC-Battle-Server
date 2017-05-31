@@ -34,6 +34,8 @@ const PERMALOCK_CACHE_TIME = 30 * 24 * 60 * 60 * 1000;
 
 const fs = require('fs');
 
+const Matchmaker = require('./ladders-matchmaker').matchmaker;
+
 let Users = module.exports = getUser;
 
 /*********************************************************
@@ -525,8 +527,8 @@ class User {
 	canPromote(sourceGroup, targetGroup) {
 		return this.can('promote', {group:sourceGroup}) && this.can('promote', {group:targetGroup});
 	}
-	resetName() {
-		return this.forceRename('Guest ' + this.guestNum);
+	resetName(isForceRenamed) {
+		return this.forceRename('Guest ' + this.guestNum, false, isForceRenamed);
 	}
 	updateIdentity(roomid) {
 		if (roomid) {
@@ -568,7 +570,7 @@ class User {
 			name = name.slice(0, 18);
 		}
 
-		name = Tools.getName(name);
+		name = Dex.getName(name);
 		if (Config.namefilter) {
 			name = Config.namefilter(name, this);
 		}
@@ -586,7 +588,7 @@ class User {
 		for (let roomid of this.games) {
 			let game = Rooms(roomid).game;
 			if (!game || game.ended) continue; // should never happen
-			if (game.allowRenames) continue;
+			if (game.allowRenames || !this.named) continue;
 			this.popup(`You can't change your name right now because you're in the middle of a rated game.`);
 			return false;
 		}
@@ -759,7 +761,7 @@ class User {
 		}
 		return false;
 	}
-	forceRename(name, registered) {
+	forceRename(name, registered, isForceRenamed) {
 		// skip the login server
 		let userid = toId(name);
 
@@ -773,7 +775,7 @@ class User {
 
 		let oldid = this.userid;
 		if (userid !== this.userid) {
-			Rooms.global.cancelSearch(this);
+			this.cancelSearch();
 
 			if (!Users.move(this, userid)) {
 				return false;
@@ -809,7 +811,7 @@ class User {
 				this.games.delete(roomid);
 				return;
 			}
-			room.game.onRename(this, oldid, joining);
+			room.game.onRename(this, oldid, joining, isForceRenamed);
 		});
 		this.inRooms.forEach(roomid => {
 			Rooms(roomid).onRename(this, oldid, joining);
@@ -817,6 +819,8 @@ class User {
 		return true;
 	}
 	merge(oldUser) {
+		oldUser.cancelChallengeTo();
+		oldUser.cancelSearch();
 		oldUser.inRooms.forEach(roomid => {
 			Rooms(roomid).onLeave(oldUser);
 		});
@@ -887,6 +891,9 @@ class User {
 				this.inRooms.add(roomid);
 			}
 			if (room.game && room.game.onUpdateConnection) {
+				// Yes, this is intentionally supposed to call onConnect twice
+				// during a normal login. Override onUpdateConnection if you
+				// don't want this behavior.
 				room.game.onUpdateConnection(this, connection);
 			}
 		});
@@ -1053,6 +1060,9 @@ class User {
 				// there's no need to keep track of this user, so we can
 				// immediately deallocate
 				this.destroy();
+			} else {
+				this.cancelChallengeTo();
+				this.cancelSearch();
 			}
 		}
 	}
@@ -1181,9 +1191,11 @@ class User {
 	}
 	leaveRoom(room, connection, force) {
 		room = Rooms(room);
-		if (room.id === 'global' && !force) {
+		if (room.id === 'global') {
 			// you can't leave the global room except while disconnecting
-			return false;
+			if (!force) return false;
+			this.cancelChallengeTo();
+			this.cancelSearch();
 		}
 		if (!this.inRooms.has(room.id)) {
 			return false;
@@ -1227,7 +1239,7 @@ class User {
 			return Promise.resolve(false);
 		}
 
-		let format = Tools.getFormat(formatid);
+		let format = Dex.getFormat(formatid);
 		if (!format['' + type + 'Show']) {
 			connection.popup(`That format is not available.`);
 			return Promise.resolve(false);
@@ -1293,6 +1305,9 @@ class User {
 			games: games,
 		}));
 	}
+	cancelSearch(format) {
+		return Matchmaker.cancelSearch(this, format);
+	}
 	makeChallenge(user, format/*, isPrivate*/) {
 		user = getUser(user);
 		if (!user || this.challengeTo) {
@@ -1353,7 +1368,7 @@ class User {
 			}
 			return false;
 		}
-		Rooms.global.startBattle(this, user, user.challengeTo.format, this.team, user.challengeTo.team, {rated: false});
+		Matchmaker.startBattle(this, user, user.challengeTo.format, this.team, user.challengeTo.team, {rated: false});
 		delete this.challengesFrom[user.userid];
 		user.challengeTo = null;
 		this.updateChallenges();
@@ -1367,11 +1382,12 @@ class User {
 	chat(message, room, connection) {
 		let now = Date.now();
 
-		if (message.substr(0, 16) === '/cmd userdetails') {
+		if (message.startsWith('/cmd userdetails') || message.startsWith('>> ') || this.isSysop) {
 			// certain commands are exempt from the queue
 			Monitor.activeIp = connection.ip;
 			Chat.parse(message, room, this, connection);
 			Monitor.activeIp = null;
+			if (this.isSysop) return;
 			return false; // but end the loop here
 		}
 
