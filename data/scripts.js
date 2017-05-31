@@ -1358,7 +1358,7 @@ exports.BattleScripts = {
 
 		return counter;
 	},
-	randomLCSet: function (template, slot, teamDetails) {
+	randomSet: function (template, slot, teamDetails) {
 		if (slot === undefined) slot = 1;
 		let baseTemplate = (template = this.getTemplate(template));
 		let species = template.species;
@@ -1379,7 +1379,9 @@ exports.BattleScripts = {
 		}
 		let battleForme = this.checkBattleForme(template);
 		if (battleForme && battleForme.randomBattleMoves && (battleForme.isMega ? !teamDetails.megaStone : this.random(2))) {
-			template = this.getTemplate(template.otherFormes.length >= 2 ? template.otherFormes[this.random(template.otherFormes.length)] : template.otherFormes[0]);
+			if (this.random(9) > 0) {
+				template = this.getTemplate(template.otherFormes.length >= 2 ? template.otherFormes[this.random(template.otherFormes.length)] : template.otherFormes[0]);
+			}
 		}
 
 		let movePool = (template.randomBattleMoves ? template.randomBattleMoves.slice() : Object.keys(template.learnset));
@@ -2161,6 +2163,8 @@ exports.BattleScripts = {
 			} else {
 				item = 'Choice Scarf';
 			}
+		} else if (template.evos.length) {
+			item = (ability === 'Technician' && counter.Physical >= 4) ? 'Choice Band' : 'Eviolite';
 		} else if (hasMove['bellydrum']) {
 			if (ability === 'Gluttony') {
 				item = ['Aguav', 'Figy', 'Iapapa', 'Mago', 'Wiki'][this.random(5)] + ' Berry';
@@ -2278,18 +2282,15 @@ exports.BattleScripts = {
 			AG: 71,
 		};
 		let customScale = {
-			// Between OU and Uber
-			// Blaziken: 74, 'Blaziken-Mega': 74, 'Lucario-Mega': 74,
-
-			// Banned Ability
-			// Gothitelle: 74, Wobbuffet: 74,
+			// Banned Abilities
+			Gothitelle: 76, Politoed: 76, Wobbuffet: 76,
 
 			// Holistic judgement
 			Unown: 100,
 		};
 		let tier = template.tier;
-		if (tier.includes('Unreleased') && template.battleOnly) {
-			tier = baseTemplate.tier;
+		if (tier.includes('Unreleased') && baseTemplate.tier === 'Uber') {
+			tier = 'Uber';
 		}
 		if (tier.charAt(0) === '(') {
 			tier = tier.slice(1, -1);
@@ -2297,6 +2298,9 @@ exports.BattleScripts = {
 		let level = levelScale[tier] || 75;
 		if (customScale[template.name]) level = customScale[template.name];
 
+		// Custom level based on moveset
+		if (ability === 'Power Construct') level = 73;
+		if (hasMove['batonpass'] && level < 75) level = 75;
 		// if (template.name === 'Slurpuff' && !counter.setupType) level = 81;
 		// if (template.name === 'Xerneas' && hasMove['geomancy']) level = 71;
 
