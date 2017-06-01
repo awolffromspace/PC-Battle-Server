@@ -1429,50 +1429,6 @@ class Battle extends Dex.ModdedDex {
 		this.midTurn = true;
 		if (!this.currentRequest) this.go();
 	}
-	/**
-	 * returns false if the target is immune; true otherwise
-	 *
-	 * also checks immunity to some statuses
-	 * @param {Sim.Pokemon} source
-	 * @param {Sim.Pokemon} target
-	 */
-	getImmunity(source, target) {
-		let sourceType = source.type || source;
-		let targetTyping = target.getTypes && target.getTypes() || target.types || target;
-		if (Array.isArray(targetTyping)) {
-			for (let i = 0; i < targetTyping.length; i++) {
-				if (!this.getImmunity(sourceType, targetTyping[i])) return false;
-			}
-			return true;
-		}
-		let typeData = this.data.TypeChart[targetTyping];
-		if (typeData && typeData.damageTaken[sourceType] === 3) return false;
-		return true;
-	}
-	/**
-	 * @param {Sim.Pokemon} source
-	 * @param {Sim.Pokemon} target
-	 */
-	getEffectiveness(source, target) {
-		let sourceType = source.type || source;
-		let totalTypeMod = 0;
-		let targetTyping = target.getTypes && target.getTypes() || target.types || target;
-		if (Array.isArray(targetTyping)) {
-			for (let i = 0; i < targetTyping.length; i++) {
-				totalTypeMod += this.getEffectiveness(sourceType, targetTyping[i]);
-			}
-			return totalTypeMod;
-		}
-		let typeData = this.data.TypeChart[targetTyping];
-		if (!typeData) return 0;
-		switch (typeData.damageTaken[sourceType]) {
-		case 1: return 1; // super-effective
-		case 2: return -1; // resist
-		// in case of weird situations like Gravity, immunity is
-		// handled elsewhere
-		default: return 0;
-		}
-	}
 	boost(boost, target, source, effect, isSecondary, isSelf) {
 		if (this.event) {
 			if (!target) target = this.event.target;
@@ -1554,9 +1510,6 @@ class Battle extends Dex.ModdedDex {
 			if (!(damage || damage === 0)) {
 				this.debug('damage event failed');
 				return damage;
-			}
-			if (target.illusion && target.hasAbility('Illusion') && effect && effect.effectType === 'Move' && effect.id !== 'confused') {
-				this.singleEvent('End', this.getAbility('Illusion'), target.abilityData, target, source, effect);
 			}
 		}
 		if (damage !== 0) damage = this.clampIntRange(damage, 1);
@@ -2041,6 +1994,7 @@ class Battle extends Dex.ModdedDex {
 		while (this.faintQueue.length) {
 			faintData = this.faintQueue.shift();
 			if (!faintData.target.fainted) {
+				this.runEvent('BeforeFaint', faintData.target, faintData.source, faintData.effect);
 				this.add('faint', faintData.target);
 				faintData.target.side.pokemonLeft--;
 				this.runEvent('Faint', faintData.target, faintData.source, faintData.effect);
@@ -2656,28 +2610,20 @@ class Battle extends Dex.ModdedDex {
 		if ((this.p1 && this.p1.name === name) || (this.p2 && this.p2.name === name)) return false;
 
 		let player = null;
-		if (this.p1 || slot === 'p2') {
-			if (this.started) {
-				this.p2.name = name;
-			} else {
-				//console.log("NEW SIDE: " + name);
-				this.p2 = new Sim.Side(name, this, 1, team);
-				this.sides[1] = this.p2;
-			}
-			player = this.p2;
+		if (slot !== 'p1' && slot !== 'p2') slot = (this.p1 ? 'p2' : 'p1');
+		let slotNum = (slot === 'p2' ? 1 : 0);
+		if (this.started) {
+			this[slot].name = name;
 		} else {
-			if (this.started) {
-				this.p1.name = name;
-			} else {
-				//console.log("NEW SIDE: " + name);
-				this.p1 = new Sim.Side(name, this, 0, team);
-				this.sides[0] = this.p1;
-			}
-			player = this.p1;
+			//console.log("NEW SIDE: " + name);
+			this[slot] = new Sim.Side(name, this, slotNum, team);
+			this.sides[slotNum] = this[slot];
 		}
+		player = this[slot];
 
 		if (avatar) player.avatar = avatar;
 		this.add('player', player.id, player.name, avatar);
+		if (!this.started) this.add('teamsize', player.id, player.pokemon.length);
 
 		this.start();
 		return player;

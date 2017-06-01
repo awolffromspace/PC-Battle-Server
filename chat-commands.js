@@ -1684,20 +1684,30 @@ exports.commands = {
 	unban: 'unglobalban',
 	globalunban: 'unglobalban',
 	unglobalban: function (target, room, user) {
-		if (!target) return this.parse('/help unglobalban');
+		if (!target) return this.parse(`/help unglobalban`);
 		if (!this.can('ban')) return false;
 
 		let name = Punishments.unban(target);
 		let permanent = Punishments.permanentUnban(target);
 
+		let unbanMessage = `${name} was globally unbanned by ${user.name}.`;
+
 		if (name) {
-			this.addModCommand("" + name + " was globally unbanned by " + user.name + ".");
-			this.globalModlog("UNBAN", name, " by " + user.name);
+			this.addModCommand(unbanMessage);
+			// Notify staff room when a user is unbanned outside of it.
+			if (room.id !== 'staff' && Rooms('staff')) {
+				Rooms('staff').addLogMessage(user, `<<${room.id}>> ${unbanMessage}`);
+			}
+			this.globalModlog("UNBAN", name, ` by ${user.name}`);
 		} else if (permanent) {
-			this.addModCommand("" + permanent + " was globally unbanned by " + user.name + ".");
-			this.globalModlog("UNBAN", permanent, " by " + user.name);
+			this.addModCommand(unbanMessage);
+			// Notify staff room when a user is unbanned outside of it.
+			if (room.id !== 'staff' && Rooms('staff')) {
+				Rooms('staff').addLogMessage(user, `<<${room.id}>> ${unbanMessage}`);
+			}
+			this.globalModlog("UNBAN", permanent, ` by ${user.name}`);
 		} else {
-			this.errorReply("User '" + target + "' is not globally banned.");
+			this.errorReply(`User '${target}' is not globally banned.`);
 		}
 	},
 	unglobalbanhelp: ["/unglobalban [username] - Unban a user. Requires: @ * & ~"],
@@ -1954,6 +1964,7 @@ exports.commands = {
 		let name = this.targetUsername;
 		let nextGroup = target;
 		if (!Config.groups[nextGroup]) return this.errorReply("Group '" + nextGroup + "' does not exist.");
+		if (Config.groups[nextGroup].roomonly || Config.groups[nextGroup].battleonly) return this.errorReply(`Group '${nextGroup}' does not exist as a global rank.`);
 
 		if (Users.isUsernameKnown(name)) {
 			return this.errorReply("/forcepromote - Don't forcepromote unless you have to.");

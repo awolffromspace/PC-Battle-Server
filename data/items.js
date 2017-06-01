@@ -510,7 +510,6 @@ exports.BattleItems = {
 	"blazikenite": {
 		id: "blazikenite",
 		name: "Blazikenite",
-		isUnreleased: true,
 		spritenum: 584,
 		megaStone: "Blaziken-Mega",
 		megaEvolves: "Blaziken",
@@ -1118,7 +1117,7 @@ exports.BattleItems = {
 	},
 	"deepseascale": {
 		id: "deepseascale",
-		name: "DeepSeaScale",
+		name: "Deep Sea Scale",
 		spritenum: 93,
 		fling: {
 			basePower: 30,
@@ -1135,7 +1134,7 @@ exports.BattleItems = {
 	},
 	"deepseatooth": {
 		id: "deepseatooth",
-		name: "DeepSeaTooth",
+		name: "Deep Sea Tooth",
 		spritenum: 94,
 		fling: {
 			basePower: 90,
@@ -2327,7 +2326,6 @@ exports.BattleItems = {
 	"heracronite": {
 		id: "heracronite",
 		name: "Heracronite",
-		isUnreleased: true,
 		spritenum: 590,
 		megaStone: "Heracross-Mega",
 		megaEvolves: "Heracross",
@@ -2356,7 +2354,6 @@ exports.BattleItems = {
 	"houndoominite": {
 		id: "houndoominite",
 		name: "Houndoominite",
-		isUnreleased: true,
 		spritenum: 591,
 		megaStone: "Houndoom-Mega",
 		megaEvolves: "Houndoom",
@@ -4722,7 +4719,6 @@ exports.BattleItems = {
 	"sceptilite": {
 		id: "sceptilite",
 		name: "Sceptilite",
-		isUnreleased: true,
 		spritenum: 613,
 		megaStone: "Sceptile-Mega",
 		megaEvolves: "Sceptile",
@@ -5301,7 +5297,6 @@ exports.BattleItems = {
 	"swampertite": {
 		id: "swampertite",
 		name: "Swampertite",
-		isUnreleased: true,
 		spritenum: 612,
 		megaStone: "Swampert-Mega",
 		megaEvolves: "Swampert",

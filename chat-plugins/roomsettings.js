@@ -139,7 +139,7 @@ class RoomSettings {
 		}
 	}
 	generateDisplay(user, room, connection) {
-		let output = `<div class="infobox">Room Settings for ${Chat.escapeHTML(this.room.title)}<br />`;
+		let output = Chat.html`<div class="infobox">Room Settings for ${this.room.title}<br />`;
 		output += `<strong>Modchat:</strong> <br />${this.modchat()}<br />`;
 		output += `<strong>Modjoin:</strong> <br />${this.modjoin()}<br />`;
 		output += `<strong>Stretch filter:</strong> <br />${this.stretching()}<br />`;
@@ -287,7 +287,7 @@ exports.commands = {
 			if (target === '+') {
 				this.add(`|raw|<div class="broadcast-red"><strong>This room is now invite only!</strong><br />Users must be rank + or invited with <code>/invite</code> to join</div>`);
 			} else {
-				this.add(`|raw|<div class="broadcast-red"><strong>Moderated join was set to ${target}!</strong><br />Only users of rank ${target} and higher can join.</div>`);
+				this.add(Chat.html`|raw|<div class="broadcast-red"><strong>Moderated join was set to ${target}!</strong><br />Only users of rank ${target} and higher can join.</div>`);
 			}
 			this.addModCommand(`${user.name} set modjoin to ${target}.`);
 		} else {
