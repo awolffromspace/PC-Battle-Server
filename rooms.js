@@ -549,7 +549,7 @@ class GlobalRoom {
 	onCreateBattleRoom(p1, p2, room, options) {
 		if (Config.reportbattles) {
 			let reportRoom = Rooms(Config.reportbattles === true ? 'lobby' : Config.reportbattles);
-			if (reportRoom) {
+			if (reportRoom && !options.lobbyTour) {
 				reportRoom
 					.add(`|b|${room.id}|${p1.getIdentity()}|${p2.getIdentity()}`)
 					.update();
