@@ -31,9 +31,6 @@ exports.commands = {
 			if (showAll) return this.parse('/offlinewhois ' + target);
 			return this.errorReply("User " + this.targetUsername + " not found.");
 		}
-		if (showAll && !user.trusted && targetUser !== user) {
-			return this.errorReply(`/${cmd} - Access denied.`);
-		}
 
 		let buf = Chat.html`<strong class="username"><small style="display:none">${targetUser.group}</small>${targetUser.name}</strong> `;
 		if (!targetUser.connected) buf += ` <em style="color:gray">(offline)</em>`;
@@ -169,9 +166,6 @@ exports.commands = {
 	'!offlinewhois': true,
 	checkpunishment: 'offlinewhois',
 	offlinewhois: function (target, room, user) {
-		if (!user.trusted) {
-			return this.errorReply("/offlinewhois - Access denied.");
-		}
 		let userid = toId(target);
 		if (!userid) return this.errorReply("Please enter a valid username.");
 		let targetUser = Users(userid);

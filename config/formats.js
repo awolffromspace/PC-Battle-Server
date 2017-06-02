@@ -1949,7 +1949,7 @@ exports.Formats = [
 
 		mod: 'gen5',
 		team: 'random',
-		ruleset: ['[Gen 7] Random'],
+		ruleset: ['Pokemon', 'Sleep Clause Mod', 'HP Percentage Mod', 'Cancel Mod'],
 	},
 	{
 		name: "[Gen 2] Random",

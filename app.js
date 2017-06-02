@@ -110,14 +110,10 @@ global.Chat = require('./chat');
 
 global.Rooms = require('./rooms');
 
-<<<<<<< HEAD
 global.Tells = require('./tells.js');
 
 global.Db = require('origindb')('config/db');
 
-delete process.send; // in case we're a child process
-=======
->>>>>>> upstream/master
 global.Verifier = require('./verifier');
 Verifier.PM.spawn();
 

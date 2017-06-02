@@ -12,6 +12,8 @@
 
 const PERIODIC_MATCH_INTERVAL = 60 * 1000;
 
+const SEARCH_COOLDOWN = 3 * 60 * 1000;
+
 function Search(userid, team, rating = 1000) {
 	this.userid = userid;
 	this.team = team;
@@ -61,7 +63,7 @@ class Matchmaker {
 		if (!user.locked && !Rooms.lobby.isMuted(user)) {
 			if (Rooms.lobby.disableLadderMessages) return false;
 			if (((Date.now() - user.lastLadderTime) < SEARCH_COOLDOWN) && user.lastLadderFormat === formatid) return false;
-			if (Rooms.lobby) Rooms.lobby.add('|c|' + user.group + user.name + '|/me is searching for a ' + Tools.getFormat(formatid).name + ' battle!');
+			if (Rooms.lobby) Rooms.lobby.add('|c|' + user.group + user.name + '|/me is searching for a ' + Dex.getFormat(formatid).name + ' battle!');
 			user.lastLadderFormat = formatid;
 			user.lastLadderTime = Date.now();
 		}

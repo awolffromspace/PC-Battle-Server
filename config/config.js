@@ -818,6 +818,6 @@ exports.grouplist = [
 		symbol: ' ',
 		ip: 's',
 		broadcast: true,
-		alts: '@u',
+		alts: '~u',
 	},
 ];

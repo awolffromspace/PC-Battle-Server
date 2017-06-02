@@ -98,12 +98,10 @@ exports.commands = {
 		if (Config.reportbattles === true) {
 			setting = false;
 			Config.reportbattles = setting;
-			Simulator.SimulatorProcess.eval('Config.reportbattles = \'' + toId(setting) + '\'');
 			this.add('|raw|<div class=\"broadcast-blue\"><b>Battle messages are disabled!</b><br>Battles will no longer be reported in the Lobby.</div>');
 		} else {
 			setting = true;
 			Config.reportbattles = setting;
-			Simulator.SimulatorProcess.eval('Config.reportbattles = \'' + toId(setting) + '\'');
 			this.add('|raw|<div class=\"broadcast-red\"><b>Battle messages are enabled!</b><br>Battles will be reported in the Lobby.</div>');
 		}
 	},

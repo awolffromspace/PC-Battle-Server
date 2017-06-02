@@ -17,8 +17,6 @@ const REPORT_USER_STATS_INTERVAL = 10 * 60 * 1000;
 
 const CRASH_REPORT_THROTTLE = 60 * 60 * 1000;
 
-const SEARCH_COOLDOWN = 3 * 60 * 1000;
-
 const fs = require('fs');
 const path = require('path');
 
