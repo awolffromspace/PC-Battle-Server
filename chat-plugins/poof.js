@@ -4,6 +4,10 @@ const absol98sk = [
 	"If you're a trainer, talk with Pokemon!!",
 ];
 
+const agielseishin = [
+	"You don't know half of the abuse",
+];
+
 const ahrmtic = [
 	"ヽ(⩺▾⩹)ﾉ 乁(⩺▾⩹)ㄏ ᕙ(⩺▾⩹)ᕗ",
 ];
@@ -163,6 +167,16 @@ exports.commands = {
 			room.addRaw('<center><strong><font color="' + colour + '">~~ ' + Chat.escapeHTML(message) + ' ~~</font></strong></center>');
 			user.leaveRoom(room);
 		} else if (userid.toUpperCase() === 'ABSOL98SK') {
+			let message = target || absol98sk[Math.floor(Math.random() * absol98sk.length)];
+
+			let colour = '#' + [1, 1, 1].map(function () {
+				let part = Math.floor(Math.random() * 0xaa);
+				return (part < 0x10 ? '0' : '') + part.toString(16);
+			}).join('');
+
+			room.addRaw('<center><strong><font color="' + colour + '">~~ ' + Chat.escapeHTML(message) + ' ~~</font></strong></center>');
+			user.leaveRoom(room);
+		} else if (userid.toUpperCase() === 'AGIELSEISHIN' || userid.toUpperCase() === 'AZAZIELREIKON') {
 			let message = target || absol98sk[Math.floor(Math.random() * absol98sk.length)];
 
 			let colour = '#' + [1, 1, 1].map(function () {
