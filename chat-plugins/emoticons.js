@@ -172,6 +172,7 @@ let emotes = {
 	':shift:': 'http://cbc.pokecommunity.com/config/emoticons/shift.gif',
 	':shifty:': 'http://cbc.pokecommunity.com/config/emoticons/shifty.png',
 	':shinx:': 'http://cbc.pokecommunity.com/config/emoticons/shinx.png',
+	':shinyhug:': 'http://cbc.pokecommunity.com/config/emoticons/shinyhug.png',
 	':sims:': 'http://cbc.pokecommunity.com/config/emoticons/sims.png',
 	':skarmory:': 'http://cbc.pokecommunity.com/config/emoticons/skarmory.png',
 	':slowbro:': 'http://cbc.pokecommunity.com/config/emoticons/slowbro.png',
