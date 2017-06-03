@@ -1153,16 +1153,16 @@ exports.commands = {
 			"- Aurora<br />" +
 			"- Bebop (Audy)<br />" +
 			"- Choice Specs (Choice Specs, Michonne)<br />" +
-			"- Dragon (Aerithhh, Captain Syrup, Esper Terra)<br />" +
+			"- Dragon (Aerithhh, Captain Syrup, Esper Terra, Futabaa Sakura)<br />" +
 			"- Rukario (PPN)<br />" +
 			"- Sheep (Cirnysheep, mareep)<br />" +
 			"- Sylphiel<br />" +
 			"- wolf (wofl)<br /><br />" +
 			"<b>@ Moderators</b><br />" +
+			"- 5qwerty<br />" +
 			"- Christos (sphealosophy)<br />" +
-			"- Noa (Captain Noanoa, Captain Speghatti, sweeeeets)<br />" +
+			"- Noa (Captain Noanoa, Captain Speghatti, milk tea and honey, pureleine, sweeeeets)<br />" +
 			"- Omicron (Carousels)<br />" +
-			"- Syndrome<br /><br />" +
 			"<a href=\"http://www.pokecommunity.com/showthread.php?t=289012#staff\">Click here for more details.</a>"
 		);
 	},
