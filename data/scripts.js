@@ -4949,8 +4949,8 @@ exports.BattleScripts = {
 				if (types.indexOf(type) < 0) continue;
 			}
 			if (template.gen <= this.gen && !template.isMega && !template.isPrimal && !template.isNonstandard && template.randomBattleMoves && (template.tier === 'OU' || template.tier === 'UU' || template.tier === 'BL' || 
-			template.species === 'Absol' || template.species === 'Aerodactyl' || template.species === 'Beedrill' || template.species === 'Blastoise' || template.species === 'Charizard' || template.species === 'Mawile' || 
-			template.species === 'Pinsir' || template.species === 'Sableye' || template.species === 'Sharpedo' || template.species === 'Slowbro' || template.species === 'Venusaur')) {
+			template.species === 'Absol' || template.species === 'Aerodactyl' || template.species === 'Audino' || template.species === 'Beedrill' || template.species === 'Blastoise' || template.species === 'Charizard' || template.species === 'Heracross' || template.species === 'Houndoom' || template.species === 'Mawile' || 
+			template.species === 'Medicham' || template.species === 'Pidgeot' || template.species === 'Pinsir' || template.species === 'Sableye' || template.species === 'Sharpedo' || template.species === 'Slowbro' || template.species === 'Steelix' || template.species === 'Venusaur')) {
 				pokemonPool.push(id);
 			}
 		}
@@ -4986,7 +4986,7 @@ exports.BattleScripts = {
 			case 'Basculin': case 'Cherrim': case 'Greninja': case 'Hoopa': case 'Meloetta': case 'Meowstic':
 				if (this.random(2) >= 1) continue;
 				break;
-			case 'Absol': case 'Aerodactyl': case 'Beedrill': case 'Blastoise': case 'Charizard': case 'Mawile': case 'Pinsir': case 'Sableye': case 'Sharpedo': case 'Slowbro': case 'Venusaur':
+			case 'Absol': case 'Aerodactyl': case 'Audino': case 'Beedrill': case 'Blastoise': case 'Charizard': case 'Heracross': case 'Houndoom': case 'Mawile': case 'Medicham': case 'Pidgeot': case 'Pinsir': case 'Sableye': case 'Sharpedo': case 'Slowbro': case 'Steelix': case 'Venusaur':
 				if (teamDetails.megaStone) continue;
 				break;
 			}
@@ -5008,10 +5008,10 @@ exports.BattleScripts = {
 			let set = this[this.gameType === 'singles' ? 'randomSet' : 'randomDoublesSet'](template, pokemon.length, teamDetails);
 
 			let item = this.getItem(set.item);
-			if (template.species === 'Absol' && !item.megaStone || template.species === 'Aerodactyl' && !item.megaStone || template.species === 'Beedrill' && !item.megaStone || template.species === 'Blastoise' && !item.megaStone || 
-			template.species === 'Charizard' && !item.megaStone || template.species === 'Gengar' && item.megaStone || template.species === 'Latias' && item.megaStone || template.species === 'Latios' && item.megaStone || 
-			template.species === 'Lucario' && item.megaStone || template.species === 'Mawile' && !item.megaStone || template.species === 'Pinsir' && !item.megaStone || template.species === 'Sableye' && !item.megaStone || 
-			template.species === 'Salamence' && item.megaStone || template.species === 'Sharpedo' && !item.megaStone || template.species === 'Slowbro' && !item.megaStone || template.species === 'Swampert' && item.megaStone || 
+			if (template.species === 'Absol' && !item.megaStone || template.species === 'Aerodactyl' && !item.megaStone || template.species === 'Audino' && !item.megaStone || template.species === 'Beedrill' && !item.megaStone || template.species === 'Blastoise' && !item.megaStone || 
+			template.species === 'Charizard' && !item.megaStone || template.species === 'Gengar' && item.megaStone || template.species === 'Heracross' && !item.megaStone || template.species === 'Houndoom' && !item.megaStone || template.species === 'Latias' && item.megaStone || template.species === 'Latios' && item.megaStone || 
+			template.species === 'Lucario' && item.megaStone || template.species === 'Mawile' && !item.megaStone || template.species === 'Medicham' && !item.megaStone || template.species === 'Metagross' && item.megaStone || template.species === 'Pidgeot' && !item.megaStone || template.species === 'Pinsir' && !item.megaStone || template.species === 'Sableye' && !item.megaStone || 
+			template.species === 'Salamence' && item.megaStone || template.species === 'Sharpedo' && !item.megaStone || template.species === 'Slowbro' && !item.megaStone || template.species === 'Steelix' && !item.megaStone || template.species === 'Swampert' && item.megaStone || 
 			template.species === 'Tyranitar' && item.megaStone || template.species === 'Venusaur' && !item.megaStone) continue;
 
 			if (template.baseSpecies === 'Zygarde') {
@@ -5225,7 +5225,7 @@ exports.BattleScripts = {
 				if (types.indexOf(type) < 0) continue;
 			}
 			if (template.gen <= this.gen && !template.isMega && !template.isPrimal && !template.isNonstandard && template.randomBattleMoves && (template.tier === 'Uber' || template.species === 'Gengar' || 
-			template.species === 'Kangaskhan' || template.species === 'Lucario' || template.species === 'Salamence')) {
+			template.species === 'Kangaskhan' || template.species === 'Lucario' || template.species === 'Metagross' || template.species === 'Salamence')) {
 				pokemonPool.push(id);
 			}
 		}
@@ -5261,7 +5261,7 @@ exports.BattleScripts = {
 			case 'Basculin': case 'Cherrim': case 'Greninja': case 'Hoopa': case 'Meloetta': case 'Meowstic':
 				if (this.random(2) >= 1) continue;
 				break;
-			case 'Gengar': case 'Kangaskhan': case 'Lucario': case 'Salamence':
+			case 'Gengar': case 'Kangaskhan': case 'Lucario': case 'Metagross': case 'Salamence':
 				if (teamDetails.megaStone) continue;
 				break;
 			}
@@ -5283,7 +5283,7 @@ exports.BattleScripts = {
 			let set = this[this.gameType === 'singles' ? 'randomSet' : 'randomDoublesSet'](template, pokemon.length, teamDetails);
 
 			let item = this.getItem(set.item);
-			if (template.species === 'Blaziken' && item.megaStone || template.species === 'Gengar' && !item.megaStone || template.species === 'Kangaskhan' && !item.megaStone || template.species === 'Lucario' && !item.megaStone || 
+			if (template.species === 'Blaziken' && item.megaStone || template.species === 'Gengar' && !item.megaStone || template.species === 'Kangaskhan' && !item.megaStone || template.species === 'Lucario' && !item.megaStone || template.species === 'Metagross' && !item.megaStone || 
 			template.species === 'Salamence' && !item.megaStone) continue;
 
 			// Illusion shouldn't be the last Pokemon of the team
