@@ -11,14 +11,16 @@ exports.Formats = [
 		section: "SM Singles",
 	},
 	{
-		name: "[LotW 30] Spring Random",
+		name: "[LotW 31] NU (alpha)",
 
 		mod: 'gen7',
-		team: 'randomSpring',
-		ruleset: ['[Gen 7] Random (no PotD)'],
+		ruleset: ['[Gen 7] RU (beta)'],
+		banlist: [
+			'Aerodactyl', 'Araquanid', 'Blastoise', 'Bronzong', 'Bruxish', 'Chesnaught', 'Cloyster', 'Comfey', 'Cresselia', 'Dhelmise', 'Diancie', 'Donphan', 'Doublade', 'Durant', 'Escavalier', 'Espeon', 'Feraligatr',
+			'Florges', 'Flygon', 'Froslass', 'Galvantula', 'Gardevoir', 'Gigalith', 'Glalitite', 'Gligar', 'Golisopod', 'Goodra', 'Heliolisk', 'Heracross', 'Honchkrow', 'Hoopa', 'Jellicent', 'Jolteon', 'Kommo-o',
+			'Linoone', 'Mantine', 'Milotic', 'Nidoqueen', 'Registeel', 'Reuniclus', 'Rhyperior', 'Roserade', 'Rotom-Heat', 'Salazzle', 'Sharpedo', 'Shaymin', 'Snorlax', 'Swellow', 'Torkoal', 'Umbreon', 'Venusaur', 'Zoroark',
+		],
 		onBegin: function() {
-			this.setTerrain('Grassy Terrain');
-			delete this.terrainData.duration;
 			this.add('raw|This is the Ladder of the Week! Use the "Battle!" button to try and win the LotW. The winner is the user who is #1 on the ladder by Sunday. They receive a <img src="http://cbc.pokecommunity.com/config/user-list-images/trophy.png" /> beside their name for a week.');
 		},
 	},
