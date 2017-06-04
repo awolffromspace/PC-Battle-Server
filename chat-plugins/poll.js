@@ -377,11 +377,11 @@ exports.commands = {
 	tournamentpoll: 'tourpoll',
 	tourneypoll: 'tourpoll',
 	tourpoll: function (target, room, user) {
-		const formats = ['OU', 'Ubers', 'UU', 'RU', 'LC', 'VGC', 'Monotype', 'Random', 'Spring Random', '1v1 Random', 'High Tier Random', 'Low Tier Random', 'Uber Random', 'LC Random', 'Monotype Random', 'Generational Random', 'Kanto/Johto/etc Random (random pick)', 'Color Random', 'Inverse Random', 'Orb Random', 'Metronome 3v3 Random', '[Gen 2] Random', '[Gen 1] Random'];
+		const formats = ['OU', 'Ubers', 'UU', 'RU', 'NU', 'LC', 'VGC', 'Monotype', 'Random', 'Spring Random', '1v1 Random', 'High Tier Random', 'Low Tier Random', 'Uber Random', 'LC Random', 'Monotype Random', 'Generational Random', 'Kanto/Johto/etc Random (random pick)', 'Color Random', 'Inverse Random', 'Orb Random', 'Metronome 3v3 Random', '[Gen 2] Random', '[Gen 1] Random'];
 		this.parse('/poll new Tournament format?, ' + formats);
 	},
 	teampoll: function (target, room, user) {
-		const formats = ['OU', 'Ubers', 'UU', 'RU', 'LC', 'VGC', 'Monotype'];
+		const formats = ['OU', 'Ubers', 'UU', 'RU', 'NU', 'LC', 'VGC', 'Monotype'];
 		this.parse('/poll new Tournament format?, ' + formats);
 	},
 	randbatpoll: 'randompoll',
