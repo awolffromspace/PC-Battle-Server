@@ -49,15 +49,14 @@ exports.commands = {
 		if (!this.runBroadcast()) return;
 		this.sendReplyBox(
 			"Sample teams:<br />" +
-			"- <a href=\"http://www.smogon.com/forums/threads/oras-ou-sample-teams.3571343/\">OU</a><br />" +
-			"- <a href=\"http://www.smogon.com/forums/threads/sample-teams-mega-thread-generations-3-4-5-and-6.3550998/\">Ubers</a><br />" +
-			"- <a href=\"http://www.smogon.com/forums/threads/oras-uu-sample-teams-v2.3562531/\">UU</a><br />" +
-			"- <a href=\"http://www.smogon.com/forums/threads/ru-sample-teams-thread-3-0.3551316/\">RU</a><br />" +
-			"- <a href=\"http://www.smogon.com/forums/threads/nu-sample-teams-accepting-teams.3563961/\">NU</a><br />" +
-			"- <a href=\"http://www.smogon.com/forums/threads/sample-teams-v2.3540949/\">PU</a><br />" +
-			"- <a href=\"http://www.smogon.com/forums/threads/multigen-lc-sample-teams.3554452/\">LC</a><br />" +
-			"- <a href=\"http://www.smogon.com/forums/threads/doubles-ou-sample-teams.3548802/\">Doubles OU</a><br />" +
-			"- <a href=\"http://www.smogon.com/forums/threads/monotype-sample-teams.3565507/\">Monotype</a>"
+			"- <a href=\"http://www.smogon.com/forums/threads/sm-ou-sample-teams.3598705/\">OU</a><br />" +
+			"- <a href=\"http://www.smogon.com/forums/threads/sample-teams-sm-submissions-open.3599816/\">Ubers</a><br />" +
+			"- <a href=\"http://www.smogon.com/forums/threads/sm-uu-sample-teams-thread.3591880/\">UU</a><br />" +
+			"- <a href=\"http://www.smogon.com/forums/threads/sm-ru-sample-teams-thread.3598090/\">RU</a><br />" +
+			"- <a href=\"http://www.smogon.com/forums/threads/multigen-lc-sample-teams-from-adv-to-sm.3588679/\">LC</a><br />" +
+			"- <a href=\"http://www.smogon.com/forums/threads/vgc-17-sample-teams.3590391/\">VGC 2017</a><br />" +
+			"- <a href=\"http://www.smogon.com/forums/threads/doubles-ou-team-bazaar-sample-teams-here.3590987/\">Doubles OU</a><br />" +
+			"- <a href=\"http://www.smogon.com/forums/threads/monotype-sample-teams.3599682/\">Monotype</a>"
 		);
 	},
 
