@@ -975,7 +975,7 @@ class Tournament {
 		// Tournament Winnings
 		//
 
-		let color = '#169bd9';
+		let color = '#474bb3';
 		let sizeRequiredToEarn = 3;
 		let currencyName = function (amount) {
 			let name = " Battle Point";
