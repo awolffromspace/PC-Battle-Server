@@ -913,12 +913,12 @@ class Tournament {
 		let sizeRequiredToEarn = 3;
 		if (from === winner) {
 			result = 'win';
-			if (tourSize >= sizeRequiredToEarn && this.format !== 'gen71v1random' && this.format !== 'gen71v1challengecup' && this.format !== 'gen71v1') {
+			if (tourSize >= sizeRequiredToEarn && this.format !== 'gen71v1random' && this.format !== 'gen71v1challengecup' && this.format !== 'gen71v1' && this.format !== 'gen7battlespotspecial4') {
 				Db('bp').set(from, Db('bp').get(from, 0) + 1);
 			}
 		} else if (to === winner) {
 			result = 'loss';
-			if (tourSize >= sizeRequiredToEarn && this.format !== 'gen71v1random' && this.format !== 'gen71v1challengecup' && this.format !== 'gen71v1') {
+			if (tourSize >= sizeRequiredToEarn && this.format !== 'gen71v1random' && this.format !== 'gen71v1challengecup' && this.format !== 'gen71v1' && this.format !== 'gen7battlespotspecial4') {
 				Db('bp').set(to, Db('bp').get(to, 0) + 1);
 			}
 		}
