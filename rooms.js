@@ -844,7 +844,7 @@ class BattleRoom extends Room {
 		}
 		if (this.tour) {
 			this.tour.onBattleWin(this, winnerid);
-			if (this.format !== 'gen71v1random' && this.format !== 'gen71v1challengecup' && this.format !== 'gen71v1') {
+			if (this.format !== 'gen71v1random' && this.format !== 'gen71v1challengecup' && this.format !== 'gen71v1' && this.format !== 'gen7battlespotspecial4') {
 				this.push("|raw|<b><font color='" + color + "'>" + Chat.escapeHTML(winnerid) + "</font> has won " + "<font color='" + color + "'>1</font>" + " Battle Point for winning the tournament battle!</b>");
 			}
 		}
