@@ -787,7 +787,7 @@ class BattleRoom extends Room {
 		// Declare variables here in case we need them for non-rated battles logging.
 		let p1score = 0.5;
 		let winnerid = toId(winner);
-		let color = '#169bd9';
+		let color = '#474bb3';
 
 		// Check if the battle was rated to update the ladder, return its response, and log the battle.
 		if (this.rated) {
