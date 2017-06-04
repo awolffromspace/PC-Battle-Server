@@ -197,6 +197,7 @@ let emotes = {
 	':taco:': 'http://cbc.pokecommunity.com/config/emoticons/taco.png',
 	':taillow:': 'http://cbc.pokecommunity.com/config/emoticons/taillow.png',
 	':thinkeng:': 'http://cbc.pokecommunity.com/config/emoticons/thinkeng.png',
+	':thonkeng:': 'http://cbc.pokecommunity.com/config/emoticons/thinkeng.png',
 	':thinkform:': 'http://cbc.pokecommunity.com/config/emoticons/thinkform.png',
 	':thonk:': 'http://cbc.pokecommunity.com/config/emoticons/thonk.png',
 	':thonkang:': 'http://cbc.pokecommunity.com/config/emoticons/thonkang.png',
@@ -359,7 +360,7 @@ function parseEmoticons(message, room, user, pm) {
 		if (match === ':thonk:') return typeof emote != 'undefined' ?
 			'<img src="' + emote + '" title="' + match + '" width="35" height="30"/>' :
 			match;
-		if (match === ':thinkeng:' || match === ':thonkang:') return typeof emote != 'undefined' ?
+		if (match === ':thinkeng:' || match === ':thonkeng:' || match === ':thonkang:') return typeof emote != 'undefined' ?
 			'<img src="' + emote + '" title="' + match + '" width="29" height="30"/>' :
 			match;
 		if (match === ':viper:') return typeof emote != 'undefined' ?
