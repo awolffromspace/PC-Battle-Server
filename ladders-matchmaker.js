@@ -53,12 +53,6 @@ class Matchmaker {
 	searchBattle(user, formatid) {
 		if (!user.connected) return;
 		formatid = Dex.getFormat(formatid).id;
-		return user.prepBattle(formatid, 'search', null)
-			.then(result => this.finishSearchBattle(user, formatid, result));
-	}
-
-	finishSearchBattle(user, formatid, result) {
-		if (!result) return;
 
 		if (!user.locked && !Rooms.lobby.isMuted(user)) {
 			if (Rooms.lobby.disableLadderMessages) return false;
@@ -67,6 +61,13 @@ class Matchmaker {
 			user.lastLadderFormat = formatid;
 			user.lastLadderTime = Date.now();
 		}
+
+		return user.prepBattle(formatid, 'search', null)
+			.then(result => this.finishSearchBattle(user, formatid, result));
+	}
+
+	finishSearchBattle(user, formatid, result) {
+		if (!result) return;
 
 		// Get the user's rating before actually starting to search.
 		Ladders(formatid).getRating(user.userid).then(rating => {
