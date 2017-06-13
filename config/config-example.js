@@ -619,7 +619,8 @@ exports.customavatars = {
 	'snow': 'snow.gif',
 	'moocyst': 'moocyst.png',
 	'oddsh': 'oddsh.png',
-	'wifinetwork': 'wifinetwork.gif',
+	'wifinetwork': 'wifinetwork.png',
+	'everlastingsnow': 'wifinetwork.png',
 	'pdge': 'pdge.png',
 	'jnssen': 'pdge.png',
 	'sria': 'pdge.png',
@@ -631,6 +632,8 @@ exports.customavatars = {
 	'mrep': 'sheep.png',
 	'madnessftw': 'madnessftw.png',
 	'mdki': 'mdki.png',
+	'violentcharizard21': 'violentcharizard21.gif',
+	'voltyshocks': 'voltyshocks.png',
 };
 
 // custom avatars appear in profile by specifiying server url.
