@@ -713,6 +713,7 @@ class CommandContext {
 				}
 				user.lastMessage = message;
 				user.lastMessageTime = Date.now();
+				}
 			}
 
 			if (Config.chatfilter) {
