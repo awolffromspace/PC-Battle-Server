@@ -651,8 +651,10 @@ exports.ratedtours = false;
 // which case users won't be given any information on how to appeal.
 exports.appealurl = 'http://www.pokecommunity.com/showthread.php?t=289012#seniorstaff';
 
+// repl - whether repl sockets are enabled or not
 // replsocketprefix - the prefix for the repl sockets to be listening on
 // replsocketmode - the file mode bits to use for the repl sockets
+exports.repl = true;
 exports.replsocketprefix = './logs/repl/';
 exports.replsocketmode = 0o600;
 
