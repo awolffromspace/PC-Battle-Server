@@ -619,7 +619,8 @@ exports.customavatars = {
 	'snow': 'snow.gif',
 	'moocyst': 'moocyst.png',
 	'oddsh': 'oddsh.png',
-	'wifinetwork': 'wifinetwork.gif',
+	'wifinetwork': 'wifinetwork.png',
+	'everlastingsnow': 'wifinetwork.png',
 	'pdge': 'pdge.png',
 	'jnssen': 'pdge.png',
 	'sria': 'pdge.png',
@@ -631,6 +632,8 @@ exports.customavatars = {
 	'mrep': 'sheep.png',
 	'madnessftw': 'madnessftw.png',
 	'mdki': 'mdki.png',
+	'violentcharizard21': 'violentcharizard21.gif',
+	'voltyshocks': 'voltyshocks.png',
 };
 
 // custom avatars appear in profile by specifiying server url.
@@ -651,8 +654,10 @@ exports.ratedtours = false;
 // which case users won't be given any information on how to appeal.
 exports.appealurl = 'http://www.pokecommunity.com/showthread.php?t=289012#seniorstaff';
 
+// repl - whether repl sockets are enabled or not
 // replsocketprefix - the prefix for the repl sockets to be listening on
 // replsocketmode - the file mode bits to use for the repl sockets
+exports.repl = true;
 exports.replsocketprefix = './logs/repl/';
 exports.replsocketmode = 0o600;
 
