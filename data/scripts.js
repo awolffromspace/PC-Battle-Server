@@ -5149,10 +5149,6 @@ exports.BattleScripts = {
 
 			if (template.species === 'Gothitelle') {
 				set.ability = 'Frisk';
-			} else if (template.species === 'Ninetales') {
-				set.ability = 'Flash Fire';
-			} else if (template.species === 'Politoed') {
-				set.ability = 'Water Absorb';
 			} else if (template.species === 'Wobbuffet') {
 				set.ability = 'Telepathy';
 			}
