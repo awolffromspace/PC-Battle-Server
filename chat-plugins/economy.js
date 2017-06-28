@@ -306,6 +306,69 @@ exports.commands = {
 		display += "</tbody></table>";
 		this.sendReply("|raw|" + display);
 	},
+	
+	
+	dicegame: 'startdice',
+	dicestart: 'startdice',
+	startdice: function (target, room, user) {
+		if (!this.can('broadcast', null, room)) return false;
+		if (!target) return this.parse('/help startdice');
+		if (!this.canTalk()) return this.errorReply("You can not start dice games while unable to speak.");
+
+		let amount = isMoney(target);
+
+		if (typeof amount === 'string') return this.errorReply(amount);
+		if (!room.dice) room.dice = {};
+		if (room.dice.started) return this.errorReply("A dice game has already started in this room.");
+
+		room.dice.started = true;
+		room.dice.bet = amount;
+		// Prevent ending a dice game too early.
+		room.dice.startTime = Date.now();
+
+		room.addRaw("<div class='infobox'><h2><center><font color=#24678d>" + user.name + " has started a dice game for </font><font color=red>" + amount + "</font><font color=#24678d>" + currencyName(amount) + ".</font><br><button name='send' value='/joindice'>Click to join.</button></center></h2></div>");
+	},
+	startdicehelp: ["/startdice [bet] - Start a dice game to gamble for Battle Points."],
+
+	joindice: function (target, room, user) {
+		if (!room.dice || (room.dice.p1 && room.dice.p2)) return this.errorReply("There is no dice game in it's signup phase in this room.");
+		if (!this.canTalk()) return this.errorReply("You may not join dice games while unable to speak.");
+		if (room.dice.p1 === user.userid) return this.errorReply("You already entered this dice game.");
+		if (Db('bp').get(user.userid, 0) < room.dice.bet) return this.errorReply("You don't have enough Battle Points to join this game.");
+		Db('bp').set(user.userid, Db('bp').get(user.userid) - room.dice.bet);
+		if (!room.dice.p1) {
+			room.dice.p1 = user.userid;
+			room.addRaw("<b>" + user.name + " has joined the dice game.</b>");
+			return;
+		}
+		room.dice.p2 = user.userid;
+		room.addRaw("<b>" + user.name + " has joined the dice game.</b>");
+		let p1Number = Math.floor(6 * Math.random()) + 1;
+		let p2Number = Math.floor(6 * Math.random()) + 1;
+		let output = "<div class='infobox'>Game has two players, starting now.<br>Rolling the dice.<br>" + room.dice.p1 + " has rolled a " + p1Number + ".<br>" + room.dice.p2 + " has rolled a " + p2Number + ".<br>";
+		while (p1Number === p2Number) {
+			output += "Tie... rolling again.<br>";
+			p1Number = Math.floor(6 * Math.random()) + 1;
+			p2Number = Math.floor(6 * Math.random()) + 1;
+			output += room.dice.p1 + " has rolled a " + p1Number + ".<br>" + room.dice.p2 + " has rolled a " + p2Number + ".<br>";
+		}
+		let winner = room.dice[p1Number > p2Number ? 'p1' : 'p2'];
+		output += "<font color=#24678d><b>" + winner + "</b></font> has won <font color=#24678d><b>" + room.dice.bet + "</b></font>" + currencyName(room.dice.bet) + ".<br>Better luck next time " + room.dice[p1Number < p2Number ? 'p1' : 'p2'] + "!</div>";
+		room.addRaw(output);
+		Db('bp').set(winner, Db('bp').get(winner, 0) + room.dice.bet * 2);
+		delete room.dice;
+	},
+
+	enddice: function (target, room, user) {
+		if (!user.can('broadcast', null, room)) return false;
+		if (!room.dice) return this.errorReply("There is no dice game in this room.");
+		if ((Date.now() - room.dice.startTime) < 15000 && !user.can('broadcast', null, room)) return this.errorReply("Regular users may not end a dice game within the first minute of it starting.");
+		if (room.dice.p2) return this.errorReply("Dice game has already started.");
+		if (room.dice.p1) Db('bp').set(room.dice.p1, Db('bp').get(room.dice.p1, 0) + room.dice.bet);
+		room.addRaw("<b>" + user.name + " ended the dice game.</b>");
+		delete room.dice;
+	},
+
 
 	bpstats: 'economystats',
 	bp: 'economystats',
