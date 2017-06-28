@@ -90,10 +90,6 @@ function currencyName(amount) {
 	return amount === 1 ? name : name + "s";
 }
 
-function titleCSS(text) {
-	return '<span class="profile-title">' + text + '</span>';
-}
-
 Profile.prototype.avatar = function () {
 	if (this.isOnline) {
 		if (typeof this.image === 'string') return img(this.url + this.image);
@@ -138,25 +134,17 @@ Profile.prototype.seen = function (timeAgo) {
 	return label('Last Seen') + moment(timeAgo).fromNow();
 };
 
-Profile.prototype.title = function (amount) {
-	return titleCSS(amount);
+Profile.prototype.title = function (user) {
+	let title = Db('titles').get(user);
+	if (!Db('titles').has(user)) return '';
+	return SPACE + title;
 };
 
 Profile.prototype.show = function (callback) {
 	let userid = toId(this.username);
-	let title = Db('title').get(toId(userid));
-
-	if (title) {
+	
 		return this.buttonAvatar() +
-			SPACE + this.title(Db('title').get(userid)) + BR +
-			SPACE + this.name() + BR +
-			SPACE + this.group() + BR +
-			SPACE + this.money(Db('bp').get(userid, 0)) + BR +
-			SPACE + this.seen(Db('seen').get(userid)) +
-			'<br clear="all">';
-	} else {
-		return this.buttonAvatar() +
-			SPACE + this.name() + BR +
+			SPACE + this.name() + this.title(userid) + BR +
 			SPACE + this.group() + BR +
 			SPACE + this.money(Db('bp').get(userid, 0)) + BR +
 			SPACE + this.seen(Db('seen').get(userid)) +
@@ -177,5 +165,41 @@ exports.commands = {
 		}
 		this.sendReplyBox(profile.show());
 	},
-	profilehelp: ["/profile -	Shows information regarding user's name, group, Battle Points, and when they were last seen."],
+	profilehelp: ["/profile -	Shows information regarding user'sname, group, Battle Points, and when they were last seen."],
+	
+		title: function (target) {
+		let parts = target.split(', ');
+		if (!this.can('broadcast')) return false;
+		let user = parts[1];
+		if (!user) return this.parse("/help title");
+		if (!parts[0]) return this.parse("/help title");
+		if (hasUpperCase(user) && parts[0] === 'set') { //Ensure the username isn't capitalized
+			return this.parse("/title " + parts[0] + ", " + parts[1].toLowerCase() + ", " + parts[2] + ", " + parts[3]); // Re-Parse the command with the username lowercased
+		}
+
+		switch (parts[0]) {
+		case 'set':
+			let hex = parts[2];
+			let text = parts[3];
+			if (!hex || !text) return this.errorReply("Ensure you have set a title and hex");
+
+			let title = '<font color = ' + hex + '><b>(' + text + ')</b></font>';
+			if (Db('titles').has(user)) return false;
+			Db('titles').set(user, title);
+			Users(user).send('|popup| You have recieved a custom title');
+			this.sendReply('|html|You have set the custom title');
+			break;
+		case 'delete':
+			if (!Db('titles').has(user)) return false;
+			Db('titles').delete(user);
+			Users(user).send('|popup| Your custom title has been removed');
+			this.sendReply("You have removed " + user + "s' custom title");
+			break;
+		default:
+			this.parse("/help title");
+		}
+	},
+	titlehelp: ["/title set, user, hex, title - Sets a users title",
+		"/title delete, user - Deletes a users title.",
+	],
 };
