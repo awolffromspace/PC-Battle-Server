@@ -18,6 +18,12 @@ exports.port = 8000;
 //   know what you are doing.
 exports.proxyip = false;
 
+// ofe - write heapdumps if sockets.js workers run out of memory.
+//   If you wish to enable this, you will need to install ofe, as it is not a
+//   installed by default:
+//     $ npm install --no-save ofe
+exports.ofe = false;
+
 // Pokemon of the Day - put a pokemon's name here to make it Pokemon of the Day
 //   The PotD will always be in the #2 slot (not #1 so it won't be a lead)
 //   in every Random Battle team.
@@ -55,7 +61,10 @@ Y929lRybWEiKUr+4Yw2O1W0CAwEAAQ==
 // crashguardemail - if the server has been running for more than an hour
 //   and crashes, send an email using these settings, rather than locking down
 //   the server. Uncomment this definition if you want to use this feature;
-//   otherwise, all crashes will lock down the server.
+//   otherwise, all crashes will lock down the server. If you wish to enable
+//   this setting, you will need to install nodemailer, as it is not installed
+//   by default:
+//     $ npm install --no-save nodemailer
 /**exports.crashguardemail = {
 	options: {
 		host: 'mail.example.com',
@@ -185,6 +194,11 @@ exports.simulatorprocesses = 1;
 // inactiveuserthreshold - how long a user must be inactive before being pruned
 // from the `users` array. The default is 1 hour.
 exports.inactiveuserthreshold = 1000 * 60 * 60;
+
+// autolockdown - whether or not to automatically kill the server when it is
+// in lockdown mode and the final battle finishes.  This is potentially useful
+// to prevent forgetting to restart after a lockdown where battles are finished.
+exports.autolockdown = true;
 
 // tellsexpiryage - how long an offline message remains in existence before being removed.
 // By default, 7 days
@@ -825,5 +839,17 @@ exports.grouplist = [
 		ip: 's',
 		broadcast: true,
 		alts: '~u',
+	},
+	{
+		name: 'Locked',
+		id: 'locked',
+		symbol: '‽',
+		punishgroup: 'LOCK',
+	},
+	{
+		name: 'Muted',
+		id: 'muted',
+		symbol: '!',
+		punishgroup: 'MUTE',
 	},
 ];

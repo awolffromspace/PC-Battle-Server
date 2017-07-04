@@ -1,13 +1,13 @@
 'use strict';
 
-const fs = require('fs');
+const FS = require('./../fs');
 const path = require('path');
 const ProcessManager = require('./../process-manager');
 const execFileSync = require('child_process').execFileSync;
 
 const MAX_PROCESSES = 1;
 const RESULTS_MAX_LENGTH = 100;
-const LOG_PATH = '../logs/modlog/';
+const LOG_PATH = 'logs/modlog/';
 
 class ModlogManager extends ProcessManager {
 	onMessageUpstream(message) {
@@ -24,13 +24,13 @@ class ModlogManager extends ProcessManager {
 		}
 	}
 
-	onMessageDownstream(message) {
+	async onMessageDownstream(message) {
 		// protocol:
-		// "[id]|[room]|[searchString]|[exactSearch]|[maxLines]"
+		// "[id]|[comma-separated list of room ids]|[searchString]|[exactSearch]|[maxLines]"
 		let pipeIndex = message.indexOf('|');
 		let nextPipeIndex = message.indexOf('|', pipeIndex + 1);
 		let id = message.substr(0, pipeIndex);
-		let room = message.substr(pipeIndex + 1, nextPipeIndex - pipeIndex - 1);
+		let rooms = message.substr(pipeIndex + 1, nextPipeIndex - pipeIndex - 1);
 
 		pipeIndex = nextPipeIndex;
 		nextPipeIndex = message.indexOf('|', pipeIndex + 1);
@@ -41,19 +41,19 @@ class ModlogManager extends ProcessManager {
 		let exactSearch = message.substr(pipeIndex + 1, nextPipeIndex - pipeIndex - 1);
 		let maxLines = message.substr(nextPipeIndex + 1);
 
-		process.send(id + '|' + this.receive(room, searchString, exactSearch, maxLines));
+		process.send(id + '|' + await this.receive(rooms, searchString, exactSearch, maxLines));
 	}
 
-	receive(room, searchString, exactSearch, maxLines) {
+	async receive(rooms, searchString, exactSearch, maxLines) {
 		let result;
 		exactSearch = exactSearch === '1';
 		maxLines = Number(maxLines);
 		if (isNaN(maxLines) || maxLines > RESULTS_MAX_LENGTH || maxLines < 1) maxLines = RESULTS_MAX_LENGTH;
 		try {
-			result = '1|' + runModlog(room, searchString, exactSearch, maxLines);
+			result = '1|' + await runModlog(rooms.split(','), searchString, exactSearch, maxLines);
 		} catch (err) {
 			require('../crashlogger')(err, 'A modlog query', {
-				room: room,
+				rooms: rooms,
 				searchString: searchString,
 				exactSearch: exactSearch,
 				maxLines: maxLines,
@@ -71,6 +71,19 @@ const PM = exports.PM = new ModlogManager({
 	maxProcesses: MAX_PROCESSES,
 	isChatBased: true,
 });
+
+if (!process.send) {
+	PM.spawn();
+}
+
+if (process.send && module === process.mainModule) {
+	global.Config = require('../config/config');
+	global.Dex = require('../sim/dex');
+	global.toId = Dex.getId;
+	process.on('message', message => PM.onMessageDownstream(message));
+	process.on('disconnect', () => process.exit());
+	require('../repl').start('modlog', cmd => eval(cmd));
+}
 
 class SortedLimitedLengthList {
 	constructor(maxSize) {
@@ -107,7 +120,7 @@ class SortedLimitedLengthList {
 function checkRipgrepAvailability() {
 	if (Config.ripgrepmodlog === undefined) {
 		try {
-			execFileSync('rg', ['--version'], {cwd: path.normalize(`${__dirname}/${LOG_PATH}`)});
+			execFileSync('rg', ['--version'], {cwd: path.normalize(`${__dirname}/../${LOG_PATH}`)});
 			Config.ripgrepmodlog = true;
 		} catch (error) {
 			Config.ripgrepmodlog = false;
@@ -116,90 +129,63 @@ function checkRipgrepAvailability() {
 	return Config.ripgrepmodlog;
 }
 
-function runModlog(room, searchString, exactSearch, maxLines) {
+async function runModlog(rooms, searchString, exactSearch, maxLines) {
 	const useRipgrep = checkRipgrepAvailability();
 	let fileNameList = [];
-	if (room === 'all') {
-		const fileList = fs.readdirSync(`${__dirname}/${LOG_PATH}`);
-		for (let i = 0; i < fileList.length; i++) {
-			fileNameList.push(fileList[i]);
+	let checkAllRooms = false;
+	for (let i = 0; i < rooms.length; i++) {
+		if (rooms[i] === 'all') {
+			checkAllRooms = true;
+			const fileList = await FS(LOG_PATH).readdir();
+			for (let i = 0; i < fileList.length; i++) {
+				fileNameList.push(fileList[i]);
+			}
+		} else {
+			fileNameList.push(`modlog_${rooms[i]}.txt`);
 		}
-	} else if (room === 'public') {
-		const isPublicRoom = (room => !(room.isPrivate || room.battle || room.isPersonal || room.id === 'global'));
-		const publicRoomIds = Array.from(Rooms.rooms.values()).filter(isPublicRoom).map(room => room.id);
-		for (let i = 0; i < publicRoomIds.length; i++) {
-			fileNameList.push(`modlog_${publicRoomIds[i]}.txt`);
-		}
-	} else {
-		fileNameList = [`modlog_${room}.txt`];
 	}
 
-	let searchStringRegex;
+	let regexString;
 	if (!searchString) {
-		searchStringRegex = new RegExp('.');
+		regexString = '.';
 	} else if (exactSearch) {
-		const escapedSearchString = searchString.replace(/\W/g, '\\$&');
-		searchStringRegex = new RegExp(escapedSearchString, 'i');
+		regexString = searchString.replace(/[\\.+*?()|[\]{}^$]/g, '\\$&');
 	} else {
 		searchString = toId(searchString);
-		searchStringRegex = new RegExp(`\\b${searchString.split('').join('\\W*')}\\b`, 'i');
+		regexString = `\\b${searchString.split('').join('[\\W_]*')}\\b`;
 	}
 
 	let results = new SortedLimitedLengthList(maxLines);
 	if (useRipgrep && searchString) {
-		if (room === 'all') fileNameList = [`${__dirname}/${LOG_PATH}`];
-		runRipgrepModlog(fileNameList, searchStringRegex, results);
+		// the entire directory is searched by default, no need to list every file manually
+		if (checkAllRooms) fileNameList = [LOG_PATH];
+		runRipgrepModlog(fileNameList, regexString, results);
 	} else {
-		fileNameList = fileNameList.map(filename => path.normalize(`${__dirname}/${LOG_PATH}${filename}`));
+		fileNameList = fileNameList.map(filename => `${LOG_PATH}${filename}`);
+		const searchStringRegex = new RegExp(regexString, 'i');
 		for (let i = 0; i < fileNameList.length; i++) {
-			checkRoomModlog(fileNameList[i], searchStringRegex, results);
+			await checkRoomModlog(fileNameList[i], searchStringRegex, results);
 		}
 	}
 	const resultData = results.getListClone();
 	return resultData.join('\n');
 }
 
-function checkRoomModlog(path, regex, results) {
-	if (!fs.existsSync(path)) return results;
-	let newLines = [];
-	let lineFragment = '';
-	let blockSize = 1024;
-	let buf = Buffer.alloc(blockSize);
-	const stats = fs.statSync(path);
-	let startPos = stats.size;
-	const fd = fs.openSync(path, 'r');
-
-	outerLoop: do {
-		startPos -= blockSize;
-		if (startPos < 0) {
-			blockSize += startPos;
-			startPos = 0;
+async function checkRoomModlog(path, regex, results) {
+	const fileContents = await FS(path).readTextIfExists();
+	for (const line of fileContents.toString().split('\n').reverse()) {
+		if (regex.test(line)) {
+			const insertionSuccessful = results.tryInsert(line);
+			if (!insertionSuccessful) break;
 		}
-		const bytesRead = fs.readSync(fd, buf, 0, blockSize, startPos);
-		newLines = buf.toString().substr(0, bytesRead).split('\n').reverse();
-		newLines[0] += lineFragment;
-		lineFragment = newLines[newLines.length - 1];
-		if (startPos > 0) newLines.splice(-1, 1);
-		for (let i = 0; i < newLines.length; i++) {
-			if (newLines[i] && regex.test(newLines[i])) {
-				const insertionSuccessful = results.tryInsert(newLines[i]);
-				if (!insertionSuccessful) {
-					break outerLoop;
-				}
-			}
-		}
-	} while (startPos > 0);
-
-	fs.close(fd);
-
+	}
 	return results;
 }
 
-function runRipgrepModlog(paths, regex, results) {
-	let regexString = regex.source;
+function runRipgrepModlog(paths, regexString, results) {
 	let stdout;
 	try {
-		stdout = execFileSync('rg', ['-i', '-e', regexString, '--no-filename', '--no-line-number', ...paths], {cwd: path.normalize(`${__dirname}/${LOG_PATH}`)});
+		stdout = execFileSync('rg', ['-i', '-e', regexString, '--no-filename', '--no-line-number', ...paths], {cwd: path.normalize(`${__dirname}/../${LOG_PATH}`)});
 	} catch (error) {
 		return results;
 	}
@@ -305,8 +291,19 @@ exports.commands = {
 			searchString = searchString.substring(1, searchString.length - 1);
 		}
 
-		PM.send(roomId, searchString, exactSearch, lines).then(response => connection.popup(prettifyResults(response, roomId, searchString, exactSearch, addModlogLinks, hideIps)));
-		if (cmd === 'timedmodlog') this.sendReply(`The modlog query took ${Date.now() - startTime} ms to complete.`);
+		let roomIdList;
+		// handle this here so the child process doesn't have to load rooms data
+		if (roomId === 'public') {
+			const isPublicRoom = (room => !(room.isPrivate || room.battle || room.isPersonal || room.id === 'global'));
+			roomIdList = Array.from(Rooms.rooms.values()).filter(isPublicRoom).map(room => room.id);
+		} else {
+			roomIdList = [roomId];
+		}
+
+		PM.send(roomIdList.join(','), searchString, exactSearch, lines).then(response => {
+			connection.popup(prettifyResults(response, roomId, searchString, exactSearch, addModlogLinks, hideIps));
+			if (cmd === 'timedmodlog') this.sendReply(`The modlog query took ${Date.now() - startTime} ms to complete.`);
+		});
 	},
 	modloghelp: ["/modlog [roomid|all|public], [n] - Roomid defaults to current room.",
 		"If n is a number or omitted, display the last n lines of the moderator log. Defaults to 20.",
