@@ -11,18 +11,19 @@ exports.Formats = [
 		section: "SM Singles",
 	},
 	{
-		name: "[LotW 32] Inverse Random",
+		name: "[LotW 33] BSS Factory",
+		desc: [
+			"Randomised 3v3 Singles featuring Pok&eacute;mon and movesets popular in Battle Spot Singles.",
+			"&bullet; <a href=\"https://www.smogon.com/forums/threads/3604845/\">Information and Suggestions Thread</a>",
+		],
 
 		mod: 'gen7',
-		team: 'randomNoPotD',
-		ruleset: ['[Gen 7] Random (no PotD)'],
-		onNegateImmunity: false,
-		onEffectiveness: function (typeMod, target, type, move) {
-			// The effectiveness of Freeze Dry on Water isn't reverted
-			if (move && move.id === 'freezedry' && type === 'Water') return;
-			if (move && !this.getImmunity(move, type)) return 1;
-			return -typeMod;
+		team: 'randomBSSFactory',
+		teamLength: {
+			validate: [3, 6],
+			battle: 3,
 		},
+		ruleset: ['Pokemon', 'Standard GBU', 'Team Preview'],
 		onBegin: function() {
 			this.add('raw|This is the Ladder of the Week! Use the "Battle!" button to try and win the LotW. The winner is the user who is #1 on the ladder by Sunday. They receive a <img src="http://cbc.pokecommunity.com/config/user-list-images/trophy.png" /> beside their name for a week.');
 		},
