@@ -370,13 +370,13 @@ exports.Formats = [
 		team: 'randomHighTier',
 		ruleset: ['[Gen 7] Random (no PotD)'],
 	},
-	{
+	/*{
 		name: "[Gen 7] Low Tier Random",
 
 		mod: 'gen7',
 		team: 'randomLowTier',
 		ruleset: ['[Gen 7] Random (no PotD)'],
-	},
+	},*/
 	{
 		name: "[Gen 7] Uber Random",
 
@@ -517,7 +517,7 @@ exports.Formats = [
 		},
 		ruleset: ['Pokemon', 'Standard GBU', 'Team Preview'],
 	},
-	{
+	/*{
 		name: "[Gen 7] Super Staff Bros. Melee",
 
 		mod: 'staffbrosmelee',
@@ -1908,7 +1908,7 @@ exports.Formats = [
 				}
 			}
 		},
-	},
+	},*/
 	{
 		name: "[Gen 7] Hackmons Cup",
 		desc: ["Randomized teams of level-balanced Pok&eacute;mon with absolutely any ability, moves, and item."],
