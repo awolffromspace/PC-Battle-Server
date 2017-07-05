@@ -648,6 +648,7 @@ exports.customavatars = {
 	'mdki': 'mdki.png',
 	'violentcharizard21': 'violentcharizard21.gif',
 	'voltyshocks': 'voltyshocks.png',
+	'saincweedle12': 'saincweedle12.png',
 };
 
 // custom avatars appear in profile by specifiying server url.
