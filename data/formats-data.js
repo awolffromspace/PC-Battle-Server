@@ -3754,8 +3754,8 @@ exports.BattleFormatsData = {
 		tier: "LC",
 	},
 	wormadam: {
-		randomBattleMoves: ["gigadrain", "signalbeam", "protect", "toxic", "synthesis"],
-		randomDoubleBattleMoves: ["leafstorm", "gigadrain", "signalbeam", "hiddenpowerice", "hiddenpowerrock", "stringshot", "protect"],
+		randomBattleMoves: ["gigadrain", "bugbuzz", "protect", "toxic", "synthesis"],
+		randomDoubleBattleMoves: ["leafstorm", "gigadrain", "bugbuzz", "hiddenpowerice", "hiddenpowerrock", "stringshot", "protect"],
 		tier: "NU",
 	},
 	wormadamsandy: {
@@ -6436,7 +6436,7 @@ exports.BattleFormatsData = {
 			{"generation": 7, "level": 50, "moves":["spectralthief", "closecombat", "forcepalm", "shadowball"], "pokeball": "cherishball"},
 		],
 		eventOnly: true,
-		tier: "OU",
+		tier: "Uber",
 	},
 	missingno: {
 		randomBattleMoves: ["watergun", "skyattack", "doubleedge", "metronome"],
