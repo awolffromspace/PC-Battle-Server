@@ -16,7 +16,6 @@ let emotes = {
 	':arceus:': 'http://cbc.pokecommunity.com/config/emoticons/arceus.png',
 	':armycat:': 'http://cbc.pokecommunity.com/config/emoticons/armycat.png',
 	':ashhug:': 'http://cbc.pokecommunity.com/config/emoticons/ashhug.png',
-	':azelf:': 'http://cbc.pokecommunity.com/config/emoticons/azelf.png',
 	':ball:': 'http://cbc.pokecommunity.com/config/emoticons/ball.gif',
 	':barrel:': 'http://cbc.pokecommunity.com/config/emoticons/barrel.gif',
 	':bastion:': 'http://cbc.pokecommunity.com/config/emoticons/bastion.png',
