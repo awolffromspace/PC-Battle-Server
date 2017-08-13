@@ -138,8 +138,10 @@ exports.punishmentautolock = false;
 exports.chatmodchat = false;
 // battle modchat - default minimum group for speaking in battles; changeable with /modchat
 exports.battlemodchat = false;
-// pm modchat - minimum group for PMing other users, challenging other users, and laddering
+// pm modchat - minimum group for PMing other users, challenging other users
 exports.pmmodchat = false;
+// ladder modchat - minimum group for laddering
+exports.laddermodchat = false;
 
 // forced timer - force the timer on for all battles
 //   Players will be unable to turn it off.
@@ -635,11 +637,12 @@ exports.customavatars = {
 	'oddsh': 'oddsh.png',
 	'wifinetwork': 'wifinetwork.png',
 	'everlastingsnow': 'wifinetwork.png',
-	'pdge': 'pdge.png',
-	'jnssen': 'pdge.png',
-	'sria': 'pdge.png',
-	'pabloocean': 'pdge.png',
-	'blnd': 'pdge.png',
+	'pdge': 'yehw.png',
+	'jnssen': 'yehw.png',
+	'sria': 'yehw.png',
+	'pabloocean': 'yehw.png',
+	'blnd': 'yehw.png',
+	'yehw': 'yehw.png',
 	'kwstaspaokara': 'kwstaspaokara.png',
 	'jannasheep': 'sheep.png',
 	'jnna': 'sheep.png',
