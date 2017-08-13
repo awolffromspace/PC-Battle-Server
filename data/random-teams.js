@@ -4133,8 +4133,8 @@ class RandomTeams extends Dex.ModdedDex {
 			if (template.gen <= this.gen && !template.isMega && !template.isPrimal && !template.isNonstandard && template.randomBattleMoves && (template.tier === 'OU' || template.tier === 'UU' || template.tier === 'BL' || 
 			template.species === 'Abomasnow' || template.species === 'Absol' || template.species === 'Aerodactyl' || template.species === 'Aggron' || template.species === 'Altaria' || template.species === 'Ampharos' || 
 			template.species === 'Banette' || template.species === 'Beedrill' || template.species === 'Blastoise' || template.species === 'Camerupt' || template.species === 'Charizard' || template.species === 'Diancie' || 
-			template.species === 'Heracross' || template.species === 'Houndoom' || template.species === 'Mawile' || template.species === 'Medicham' || template.species === 'Pidgeot' || template.species === 'Sceptile' || 
-			template.species === 'Pinsir' || template.species === 'Sableye' || template.species === 'Sharpedo' || template.species === 'Slowbro' || template.species === 'Steelix' || template.species === 'Venusaur')) {
+			template.species === 'Heracross' || template.species === 'Houndoom' || template.species === 'Mawile' || template.species === 'Medicham' || template.species === 'Pidgeot' || template.species === 'Pinsir' || 
+			template.species === 'Sableye' || template.species === 'Sceptile' || template.species === 'Sharpedo' || template.species === 'Slowbro' || template.species === 'Steelix' || template.species === 'Venusaur')) {
 				pokemonPool.push(id);
 			}
 		}
@@ -4170,7 +4170,7 @@ class RandomTeams extends Dex.ModdedDex {
 			case 'Basculin': case 'Cherrim': case 'Greninja': case 'Hoopa': case 'Meloetta': case 'Meowstic':
 				if (this.random(2) >= 1) continue;
 				break;
-			case 'Absol': case 'Aerodactyl': case 'Audino': case 'Beedrill': case 'Blastoise': case 'Charizard': case 'Heracross': case 'Houndoom': case 'Mawile': case 'Medicham': case 'Pidgeot': case 'Pinsir': case 'Sableye': case 'Sharpedo': case 'Slowbro': case 'Steelix': case 'Venusaur':
+			case 'Abomasnow': case 'Absol': case 'Aerodactyl': case 'Aggron': case 'Altaria': case 'Ampharos': case 'Banette': case 'Beedrill': case 'Blastoise': case 'Camerupt': case 'Charizard': case 'Diancie': case 'Heracross': case 'Houndoom': case 'Mawile': case 'Medicham': case 'Pidgeot': case 'Pinsir': case 'Sableye': case 'Sharpedo': case 'Slowbro': case 'Steelix': case 'Venusaur':
 				if (teamDetails.megaStone) continue;
 				break;
 			}
