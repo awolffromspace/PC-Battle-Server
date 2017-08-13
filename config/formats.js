@@ -401,6 +401,13 @@ exports.Formats = [
 		ruleset: ['[Gen 7] Random (no PotD)'],
 	},
 	{
+		name: "[Gen 7] Mid Tier Random",
+
+		mod: 'gen7',
+		team: 'randomMidTier',
+		ruleset: ['[Gen 7] Random (no PotD)'],
+	},
+	{
 		name: "[Gen 7] Low Tier Random",
 
 		mod: 'gen7',
