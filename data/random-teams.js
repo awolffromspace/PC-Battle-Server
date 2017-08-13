@@ -4170,7 +4170,8 @@ class RandomTeams extends Dex.ModdedDex {
 			case 'Basculin': case 'Cherrim': case 'Greninja': case 'Hoopa': case 'Meloetta': case 'Meowstic':
 				if (this.random(2) >= 1) continue;
 				break;
-			case 'Abomasnow': case 'Absol': case 'Aerodactyl': case 'Aggron': case 'Altaria': case 'Ampharos': case 'Banette': case 'Beedrill': case 'Blastoise': case 'Camerupt': case 'Charizard': case 'Diancie': case 'Heracross': case 'Houndoom': case 'Mawile': case 'Medicham': case 'Pidgeot': case 'Pinsir': case 'Sableye': case 'Sharpedo': case 'Slowbro': case 'Steelix': case 'Venusaur':
+			case 'Abomasnow': case 'Absol': case 'Aerodactyl': case 'Aggron': case 'Altaria': case 'Ampharos': case 'Banette': case 'Beedrill': case 'Blastoise': case 'Camerupt': case 'Charizard': case 'Diancie': 
+			case 'Heracross': case 'Houndoom': case 'Mawile': case 'Medicham': case 'Pidgeot': case 'Pinsir': case 'Sableye': case 'Sharpedo': case 'Slowbro': case 'Steelix': case 'Venusaur':
 				if (teamDetails.megaStone) continue;
 				break;
 			}
@@ -4192,11 +4193,13 @@ class RandomTeams extends Dex.ModdedDex {
 			let set = this[this.gameType === 'singles' ? 'randomSet' : 'randomDoublesSet'](template, pokemon.length, teamDetails);
 
 			let item = this.getItem(set.item);
-			if (template.species === 'Absol' && !item.megaStone || template.species === 'Aerodactyl' && !item.megaStone || template.species === 'Audino' && !item.megaStone || template.species === 'Beedrill' && !item.megaStone || template.species === 'Blastoise' && !item.megaStone || 
-			template.species === 'Charizard' && !item.megaStone || template.species === 'Gengar' && item.megaStone || template.species === 'Heracross' && !item.megaStone || template.species === 'Houndoom' && !item.megaStone || template.species === 'Latias' && item.megaStone || template.species === 'Latios' && item.megaStone || 
-			template.species === 'Lucario' && item.megaStone || template.species === 'Mawile' && !item.megaStone || template.species === 'Medicham' && !item.megaStone || template.species === 'Metagross' && item.megaStone || template.species === 'Pidgeot' && !item.megaStone || template.species === 'Pinsir' && !item.megaStone || template.species === 'Sableye' && !item.megaStone || 
-			template.species === 'Salamence' && item.megaStone || template.species === 'Sharpedo' && !item.megaStone || template.species === 'Slowbro' && !item.megaStone || template.species === 'Steelix' && !item.megaStone || template.species === 'Swampert' && item.megaStone || 
-			template.species === 'Tyranitar' && item.megaStone || template.species === 'Venusaur' && !item.megaStone) continue;
+			if (template.species === 'Abomasnow' && !item.megaStone || template.species === 'Absol' && !item.megaStone || template.species === 'Aerodactyl' && !item.megaStone || template.species === 'Aggron' && !item.megaStone || 
+			template.species === 'Altaria' && !item.megaStone || template.species === 'Ampharos' && !item.megaStone || template.species === 'Banette' && !item.megaStone || template.species === 'Beedrill' && !item.megaStone || 
+			template.species === 'Blastoise' && !item.megaStone || template.species === 'Camerupt' && !item.megaStone || template.species === 'Charizard' && !item.megaStone || template.species === 'Diancie' && !item.megaStone || 
+			template.species === 'Gengar' && item.megaStone || template.species === 'Heracross' && !item.megaStone || template.species === 'Houndoom' && !item.megaStone || template.species === 'Mawile' && !item.megaStone || 
+			template.species === 'Medicham' && !item.megaStone || template.species === 'Metagross' && item.megaStone || template.species === 'Pidgeot' && !item.megaStone || template.species === 'Pinsir' && !item.megaStone || 
+			template.species === 'Sableye' && !item.megaStone || template.species === 'Salamence' && item.megaStone || template.species === 'Sharpedo' && !item.megaStone || template.species === 'Slowbro' && !item.megaStone || 
+			template.species === 'Steelix' && !item.megaStone || template.species === 'Venusaur' && !item.megaStone) continue;
 
 			if (template.baseSpecies === 'Zygarde') {
 				set.ability = 'Aura Break';
