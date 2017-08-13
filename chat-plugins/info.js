@@ -1194,7 +1194,6 @@ exports.commands = {
 		this.sendReplyBox(
 			"<b>~ Administrators</b><br />" +
 			"- Achromatic<br />" +
-			"- Aurora<br />" +
 			"- Bebop (Audy)<br />" +
 			"- Choice Specs (Choice Specs, Michonne)<br />" +
 			"- Dragon (Aerithhh, Captain Syrup, Esper Terra, Futabaa Sakura)<br />" +
