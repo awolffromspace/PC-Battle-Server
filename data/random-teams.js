@@ -4131,8 +4131,10 @@ class RandomTeams extends Dex.ModdedDex {
 				if (types.indexOf(type) < 0) continue;
 			}
 			if (template.gen <= this.gen && !template.isMega && !template.isPrimal && !template.isNonstandard && template.randomBattleMoves && (template.tier === 'OU' || template.tier === 'UU' || template.tier === 'BL' || 
-			template.species === 'Absol' || template.species === 'Aerodactyl' || template.species === 'Audino' || template.species === 'Beedrill' || template.species === 'Blastoise' || template.species === 'Charizard' || template.species === 'Heracross' || template.species === 'Houndoom' || template.species === 'Mawile' || 
-			template.species === 'Medicham' || template.species === 'Pidgeot' || template.species === 'Pinsir' || template.species === 'Sableye' || template.species === 'Sharpedo' || template.species === 'Slowbro' || template.species === 'Steelix' || template.species === 'Venusaur')) {
+			template.species === 'Abomasnow' || template.species === 'Absol' || template.species === 'Aerodactyl' || template.species === 'Aggron' || template.species === 'Altaria' || template.species === 'Ampharos' || 
+			template.species === 'Banette' || template.species === 'Beedrill' || template.species === 'Blastoise' || template.species === 'Camerupt' || template.species === 'Charizard' || template.species === 'Diancie' || 
+			template.species === 'Heracross' || template.species === 'Houndoom' || template.species === 'Mawile' || template.species === 'Medicham' || template.species === 'Pidgeot' || template.species === 'Sceptile' || 
+			template.species === 'Pinsir' || template.species === 'Sableye' || template.species === 'Sharpedo' || template.species === 'Slowbro' || template.species === 'Steelix' || template.species === 'Venusaur')) {
 				pokemonPool.push(id);
 			}
 		}
