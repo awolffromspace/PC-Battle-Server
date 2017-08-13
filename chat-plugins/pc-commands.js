@@ -49,7 +49,7 @@ exports.commands = {
 		if (!this.runBroadcast()) return;
 		this.sendReplyBox(
 			"Sample teams:<br />" +
-			"- <a href=\"http://www.smogon.com/forums/threads/sm-ou-sample-teams.3598705/\">OU</a><br />" +
+			"- <a href=\"http://www.smogon.com/forums/threads/sm-ou-sample-teams.3606650/\">OU</a><br />" +
 			"- <a href=\"http://www.smogon.com/forums/threads/sample-teams-sm-submissions-open.3599816/\">Ubers</a><br />" +
 			"- <a href=\"http://www.smogon.com/forums/threads/sm-uu-sample-teams-thread.3591880/\">UU</a><br />" +
 			"- <a href=\"http://www.smogon.com/forums/threads/sm-ru-sample-teams-thread.3598090/\">RU</a><br />" +
