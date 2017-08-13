@@ -4130,7 +4130,7 @@ class RandomTeams extends Dex.ModdedDex {
 				if (template.battleOnly) types = this.getTemplate(template.baseSpecies).types;
 				if (types.indexOf(type) < 0) continue;
 			}
-			if (template.gen <= this.gen && !template.isMega && !template.isPrimal && !template.isNonstandard && template.randomBattleMoves && (template.tier === 'OU' || template.tier === 'UU' || template.tier === 'BL' || 
+			if (template.gen <= this.gen && !template.isMega && !template.isPrimal && !template.isNonstandard && template.randomBattleMoves && (template.tier === 'OU' || template.tier === 'BL' || template.tier === 'UU' || template.tier === 'BL2' || 
 			template.species === 'Abomasnow' || template.species === 'Absol' || template.species === 'Aerodactyl' || template.species === 'Aggron' || template.species === 'Altaria' || template.species === 'Ampharos' || 
 			template.species === 'Banette' || template.species === 'Beedrill' || template.species === 'Blastoise' || template.species === 'Camerupt' || template.species === 'Charizard' || template.species === 'Diancie' || 
 			template.species === 'Heracross' || template.species === 'Houndoom' || template.species === 'Mawile' || template.species === 'Medicham' || template.species === 'Pidgeot' || template.species === 'Pinsir' || 
@@ -4255,6 +4255,146 @@ class RandomTeams extends Dex.ModdedDex {
 		}
 		return pokemon;
 	}
+	randomMidTierTeam() {
+		let pokemon = [];
+
+		// For Monotype
+		let isMonotype = this.format === 'gen7monotyperandom';
+		let typePool = Object.keys(this.data.TypeChart);
+		let type = typePool[this.random(typePool.length)];
+
+		let pokemonPool = [];
+		for (let id in this.data.FormatsData) {
+			let template = this.getTemplate(id);
+			if (isMonotype) {
+				let types = template.types;
+				if (template.battleOnly) types = this.getTemplate(template.baseSpecies).types;
+				if (types.indexOf(type) < 0) continue;
+			}
+			if (template.gen <= this.gen && !template.isMega && !template.isPrimal && !template.isNonstandard && template.randomBattleMoves && (template.tier === 'RU' || template.tier === 'BL3' || template.tier === 'NU' || template.tier === 'BL4' || 
+			template.species === 'Audino' || template.species === 'Glalie')) {
+				pokemonPool.push(id);
+			}
+		}
+
+		let typeCount = {};
+		let typeComboCount = {};
+		let baseFormes = {};
+		let teamDetails = {};
+
+		while (pokemonPool.length && pokemon.length < 6) {
+			let template = this.getTemplate(this.sampleNoReplace(pokemonPool));
+			if (!template.exists) continue;
+
+			// Limit to one of each species (Species Clause)
+			if (baseFormes[template.baseSpecies]) continue;
+
+			if (template.species === 'Unown' || template.species === 'Cosmog' || template.species === 'Cosmoem') continue;
+
+			// Adjust rate for species with multiple formes
+			switch (template.baseSpecies) {
+			case 'Arceus': case 'Silvally':
+				if (this.random(18) >= 1) continue;
+				break;
+			case 'Pikachu':
+				if (this.random(7) >= 1) continue;
+				continue;
+			case 'Genesect':
+				if (this.random(5) >= 1) continue;
+				break;
+			case 'Castform': case 'Pumpkaboo': case 'Gourgeist': case 'Oricorio':
+				if (this.random(4) >= 1) continue;
+				break;
+			case 'Basculin': case 'Cherrim': case 'Greninja': case 'Hoopa': case 'Meloetta': case 'Meowstic':
+				if (this.random(2) >= 1) continue;
+				break;
+			case 'Audino': case 'Glalie':
+				if (teamDetails.megaStone) continue;
+				break;
+			}
+
+			let types = template.types;
+
+			if (!isMonotype) {
+				// Limit 2 of any type
+				let skip = false;
+				for (let t = 0; t < types.length; t++) {
+					if (typeCount[types[t]] > 1 && this.random(5) >= 1) {
+						skip = true;
+						break;
+					}
+				}
+				if (skip) continue;
+			}
+
+			let set = this[this.gameType === 'singles' ? 'randomSet' : 'randomDoublesSet'](template, pokemon.length, teamDetails);
+
+			let item = this.getItem(set.item);
+			if (template.species === 'Abomasnow' && item.megaStone || template.species === 'Absol' && item.megaStone || template.species === 'Aerodactyl' && item.megaStone || template.species === 'Aggron' && item.megaStone || 
+			template.species === 'Altaria' && item.megaStone || template.species === 'Ampharos' && item.megaStone || template.species === 'Audino' && !item.megaStone || template.species === 'Banette' && item.megaStone || 
+			template.species === 'Beedrill' && item.megaStone || template.species === 'Blastoise' && item.megaStone || template.species === 'Camerupt' && item.megaStone || template.species === 'Charizard' && item.megaStone || 
+			template.species === 'Diancie' && item.megaStone || template.species === 'Gallade' && item.megaStone || template.species === 'Gardevoir' && item.megaStone || template.species === 'Glalie' && !item.megaStone || 
+			template.species === 'Heracross' && item.megaStone || template.species === 'Houndoom' && item.megaStone || template.species === 'Kangaskhan' && item.megaStone || template.species === 'Lopunny' && item.megaStone || 
+			template.species === 'Lucario' && item.megaStone || template.species === 'Manectric' && item.megaStone || template.species === 'Mawile' && item.megaStone || template.species === 'Medicham' && item.megaStone || 
+			template.species === 'Pidgeot' && item.megaStone || template.species === 'Pinsir' && item.megaStone || template.species === 'Sableye' && item.megaStone || template.species === 'Sceptile' && item.megaStone || 
+			template.species === 'Sharpedo' && item.megaStone || template.species === 'Slowbro' && item.megaStone || template.species === 'Steelix' && item.megaStone || template.species === 'Venusaur' && item.megaStone) continue;
+
+			if (template.species === 'Gothitelle') {
+				set.ability = 'Frisk';
+			} else if (template.species === 'Wobbuffet') {
+				set.ability = 'Telepathy';
+			}
+
+			// Illusion shouldn't be the last Pokemon of the team
+			if (set.ability === 'Illusion' && pokemon.length > 4) continue;
+
+			// Pokemon shouldn't have Physical and Special setup on the same set
+			let incompatibleMoves = ['bellydrum', 'swordsdance', 'calmmind', 'nastyplot'];
+			let intersectMoves = set.moves.filter(move => incompatibleMoves.includes(move));
+			if (intersectMoves.length > 1) continue;
+
+			// Limit 1 of any type combination, 2 in monotype
+			let typeCombo = types.slice().sort().join();
+			if (set.ability === 'Drought' || set.ability === 'Drizzle' || set.ability === 'Sand Stream') {
+				// Drought, Drizzle and Sand Stream don't count towards the type combo limit
+				typeCombo = set.ability;
+				if (typeCombo in typeComboCount) continue;
+			} else {
+				if (typeComboCount[typeCombo] >= (isMonotype ? 2 : 1)) continue;
+			}
+
+			// Okay, the set passes, add it to our team
+			pokemon.push(set);
+
+			// Now that our Pokemon has passed all checks, we can increment our counters
+			baseFormes[template.baseSpecies] = 1;
+
+			// Increment type counters
+			for (let t = 0; t < types.length; t++) {
+				if (types[t] in typeCount) {
+					typeCount[types[t]]++;
+				} else {
+					typeCount[types[t]] = 1;
+				}
+			}
+			if (typeCombo in typeComboCount) {
+				typeComboCount[typeCombo]++;
+			} else {
+				typeComboCount[typeCombo] = 1;
+			}
+
+			// Team has Mega/weather/hazards
+			if (item.megaStone) teamDetails['megaStone'] = 1;
+			if (item.zMove) teamDetails['zMove'] = 1;
+			if (set.ability === 'Snow Warning') teamDetails['hail'] = 1;
+			if (set.ability === 'Drizzle' || set.moves.includes('raindance')) teamDetails['rain'] = 1;
+			if (set.ability === 'Sand Stream') teamDetails['sand'] = 1;
+			if (set.moves.includes('stealthrock')) teamDetails['stealthRock'] = 1;
+			if (set.moves.includes('toxicspikes')) teamDetails['toxicSpikes'] = 1;
+			if (set.moves.includes('defog') || set.moves.includes('rapidspin')) teamDetails['hazardClear'] = 1;
+		}
+		return pokemon;
+	}
 	randomLowTierTeam() {
 		let pokemon = [];
 
@@ -4271,7 +4411,7 @@ class RandomTeams extends Dex.ModdedDex {
 				if (template.battleOnly) types = this.getTemplate(template.baseSpecies).types;
 				if (types.indexOf(type) < 0) continue;
 			}
-			if (template.gen <= this.gen && !template.isMega && !template.isPrimal && !template.isNonstandard && template.randomBattleMoves && template.tier === 'New') {
+			if (template.gen <= this.gen && !template.isMega && !template.isPrimal && !template.isNonstandard && template.randomBattleMoves && (template.tier === 'PU')) {
 				pokemonPool.push(id);
 			}
 		}
@@ -4329,11 +4469,11 @@ class RandomTeams extends Dex.ModdedDex {
 			if (template.species === 'Abomasnow' && item.megaStone || template.species === 'Absol' && item.megaStone || template.species === 'Aerodactyl' && item.megaStone || template.species === 'Aggron' && item.megaStone || 
 			template.species === 'Altaria' && item.megaStone || template.species === 'Ampharos' && item.megaStone || template.species === 'Audino' && item.megaStone || template.species === 'Banette' && item.megaStone || 
 			template.species === 'Beedrill' && item.megaStone || template.species === 'Blastoise' && item.megaStone || template.species === 'Camerupt' && item.megaStone || template.species === 'Charizard' && item.megaStone || 
-			template.species === 'Diancie' && item.megaStone || template.species === 'Gallade' && item.megaStone || template.species === 'Gardevoir' && item.megaStone || template.species === 'Heracross' && item.megaStone || 
-			template.species === 'Houndoom' && item.megaStone || template.species === 'Kangaskhan' && item.megaStone || template.species === 'Lopunny' && item.megaStone || template.species === 'Lucario' && item.megaStone || 
-			template.species === 'Manectric' && item.megaStone || template.species === 'Mawile' && item.megaStone || template.species === 'Medicham' && item.megaStone || template.species === 'Pidgeot' && item.megaStone || 
-			template.species === 'Pinsir' && item.megaStone || template.species === 'Sableye' && item.megaStone || template.species === 'Sceptile' && item.megaStone || template.species === 'Sharpedo' && item.megaStone || 
-			template.species === 'Slowbro' && item.megaStone || template.species === 'Steelix' && item.megaStone || template.species === 'Venusaur' && item.megaStone) continue;
+			template.species === 'Diancie' && item.megaStone || template.species === 'Gallade' && item.megaStone || template.species === 'Gardevoir' && item.megaStone || template.species === 'Glalie' && item.megaStone || 
+			template.species === 'Heracross' && item.megaStone || template.species === 'Houndoom' && item.megaStone || template.species === 'Kangaskhan' && item.megaStone || template.species === 'Lopunny' && item.megaStone || 
+			template.species === 'Lucario' && item.megaStone || template.species === 'Manectric' && item.megaStone || template.species === 'Mawile' && item.megaStone || template.species === 'Medicham' && item.megaStone || 
+			template.species === 'Pidgeot' && item.megaStone || template.species === 'Pinsir' && item.megaStone || template.species === 'Sableye' && item.megaStone || template.species === 'Sceptile' && item.megaStone || 
+			template.species === 'Sharpedo' && item.megaStone || template.species === 'Slowbro' && item.megaStone || template.species === 'Steelix' && item.megaStone || template.species === 'Venusaur' && item.megaStone) continue;
 
 			if (template.species === 'Gothitelle') {
 				set.ability = 'Frisk';
