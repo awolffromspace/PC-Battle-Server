@@ -1194,6 +1194,8 @@ class ChatRoom extends Room {
 		// hour ago isn't done yet. But if that's the case, we have bigger
 		// problems anyway.
 		if (this.rollLogTimer) clearTimeout(this.rollLogTimer);
+
+		if (this.destroyingLog) return;
 		this.rollLogTimer = setTimeout(() => this.rollLogFile(), nextHour - currentTime);
 
 		if (relpath + filename === this.logFilename) return;
@@ -1224,8 +1226,8 @@ class ChatRoom extends Room {
 			this.rollLogTimer = null;
 			this.logEntry = function () { };
 			this.logFile.end(finalCallback);
-		} else {
-			finalCallback();
+		} else if (typeof finalCallback === 'function') {
+			setImmediate(finalCallback);
 		}
 	}
 	logUserStats() {
@@ -1428,6 +1430,8 @@ class ChatRoom extends Room {
 			clearInterval(this.logUserStatsInterval);
 		}
 		this.logUserStatsInterval = null;
+
+		this.destroyLog();
 
 		if (!this.isPersonal) {
 			this.modlogStream.removeAllListeners('finish');
