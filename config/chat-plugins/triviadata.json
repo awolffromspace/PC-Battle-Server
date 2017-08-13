@@ -426,7 +426,7 @@
     },
     {
       "category": "pokemon",
-      "question": "Which PokÃ©mon has base 48 stats across the board?",
+      "question": "Which Pokémon has base 48 stats across the board?",
       "answers": [
         "ditto"
       ],
@@ -434,7 +434,7 @@
     },
     {
       "category": "pokemon",
-      "question": "Which PokÃ©mon has base 30 stats across the board?",
+      "question": "Which Pokémon has base 30 stats across the board?",
       "answers": [
         "sunkern"
       ],
@@ -442,7 +442,7 @@
     },
     {
       "category": "pokemon",
-      "question": "Which PokÃ©mon has base 120 stats across the board?",
+      "question": "Which Pokémon has base 120 stats across the board?",
       "answers": [
         "arceus"
       ],
@@ -450,7 +450,7 @@
     },
     {
       "category": "pokemon",
-      "question": "Which PokÃ©mon has base 95 stats across the board?",
+      "question": "Which Pokémon has base 95 stats across the board?",
       "answers": [
         "silvally"
       ],
@@ -458,7 +458,7 @@
     },
     {
       "category": "pokemon",
-      "question": "Which PokÃ©mon is the only one with a base stat total of 190?",
+      "question": "Which Pokémon is the only one with a base stat total of 190?",
       "answers": [
         "azurill"
       ],
@@ -466,7 +466,7 @@
     },
     {
       "category": "pokemon",
-      "question": "In PokÃ©mon Fire Red and Leaf Green, which PokÃ©mon is needed to trade for a Jynx?",
+      "question": "In Pokémon Fire Red and Leaf Green, which Pokémon is needed to trade for a Jynx?",
       "answers": [
         "poliwhirl"
       ],
@@ -474,7 +474,7 @@
     },
     {
       "category": "pokemon",
-      "question": "In PokÃ©mon Fire Red and Leaf Green, which PokÃ©mon is needed to trade for a Farfetch&apos;d?",
+      "question": "In Pokémon Fire Red and Leaf Green, which Pokémon is needed to trade for a Farfetch&apos;d?",
       "answers": [
         "spearow"
       ],
@@ -482,7 +482,7 @@
     },
     {
       "category": "pokemon",
-      "question": "In PokÃ©mon Fire Red and Leaf Green, which PokÃ©mon is needed to trade for a Mr. Mime?",
+      "question": "In Pokémon Fire Red and Leaf Green, which Pokémon is needed to trade for a Mr. Mime?",
       "answers": [
         "abra"
       ],
@@ -490,7 +490,7 @@
     },
     {
       "category": "pokemon",
-      "question": "Not counting Megas, what is the fastest fully-evolved starter PokÃ©mon?",
+      "question": "Not counting Megas, what is the fastest fully-evolved starter Pokémon?",
       "answers": [
         "greninja"
       ],
@@ -498,7 +498,7 @@
     },
     {
       "category": "pokemon",
-      "question": "Not counting Megas, what is the slowest fully-evolved starter PokÃ©mon?",
+      "question": "Not counting Megas, what is the slowest fully-evolved starter Pokémon?",
       "answers": [
         "torterra"
       ],
@@ -514,7 +514,7 @@
     },
     {
       "category": "pokemon",
-      "question": "Which PokÃ©mon&apos;s base stat total is the same as its National Dex number?",
+      "question": "Which Pokémon&apos;s base stat total is the same as its National Dex number?",
       "answers": [
         "archeops"
       ],
@@ -570,7 +570,7 @@
     },
     {
       "category": "pokemon",
-      "question": "Name one of the PokÃ©mon that you start with in PokÃ©mon Colosseum.",
+      "question": "Name one of the Pokémon that you start with in Pokémon Colosseum.",
       "answers": [
         "umbreon",
         "espeon"
@@ -579,7 +579,7 @@
     },
     {
       "category": "pokemon",
-      "question": "Name a PokÃ©mon whose name starts with &quot;X&quot;.",
+      "question": "Name a Pokémon whose name starts with &quot;X&quot;.",
       "answers": [
         "xatu",
         "xerneas",
@@ -589,7 +589,7 @@
     },
     {
       "category": "pokemon",
-      "question": "How many different species of PokÃ©mon can Tyrogue evolve into?",
+      "question": "How many different species of Pokémon can Tyrogue evolve into?",
       "answers": [
         "3",
         "three"
@@ -598,7 +598,7 @@
     },
     {
       "category": "pokemon",
-      "question": "How many different species of PokÃ©mon can Eevee evolve into?",
+      "question": "How many different species of Pokémon can Eevee evolve into?",
       "answers": [
         "8",
         "eight"
@@ -607,7 +607,7 @@
     },
     {
       "category": "pokemon",
-      "question": "How many different species of PokÃ©mon can Poliwag evolve into?",
+      "question": "How many different species of Pokémon can Poliwag evolve into?",
       "answers": [
         "1",
         "one"
@@ -616,7 +616,7 @@
     },
     {
       "category": "pokemon",
-      "question": "How many different species of PokÃ©mon can Gloom evolve into?",
+      "question": "How many different species of Pokémon can Gloom evolve into?",
       "answers": [
         "2",
         "two"
@@ -936,7 +936,7 @@
     },
     {
       "category": "pokemon",
-      "question": "Aside from Victini, which PokÃ©mon can learn V-Create?",
+      "question": "Aside from Victini, which Pokémon can learn V-Create?",
       "answers": [
         "rayquaza"
       ],
@@ -944,7 +944,7 @@
     },
     {
       "category": "pokemon",
-      "question": "Which Ground-type move can hit Flying-type PokÃ©mon?",
+      "question": "Which Ground-type move can hit Flying-type Pokémon?",
       "answers": [
         "thousandarrows"
       ],
