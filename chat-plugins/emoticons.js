@@ -58,6 +58,7 @@ let emotes = {
 	':dinner:': 'http://cbc.pokecommunity.com/config/emoticons/dinner.png',
 	':ditto:': 'http://cbc.pokecommunity.com/config/emoticons/ditto.png',
 	':dk:': 'http://cbc.pokecommunity.com/config/emoticons/dk.png',
+	':doomfist:': 'http://cbc.pokecommunity.com/config/emoticons/doomfist.png',
 	':drama:': 'http://cbc.pokecommunity.com/config/emoticons/drama.png',
 	':drowzee:': 'http://cbc.pokecommunity.com/config/emoticons/drowzee.png',
 	':dva:': 'http://cbc.pokecommunity.com/config/emoticons/dva.png',
@@ -334,7 +335,7 @@ function parseEmoticons(message, room, user, pm) {
 		if (match === ':fish:') return typeof emote != 'undefined' ?
 			'<img src="' + emote + '" title="' + match + '" width="65" height="42"/>' :
 			match;
-		if (match === ':genji:') return typeof emote != 'undefined' ?
+		if (match === ':doomfist:' || match === ':genji:') return typeof emote != 'undefined' ?
 			'<img src="' + emote + '" title="' + match + '" width="36" height="33"/>' :
 			match;
 		if (match === ':glare:' || match === ':shifty:' || match === ':squint:' || match === ':uhhuh:') return typeof emote != 'undefined' ?
