@@ -1503,7 +1503,7 @@ exports.commands = {
 			if (!this.runBroadcast()) return;
 			this.sendReplyBox("Please follow the rules:<br />" +
 				(room && room.rulesLink ? "- <a href=\"" + Chat.escapeHTML(room.rulesLink) + "\">" + Chat.escapeHTML(room.title) + " room rules</a><br />" : "") +
-				"- <a href=\"http://www.pokecommunity.com/showthread.php?t=289012#rules\">" + (room && room.rulesLink ? "Global rules" : "PC Battle Server Rules") + "</a>");
+				"- <a href=\"https://www.pokecommunity.com/showthread.php?t=289012\">" + (room && room.rulesLink ? "Global rules" : "PC Battle Server Rules") + "</a>");
 			return;
 		}
 		if (!room) {
