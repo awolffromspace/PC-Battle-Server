@@ -64,7 +64,6 @@ class Matchmaker {
 		if (!user.connected) return;
 		formatid = Dex.getFormat(formatid).id;
 
-<<<<<<< HEAD
 		if (!user.locked && !Rooms.lobby.isMuted(user)) {
 			if (Rooms.lobby.disableLadderMessages) return false;
 			if (((Date.now() - user.lastLadderTime) < SEARCH_COOLDOWN) && user.lastLadderFormat === formatid) return false;
@@ -73,9 +72,6 @@ class Matchmaker {
 			user.lastLadderTime = Date.now();
 		}
 
-		return user.prepBattle(formatid, 'search', null)
-			.then(result => this.finishSearchBattle(user, formatid, result));
-=======
 		return Promise.all([
 			Promise.resolve(user.userid),
 			user.prepBattle(formatid, 'search', null),
@@ -90,7 +86,6 @@ class Matchmaker {
 			if (Ladders.disabled) return user.popup(`The ladder is currently disabled due to high server load.`);
 			// User feedback for renames handled elsewhere.
 		});
->>>>>>> upstream/master
 	}
 
 	finishSearchBattle(user, formatid, validTeam, rating) {
