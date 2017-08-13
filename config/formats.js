@@ -11,19 +11,11 @@ exports.Formats = [
 		section: "SM Singles",
 	},
 	{
-		name: "[LotW 33] BSS Factory",
-		desc: [
-			"Randomised 3v3 Singles featuring Pok&eacute;mon and movesets popular in Battle Spot Singles.",
-			"&bullet; <a href=\"https://www.smogon.com/forums/threads/3604845/\">Information and Suggestions Thread</a>",
-		],
+		name: "[LotW 34] Gen 3 Random",
 
-		mod: 'gen7',
-		team: 'randomBSSFactory',
-		teamLength: {
-			validate: [3, 6],
-			battle: 3,
-		},
-		ruleset: ['Pokemon', 'Standard GBU', 'Team Preview'],
+		mod: 'gen3',
+		team: 'random',
+		ruleset: ['[Gen 5] Random'],
 		onBegin: function() {
 			this.add('raw|This is the Ladder of the Week! Use the "Battle!" button to try and win the LotW. The winner is the user who is #1 on the ladder by Sunday. They receive a <img src="http://cbc.pokecommunity.com/config/user-list-images/trophy.png" /> beside their name for a week.');
 		},
@@ -373,17 +365,6 @@ exports.Formats = [
 		ruleset: ['Pokemon', 'Sleep Clause Mod', 'HP Percentage Mod', 'Cancel Mod', 'Team Preview'],
 	},
 	{
-		name: "[Gen 7] Spring Random",
-
-		mod: 'gen7',
-		team: 'randomSpring',
-		ruleset: ['[Gen 7] Random (no PotD)'],
-		onBegin: function() {
-			this.setTerrain('Grassy Terrain');
-			delete this.terrainData.duration;
-		},
-	},
-	{
 		name: "[Gen 7] 1v1 Random",
 
 		mod: 'gen7',
@@ -427,6 +408,21 @@ exports.Formats = [
 		mod: 'gen7',
 		team: 'randomLC',
 		ruleset: ['[Gen 7] Random (no PotD)'],
+	},
+	{
+		name: "[Gen 7] BSS Factory",
+		desc: [
+			"Randomised 3v3 Singles featuring Pok&eacute;mon and movesets popular in Battle Spot Singles.",
+			"&bullet; <a href=\"https://www.smogon.com/forums/threads/3604845/\">Information and Suggestions Thread</a>",
+		],
+
+		mod: 'gen7',
+		team: 'randomBSSFactory',
+		teamLength: {
+			validate: [3, 6],
+			battle: 3,
+		},
+		ruleset: ['Pokemon', 'Standard GBU', 'Team Preview'],
 	},
 	{
 		name: "[Gen 7] Monotype Random",
@@ -540,19 +536,15 @@ exports.Formats = [
 		ruleset: ['[Gen 7] Random (no PotD)'],
 	},
 	{
-		name: "[Gen 7] BSS Factory",
-		desc: [
-			"Randomised 3v3 Singles featuring Pok&eacute;mon and movesets popular in Battle Spot Singles.",
-			"&bullet; <a href=\"https://www.smogon.com/forums/threads/3604845/\">Information and Suggestions Thread</a>",
-		],
+		name: "[Gen 7] Spring Random",
 
 		mod: 'gen7',
-		team: 'randomBSSFactory',
-		teamLength: {
-			validate: [3, 6],
-			battle: 3,
+		team: 'randomSpring',
+		ruleset: ['[Gen 7] Random (no PotD)'],
+		onBegin: function() {
+			this.setTerrain('Grassy Terrain');
+			delete this.terrainData.duration;
 		},
-		ruleset: ['Pokemon', 'Standard GBU', 'Team Preview'],
 	},
 	/*{
 		name: "[Gen 7] Super Staff Bros. Melee",
