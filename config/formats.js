@@ -15,7 +15,7 @@ exports.Formats = [
 
 		mod: 'gen3',
 		team: 'random',
-		ruleset: ['[Gen 5] Random'],
+		ruleset: ['Pokemon', 'Sleep Clause Mod', 'HP Percentage Mod', 'Cancel Mod'],
 		onBegin: function() {
 			this.add('raw|This is the Ladder of the Week! Use the "Battle!" button to try and win the LotW. The winner is the user who is #1 on the ladder by Sunday. They receive a <img src="http://cbc.pokecommunity.com/config/user-list-images/trophy.png" /> beside their name for a week.');
 		},
@@ -1985,14 +1985,14 @@ exports.Formats = [
 
 		mod: 'gen6',
 		team: 'random',
-		ruleset: ['[Gen 7] Random (no PotD)'],
+		ruleset: ['Pokemon', 'Sleep Clause Mod', 'HP Percentage Mod', 'Cancel Mod', 'Team Preview'],
 	},
 	{
 		name: "[Gen 6] Battle Factory",
 
 		mod: 'gen6',
 		team: 'randomFactory',
-		ruleset: ['[Gen 7] Random (no PotD)', 'Mega Rayquaza Clause'],
+		ruleset: ['Pokemon', 'Sleep Clause Mod', 'HP Percentage Mod', 'Cancel Mod', 'Team Preview', 'Mega Rayquaza Clause'],
 	},
 	{
 		name: "[Gen 6] Doubles Random",
@@ -2001,7 +2001,7 @@ exports.Formats = [
 		gameType: 'doubles',
 		team: 'random',
 		searchShow: false,
-		ruleset: ['[Gen 7] Random (no PotD)'],
+		ruleset: ['Pokemon', 'Sleep Clause Mod', 'HP Percentage Mod', 'Cancel Mod', 'Team Preview'],
 	},
 	{
 		name: "[Gen 6] Triples Random",
@@ -2009,7 +2009,7 @@ exports.Formats = [
 		mod: 'gen6',
 		gameType: 'triples',
 		team: 'random',
-		ruleset: ['[Gen 7] Random (no PotD)'],
+		ruleset: ['Pokemon', 'Sleep Clause Mod', 'HP Percentage Mod', 'Cancel Mod', 'Team Preview'],
 	},
 	{
 		name: "[Gen 6] Triples Hackmons Cup",
@@ -2018,7 +2018,7 @@ exports.Formats = [
 		gameType: 'triples',
 		team: 'randomHC',
 		searchShow: false,
-		ruleset: ['[Gen 7] Random (no PotD)'],
+		ruleset: ['Pokemon', 'Sleep Clause Mod', 'HP Percentage Mod', 'Cancel Mod', 'Team Preview'],
 	},
 	{
 		name: "[Gen 5] Random",
@@ -2032,28 +2032,28 @@ exports.Formats = [
 
 		mod: 'gen4',
 		team: 'random',
-		ruleset: ['[Gen 5] Random'],
+		ruleset: ['Pokemon', 'Sleep Clause Mod', 'HP Percentage Mod', 'Cancel Mod'],
 	},
 	{
 		name: "[Gen 3] Random",
 
 		mod: 'gen3',
 		team: 'random',
-		ruleset: ['[Gen 5] Random'],
+		ruleset: ['Pokemon', 'Sleep Clause Mod', 'HP Percentage Mod', 'Cancel Mod'],
 	},
 	{
 		name: "[Gen 2] Random",
 
 		mod: 'gen2',
 		team: 'random',
-		ruleset: ['[Gen 5] Random'],
+		ruleset: ['Pokemon', 'Sleep Clause Mod', 'HP Percentage Mod', 'Cancel Mod'],
 	},
 	{
 		name: "[Gen 1] Random",
 
 		mod: 'gen1',
 		team: 'random',
-		ruleset: ['[Gen 5] Random'],
+		ruleset: ['Pokemon', 'Sleep Clause Mod', 'HP Percentage Mod', 'Cancel Mod'],
 	},
 	{
 		name: "[Gen 1] Challenge Cup",
@@ -2061,7 +2061,7 @@ exports.Formats = [
 		mod: 'gen1',
 		team: 'randomCC',
 		searchShow: false,
-		ruleset: ['[Gen 5] Random'],
+		ruleset: ['Pokemon', 'Sleep Clause Mod', 'HP Percentage Mod', 'Cancel Mod'],
 	},
 
 	// Other Metagames
