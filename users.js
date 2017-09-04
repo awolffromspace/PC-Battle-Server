@@ -34,8 +34,6 @@ const PERMALOCK_CACHE_TIME = 30 * 24 * 60 * 60 * 1000;
 
 const FS = require('./fs');
 
-const Matchmaker = require('./ladders-matchmaker').matchmaker;
-
 let Users = module.exports = getUser;
 
 /*********************************************************
@@ -248,7 +246,7 @@ function cacheGroupData() {
 		punishgroups.locked = {
 			name: 'Locked',
 			id: 'locked',
-			symbol: '‽',
+			symbol: '\u203d',
 		};
 	}
 	if (!punishgroups.muted) {
@@ -452,7 +450,7 @@ class User {
 	}
 	getIdentity(roomid) {
 		if (this.locked || this.namelocked) {
-			const lockedSymbol = (Config.punishgroups && Config.punishgroups.locked ? Config.punishgroups.locked.symbol : '‽');
+			const lockedSymbol = (Config.punishgroups && Config.punishgroups.locked ? Config.punishgroups.locked.symbol : '\u203d');
 			return lockedSymbol + this.name;
 		}
 		if (roomid && roomid !== 'global') {
@@ -1249,7 +1247,7 @@ class User {
 			this.inRooms.delete(room.id);
 		}
 	}
-	prepBattle(formatid, type, connection, customBanlist) {
+	prepBattle(formatid, type, connection) {
 		// all validation for a battle goes through here
 		if (!connection) connection = this;
 		if (!type) type = 'challenge';
@@ -1279,7 +1277,7 @@ class User {
 			connection.popup(`You are already searching a battle in that format.`);
 			return Promise.resolve(false);
 		}
-		return TeamValidator(formatid, customBanlist).prepTeam(this.team, this.locked || this.namelocked).then(result => this.finishPrepBattle(connection, result));
+		return TeamValidator(formatid).prepTeam(this.team, this.locked || this.namelocked).then(result => this.finishPrepBattle(connection, result));
 	}
 
 	/**
@@ -1347,7 +1345,7 @@ class User {
 		}));
 	}
 	cancelSearch(format) {
-		return Matchmaker.cancelSearch(this, format);
+		return Ladders.matchmaker.cancelSearch(this, format);
 	}
 	makeChallenge(user, format, team/*, isPrivate*/) {
 		user = getUser(user);
@@ -1409,7 +1407,13 @@ class User {
 			}
 			return false;
 		}
-		Matchmaker.startBattle(this, user, user.challengeTo.format, team, user.challengeTo.team, {rated: false});
+		Rooms.createBattle(user.challengeTo.format, {
+			p1: this,
+			p1team: team,
+			p2: user,
+			p2team: user.challengeTo.team,
+			rated: false,
+		});
 		delete this.challengesFrom[user.userid];
 		user.challengeTo = null;
 		this.updateChallenges();

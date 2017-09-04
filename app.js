@@ -46,8 +46,6 @@
 
 'use strict';
 
-const FS = require('./fs');
-
 // Check for version and dependencies
 try {
 	// I've gotten enough reports by people who don't use the launch
@@ -61,6 +59,8 @@ try {
 } catch (e) {
 	throw new Error("Dependencies are unmet; run node pokemon-showdown before launching Pokemon Showdown again.");
 }
+
+const FS = require('./fs');
 
 /*********************************************************
  * Load configuration

@@ -749,7 +749,7 @@ class RandomTeams extends Dex.ModdedDex {
 					if (hasMove['outrage'] || hasMove['dragontail']) rejected = true;
 					break;
 				case 'dracometeor':
-					if (counter.setupType === 'Physical' && hasMove['outrage']) rejected = true;
+					if (hasMove['swordsdance'] || counter.setupType === 'Physical' && hasMove['outrage']) rejected = true;
 					break;
 				case 'dragonpulse': case 'spacialrend':
 					if (hasMove['dracometeor'] || hasMove['outrage']) rejected = true;
@@ -1096,7 +1096,7 @@ class RandomTeams extends Dex.ModdedDex {
 		} while (moves.length < 4 && movePool.length);
 
 		// Moveset modifications
-		if (hasMove['autotomize'] && hasMove['heavyslam']) {
+		if (hasMove['autotomize'] && hasMove['heavyslam'] && template.id !== 'celesteela') {
 			moves[moves.indexOf('autotomize')] = 'rockpolish';
 		}
 		if (moves[0] === 'conversion') {
@@ -2497,6 +2497,16 @@ class RandomTeams extends Dex.ModdedDex {
 		if (hasMove['gyroball'] || hasMove['trickroom']) {
 			evs.spe = 0;
 			ivs.spe = 0;
+		}
+
+		// Minimize unused attack stats
+		if (!counter['Physical'] && !hasMove['copycat'] && !hasMove['transform'] && !hasMove['mirrormove']) {
+			evs.atk = 0;
+			ivs.atk = 0;
+		}
+		if (!counter['Special'] && !hasMove['copycat'] && !hasMove['transform'] && !hasMove['mirrormove']) {
+			evs.spa = 0;
+			ivs.spa = 0;
 		}
 
 		return {
