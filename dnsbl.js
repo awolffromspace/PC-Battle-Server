@@ -84,9 +84,9 @@ Dnsbl.query = function queryDnsbl(ip) {
 Dnsbl.ipToNumber = function (ip) {
 	let num = 0;
 	let parts = ip.split('.');
-	for (let i = 0, len = parts.length; i < len; i++) {
+	for (const part of parts) {
 		num *= 256;
-		num += parseInt(parts[i]);
+		num += parseInt(part);
 	}
 	return num;
 };
@@ -169,8 +169,7 @@ Dnsbl.rangeToPattern = function (range) {
  * @return {boolean}
  */
 Dnsbl.checkPattern = function (patterns, num) {
-	for (let i = 0; i < patterns.length; ++i) {
-		let pattern = patterns[i];
+	for (const pattern of patterns) {
 		if (num >= pattern[0] && num <= pattern[1]) {
 			return true;
 		}
@@ -262,7 +261,7 @@ Dnsbl.reverse = function reverseDns(ip) {
 			resolve('ovh.fr.res-nohost');
 			return;
 		}
-		for (let row of Dnsbl.datacenters) {
+		for (const row of Dnsbl.datacenters) {
 			if (ipNumber >= row[0] && ipNumber <= row[1]) {
 				resolve(row[2] + '.proxy-nohost');
 				return;
@@ -334,6 +333,10 @@ Dnsbl.reverse = function reverseDns(ip) {
 		}
 		if (ip.startsWith('198.144.104.') || ip.startsWith('198.47.115.') || ip.startsWith('199.255.215.') || ip.startsWith('204.14.76.') || ip.startsWith('204.14.77.') || ip.startsWith('204.14.78.') || ip.startsWith('204.14.79.') || ip.startsWith('205.164.32.') || ip.startsWith('209.73.132.') || ip.startsWith('209.73.151.') || ip.startsWith('216.172.135.') || ip.startsWith('46.16.34.') || ip.startsWith('46.16.35.') || ip.startsWith('50.117.45.') || ip.startsWith('63.141.198.') || ip.startsWith('63.141.199.') || ip.startsWith('74.115.1.') || ip.startsWith('74.115.5.') || ip.startsWith('85.237.197.') || ip.startsWith('85.237.222.')) {
 			resolve('anchorfree.proxy-nohost');
+			return;
+		}
+		if (ip === '127.0.0.1') {
+			resolve('localhost');
 			return;
 		}
 		dns.reverse(ip, (err, hosts) => {

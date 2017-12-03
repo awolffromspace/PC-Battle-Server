@@ -110,6 +110,7 @@ exports.commands = {
 			} else if (response.reply) {
 				this.sendReplyBox(response.reply);
 			} else if (response.dt) {
+				if (targetGen) response.dt += `, gen${targetGen}`;
 				Chat.commands.data.call(this, response.dt, room, user, connection, 'dt');
 			}
 			this.update();
@@ -120,13 +121,15 @@ exports.commands = {
 		"/dexsearch [parameter], [parameter], [parameter], ... - Searches for Pok\u00e9mon that fulfill the selected criteria",
 		"Search categories are: type, tier, color, moves, ability, gen, resists, recovery, priority, stat, weight, height, egg group.",
 		"Valid colors are: green, red, blue, white, brown, yellow, purple, pink, gray and black.",
-		"Valid tiers are: Uber/OU/BL/UU/BL2/RU/BL3/NU/BL4/PU/NFE/LC/CAP.",
-		"Types must be followed by ' type', e.g., 'dragon type'.",
+		"Valid tiers are: Uber/OU/BL/UU/BL2/RU/BL3/NU/BL4/PU/NFE/LC/CAP/CAP NFE/CAP LC.",
+		"Types can be searched for by either having the type precede 'type' or just using the type itself as a parameter, e.g., both 'fire type' and 'fire' show all Fire types; however, using 'psychic' as a parameter will show all Pok\u00e9mon that learn the move Psychic and not Psychic types.",
 		"'resists' followed by a type will show Pok\u00e9mon that resist that typing, e.g., 'resists normal'.",
 		"Inequality ranges use the characters '>=' for '≥' and '<=' for '≤', e.g., 'hp <= 95' searches all Pok\u00e9mon with HP less than or equal to 95.",
 		"Parameters can be excluded through the use of '!', e.g., '!water type' excludes all water types.",
 		"The parameter 'mega' can be added to search for Mega Evolutions only, and the parameter 'NFE' can be added to search not-fully evolved Pok\u00e9mon only.",
 		"Parameters separated with '|' will be searched as alternatives for each other, e.g., 'trick | switcheroo' searches for all Pok\u00e9mon that learn either Trick or Switcheroo.",
+		"You can search for info in a specific generation by appending the generation to ds, e.g. '/ds1 normal' searches for all Pok\u00e9mon that were normal type in Generation I.",
+		"Searching for a Pok\u00e9mon with both egg group and type parameters can be differentiated by adding the suffix 'group' onto the egg group parameter, e.g., seaching for 'grass, grass group' will show all Grass types in the Grass egg group.",
 		"The order of the parameters does not matter.",
 	],
 
@@ -248,9 +251,12 @@ exports.commands = {
 		"Search categories are: type, category, gen, contest condition, flag, status inflicted, type boosted, and numeric range for base power, pp, and accuracy.",
 		"Types must be followed by ' type', e.g., 'dragon type'.",
 		"Stat boosts must be preceded with 'boosts ', and stat-lowering moves with 'lowers ', e.g., 'boosts attack' searches for moves that boost the attack stat of either Pok\u00e9mon.",
+		"Z-stat boosts must be preceded with 'zboosts ', e.g., 'zboosts accuracy' searches for all status moves whose Z-Effects boost the user's accuracy.",
+		"Moves that have a Z-Effect of fully restoring the user's health can be searched for with 'zrecovery'.",
 		"Inequality ranges use the characters '>' and '<' though they behave as '≥' and '≤', e.g., 'bp > 100' searches for all moves equal to and greater than 100 base power.",
 		"Parameters can be excluded through the use of '!', e.g., !water type' excludes all water type moves.",
 		"Valid flags are: authentic (bypasses substitute), bite, bullet, contact, defrost, powder, pulse, punch, secondary, snatch, and sound.",
+		"Parameters separated with '|' will be searched as alternatives for each other, e.g., 'fire | water' searches for all moves that are either Fire type or Water type.",
 		"If a Pok\u00e9mon is included as a parameter, moves will be searched from its movepool.",
 		"The order of the parameters does not matter.",
 	],
@@ -338,7 +344,7 @@ if (process.send && module === process.mainModule) {
 	global.Dex = require('../sim/dex');
 	global.toId = Dex.getId;
 	Dex.includeData();
-	global.TeamValidator = require('../team-validator');
+	global.TeamValidator = require('../sim/team-validator');
 
 	process.on('message', message => PM.onMessageDownstream(message));
 	process.on('disconnect', () => process.exit());
@@ -348,28 +354,28 @@ if (process.send && module === process.mainModule) {
 
 function runDexsearch(target, cmd, canAll, message) {
 	let searches = [];
-	let allTiers = {'uber':'Uber', 'ubers':'Uber', 'ou':'OU', 'bl':'BL', 'uu':'UU', 'bl2':'BL2', 'ru':'RU', 'bl3':'BL3', 'nu':'NU', 'bl4':'BL4', 'pu':'PU', 'nfe':'NFE', 'lcuber':'LC Uber', 'lcubers':'LC Uber', 'lc':'LC', 'cap':'CAP', 'caplc':'CAP LC', 'capnfe':'CAP NFE'};
-	let allTypes = {};
+	let allTiers = {'uber': 'Uber', 'ubers': 'Uber', 'ou': 'OU', 'bl': 'BL', 'uu': 'UU', 'bl2': 'BL2', 'ru': 'RU', 'bl3': 'BL3', 'nu': 'NU', 'bl4': 'BL4', 'pu': 'PU', 'nfe': 'NFE', 'lcuber': 'LC Uber', 'lcubers': 'LC Uber', 'lc': 'LC', 'cap': 'CAP', 'caplc': 'CAP LC', 'capnfe': 'CAP NFE', __proto__: null};
+	let allTypes = Object.create(null);
 	for (let i in Dex.data.TypeChart) {
 		allTypes[toId(i)] = i;
 	}
-	let allColours = {'green':1, 'red':1, 'blue':1, 'white':1, 'brown':1, 'yellow':1, 'purple':1, 'pink':1, 'gray':1, 'black':1};
-	let allEggGroups = {'amorphous':'Amorphous', 'bug':'Bug', 'ditto':'Ditto', 'dragon':'Dragon', 'fairy':'Fairy', 'field':'Field', 'flying':'Flying', 'grass':'Grass', 'humanlike':'Human-Like', 'mineral':'Mineral', 'monster':'Monster', 'undiscovered':'Undiscovered', 'water1':'Water 1', 'water2':'Water 2', 'water3':'Water 3'};
-	let allStats = {'hp':1, 'atk':1, 'def':1, 'spa':1, 'spd':1, 'spe':1, 'bst':1, 'weight':1, 'height':1, 'gen':1};
+	let allColors = ['green', 'red', 'blue', 'white', 'brown', 'yellow', 'purple', 'pink', 'gray', 'black'];
+	let allEggGroups = {'amorphous': 'Amorphous', 'bug': 'Bug', 'ditto': 'Ditto', 'dragon': 'Dragon', 'fairy': 'Fairy', 'field': 'Field', 'flying': 'Flying', 'grass': 'Grass', 'humanlike': 'Human-Like', 'mineral': 'Mineral', 'monster': 'Monster', 'undiscovered': 'Undiscovered', 'water1': 'Water 1', 'water2': 'Water 2', 'water3': 'Water 3', __proto__: null};
+	let allStats = ['hp', 'atk', 'def', 'spa', 'spd', 'spe', 'bst', 'weight', 'height', 'gen'];
 	let showAll = false;
 	let megaSearch = null;
 	let capSearch = null;
 	let randomOutput = 0;
 	let maxGen = 0;
 	let validParameter = (cat, param, isNotSearch, input) => {
-		let uniqueTraits = {'colors':1, 'gens':1};
+		let uniqueTraits = ['colors', 'gens'];
 		for (let h = 0; h < searches.length; h++) {
 			let group = searches[h];
 			if (group[cat] === undefined) continue;
 			if (group[cat][param] === undefined) {
-				if (cat in uniqueTraits) {
+				if (uniqueTraits.includes(cat)) {
 					for (let currentParam in group[cat]) {
-						if (group[cat][currentParam] !== isNotSearch) return `A pokemon cannot have multiple ${cat}.`;
+						if (group[cat][currentParam] !== isNotSearch) return `A Pok&eacute;mon cannot have multiple ${cat}.`;
 					}
 				}
 				continue;
@@ -416,7 +422,7 @@ function runDexsearch(target, cmd, canAll, message) {
 				continue;
 			}
 
-			if (target in allColours) {
+			if (allColors.includes(target)) {
 				target = target.charAt(0).toUpperCase() + target.slice(1);
 				let invalid = validParameter("colors", target, isNotSearch, target);
 				if (invalid) return {reply: invalid};
@@ -447,6 +453,7 @@ function runDexsearch(target, cmd, canAll, message) {
 
 			if (target.substr(0, 6) === 'maxgen') {
 				maxGen = parseInt(target[6]);
+				if (!maxGen || maxGen < 1 || maxGen > 7) return {reply: "The generation must be between 1 and 7"};
 				orGroup.skip = true;
 				continue;
 			}
@@ -609,6 +616,8 @@ function runDexsearch(target, cmd, canAll, message) {
 				case 'attack': stat = 'atk'; break;
 				case 'defense': stat = 'def'; break;
 				case 'specialattack': stat = 'spa'; break;
+				case 'spc': stat = 'spa'; break;
+				case 'special': stat = 'spa'; break;
 				case 'spatk': stat = 'spa'; break;
 				case 'specialdefense': stat = 'spd'; break;
 				case 'spdef': stat = 'spd'; break;
@@ -617,7 +626,7 @@ function runDexsearch(target, cmd, canAll, message) {
 				case 'ht': stat = 'height'; break;
 				case 'generation': stat = 'gen'; break;
 				}
-				if (!(stat in allStats)) return {reply: `'${escapeHTML(target)}' did not contain a valid stat.`};
+				if (!allStats.includes(stat)) return {reply: `'${escapeHTML(target)}' did not contain a valid stat.`};
 				if (!orGroup.stats[stat]) orGroup.stats[stat] = {};
 				for (let direction of directions) {
 					if (orGroup.stats[stat][direction]) return {reply: `Invalid stat range for ${stat}.`};
@@ -632,15 +641,13 @@ function runDexsearch(target, cmd, canAll, message) {
 		}
 	}
 	if (showAll && searches.length === 0 && megaSearch === null) return {reply: "No search parameters other than 'all' were found. Try '/help dexsearch' for more information on this command."};
-	let mod = Dex;
-	if (maxGen) {
-		mod = Dex.mod('gen' + maxGen);
-	}
+	if (!maxGen) maxGen = 7;
+	let mod = Dex.mod('gen' + maxGen);
 	let dex = {};
 	for (let pokemon in mod.data.Pokedex) {
 		let template = mod.getTemplate(pokemon);
 		let megaSearchResult = (megaSearch === null || (megaSearch === true && template.isMega) || (megaSearch === false && !template.isMega));
-		if (template.tier !== 'Unreleased' && template.tier !== 'Illegal' && (!template.tier.startsWith("CAP") || capSearch) && megaSearchResult) {
+		if (template.gen <= maxGen && template.tier !== 'Unreleased' && template.tier !== 'Illegal' && (!template.tier.startsWith("CAP") || capSearch) && megaSearchResult) {
 			dex[pokemon] = template;
 		}
 	}
@@ -744,8 +751,8 @@ function runDexsearch(target, cmd, canAll, message) {
 			if (matched) continue;
 
 			for (let move in alts.moves) {
-				if (!lsetData[mon]) lsetData[mon] = {fastCheck: true, set: {}};
-				if (!TeamValidator('gen7ou').checkLearnset(move, mon, lsetData[mon]) === alts.moves[move]) {
+				if (!lsetData[mon]) lsetData[mon] = {fastCheck: true, sources: [], sourcesBefore: maxGen};
+				if (!TeamValidator(`gen${maxGen}ou`).checkLearnset(move, mon, lsetData[mon]) === alts.moves[move]) {
 					matched = true;
 					break;
 				}
@@ -788,13 +795,13 @@ function runDexsearch(target, cmd, canAll, message) {
 function runMovesearch(target, cmd, canAll, message) {
 	let targets = target.split(',');
 	let searches = [];
-	let allCategories = {'physical':1, 'special':1, 'status':1};
-	let allContestTypes = {'beautiful':1, 'clever':1, 'cool':1, 'cute':1, 'tough':1};
-	let allProperties = {'basePower':1, 'accuracy':1, 'priority':1, 'pp':1};
-	let allFlags = {'authentic':1, 'bite':1, 'bullet':1, 'contact':1, 'defrost':1, 'powder':1, 'pulse':1, 'punch':1, 'secondary':1, 'snatch':1, 'sound':1};
-	let allStatus = {'psn':1, 'tox':1, 'brn':1, 'par':1, 'frz':1, 'slp':1};
-	let allVolatileStatus = {'flinch':1, 'confusion':1, 'partiallytrapped':1};
-	let allBoosts = {'hp':1, 'atk':1, 'def':1, 'spa':1, 'spd':1, 'spe':1, 'accuracy':1, 'evasion':1};
+	let allCategories = ['physical', 'special', 'status'];
+	let allContestTypes = ['beautiful', 'clever', 'cool', 'cute', 'tough'];
+	let allProperties = ['basePower', 'accuracy', 'priority', 'pp'];
+	let allFlags = ['authentic', 'bite', 'bullet', 'contact', 'defrost', 'powder', 'pulse', 'punch', 'secondary', 'snatch', 'sound'];
+	let allStatus = ['psn', 'tox', 'brn', 'par', 'frz', 'slp'];
+	let allVolatileStatus = ['flinch', 'confusion', 'partiallytrapped'];
+	let allBoosts = ['hp', 'atk', 'def', 'spa', 'spd', 'spe', 'accuracy', 'evasion'];
 	let allTypes = {};
 	for (let i in Dex.data.TypeChart) {
 		allTypes[toId(i)] = i;
@@ -820,21 +827,21 @@ function runMovesearch(target, cmd, canAll, message) {
 			} else {
 				targetType = toId(target);
 			}
-			if (targetType in allTypes) {
+			if (allTypes[targetType]) {
 				target = allTypes[targetType];
 				if ((orGroup.types[target] && isNotSearch) || (orGroup.types[target] === false && !isNotSearch)) return {reply: 'A search cannot both exclude and include a type.'};
 				orGroup.types[target] = !isNotSearch;
 				continue;
 			}
 
-			if (target in allCategories) {
+			if (allCategories.includes(target)) {
 				target = target.charAt(0).toUpperCase() + target.substr(1);
 				if ((orGroup.categories[target] && isNotSearch) || (orGroup.categories[target] === false && !isNotSearch)) return {reply: 'A search cannot both exclude and include a category.'};
 				orGroup.categories[target] = !isNotSearch;
 				continue;
 			}
 
-			if (target in allContestTypes) {
+			if (allContestTypes.includes(target)) {
 				target = target.charAt(0).toUpperCase() + target.substr(1);
 				if ((orGroup.contestTypes[target] && isNotSearch) || (orGroup.contestTypes[target] === false && !isNotSearch)) return {reply: 'A search cannot both exclude and include a contest condition.'};
 				orGroup.contestTypes[target] = !isNotSearch;
@@ -842,7 +849,7 @@ function runMovesearch(target, cmd, canAll, message) {
 			}
 
 			if (target === 'bypassessubstitute') target = 'authentic';
-			if (target in allFlags) {
+			if (allFlags.includes(target)) {
 				if ((orGroup.flags[target] && isNotSearch) || (orGroup.flags[target] === false && !isNotSearch)) return {reply: 'A search cannot both exclude and include \'' + target + '\'.'};
 				orGroup.flags[target] = !isNotSearch;
 				continue;
@@ -941,7 +948,7 @@ function runMovesearch(target, cmd, canAll, message) {
 				case 'bp': prop = 'basePower'; break;
 				case 'acc': prop = 'accuracy'; break;
 				}
-				if (!(prop in allProperties)) return {reply: `'${escapeHTML(target)}' did not contain a valid property.`};
+				if (!allProperties.includes(prop)) return {reply: `'${escapeHTML(target)}' did not contain a valid property.`};
 				if (direction === 'equal') {
 					if (orGroup.property[prop]) return {reply: `Invalid property range for ${prop}.`};
 					orGroup.property[prop] = {};
@@ -992,7 +999,7 @@ function runMovesearch(target, cmd, canAll, message) {
 				case 'evasiveness': target = 'evasion'; break;
 				default: target = target.substr(7);
 				}
-				if (!(target in allBoosts)) return {reply: `'${escapeHTML(target.substr(7))}' is not a recognized stat.`};
+				if (!allBoosts.includes(target)) return {reply: `'${escapeHTML(target.substr(7))}' is not a recognized stat.`};
 				if (isBoost) {
 					if ((orGroup.boost[target] && isNotSearch) || (orGroup.boost[target] === false && !isNotSearch)) return {reply: 'A search cannot both exclude and include a stat boost.'};
 					orGroup.boost[target] = !isNotSearch;
@@ -1036,13 +1043,13 @@ function runMovesearch(target, cmd, canAll, message) {
 			case 'flinche': target = 'flinch'; break;
 			}
 
-			if (target in allStatus) {
+			if (allStatus.includes(target)) {
 				if ((orGroup.status[target] && isNotSearch) || (orGroup.status[target] === false && !isNotSearch)) return {reply: 'A search cannot both exclude and include a status.'};
 				orGroup.status[target] = !isNotSearch;
 				continue;
 			}
 
-			if (target in allVolatileStatus) {
+			if (allVolatileStatus.includes(target)) {
 				if ((orGroup.volatileStatus[target] && isNotSearch) || (orGroup.volatileStatus[target] === false && !isNotSearch)) return {reply: 'A search cannot both exclude and include a volitile status.'};
 				orGroup.volatileStatus[target] = !isNotSearch;
 				continue;
@@ -1240,7 +1247,8 @@ function runItemsearch(target, cmd, canAll, message) {
 	let showAll = false;
 
 	target = target.trim();
-	if (target.substr(target.length - 5) === ', all' || target.substr(target.length - 4) === ',all') {
+	if (target.substr(target.length - 5) === ', all') {
+		if (!canAll) return {reply: "A search ending in ', all' cannot be broadcast."};
 		showAll = true;
 		target = target.substr(0, target.length - 5);
 	}
@@ -1458,7 +1466,7 @@ function runItemsearch(target, cmd, canAll, message) {
 function runLearn(target, cmd) {
 	let format = {};
 	let targets = target.split(',');
-	let gen = ({rby:1, gsc:2, adv:3, dpp:4, bw2:5, oras:6}[cmd.slice(0, -5)] || 7);
+	let gen = ({rby: 1, gsc: 2, adv: 3, dpp: 4, bw2: 5, oras: 6}[cmd.slice(0, -5)] || 7);
 	let formatid;
 	let formatName;
 
@@ -1490,7 +1498,7 @@ function runLearn(target, cmd) {
 	if (!formatid) format = new Dex.Data.Format(format);
 	if (!formatid) formatid = 'gen' + gen + 'ou';
 	if (!formatName) formatName = 'Gen ' + gen;
-	let lsetData = {set: {}, format: format};
+	let lsetData = {set: {}, sources: [], sourcesBefore: gen};
 
 	let template = Dex.getTemplate(targets[0]);
 	let move = {};
@@ -1524,7 +1532,7 @@ function runLearn(target, cmd) {
 	let buffer = `In ${formatName}, `;
 	buffer += "" + template.name + (problem ? " <span class=\"message-learn-cannotlearn\">can't</span> learn " : " <span class=\"message-learn-canlearn\">can</span> learn ") + (targets.length > 2 ? "these moves" : move.name);
 	if (!problem) {
-		let sourceNames = {E:"egg", S:"event", D:"dream world", V:"virtual console transfer from gen 1", X:"egg, traded back", Y:"event, traded back"};
+		let sourceNames = {E: "egg", S: "event", D: "dream world", V: "virtual console transfer from gen 1-2", X: "egg, traded back", Y: "event, traded back"};
 		let sourcesBefore = lsetData.sourcesBefore;
 		if (lsetData.sources || sourcesBefore < gen) buffer += " only when obtained";
 		buffer += " from:<ul class=\"message-learn-list\">";

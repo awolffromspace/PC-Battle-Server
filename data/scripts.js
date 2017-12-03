@@ -18,7 +18,7 @@ exports.BattleScripts = {
 	runMove: function (move, pokemon, targetLoc, sourceEffect, zMove, externalMove) {
 		let target = this.getTarget(pokemon, zMove || move, targetLoc);
 		if (!sourceEffect && toId(move) !== 'struggle' && !zMove) {
-			let changedMove = this.runEvent('OverrideDecision', pokemon, target, move);
+			let changedMove = this.runEvent('OverrideAction', pokemon, target, move);
 			if (changedMove && changedMove !== true) {
 				move = changedMove;
 				target = null;
@@ -44,8 +44,6 @@ exports.BattleScripts = {
 		} */
 		if (!this.runEvent('BeforeMove', pokemon, target, move)) {
 			this.runEvent('MoveAborted', pokemon, target, move);
-			// Prevent Pursuit from running again against a slower U-turn/Volt Switch/Parting Shot
-			pokemon.moveThisTurn = true;
 			this.clearActiveMove(true);
 			return;
 		}
@@ -85,9 +83,30 @@ exports.BattleScripts = {
 			this.add('-zpower', pokemon);
 			pokemon.side.zMoveUsed = true;
 		}
-		this.useMove(baseMove, pokemon, target, sourceEffect, zMove);
+		let moveDidSomething = this.useMove(baseMove, pokemon, target, sourceEffect, zMove);
 		this.singleEvent('AfterMove', move, null, pokemon, target, move);
 		this.runEvent('AfterMove', pokemon, target, move);
+
+		// Dancer's activation order is completely different from any other event, so it's handled separately
+		if (move.flags['dance'] && moveDidSomething && !move.isExternal) {
+			let dancers = [];
+			for (const side of this.sides) {
+				for (const currentPoke of side.active) {
+					if (!currentPoke || !currentPoke.hp || pokemon === currentPoke) continue;
+					if (currentPoke.hasAbility('dancer') && !currentPoke.isSemiInvulnerable()) {
+						dancers.push(currentPoke);
+					}
+				}
+			}
+			// Dancer activates in order of lowest speed stat to highest
+			// Ties go to whichever Pokemon has had the ability for the least amount of time
+			dancers.sort(function (a, b) { return -(b.stats['spe'] - a.stats['spe']) || b.abilityOrder - a.abilityOrder; });
+			for (const dancer of dancers) {
+				this.faintMessages();
+				this.add('-activate', dancer, 'ability: Dancer');
+				this.runMove(baseMove.id, dancer, 0, this.getAbility('dancer'), undefined, true);
+			}
+		}
 		if (noLock && pokemon.volatiles.lockedmove) delete pokemon.volatiles.lockedmove;
 	},
 	/**
@@ -107,7 +126,7 @@ exports.BattleScripts = {
 			this.singleEvent('ModifyMove', move, null, pokemon, target, move, move);
 			move = this.getZMoveCopy(move, pokemon);
 			if (move.type !== 'Normal') sourceEffect = baseMove;
-		} else if (zMove || (sourceEffect && sourceEffect.isZ)) {
+		} else if (zMove || (sourceEffect && sourceEffect.isZ && sourceEffect.id !== 'instruct')) {
 			move = this.getZMoveCopy(move, pokemon);
 		} else {
 			move = this.getMoveCopy(move);
@@ -191,7 +210,7 @@ exports.BattleScripts = {
 			this.attrLastMove('[notarget]');
 			this.add('-notarget');
 			if (move.target === 'normal') pokemon.isStaleCon = 0;
-			return true;
+			return false;
 		}
 
 		let targets = pokemon.getMoveTargets(move, target);
@@ -210,11 +229,13 @@ exports.BattleScripts = {
 		}
 
 		if (!this.singleEvent('TryMove', move, null, pokemon, target, move)) {
-			return true;
+			move.mindBlownRecoil = false;
+			return false;
 		}
 
 		if (!this.runEvent('TryMove', pokemon, target, move)) {
-			return true;
+			move.mindBlownRecoil = false;
+			return false;
 		}
 
 		this.singleEvent('UseMoveMessage', move, null, pokemon, target, move);
@@ -235,10 +256,9 @@ exports.BattleScripts = {
 			if (!targets.length) {
 				this.attrLastMove('[notarget]');
 				this.add('-notarget');
-				return true;
+				return false;
 			}
 			if (targets.length > 1) move.spreadHit = true;
-			damage = 0;
 			let hitTargets = [];
 			for (let i = 0; i < targets.length; i++) {
 				let hitResult = this.tryMoveHit(targets[i], pokemon, move);
@@ -246,7 +266,11 @@ exports.BattleScripts = {
 					moveResult = true;
 					hitTargets.push(targets[i].toString().substr(0, 3));
 				}
-				damage += hitResult || 0;
+				if (damage !== false) {
+					damage += hitResult || 0;
+				} else {
+					damage = hitResult;
+				}
 			}
 			if (move.spreadHit) this.attrLastMove('[spread] ' + hitTargets.join(','));
 		} else {
@@ -261,18 +285,19 @@ exports.BattleScripts = {
 				this.attrLastMove('[notarget]');
 				this.add('-notarget');
 				if (move.target === 'normal') pokemon.isStaleCon = 0;
-				return true;
+				return false;
 			}
 			damage = this.tryMoveHit(target, pokemon, move);
 			if (damage || damage === 0 || damage === undefined) moveResult = true;
 		}
+		if (move.selfBoost && moveResult) this.moveHit(pokemon, pokemon, move, move.selfBoost, false, true);
 		if (!pokemon.hp) {
 			this.faint(pokemon, pokemon, move);
 		}
 
 		if (!moveResult) {
 			this.singleEvent('MoveFail', move, null, target, pokemon, move);
-			return true;
+			return false;
 		}
 
 		if (!move.negateSecondary && !(move.hasSheerForce && pokemon.hasAbility('sheerforce'))) {
@@ -304,7 +329,7 @@ exports.BattleScripts = {
 			}
 			if (!hitResult) {
 				if (hitResult === false) this.add('-fail', target);
-				return true;
+				return false;
 			}
 			return this.moveHit(target, pokemon, move);
 		}
@@ -313,7 +338,7 @@ exports.BattleScripts = {
 			move.ignoreImmunity = (move.category === 'Status');
 		}
 
-		if (move.ignoreImmunity !== true && !move.ignoreImmunity[move.type] && !target.runImmunity(move.type, true)) {
+		if (this.gen < 7 && move.ignoreImmunity !== true && !move.ignoreImmunity[move.type] && !target.runImmunity(move.type, true)) {
 			return false;
 		}
 
@@ -323,6 +348,9 @@ exports.BattleScripts = {
 			return false;
 		}
 
+		if (this.gen >= 7 && move.ignoreImmunity !== true && !move.ignoreImmunity[move.type] && !target.runImmunity(move.type, true)) {
+			return false;
+		}
 		if (move.flags['powder'] && target !== pokemon && !this.getImmunity('powder', target)) {
 			this.debug('natural powder immunity');
 			this.add('-immune', target, '[msg]');
@@ -389,12 +417,12 @@ exports.BattleScripts = {
 
 		if (move.breaksProtect) {
 			let broke = false;
-			for (let i in {banefulbunker:1, kingsshield:1, protect:1, spikyshield:1}) {
-				if (target.removeVolatile(i)) broke = true;
+			for (const effectid of ['banefulbunker', 'kingsshield', 'protect', 'spikyshield']) {
+				if (target.removeVolatile(effectid)) broke = true;
 			}
 			if (this.gen >= 6 || target.side !== pokemon.side) {
-				for (let i in {craftyshield:1, matblock:1, quickguard:1, wideguard:1}) {
-					if (target.side.removeSideCondition(i)) broke = true;
+				for (const effectid of ['craftyshield', 'matblock', 'quickguard', 'wideguard']) {
+					if (target.side.removeSideCondition(effectid)) broke = true;
 				}
 			}
 			if (broke) {
@@ -492,9 +520,12 @@ exports.BattleScripts = {
 				damage = (moveDamage || 0);
 				// Total damage dealt is accumulated for the purposes of recoil (Parental Bond).
 				move.totalDamage += damage;
+				if (move.mindBlownRecoil && i === 0) {
+					this.damage(Math.round(pokemon.maxhp / 2), pokemon, pokemon, null, true);
+				}
 				this.eachEvent('Update');
 			}
-			if (i === 0) return true;
+			if (i === 0) return false;
 			if (nullDamage) damage = false;
 			this.add('-hitcount', target, i);
 		} else {
@@ -682,7 +713,9 @@ exports.BattleScripts = {
 				if (this.canSwitch(target.side)) didSomething = true; // at least defer the fail message to later
 			}
 			if (moveData.selfSwitch) {
-				if (this.canSwitch(pokemon.side)) didSomething = true; // at least defer the fail message to later
+				// If the move is Parting Shot and it fails to change the target's stats in gen 7, didSomething will be null instead of false.
+				// Leaving didSomething as null will cause this function to return before setting the switch flag, preventing the switch.
+				if (this.canSwitch(pokemon.side) && (didSomething !== null || this.gen < 7)) didSomething = true; // at least defer the fail message to later
 			}
 			// Hit events
 			//   These are like the TryHit events, except we don't need a FieldHit event.
@@ -702,7 +735,7 @@ exports.BattleScripts = {
 
 			if (!hitResult && !didSomething && !moveData.self && !moveData.selfdestruct) {
 				if (!isSelf && !isSecondary) {
-					if (hitResult === false || didSomething === false) this.add('-fail', target);
+					if (hitResult === false || didSomething === false) this.add('-fail', pokemon);
 				}
 				this.debug('move failed because it did nothing');
 				return false;
@@ -735,6 +768,7 @@ exports.BattleScripts = {
 				target.forceSwitchFlag = true;
 			} else if (hitResult === false && move.category === 'Status') {
 				this.add('-fail', target);
+				return false;
 			}
 		}
 		if (move.selfSwitch && pokemon.hp) {
@@ -813,7 +847,7 @@ exports.BattleScripts = {
 	},
 
 	canZMove: function (pokemon) {
-		if (pokemon.side.zMoveUsed) return;
+		if (pokemon.side.zMoveUsed || (pokemon.transformed && (pokemon.template.isMega || pokemon.template.isPrimal))) return;
 		let item = pokemon.getItem();
 		if (!item.zMove) return;
 		if (item.zMoveUser && !item.zMoveUser.includes(pokemon.template.species)) return;
@@ -842,18 +876,28 @@ exports.BattleScripts = {
 		let altForme = pokemon.baseTemplate.otherFormes && this.getTemplate(pokemon.baseTemplate.otherFormes[0]);
 		let item = pokemon.getItem();
 		if (altForme && altForme.isMega && altForme.requiredMove && pokemon.moves.includes(toId(altForme.requiredMove)) && !item.zMove) return altForme.species;
-		if (item.megaEvolves !== pokemon.baseTemplate.baseSpecies || item.megaStone === pokemon.species) return false;
+		if (item.megaEvolves !== pokemon.baseTemplate.baseSpecies || item.megaStone === pokemon.species) {
+			return null;
+		}
 		return item.megaStone;
 	},
 
+	canUltraBurst: function (pokemon) {
+		if (['Necrozma-Dawn-Wings', 'Necrozma-Dusk-Mane'].includes(pokemon.baseTemplate.species) &&
+			pokemon.getItem().id === 'ultranecroziumz') {
+			return "Necrozma-Ultra";
+		}
+		return null;
+	},
+
 	runMegaEvo: function (pokemon) {
-		let template = this.getTemplate(pokemon.canMegaEvo);
-		let side = pokemon.side;
+		const isUltraBurst = !pokemon.canMegaEvo;
+		const template = this.getTemplate(pokemon.canMegaEvo || pokemon.canUltraBurst);
+		const side = pokemon.side;
 
 		// Pokémon affected by Sky Drop cannot mega evolve. Enforce it here for now.
-		let foeActive = side.foe.active;
-		for (let i = 0; i < foeActive.length; i++) {
-			if (foeActive[i].volatiles['skydrop'] && foeActive[i].volatiles['skydrop'].source === pokemon) {
+		for (const foeActive of side.foe.active) {
+			if (foeActive.volatiles['skydrop'] && foeActive.volatiles['skydrop'].source === pokemon) {
 				return false;
 			}
 		}
@@ -863,17 +907,25 @@ exports.BattleScripts = {
 		pokemon.details = template.species + (pokemon.level === 100 ? '' : ', L' + pokemon.level) + (pokemon.gender === '' ? '' : ', ' + pokemon.gender) + (pokemon.set.shiny ? ', shiny' : '');
 		if (pokemon.illusion) {
 			pokemon.ability = ''; // Don't allow Illusion to wear off
-			this.add('-mega', pokemon, pokemon.illusion.template.baseSpecies, template.requiredItem);
+			this.add(isUltraBurst ? '-burst' : '-mega', pokemon, pokemon.illusion.template.baseSpecies, template.requiredItem);
 		} else {
+			if (isUltraBurst) {
+				this.add('-burst', pokemon, template.baseSpecies, template.requiredItem);
+			} else {
+				this.add('-mega', pokemon, template.baseSpecies, template.requiredItem);
+			}
 			this.add('detailschange', pokemon, pokemon.details);
-			this.add('-mega', pokemon, template.baseSpecies, template.requiredItem);
 		}
 		pokemon.setAbility(template.abilities['0']);
 		pokemon.baseAbility = pokemon.ability;
 
 		// Limit one mega evolution
-		for (let i = 0; i < side.pokemon.length; i++) {
-			side.pokemon[i].canMegaEvo = false;
+		for (const ally of side.pokemon) {
+			if (isUltraBurst) {
+				ally.canUltraBurst = null;
+			} else {
+				ally.canMegaEvo = null;
+			}
 		}
 
 		this.runEvent('AfterMega', pokemon);

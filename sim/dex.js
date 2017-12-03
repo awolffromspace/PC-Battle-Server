@@ -34,14 +34,13 @@ const fs = require('fs');
 const path = require('path');
 
 const Data = require('./dex-data');
-const {Effect, PureEffect, RuleTable, Format, Item, Template, Move, Ability} = Data; // eslint-disable-line no-unused-vars
 
 const DATA_DIR = path.resolve(__dirname, '../data');
 const MODS_DIR = path.resolve(__dirname, '../mods');
 const FORMATS = path.resolve(__dirname, '../config/formats');
 
 /** @type {{[mod: string]: ModdedDex}} */
-let dexes = {};
+let dexes = Object.create(null);
 
 /** @typedef {'Pokedex' | 'FormatsData' | 'Learnsets' | 'Movedex' | 'Statuses' | 'TypeChart' | 'Scripts' | 'Items' | 'Abilities' | 'Natures' | 'Formats'} DataType */
 /** @type {DataType[]} */
@@ -68,31 +67,31 @@ const DATA_FILES = {
 /** @typedef {{Pokedex: DexTable, Movedex: DexTable, Statuses: DexTable, TypeChart: DexTable, Scripts: DexTable, Items: DexTable, Abilities: DexTable, FormatsData: DexTable, Learnsets: DexTable, Aliases: {[id: string]: string}, Natures: DexTable, Formats: DexTable}} DexTableData */
 
 const BattleNatures = {
-	adamant: {name:"Adamant", plus:'atk', minus:'spa'},
-	bashful: {name:"Bashful"},
-	bold: {name:"Bold", plus:'def', minus:'atk'},
-	brave: {name:"Brave", plus:'atk', minus:'spe'},
-	calm: {name:"Calm", plus:'spd', minus:'atk'},
-	careful: {name:"Careful", plus:'spd', minus:'spa'},
-	docile: {name:"Docile"},
-	gentle: {name:"Gentle", plus:'spd', minus:'def'},
-	hardy: {name:"Hardy"},
-	hasty: {name:"Hasty", plus:'spe', minus:'def'},
-	impish: {name:"Impish", plus:'def', minus:'spa'},
-	jolly: {name:"Jolly", plus:'spe', minus:'spa'},
-	lax: {name:"Lax", plus:'def', minus:'spd'},
-	lonely: {name:"Lonely", plus:'atk', minus:'def'},
-	mild: {name:"Mild", plus:'spa', minus:'def'},
-	modest: {name:"Modest", plus:'spa', minus:'atk'},
-	naive: {name:"Naive", plus:'spe', minus:'spd'},
-	naughty: {name:"Naughty", plus:'atk', minus:'spd'},
-	quiet: {name:"Quiet", plus:'spa', minus:'spe'},
-	quirky: {name:"Quirky"},
-	rash: {name:"Rash", plus:'spa', minus:'spd'},
-	relaxed: {name:"Relaxed", plus:'def', minus:'spe'},
-	sassy: {name:"Sassy", plus:'spd', minus:'spe'},
-	serious: {name:"Serious"},
-	timid: {name:"Timid", plus:'spe', minus:'atk'},
+	adamant: {name: "Adamant", plus: 'atk', minus: 'spa'},
+	bashful: {name: "Bashful"},
+	bold: {name: "Bold", plus: 'def', minus: 'atk'},
+	brave: {name: "Brave", plus: 'atk', minus: 'spe'},
+	calm: {name: "Calm", plus: 'spd', minus: 'atk'},
+	careful: {name: "Careful", plus: 'spd', minus: 'spa'},
+	docile: {name: "Docile"},
+	gentle: {name: "Gentle", plus: 'spd', minus: 'def'},
+	hardy: {name: "Hardy"},
+	hasty: {name: "Hasty", plus: 'spe', minus: 'def'},
+	impish: {name: "Impish", plus: 'def', minus: 'spa'},
+	jolly: {name: "Jolly", plus: 'spe', minus: 'spa'},
+	lax: {name: "Lax", plus: 'def', minus: 'spd'},
+	lonely: {name: "Lonely", plus: 'atk', minus: 'def'},
+	mild: {name: "Mild", plus: 'spa', minus: 'def'},
+	modest: {name: "Modest", plus: 'spa', minus: 'atk'},
+	naive: {name: "Naive", plus: 'spe', minus: 'spd'},
+	naughty: {name: "Naughty", plus: 'atk', minus: 'spd'},
+	quiet: {name: "Quiet", plus: 'spa', minus: 'spe'},
+	quirky: {name: "Quirky"},
+	rash: {name: "Rash", plus: 'spa', minus: 'spd'},
+	relaxed: {name: "Relaxed", plus: 'def', minus: 'spe'},
+	sassy: {name: "Sassy", plus: 'spd', minus: 'spe'},
+	serious: {name: "Serious"},
+	timid: {name: "Timid", plus: 'spe', minus: 'atk'},
 };
 
 const toId = Data.Tools.getId;
@@ -127,6 +126,8 @@ class ModdedDex {
 		this.itemCache = new Map();
 		/** @type {Map<string, Ability>} */
 		this.abilityCache = new Map();
+		/** @type {Map<string, TypeInfo>} */
+		this.typeCache = new Map();
 
 		if (!isOriginal) {
 			const original = dexes['base'].mod(mod).includeData();
@@ -330,7 +331,18 @@ class ModdedDex {
 		let template = this.templateCache.get(id);
 		if (template) return template;
 		if (this.data.Aliases.hasOwnProperty(id)) {
-			template = this.getTemplate(this.data.Aliases[id]);
+			if (this.data.FormatsData.hasOwnProperty(id)) {
+				// special event ID, like Rockruff-Dusk
+				let baseId = toId(this.data.Aliases[id]);
+				template = new Data.Template({name}, this.data.Pokedex[baseId], this.data.FormatsData[id], this.data.Learnsets[id]);
+				template.name = id;
+				template.species = id;
+				template.speciesid = id;
+				// @ts-ignore
+				template.abilities = {0: template.abilities['S']};
+			} else {
+				template = this.getTemplate(this.data.Aliases[id]);
+			}
 			if (template) {
 				this.templateCache.set(id, template);
 			}
@@ -357,7 +369,13 @@ class ModdedDex {
 		}
 		if (id && this.data.Pokedex.hasOwnProperty(id)) {
 			template = new Data.Template({name}, this.data.Pokedex[id], this.data.FormatsData[id], this.data.Learnsets[id]);
-			if (!template.tier && template.baseSpecies !== template.species) template.tier = this.data.FormatsData[toId(template.baseSpecies)].tier;
+			if (!template.tier && template.baseSpecies !== template.species) {
+				if (template.speciesid.endsWith('totem')) {
+					template.tier = this.data.FormatsData[template.speciesid.slice(0, -5)].tier;
+				} else {
+					template.tier = this.data.FormatsData[toId(template.baseSpecies)].tier;
+				}
+			}
 			if (!template.tier) template.tier = 'Illegal';
 		} else {
 			template = new Data.Template({name, exists: false});
@@ -427,7 +445,7 @@ class ModdedDex {
 		return moveCopy;
 	}
 	/**
-	 * @param {string | Effect} name
+	 * @param {?string | Effect} name
 	 * @return {Effect}
 	 */
 	getEffect(name) {
@@ -469,9 +487,12 @@ class ModdedDex {
 		}
 		name = (name || '').trim();
 		let id = toId(name);
-		if (this.data.Aliases[id]) {
+		if (this.data.Aliases.hasOwnProperty(id)) {
 			name = this.data.Aliases[id];
 			id = toId(name);
+		}
+		if (this.data.Formats.hasOwnProperty('gen7' + id)) {
+			id = 'gen7' + id;
 		}
 		let effect;
 		/**@type {string[]} */
@@ -579,7 +600,7 @@ class ModdedDex {
 	 * @param {string | Ability} name
 	 * @return {Ability}
 	 */
-	getAbility(name) {
+	getAbility(name = '') {
 		if (name && typeof name !== 'string') {
 			return name;
 		}
@@ -596,28 +617,24 @@ class ModdedDex {
 		return ability;
 	}
 	/**
-	 * @param {string | AnyObject} type
-	 * @return {AnyObject}
+	 * @param {string | TypeInfo} name
+	 * @return {TypeInfo}
 	 */
-	getType(type) {
-		if (!type || typeof type === 'string') {
-			let id = toId(type);
-			id = id.charAt(0).toUpperCase() + id.substr(1);
-			type = {};
-			if (id && id !== 'constructor' && this.data.TypeChart[id]) {
-				type = this.data.TypeChart[id];
-				if (type.cached) return type;
-				type.cached = true;
-				type.exists = true;
-				type.isType = true;
-				type.effectType = 'Type';
-			}
-			if (!type.id) type.id = id;
-			if (!type.effectType) {
-				// man, this is really meta
-				type.effectType = 'EffectType';
-			}
+	getType(name) {
+		if (name && typeof name !== 'string') {
+			return name;
 		}
+		let id = toId(name);
+		id = id.charAt(0).toUpperCase() + id.substr(1);
+		let type = this.typeCache.get(id);
+		if (type) return type;
+		if (id && this.data.TypeChart.hasOwnProperty(id)) {
+			type = new Data.TypeInfo({id}, this.data.TypeChart[id]);
+		} else {
+			type = new Data.TypeInfo({name, exists: false, effectType: 'EffectType'});
+		}
+
+		if (type.exists) this.typeCache.set(id, type);
 		return type;
 	}
 	/**
@@ -649,7 +666,7 @@ class ModdedDex {
 	 * @return {AnyObject}
 	 */
 	spreadModify(stats, set) {
-		const modStats = {atk:10, def:10, spa:10, spd:10, spe:10};
+		const modStats = {atk: 10, def: 10, spa: 10, spd: 10, spe: 10};
 		for (let statName in modStats) {
 			let stat = stats[statName];
 			modStats[statName] = Math.floor(Math.floor(2 * stat + set.ivs[statName] + Math.floor(set.evs[statName] / 4)) * set.level / 100 + 5);
@@ -711,11 +728,10 @@ class ModdedDex {
 	 * @return {RuleTable}
 	 */
 	getRuleTable(format, depth = 0) {
-		/** @type {RuleTable} */
-		let ruleTable = new RuleTable();
+		let ruleTable = new Data.RuleTable();
 		if (format.ruleTable) return format.ruleTable;
 
-		const ruleset = format.ruleset.slice();
+		let ruleset = format.ruleset.slice();
 		for (const ban of format.banlist) {
 			ruleset.push('-' + ban);
 		}
@@ -960,7 +976,7 @@ class ModdedDex {
 	}
 
 	/**
-	 * @param {AnyObject[]} team
+	 * @param {PokemonSet[]} team
 	 * @return {string}
 	 */
 	packTeam(team) {
@@ -1067,7 +1083,7 @@ class ModdedDex {
 
 	/**
 	 * @param {string} buf
-	 * @return {?AnyObject[]}
+	 * @return {?PokemonSet[]}
 	 */
 	fastUnpackTeam(buf) {
 		if (!buf) return null;
@@ -1077,7 +1093,7 @@ class ModdedDex {
 
 		// limit to 24
 		for (let count = 0; count < 24; count++) {
-			let set = {};
+			let set = /** @type {any} */ ({});
 			team.push(set);
 
 			// name
@@ -1104,13 +1120,13 @@ class ModdedDex {
 			let ability = buf.substring(i, j);
 			let template = dexes['base'].getTemplate(set.species);
 			// @ts-ignore
-			set.ability = (template.abilities && ability in {'':1, 0:1, 1:1, H:1} ? template.abilities[ability || '0'] : ability);
+			set.ability = (template.abilities && ['', '0', '1', 'H'].includes(ability) ? template.abilities[ability || '0'] : ability);
 			i = j + 1;
 
 			// moves
 			j = buf.indexOf('|', i);
 			if (j < 0) return null;
-			set.moves = buf.substring(i, j).split(',', 24);
+			set.moves = buf.substring(i, j).split(',', 24).filter(x => x);
 			i = j + 1;
 
 			// nature
@@ -1219,7 +1235,7 @@ class ModdedDex {
 			if (!dataObject[key] || typeof dataObject[key] !== 'object') return new TypeError(`${filePath}, if it exists, must export an object whose '${key}' property is a non-null object`);
 			return dataObject[key];
 		} catch (e) {
-			if (e.code !== 'MODULE_NOT_FOUND') {
+			if (e.code !== 'MODULE_NOT_FOUND' && e.code !== 'ENOENT') {
 				throw e;
 			}
 		}
@@ -1352,7 +1368,9 @@ class ModdedDex {
 		try {
 			Formats = require(FORMATS).Formats;
 		} catch (e) {
-			if (e.code !== 'MODULE_NOT_FOUND') throw e;
+			if (e.code !== 'MODULE_NOT_FOUND' && e.code !== 'ENOENT') {
+				throw e;
+			}
 		}
 		if (!Array.isArray(Formats)) throw new TypeError(`Exported property 'Formats' from "./config/formats.js" must be an array`);
 

@@ -27,16 +27,16 @@ exports.BattleScripts = {
 					let numerators = [100, 66, 50, 40, 33, 28, 25];
 					stat = Math.floor(stat * numerators[-boost] / 100);
 				}
+			}
 
-				// On Gen 2 we check modifications here from moves and items
-				let statTable = {atk:'Atk', def:'Def', spa:'SpA', spd:'SpD', spe:'Spe'};
-				stat = this.battle.runEvent('Modify' + statTable[statName], this, null, null, stat);
+			if (this.status === 'par' && statName === 'spe') {
+				stat = Math.floor(stat / 4);
 			}
 
 			if (!unmodified) {
 				// Burn attack drop is checked when you get the attack stat upon switch in and used until switch out.
 				if (this.status === 'brn' && statName === 'atk') {
-					stat = this.battle.clampIntRange(Math.floor(stat / 2), 1);
+					stat = Math.floor(stat / 2);
 				}
 			}
 
@@ -51,9 +51,9 @@ exports.BattleScripts = {
 			}
 
 			// Treat here the items.
-			if ((this.species in {'Cubone':1, 'Marowak':1} && this.item === 'thickclub' && statName === 'atk') || (this.species === 'Pikachu' && this.item === 'lightball' && statName === 'spa')) {
+			if ((['Cubone', 'Marowak'].includes(this.species) && this.item === 'thickclub' && statName === 'atk') || (this.species === 'Pikachu' && this.item === 'lightball' && statName === 'spa')) {
 				stat *= 2;
-			} else if (this.species === 'Ditto' && this.item === 'metalpowder' && statName in {'def':1, 'spd':1}) {
+			} else if (this.species === 'Ditto' && this.item === 'metalpowder' && ['def', 'spd'].includes(statName)) {
 				// what. the. fuck. stop playing pokémon
 				stat *= 1.5;
 			}
@@ -65,7 +65,7 @@ exports.BattleScripts = {
 	runMove: function (move, pokemon, targetLoc, sourceEffect) {
 		let target = this.getTarget(pokemon, move, targetLoc);
 		if (!sourceEffect && toId(move) !== 'struggle') {
-			let changedMove = this.runEvent('OverrideDecision', pokemon, target, move);
+			let changedMove = this.runEvent('OverrideAction', pokemon, target, move);
 			if (changedMove && changedMove !== true) {
 				move = changedMove;
 				target = null;
@@ -116,6 +116,133 @@ exports.BattleScripts = {
 		this.useMove(move, pokemon, target, sourceEffect);
 		this.singleEvent('AfterMove', move, null, pokemon, target, move);
 		if (!move.selfSwitch && target.hp > 0) this.runEvent('AfterMoveSelf', pokemon, target, move);
+	},
+	tryMoveHit: function (target, pokemon, move, spreadHit) {
+		let positiveBoostTable = [1, 1.33, 1.66, 2, 2.33, 2.66, 3];
+		let negativeBoostTable = [1, 0.75, 0.6, 0.5, 0.43, 0.36, 0.33];
+		let doSelfDestruct = true;
+		let damage = 0;
+
+		if (move.selfdestruct && doSelfDestruct) {
+			this.faint(pokemon, pokemon, move);
+		}
+		if (!this.singleEvent('Try', move, null, pokemon, target, move)) {
+			return false;
+		}
+
+		if (move.ignoreImmunity === undefined) {
+			move.ignoreImmunity = (move.category === 'Status');
+		}
+
+		if (move.ignoreImmunity !== true && !move.ignoreImmunity[move.type] && !target.runImmunity(move.type, true)) {
+			return false;
+		}
+
+		let hitResult = this.runEvent('TryHit', target, pokemon, move);
+		if (!hitResult) {
+			if (hitResult === false) this.add('-fail', target);
+			return false;
+		}
+
+		let accuracy = move.accuracy;
+		if (move.alwaysHit) {
+			accuracy = true;
+		} else {
+			accuracy = this.runEvent('Accuracy', target, pokemon, move, accuracy);
+		}
+		// Now, let's calculate the accuracy.
+		if (accuracy !== true) {
+			accuracy = Math.floor(accuracy * 255 / 100);
+			if (move.ohko) {
+				if (pokemon.level >= target.level) {
+					accuracy += (pokemon.level - target.level) * 2;
+					accuracy = Math.min(accuracy, 255);
+				} else {
+					this.add('-immune', target, '[ohko]');
+					return false;
+				}
+			}
+			if (!move.ignoreAccuracy) {
+				if (pokemon.boosts.accuracy > 0) {
+					accuracy *= positiveBoostTable[pokemon.boosts.accuracy];
+				} else {
+					accuracy *= negativeBoostTable[-pokemon.boosts.accuracy];
+				}
+			}
+			if (!move.ignoreEvasion) {
+				if (target.boosts.evasion > 0 && !move.ignorePositiveEvasion) {
+					accuracy *= negativeBoostTable[target.boosts.evasion];
+				} else if (target.boosts.evasion < 0) {
+					accuracy *= positiveBoostTable[-target.boosts.evasion];
+				}
+			}
+			accuracy = Math.min(Math.floor(accuracy), 255);
+			accuracy = Math.max(accuracy, 1);
+		} else {
+			accuracy = this.runEvent('Accuracy', target, pokemon, move, accuracy);
+		}
+		accuracy = this.runEvent('ModifyAccuracy', target, pokemon, move, accuracy);
+		if (accuracy !== true) accuracy = Math.max(accuracy, 0);
+		if (move.alwaysHit) {
+			accuracy = true;
+		} else {
+			accuracy = this.runEvent('Accuracy', target, pokemon, move, accuracy);
+		}
+		if (accuracy !== true && accuracy !== 255 && this.random(256) >= accuracy) {
+			this.attrLastMove('[miss]');
+			this.add('-miss', pokemon);
+			damage = false;
+			return damage;
+		}
+		move.totalDamage = 0;
+		pokemon.lastDamage = 0;
+		if (move.multihit) {
+			let hits = move.multihit;
+			if (hits.length) {
+				if (hits[0] === 2 && hits[1] === 5) {
+					hits = [2, 2, 2, 3, 3, 3, 4, 5][this.random(8)];
+				} else {
+					hits = this.random(hits[0], hits[1] + 1);
+				}
+			}
+			hits = Math.floor(hits);
+			let nullDamage = true;
+			let moveDamage;
+
+			let isSleepUsable = move.sleepUsable || this.getMove(move.sourceEffect).sleepUsable;
+			let i;
+			for (i = 0; i < hits && target.hp && pokemon.hp; i++) {
+				if (pokemon.status === 'slp' && !isSleepUsable) break;
+				moveDamage = this.moveHit(target, pokemon, move);
+				if (moveDamage === false) break;
+				if (nullDamage && (moveDamage || moveDamage === 0 || moveDamage === undefined)) nullDamage = false;
+				damage = (moveDamage || 0);
+				move.totalDamage += damage;
+				this.eachEvent('Update');
+			}
+			if (i === 0) return true;
+			if (nullDamage) damage = false;
+			this.add('-hitcount', target, i);
+		} else {
+			damage = this.moveHit(target, pokemon, move);
+			move.totalDamage = damage;
+		}
+		if (move.category !== 'Status') {
+			// FIXME: The stored damage should be calculated ignoring Substitute.
+			// https://github.com/Zarel/Pokemon-Showdown/issues/2598
+			target.gotAttacked(move, damage, pokemon);
+		}
+		if (move.ohko) this.add('-ohko');
+
+		if (!move.negateSecondary) {
+			this.singleEvent('AfterMoveSecondary', move, null, target, pokemon, move);
+			this.runEvent('AfterMoveSecondary', target, pokemon, move);
+		}
+
+		if (move.recoil && move.totalDamage) {
+			this.damage(this.calcRecoilDamage(move.totalDamage, move), pokemon, target, 'recoil');
+		}
+		return damage;
 	},
 	moveHit: function (target, pokemon, move, moveData, isSecondary, isSelf) {
 		let damage;
@@ -262,7 +389,7 @@ exports.BattleScripts = {
 				// That means that a move that does not share the type of the target can status it.
 				// This means tri-attack can burn fire-types and freeze ice-types.
 				// Unlike gen 1, though, paralysis works for all unless the target is immune to direct move (ie. ground-types and t-wave).
-				if (!(moveData.secondaries[i].status && moveData.secondaries[i].status in {'brn':1, 'frz':1} && target && target.hasType(move.type))) {
+				if (!(moveData.secondaries[i].status && ['brn', 'frz'].includes(moveData.secondaries[i].status) && target && target.hasType(move.type))) {
 					let effectChance = Math.floor(moveData.secondaries[i].chance * 255 / 100);
 					if (typeof moveData.secondaries[i].chance === 'undefined' || this.random(256) <= effectChance) {
 						this.moveHit(target, pokemon, move, moveData.secondaries[i], true, isSelf);
@@ -375,6 +502,13 @@ exports.BattleScripts = {
 
 		// We now check for attacker and defender
 		let level = pokemon.level;
+
+		// Using Beat Up
+		if (move.allies) {
+			this.add('-activate', pokemon, 'move: Beat Up', '[of] ' + move.allies[0].name);
+			level = move.allies[0].level;
+		}
+
 		let attacker = pokemon;
 		let defender = target;
 		if (move.useTargetOffensive) attacker = target;
@@ -400,6 +534,12 @@ exports.BattleScripts = {
 		let attack = attacker.getStat(atkType, unboosted, noburndrop);
 		let defense = defender.getStat(defType, unboosted);
 
+		// Using Beat Up
+		if (move.allies) {
+			attack = move.allies.shift().template.baseStats.atk;
+			defense = defender.template.baseStats.def;
+		}
+
 		// Moves that ignore offense and defense respectively.
 		if (move.ignoreOffensive) {
 			this.debug('Negating (sp)atk boost/penalty.');
@@ -409,6 +549,21 @@ exports.BattleScripts = {
 		if (move.ignoreDefensive) {
 			this.debug('Negating (sp)def boost/penalty.');
 			defense = target.getStat(defType, true, true);
+		}
+
+		// Gen 2 Present has a glitched damage calculation using the secondary types of the Pokemon for the Attacker's Level and Defender's Defense.
+		if (move.id === 'present') {
+			const typeIndexes = {"Normal": 0, "Fighting": 1, "Flying": 2, "Poison": 3, "Ground": 4, "Rock": 5, "Bug": 7, "Ghost": 8, "Steel": 9, "Fire": 20, "Water": 21, "Grass": 22, "Electric": 23, "Psychic": 24, "Ice": 25, "Dragon": 26, "Dark": 27};
+			attack = 10;
+
+			const attackerLastType = attacker.getTypes().slice(-1)[0];
+			const defenderLastType = defender.getTypes().slice(-1)[0];
+
+			defense = typeIndexes[attackerLastType] || 1;
+			level = typeIndexes[defenderLastType] || 1;
+			if (move.crit) {
+				level *= 2;
+			}
 		}
 
 		// When either attack or defense are higher than 256, they are both divided by 4 and moded by 256.
@@ -499,11 +654,6 @@ exports.BattleScripts = {
 			if (!(damage || damage === 0)) {
 				this.debug('damage event failed');
 				return damage;
-			}
-			if (target.illusion && effect && effect.effectType === 'Move') {
-				this.debug('illusion cleared');
-				target.illusion = null;
-				this.add('replace', target, target.getDetails);
 			}
 		}
 		if (damage !== 0) damage = this.clampIntRange(damage, 1);

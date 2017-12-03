@@ -42,10 +42,10 @@ exports.BattleMovedex = {
 				if (pokemon === target) continue;
 				for (let i = 0; i < pokemon.moves.length; i++) {
 					let move = pokemon.moves[i];
-					let noAssist = {
-						assist:1, chatter:1, copycat:1, counter:1, covet:1, destinybond:1, detect:1, endure:1, feint:1, focuspunch:1, followme:1, helpinghand:1, mefirst:1, metronome:1, mimic:1, mirrorcoat:1, mirrormove:1, protect:1, sketch:1, sleeptalk:1, snatch:1, struggle:1, switcheroo:1, thief:1, trick:1,
-					};
-					if (move && !noAssist[move]) {
+					let noAssist = [
+						'assist', 'chatter', 'copycat', 'counter', 'covet', 'destinybond', 'detect', 'endure', 'feint', 'focuspunch', 'followme', 'helpinghand', 'mefirst', 'metronome', 'mimic', 'mirrorcoat', 'mirrormove', 'protect', 'sketch', 'sleeptalk', 'snatch', 'struggle', 'switcheroo', 'thief', 'trick',
+					];
+					if (move && !noAssist.includes(move)) {
 						moves.push(move);
 					}
 				}
@@ -65,41 +65,25 @@ exports.BattleMovedex = {
 	beatup: {
 		inherit: true,
 		basePower: 10,
-		basePowerCallback: function (pokemon, target) {
-			pokemon.addVolatile('beatup');
-			if (!pokemon.side.pokemon[pokemon.volatiles.beatup.index]) return null;
+		basePowerCallback: function (pokemon, target, move) {
+			if (!move.allies.length) return null;
 			return 10;
 		},
 		desc: "Deals typeless damage. Hits one time for the user and one time for each unfainted Pokemon without a major status condition in the user's party. For each hit, the damage formula uses the participating Pokemon's base Attack as the Attack stat, the target's base Defense as the Defense stat, and ignores stat stages and other effects that modify Attack or Defense; each hit is considered to come from the user.",
 		onModifyMove: function (move, pokemon) {
+			pokemon.addVolatile('beatup');
 			move.type = '???';
 			move.category = 'Physical';
+			move.allies = pokemon.side.pokemon.filter(ally => !ally.fainted && !ally.status);
+			move.multihit = move.allies.length;
 		},
 		effect: {
 			duration: 1,
-			onStart: function (pokemon) {
-				let index = 0;
-				let team = pokemon.side.pokemon;
-				while (!team[index] || team[index].fainted || team[index].status) {
-					index++;
-					if (index >= team.length) break;
-				}
-				this.effectData.index = index;
-			},
-			onRestart: function (pokemon) {
-				let index = this.effectData.index;
-				let team = pokemon.side.pokemon;
-				do {
-					index++;
-					if (index >= team.length) break;
-				} while (!team[index] || team[index].fainted || team[index].status);
-				this.effectData.index = index;
-			},
 			onModifyAtkPriority: -101,
-			onModifyAtk: function (atk, pokemon) {
-				this.add('-activate', pokemon, 'move: Beat Up', '[of] ' + pokemon.side.pokemon[this.effectData.index].name);
+			onModifyAtk: function (atk, pokemon, defender, move) {
+				this.add('-activate', pokemon, 'move: Beat Up', '[of] ' + move.allies[0].name);
 				this.event.modifier = 1;
-				return pokemon.side.pokemon[this.effectData.index].template.baseStats.atk;
+				return move.allies.shift().template.baseStats.atk;
 			},
 			onFoeModifyDefPriority: -101,
 			onFoeModifyDef: function (def, pokemon) {
@@ -216,8 +200,8 @@ exports.BattleMovedex = {
 	copycat: {
 		inherit: true,
 		onHit: function (pokemon) {
-			let noCopycat = {assist:1, chatter:1, copycat:1, counter:1, covet:1, destinybond:1, detect:1, endure:1, feint:1, focuspunch:1, followme:1, helpinghand:1, mefirst:1, metronome:1, mimic:1, mirrorcoat:1, mirrormove:1, protect:1, sketch:1, sleeptalk:1, snatch:1, struggle:1, switcheroo:1, thief:1, trick:1};
-			if (!this.lastMove || noCopycat[this.lastMove]) {
+			let noCopycat = ['assist', 'chatter', 'copycat', 'counter', 'covet', 'destinybond', 'detect', 'endure', 'feint', 'focuspunch', 'followme', 'helpinghand', 'mefirst', 'metronome', 'mimic', 'mirrorcoat', 'mirrormove', 'protect', 'sketch', 'sleeptalk', 'snatch', 'struggle', 'switcheroo', 'thief', 'trick'];
+			if (!this.lastMove || noCopycat.includes(this.lastMove)) {
 				return false;
 			}
 			this.useMove(this.lastMove, pokemon);
@@ -249,7 +233,7 @@ exports.BattleMovedex = {
 			if (!source.hasType('Ghost')) {
 				delete move.volatileStatus;
 				delete move.onHit;
-				move.self = {boosts: {atk:1, def:1, spe:-1}};
+				move.self = {boosts: {atk: 1, def: 1, spe: -1}};
 				move.target = move.nonGhostTarget;
 			} else if (target.volatiles['substitute']) {
 				delete move.volatileStatus;
@@ -415,9 +399,9 @@ exports.BattleMovedex = {
 				return this.random(4, 9);
 			},
 			onStart: function (target) {
-				let noEncore = {encore:1, mimic:1, mirrormove:1, sketch:1, struggle:1, transform:1};
+				let noEncore = ['encore', 'mimic', 'mirrormove', 'sketch', 'struggle', 'transform'];
 				let moveIndex = target.moves.indexOf(target.lastMove);
-				if (!target.lastMove || noEncore[target.lastMove] || (target.moveset[moveIndex] && target.moveset[moveIndex].pp <= 0)) {
+				if (!target.lastMove || noEncore.includes(target.lastMove) || (target.moveset[moveIndex] && target.moveset[moveIndex].pp <= 0)) {
 					// it failed
 					this.add('-fail', target);
 					delete target.volatiles['encore'];
@@ -429,7 +413,7 @@ exports.BattleMovedex = {
 					this.effectData.duration++;
 				}
 			},
-			onOverrideDecision: function (pokemon) {
+			onOverrideAction: function (pokemon) {
 				return this.effectData.move;
 			},
 			onResidualOrder: 13,
@@ -836,16 +820,16 @@ exports.BattleMovedex = {
 	},
 	metronome: {
 		inherit: true,
-		noMetronome: {assist:1, chatter:1, copycat:1, counter:1, covet:1, destinybond:1, detect:1, endure:1, feint:1, focuspunch:1, followme:1, helpinghand:1, mefirst:1, metronome:1, mimic:1, mirrorcoat:1, mirrormove:1, protect:1, sketch:1, sleeptalk:1, snatch:1, struggle:1, switcheroo:1, thief:1, trick:1},
+		noMetronome: ['assist', 'chatter', 'copycat', 'counter', 'covet', 'destinybond', 'detect', 'endure', 'feint', 'focuspunch', 'followme', 'helpinghand', 'mefirst', 'metronome', 'mimic', 'mirrorcoat', 'mirrormove', 'protect', 'sketch', 'sleeptalk', 'snatch', 'struggle', 'switcheroo', 'thief', 'trick'],
 	},
 	mimic: {
 		inherit: true,
 		onHit: function (target, source) {
-			let disallowedMoves = {chatter:1, metronome:1, mimic:1, sketch:1, struggle:1, transform:1};
-			if (source.transformed || !target.lastMove || disallowedMoves[target.lastMove] || source.moves.indexOf(target.lastMove) !== -1 || target.volatiles['substitute']) return false;
+			let disallowedMoves = ['chatter', 'metronome', 'mimic', 'sketch', 'struggle', 'transform'];
+			if (source.transformed || !target.lastMove || disallowedMoves.includes(target.lastMove) || source.moves.indexOf(target.lastMove) !== -1 || target.volatiles['substitute']) return false;
 			let moveslot = source.moves.indexOf('mimic');
 			if (moveslot < 0) return false;
-			let move = Dex.getMove(target.lastMove);
+			let move = this.getMove(target.lastMove);
 			source.moveset[moveslot] = {
 				move: move.name,
 				id: move.id,
@@ -875,8 +859,8 @@ exports.BattleMovedex = {
 		inherit: true,
 		onTryHit: function () { },
 		onHit: function (pokemon) {
-			let noMirror = {acupressure:1, aromatherapy:1, assist:1, chatter:1, copycat:1, counter:1, curse:1, doomdesire:1, feint:1, focuspunch:1, futuresight:1, gravity:1, hail:1, haze:1, healbell:1, helpinghand:1, lightscreen:1, luckychant:1, magiccoat:1, mefirst:1, metronome:1, mimic:1, mirrorcoat:1, mirrormove:1, mist:1, mudsport:1, naturepower:1, perishsong:1, psychup:1, raindance:1, reflect:1, roleplay:1, safeguard:1, sandstorm:1, sketch:1, sleeptalk:1, snatch:1, spikes:1, spitup:1, stealthrock:1, struggle:1, sunnyday:1, tailwind:1, toxicspikes:1, transform:1, watersport:1};
-			if (!pokemon.lastAttackedBy || !pokemon.lastAttackedBy.pokemon.lastMove || noMirror[pokemon.lastAttackedBy.move] || !pokemon.lastAttackedBy.pokemon.hasMove(pokemon.lastAttackedBy.move)) {
+			let noMirror = ['acupressure', 'aromatherapy', 'assist', 'chatter', 'copycat', 'counter', 'curse', 'doomdesire', 'feint', 'focuspunch', 'futuresight', 'gravity', 'hail', 'haze', 'healbell', 'helpinghand', 'lightscreen', 'luckychant', 'magiccoat', 'mefirst', 'metronome', 'mimic', 'mirrorcoat', 'mirrormove', 'mist', 'mudsport', 'naturepower', 'perishsong', 'psychup', 'raindance', 'reflect', 'roleplay', 'safeguard', 'sandstorm', 'sketch', 'sleeptalk', 'snatch', 'spikes', 'spitup', 'stealthrock', 'struggle', 'sunnyday', 'tailwind', 'toxicspikes', 'transform', 'watersport'];
+			if (!pokemon.lastAttackedBy || !pokemon.lastAttackedBy.pokemon.lastMove || noMirror.includes(pokemon.lastAttackedBy.move) || !pokemon.lastAttackedBy.pokemon.hasMove(pokemon.lastAttackedBy.move)) {
 				return false;
 			}
 			this.useMove(pokemon.lastAttackedBy.move, pokemon);
@@ -966,7 +950,7 @@ exports.BattleMovedex = {
 	},
 	psychup: {
 		inherit: true,
-		flags: {snatch:1, authentic: 1},
+		flags: {snatch: 1, authentic: 1},
 	},
 	recycle: {
 		inherit: true,
@@ -1046,11 +1030,11 @@ exports.BattleMovedex = {
 	sketch: {
 		inherit: true,
 		onHit: function (target, source) {
-			let disallowedMoves = {chatter:1, sketch:1, struggle:1};
-			if (source.transformed || !target.lastMove || disallowedMoves[target.lastMove] || source.moves.indexOf(target.lastMove) >= 0 || target.volatiles['substitute']) return false;
+			let disallowedMoves = ['chatter', 'sketch', 'struggle'];
+			if (source.transformed || !target.lastMove || disallowedMoves.includes(target.lastMove) || source.moves.includes(target.lastMove) || target.volatiles['substitute']) return false;
 			let moveslot = source.moves.indexOf('sketch');
 			if (moveslot < 0) return false;
-			let move = Dex.getMove(target.lastMove);
+			let move = this.getMove(target.lastMove);
 			let sketchedMove = {
 				move: move.name,
 				id: move.id,
@@ -1110,8 +1094,8 @@ exports.BattleMovedex = {
 		inherit: true,
 		desc: "Fails if the target did not select a physical or special attack for use this turn, or if the target moves before the user.",
 		onTry: function (source, target) {
-			let decision = this.willMove(target);
-			if (!decision || decision.choice !== 'move' || decision.move.category === 'Status' || target.volatiles.mustrecharge) {
+			let action = this.willMove(target);
+			if (!action || action.choice !== 'move' || action.move.category === 'Status' || target.volatiles.mustrecharge) {
 				this.add('-fail', source);
 				return null;
 			}
@@ -1294,8 +1278,8 @@ exports.BattleMovedex = {
 	worryseed: {
 		inherit: true,
 		onTryHit: function (pokemon) {
-			let bannedAbilities = {multitype:1, truant:1};
-			if (bannedAbilities[pokemon.ability]) {
+			let bannedAbilities = ['multitype', 'truant'];
+			if (bannedAbilities.includes(pokemon.ability)) {
 				return false;
 			}
 		},

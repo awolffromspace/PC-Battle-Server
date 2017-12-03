@@ -14,6 +14,21 @@ exports.BattleAbilities = {
 		},
 		rating: 1.5,
 	},
+	"blaze": {
+		desc: "When this Pokemon has 1/3 or less of its maximum HP, rounded down, its Fire-type attacks have their power multiplied by 1.5.",
+		shortDesc: "At 1/3 or less of its max HP, this Pokemon's Fire-type attacks have 1.5x power.",
+		onBasePowerPriority: 2,
+		onBasePower: function (basePower, attacker, defender, move) {
+			if (move.type === 'Fire' && attacker.hp <= attacker.maxhp / 3) {
+				this.debug('Blaze boost');
+				return this.chainModify(1.5);
+			}
+		},
+		id: "blaze",
+		name: "Blaze",
+		rating: 2,
+		num: 66,
+	},
 	"effectspore": {
 		inherit: true,
 		onAfterDamage: function (damage, target, source, move) {
@@ -170,6 +185,21 @@ exports.BattleAbilities = {
 			}
 		},
 	},
+	"overgrow": {
+		desc: "When this Pokemon has 1/3 or less of its maximum HP, rounded down, its Grass-type attacks have their power multiplied by 1.5.",
+		shortDesc: "At 1/3 or less of its max HP, this Pokemon's Grass-type attacks have 1.5x power.",
+		onBasePowerPriority: 2,
+		onBasePower: function (basePower, attacker, defender, move) {
+			if (move.type === 'Grass' && attacker.hp <= attacker.maxhp / 3) {
+				this.debug('Overgrow boost');
+				return this.chainModify(1.5);
+			}
+		},
+		id: "overgrow",
+		name: "Overgrow",
+		rating: 2,
+		num: 65,
+	},
 	"pickup": {
 		desc: "No competitive use.",
 		shortDesc: "No competitive use.",
@@ -267,6 +297,21 @@ exports.BattleAbilities = {
 		onDamage: function () {},
 		rating: 0,
 	},
+	"swarm": {
+		desc: "When this Pokemon has 1/3 or less of its maximum HP, rounded down, its Bug-type attacks have their power multiplied by 1.5.",
+		shortDesc: "At 1/3 or less of its max HP, this Pokemon's Bug-type attacks have 1.5x power.",
+		onBasePowerPriority: 2,
+		onBasePower: function (basePower, attacker, defender, move) {
+			if (move.type === 'Bug' && attacker.hp <= attacker.maxhp / 3) {
+				this.debug('Swarm boost');
+				return this.chainModify(1.5);
+			}
+		},
+		id: "swarm",
+		name: "Swarm",
+		rating: 2,
+		num: 68,
+	},
 	"synchronize": {
 		inherit: true,
 		desc: "If another Pokemon burns, paralyzes, or poisons this Pokemon, that Pokemon receives the same major status condition. If another Pokemon badly poisons this Pokemon, that Pokemon becomes poisoned.",
@@ -279,6 +324,21 @@ exports.BattleAbilities = {
 			source.trySetStatus(id);
 		},
 	},
+	"torrent": {
+		desc: "When this Pokemon has 1/3 or less of its maximum HP, rounded down, its Water-type attacks have their power multiplied by 1.5.",
+		shortDesc: "At 1/3 or less of its max HP, this Pokemon's Water-type attacks have 1.5x power.",
+		onBasePowerPriority: 2,
+		onBasePower: function (basePower, attacker, defender, move) {
+			if (move.type === 'Water' && attacker.hp <= attacker.maxhp / 3) {
+				this.debug('Torrent boost');
+				return this.chainModify(1.5);
+			}
+		},
+		id: "torrent",
+		name: "Torrent",
+		rating: 2,
+		num: 67,
+	},
 	"trace": {
 		inherit: true,
 		onUpdate: function (pokemon) {
@@ -286,8 +346,8 @@ exports.BattleAbilities = {
 			let target = pokemon.side.foe.randomActive();
 			if (!target || target.fainted) return;
 			let ability = this.getAbility(target.ability);
-			let bannedAbilities = {forecast:1, multitype:1, trace:1};
-			if (bannedAbilities[target.ability]) {
+			let bannedAbilities = ['forecast', 'multitype', 'trace'];
+			if (bannedAbilities.includes(target.ability)) {
 				return;
 			}
 			if (pokemon.setAbility(ability)) {

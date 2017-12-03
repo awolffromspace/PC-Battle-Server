@@ -6,6 +6,7 @@ const ProcessManager = require('./../process-manager');
 const execFileSync = require('child_process').execFileSync;
 
 const MAX_PROCESSES = 1;
+const MAX_QUERY_LENGTH = 2500;
 const DEFAULT_RESULTS_LENGTH = 100;
 const MORE_BUTTON_INCREMENTS = [200, 400, 800, 1600, 3200];
 const LINES_SEPARATOR = 'lines=';
@@ -146,7 +147,7 @@ function getMoreButton(room, search, useExactSearch, lines, maxLines) {
 		return ''; // don't show a button if no more pre-set increments are valid or if the amount of results is already below the max
 	} else {
 		if (useExactSearch) search = Chat.escapeHTML(`"${search}"`);
-		return `<br /><div style="float:right"><button class="button" name="send" value="/modlog ${room}, ${search} ${LINES_SEPARATOR}${newLines}" title="View more results">More results...</button></div>`;
+		return `<br /><div style="text-align:center"><button class="button" name="send" value="/modlog ${room}, ${search} ${LINES_SEPARATOR}${newLines}" title="View more results">Older results<br />&#x25bc;</button></div>`;
 	}
 }
 
@@ -167,6 +168,11 @@ async function runModlog(rooms, searchString, exactSearch, maxLines) {
 	}
 	fileNameList = fileNameList.map(filename => `${LOG_PATH}${filename}`);
 
+	// Ensure regexString can never be greater than or equal to the value of
+	// RegExpMacroAssembler::kMaxRegister in v8 (currently 1 << 16 - 1) given a
+	// searchString with max length MAX_QUERY_LENGTH. Otherwise, the modlog
+	// child process will crash when attempting to execute any RegExp
+	// constructed with it (i.e. when not configured to use ripgrep).
 	let regexString;
 	if (!searchString) {
 		regexString = '.';
@@ -212,7 +218,7 @@ function runRipgrepModlog(paths, regexString, results) {
 	}
 	const fileResults = stdout.toString().split('\n').reverse();
 	for (let i = 0; i < fileResults.length; i++) {
-		results.tryInsert(fileResults[i]);
+		if (fileResults[i]) results.tryInsert(fileResults[i]);
 	}
 	return results;
 }
@@ -239,34 +245,51 @@ function prettifyResults(rawResults, room, searchString, exactSearch, addModlogL
 		return `|popup|No moderator actions containing ${searchString} found on ${roomName}.` +
 				(exactSearch ? "" : " Add quotes to the search parameter to search for a phrase, rather than a user.");
 	}
+	const title = `[${room}]` + (searchString ? ` ${searchString}` : ``);
 	const resultArray = rawResults.split('\n');
 	let lines = resultArray.length;
+	let curDate = '';
+	resultArray.unshift('');
 	const resultString = resultArray.map(line => {
-		if (hideIps) line = line.replace(/\([0-9]+\.[0-9]+\.[0-9]+\.[0-9]+\)/g, '');
-		let bracketIndex = line.indexOf(']');
+		let time;
+		let bracketIndex;
+		if (line) {
+			if (hideIps) line = line.replace(/\([0-9]+\.[0-9]+\.[0-9]+\.[0-9]+\)/g, '');
+			bracketIndex = line.indexOf(']');
+			if (bracketIndex < 0) return Chat.escapeHTML(line);
+			time = new Date(line.slice(1, bracketIndex));
+		} else {
+			time = new Date();
+		}
+		let [date, timestamp] = Chat.toTimestamp(time, {human: true}).split(' ');
+		if (date !== curDate) {
+			curDate = date;
+			date = `</p><p>[${date}]<br />`;
+		} else {
+			date = ``;
+		}
+		if (!line) {
+			return `${date}<small>[${timestamp}] \u2190 current server time</small>`;
+		}
 		let parenIndex = line.indexOf(')');
-		if (bracketIndex < 0) return Chat.escapeHTML(line);
-		const time = line.slice(1, bracketIndex);
-		let timestamp = Chat.toTimestamp(new Date(time), {hour12: true});
-		parenIndex = line.indexOf(')');
 		let thisRoomID = line.slice(bracketIndex + 3, parenIndex);
 		if (addModlogLinks) {
-			let url = Config.modloglink(time, thisRoomID);
+			let url = Config.modloglink(timestamp, thisRoomID);
 			if (url) timestamp = `<a href="${url}">${timestamp}</a>`;
 		}
-		return `<small>[${timestamp}] (${thisRoomID})</small>${Chat.escapeHTML(line.slice(parenIndex + 1))}`;
+		return `${date}<small>[${timestamp}] (${thisRoomID})</small>${Chat.escapeHTML(line.slice(parenIndex + 1))}`;
 	}).join(`<br />`);
 	let preamble;
+	const modlogid = room + (searchString ? '-' + searchString.toLowerCase().replace(/\s+/g, '-').replace(/[^a-z0-9-]+/g, '') : '');
 	if (searchString) {
 		const searchStringDescription = (exactSearch ? `containing the string "${searchString}"` : `matching the username "${searchString}"`);
-		preamble = `|popup||wide||html|<p>The last ${lines} logged action${Chat.plural(lines)} ${searchStringDescription} on ${roomName}.` +
+		preamble = `>view-modlog-${modlogid}\n|init|html\n|title|[Modlog]${title}\n|pagehtml|<div class="pad"><p>The last ${lines} logged action${Chat.plural(lines)} ${searchStringDescription} on ${roomName}.` +
 						(exactSearch ? "" : " Add quotes to the search parameter to search for a phrase, rather than a user.");
 	} else {
-		preamble = `|popup||wide||html|<p>The last ${lines} line${Chat.plural(lines)} of the Moderator Log of ${roomName}.`;
+		preamble = `>view-modlog-${modlogid}\n|init|html\n|title|[Modlog]${title}\n|pagehtml|<div class="pad"><p>The last ${lines} line${Chat.plural(lines)} of the Moderator Log of ${roomName}.`;
 	}
-	preamble +=	`</p><p><small>[${Chat.toTimestamp(new Date(), {hour12: true})}] \u2190 current server time</small></p>`;
 	let moreButton = getMoreButton(room, searchString, exactSearch, lines, maxLines);
-	return `${preamble}${resultString}${moreButton}`;
+	return `${preamble}${resultString}${moreButton}</div>`;
 }
 
 exports.commands = {
@@ -317,6 +340,10 @@ exports.commands = {
 
 		let searchString = '';
 		if (target) searchString = target.trim();
+		if (searchString.length > MAX_QUERY_LENGTH) {
+			this.errorReply(`Your search query must be shorter than ${MAX_QUERY_LENGTH} characters.`);
+			return;
+		}
 
 		let exactSearch = '0';
 		if (searchString.match(/^["'].+["']$/)) {

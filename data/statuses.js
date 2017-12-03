@@ -283,10 +283,14 @@ exports.BattleStatuses = {
 	},
 	choicelock: {
 		onStart: function (pokemon) {
-			if (!this.activeMove.id || this.activeMove.sourceEffect && this.activeMove.sourceEffect !== this.activeMove.id) return false;
+			if (!this.activeMove.id || this.activeMove.hasBounced) return false;
 			this.effectData.move = this.activeMove.id;
 		},
 		onBeforeMove: function (pokemon, target, move) {
+			if (!pokemon.getItem().isChoice || !pokemon.hasMove(this.effectData.move)) {
+				pokemon.removeVolatile('choicelock');
+				return;
+			}
 			if (move.id !== this.effectData.move && move.id !== 'struggle') {
 				// Fails even if the Choice item is being ignored, and no PP is lost
 				this.addMove('move', pokemon, move.name);
@@ -348,7 +352,7 @@ exports.BattleStatuses = {
 
 				// time's up; time to hit! :D
 				let target = side.active[i];
-				let move = this.getMove(posData.move);
+				const move = this.getMove(posData.move);
 				if (target.fainted) {
 					this.add('-hint', '' + move.name + ' did not hit because the target is fainted.');
 					this.effectData.positions[i] = null;
@@ -362,8 +366,9 @@ exports.BattleStatuses = {
 				if (posData.source.hasAbility('infiltrator') && this.gen >= 6) {
 					posData.moveData.infiltrates = true;
 				}
+				const hitMove = new this.Data.Move(posData.moveData);
 
-				this.tryMoveHit(target, posData.source, posData.moveData);
+				this.tryMoveHit(target, posData.source, hitMove);
 
 				this.effectData.positions[i] = null;
 			}

@@ -234,7 +234,7 @@ exports.BattleMovedex = {
 			// If both are true, counter will deal twice the last damage dealt in battle, no matter what was the move.
 			// That means that, if opponent switches, counter will use last counter damage * 2.
 			let lastUsedMove = this.getMove(target.side.lastMove);
-			if (lastUsedMove && lastUsedMove.basePower > 0 && lastUsedMove.type in {'Normal': 1, 'Fighting': 1} && target.battle.lastDamage > 0 && !this.willMove(target)) {
+			if (lastUsedMove && lastUsedMove.basePower > 0 && ['Normal', 'Fighting'].includes(lastUsedMove.type) && target.battle.lastDamage > 0 && !this.willMove(target)) {
 				return 2 * target.battle.lastDamage;
 			}
 			this.add('-fail', pokemon);
@@ -526,7 +526,7 @@ exports.BattleMovedex = {
 	},
 	metronome: {
 		inherit: true,
-		noMetronome: {metronome:1, struggle:1},
+		noMetronome: ['metronome', 'struggle'],
 		secondary: false,
 		target: "self",
 		type: "Normal",
@@ -612,12 +612,12 @@ exports.BattleMovedex = {
 			onLockMove: 'rage',
 			onTryHit: function (target, source, move) {
 				if (target.boosts.atk < 6 && move.id === 'disable') {
-					this.boost({atk:1});
+					this.boost({atk: 1});
 				}
 			},
 			onHit: function (target, source, move) {
 				if (target.boosts.atk < 6 && move.category !== 'Status') {
-					this.boost({atk:1});
+					this.boost({atk: 1});
 				}
 			},
 		},
@@ -756,6 +756,9 @@ exports.BattleMovedex = {
 	},
 	struggle: {
 		inherit: true,
+		desc: "Deals Normal-type damage. If this move was successful, the user takes damage equal to 1/2 the HP lost by the target, rounded down, but not less than 1 HP. This move can only be used if none of the user's known moves can be selected.",
+		shortDesc: "User loses 1/2 the HP lost by the target.",
+		recoil: [1, 2],
 		onModifyMove: function () {},
 	},
 	substitute: {
@@ -801,10 +804,8 @@ exports.BattleMovedex = {
 				if (move.category === 'Status') {
 					// In gen 1 it only blocks:
 					// poison, confusion, secondary effect confusion, stat reducing moves and Leech Seed.
-					let SubBlocked = {
-						lockon:1, meanlook:1, mindreader:1, nightmare:1,
-					};
-					if (move.status === 'psn' || move.status === 'tox' || (move.boosts && target !== source) || move.volatileStatus === 'confusion' || SubBlocked[move.id]) {
+					let SubBlocked = ['lockon', 'meanlook', 'mindreader', 'nightmare'];
+					if (move.status === 'psn' || move.status === 'tox' || (move.boosts && target !== source) || move.volatileStatus === 'confusion' || SubBlocked.includes(move.id)) {
 						return false;
 					}
 					return;

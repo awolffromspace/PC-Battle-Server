@@ -12,7 +12,7 @@
 const LOGIN_SERVER_TIMEOUT = 30000;
 const LOGIN_SERVER_BATCH_TIME = 1000;
 
-const http = require("http");
+const http = Config.loginserver.startsWith('http:') ? require("http") : require("https");
 const url = require('url');
 
 const FS = require('./fs');
@@ -152,8 +152,8 @@ class LoginServerInstance {
 				this.requestTimeoutTimer = null;
 			}
 			req.abort();
-			for (let i = 0, len = requestCallbacks.length; i < len; i++) {
-				setImmediate(requestCallbacks[i], null, null, error);
+			for (const requestCallback of requestCallbacks) {
+				setImmediate(requestCallback, null, null, error);
 			}
 			this.requestEnd(error);
 		};
