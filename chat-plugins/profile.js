@@ -125,7 +125,7 @@ Profile.prototype.group = function () {
 };
 
 Profile.prototype.money = function (amount) {
-	return label('Money') + amount + currencyName(amount);
+	return label('Battle Points') + amount + currencyName(amount);
 };
 
 Profile.prototype.name = function () {

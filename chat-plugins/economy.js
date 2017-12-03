@@ -76,7 +76,7 @@ function shopDisplay() {
 		if (!Shop[i]) continue;
 		output += '<tr><td style="border: 2px solid #000000; width: 20%; text-align: center"><button class="button" name="send" value="/Shop buy ' + Shop[i].id + '">' + Shop[i].name + '</button></td><td style="border: 2px solid #000000; width: 70%; text-align: center">' + Shop[i].desc + '</td><td style="border: 2px solid #000000; width: 10%; text-align: center">' + Shop[i].price + '</td></tr>';
 	}
-	output += '</table></div>';
+	output += '</table><br><center>Ask wolf if you have already bought the item and want it to be changed, or if you have any questions in general.</center></div>';
 	return output;
 }
 
@@ -341,7 +341,7 @@ exports.commands = {
 				user.canCustomSymbol = true;
 			}
 			let msg = '**' + user.name + " has bought " + item.name + ".** for " + item.price + currencyName(item.price) + " and now has " + Db.bp.get(user.userid) + currencyName(Db.bp.get(user.userid)) + ".";
-			user.sendTo(room, "|uhtmlchange|shop" + user.userid + "|<div style='max-height:300px'><table style='border:2px solid #000000; border-radius: 5px'><tr><th colspan='3' style='border: 2px solid #000000; border-radius: 5px'>Server Shop</th></tr><tr><td style='colspan: 3; border: 2px solid #000000; border-radius: 5px'><center>You have purchased a " + item.name + ". " + (item.id === 'star' ? "You may now use /star to get a \u2606." : "Please contact wolf to receive a " + item.name + " if it is not automatic (\"/tell wolf, message\".") + "</center></td></tr><tr><td colspan='3' style='text-align:center'><button class='button' name='send' value='/shop reopen'>Return to Shop</button></td></tr></table>");
+			user.sendTo(room, "|uhtmlchange|shop" + user.userid + "|<div style='max-height:300px'><table style='border:2px solid #000000; border-radius: 5px'><tr><th colspan='3' style='border: 2px solid #000000; border-radius: 5px'>Server Shop</th></tr><tr><td style='colspan: 3; border: 2px solid #000000; border-radius: 5px'><center>You have purchased a " + item.name + ". " + (item.id === 'star' ? "You may now use /star to get a \u2606." : "Please contact wolf to receive a " + item.name + " (\"/tell wolf, message\".") + "</center></td></tr><tr><td colspan='3' style='text-align:center'><button class='button' name='send' value='/shop reopen'>Return to Shop</button></td></tr></table>");
 		},
 		help: function (target, room, user, connection, cmd, message) {
 			let reply = '<b>Shop commands</b><br/>';

@@ -72,7 +72,7 @@ exports.commands = {
 	},*/
 
 	clearall: function (target, room, user) {
-		if (!this.can('warn')) return false;
+		if (!this.can('warn', null, room)) return false;
 		if (room.battle) return this.sendReply("You cannot clearall in battle rooms.");
 
 		clearRoom(room);
