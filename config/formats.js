@@ -130,7 +130,7 @@ exports.Formats = [
 		maxLevel: 5,
 		ruleset: ['Pokemon', 'Standard', 'Swagger Clause', 'Team Preview', 'Little Cup'],
 		banlist: [
-			'Cutiefly', 'Drifloon', 'Gligar', 'Gothita', 'Meditite', 'Misdreavus', 'Murkrow', 'Porygon', 'Scyther', 'Sneasel', 'Swirlix', 'Tangela', 'Vulpix-Base', 'Yanma',
+			'Aipom', 'Cutiefly', 'Drifloon', 'Gligar', 'Gothita', 'Meditite', 'Misdreavus', 'Murkrow', 'Porygon', 'Scyther', 'Sneasel', 'Swirlix', 'Tangela', 'Vulpix-Base', 'Yanma',
 			'Eevium Z', 'Dragon Rage', 'Sonic Boom',
 		],
 	},
@@ -419,17 +419,6 @@ exports.Formats = [
 		ruleset: ['[Gen 7] Doubles OU'],
 		banlist: ['Huge Power', 'Imposter', 'Parental Bond', 'Pure Power', 'Wonder Guard', 'Kangaskhanite', 'Mawilite', 'Medichamite', 'Mimic', 'Sketch', 'Transform'],
 		onDisableMovePriority: -1,
-		onDisableMove: function (pokemon) {
-			let ally = pokemon.side.active.find(ally => ally && ally !== pokemon && !ally.fainted);
-			if (!ally) ally = {baseMoveset: []};
-			pokemon.moveset = pokemon.baseMoveset.concat(ally.baseMoveset);
-		},
-		onResidual: function () {
-			this.eachEvent('ResetMoveset');
-		},
-		onResetMoveset: function (pokemon) {
-			pokemon.moveset = pokemon.baseMoveset;
-		},
 		onSwitchInPriority: 2,
 		onSwitchIn: function (pokemon) {
 			if (this.p1.active.every(ally => ally && !ally.fainted)) {
@@ -496,7 +485,7 @@ exports.Formats = [
 
 		mod: 'gen7',
 		ruleset: ['[Gen 7] OU'],
-		banlist: ['Silvally', 'Type: Null', 'Wishiwashi', 'Huge Power', 'Pure Power'],
+		banlist: ['Kingdra', 'Nidoqueen', 'Wishiwashi', 'Huge Power', 'Pure Power'],
 		onValidateSet: function (set) {
 			let problems = [];
 			let template = this.getTemplate(set.species);
