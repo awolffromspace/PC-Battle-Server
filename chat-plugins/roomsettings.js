@@ -213,7 +213,7 @@ exports.commands = {
 			room.modchat = 'autoconfirmed';
 			break;
 		case 'player':
-			target = '-';
+			target = Users.PLAYER_SYMBOL;
 			/* falls through */
 		default:
 			if (!Config.groups[target]) {

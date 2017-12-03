@@ -583,12 +583,13 @@ class Battle {
 			// Battle Point Winnings
 			//
 
-			if (this.format === 'lotw34gen3random') {
-				Db('bp').set(winnerid, Db('bp').get(winnerid, 0) + 2);
-				this.push("|raw|<b><font color='" + color + "'>" + Chat.escapeHTML(winnerid) + "</font> has won " + "<font color='" + color + "'>2</font>" + " Battle Points for winning the rated Ladder of the Fortnight battle!</b>");
-			} else if (this.format !== 'gen71v1random' && this.format !== 'gen71v1challengecup' && this.format !== 'gen71v1' && this.format !== 'gen7battlespotspecial4') {
-				Db('bp').set(winnerid, Db('bp').get(winnerid, 0) + 1);
-				this.push("|raw|<b><font color='" + color + "'>" + Chat.escapeHTML(winnerid) + "</font> has won " + "<font color='" + color + "'>1</font>" + " Battle Point for winning the rated battle!</b>");
+			let color = '#45a0e5';
+			if (this.format === 'lotf35alolarandom') {
+				Db.bp.set(winnerid, Db.bp.get(winnerid, 0) + 2);
+				this.room.push("|raw|<b><font color='" + color + "'>" + Chat.escapeHTML(winnerid) + "</font> has won " + "<font color='" + color + "'>2</font>" + " Battle Points for winning the rated Ladder of the Fortnight battle!</b>");
+			} else if (this.format !== 'gen71v1' && this.format !== 'gen7challengecup1v1' && this.format !== 'gen71v1random') {
+				Db.bp.set(winnerid, Db.bp.get(winnerid, 0) + 1);
+				this.room.push("|raw|<b><font color='" + color + "'>" + Chat.escapeHTML(winnerid) + "</font> has won " + "<font color='" + color + "'>1</font>" + " Battle Point for winning the rated battle!</b>");
 			}
 		} else if (Config.logchallenges) {
 			if (winnerid === this.room.p1.userid) {
@@ -768,7 +769,7 @@ class Battle {
 		if (!player) return false;
 		this.players[user.userid] = player;
 		this.playerCount++;
-		this.room.auth[user.userid] = '-';
+		this.room.auth[user.userid] = Users.PLAYER_SYMBOL;
 		if (this.playerCount >= 2) {
 			this.room.title = `${this.p1.name} vs. ${this.p2.name}`;
 			this.room.send(`|title|${this.room.title}`);

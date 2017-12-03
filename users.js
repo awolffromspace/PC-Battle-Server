@@ -471,6 +471,9 @@ class User {
 			const mutedSymbol = (Config.punishgroups && Config.punishgroups.muted ? Config.punishgroups.muted.symbol : '!');
 			return mutedSymbol + this.name;
 		}
+		if (this.customSymbol) {
+			return this.customSymbol + this.name;
+		}
 		return this.group + this.name;
 	}
 	authAtLeast(minAuth, room) {
@@ -1047,7 +1050,7 @@ class User {
 		}
 	}
 	onDisconnect(connection) {
-		if (this.named) Db('seen').set(this.userid, Date.now());
+		if (this.named) Db.seen.set(this.userid, Date.now());
 		for (let i = 0; i < this.connections.length; i++) {
 			if (this.connections[i] === connection) {
 				// console.log('DISCONNECT: ' + this.userid);

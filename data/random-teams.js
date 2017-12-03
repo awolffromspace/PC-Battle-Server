@@ -1517,15 +1517,22 @@ class RandomTeams extends Dex.ModdedDex {
 	randomTeam() {
 		let pokemon = [];
 
-		let excludedTiers = ['NFE', 'LC Uber', 'LC'];
-		let allowedNFE = ['Chansey', 'Doublade', 'Gligar', 'Porygon2', 'Scyther', 'Togetic'];
-
 		// For Monotype
 		let isMonotype = this.format.id === 'gen7monotyperandombattle';
 		let typePool = Object.keys(this.data.TypeChart);
 		let type = typePool[this.random(typePool.length)];
 
+		if (this.format.id === 'gen7metronome3random' || this.format.id === 'gen7metronome6random') {
+			let metronome = this.getMove('Metronome');
+			metronome.pp = 624.375;
+			metronome.noMetronome.push('imprison', 'taunt', 'torment');
+		}
+
 		let pokemonPool = [];
+		let teamGeneration = Math.floor(Math.random() * 7) + 1;
+		let colorPool = ['Red', 'Blue', 'Yellow', 'Green', 'Black', 'Brown', 'Purple', 'Gray', 'White', 'Pink']
+		let teamColor = colorPool[this.random(colorPool.length)];
+		
 		for (let id in this.data.FormatsData) {
 			let template = this.getTemplate(id);
 			if (isMonotype) {
@@ -1533,9 +1540,78 @@ class RandomTeams extends Dex.ModdedDex {
 				if (template.battleOnly) types = this.getTemplate(template.baseSpecies).types;
 				if (types.indexOf(type) < 0) continue;
 			}
-			if (template.gen <= this.gen && !excludedTiers.includes(template.tier) && !template.isMega && !template.isPrimal && !template.isNonstandard && template.randomBattleMoves) {
-				pokemonPool.push(id);
+			if (this.format.id === 'gen7uberrandom') {
+				if (template.gen <= this.gen && !template.isMega && !template.isPrimal && !template.isNonstandard && template.randomBattleMoves && template.tier === 'Uber') {
+					pokemonPool.push(id);
+				}
+			} else if (this.format.id === 'gen7ouuurandom') {
+				if (template.gen <= this.gen && !template.isMega && !template.isPrimal && !template.isNonstandard && template.randomBattleMoves && (template.tier === 'OU' || template.tier === 'BL' || template.tier === 'UU' || template.tier === 'BL2')) {
+					pokemonPool.push(id);
+				}
+			} else if (this.format.id === 'gen7runurandom') {
+				if (template.gen <= this.gen && !template.isMega && !template.isPrimal && !template.isNonstandard && template.randomBattleMoves && (template.tier === 'RU' || template.tier === 'BL3' || template.tier === 'NU' || template.tier === 'BL4')) {
+					pokemonPool.push(id);
+				}
+			} else if (this.format.id === 'gen7purandom') {
+				if (template.gen <= this.gen && !template.isMega && !template.isPrimal && !template.isNonstandard && template.randomBattleMoves && template.tier === 'PU') {
+					pokemonPool.push(id);
+				}
+			} else if (this.format.id === 'gen7lcrandom') {
+				if (template.gen <= this.gen && !template.isMega && !template.isPrimal && !template.isNonstandard && template.randomBattleMoves && template.tier === 'LC') {
+					pokemonPool.push(id);
+				}
+			} else if (this.format.id === 'gen7generationalrandom') {
+				if (template.gen == teamGeneration && !template.isMega && !template.isPrimal && !template.isNonstandard && template.randomBattleMoves) {
+					pokemonPool.push(id);
+				}
+			} else if (this.format.id === 'gen7kantorandom') {
+				if (template.gen === 1 && !template.isMega && !template.isPrimal && !template.isNonstandard && template.randomBattleMoves) {
+					pokemonPool.push(id);
+				}
+			} else if (this.format.id === 'gen7johtorandom') {
+				if (template.gen === 2 && !template.isMega && !template.isPrimal && !template.isNonstandard && template.randomBattleMoves) {
+					pokemonPool.push(id);
+				}
+			} else if (this.format.id === 'gen7hoennrandom') {
+				if (template.gen === 3 && !template.isMega && !template.isPrimal && !template.isNonstandard && template.randomBattleMoves) {
+					pokemonPool.push(id);
+				}
+			} else if (this.format.id === 'gen7sinnohrandom') {
+				if (template.gen === 4 && !template.isMega && !template.isPrimal && !template.isNonstandard && template.randomBattleMoves) {
+					pokemonPool.push(id);
+				}
+			} else if (this.format.id === 'gen7unovarandom') {
+				if (template.gen === 5 && !template.isMega && !template.isPrimal && !template.isNonstandard && template.randomBattleMoves) {
+					pokemonPool.push(id);
+				}
+			} else if (this.format.id === 'gen7kalosrandom') {
+				if (template.gen === 6 && !template.isMega && !template.isPrimal && !template.isNonstandard && template.randomBattleMoves) {
+					pokemonPool.push(id);
+				}
+			} else if (this.format.id === 'gen7alolarandom') {
+				if (template.gen === 7 && !template.isMega && !template.isPrimal && !template.isNonstandard && template.randomBattleMoves) {
+					pokemonPool.push(id);
+				}
+			} else if (this.format.id === 'gen7colorrandom') {
+				let colors = template.color;
+				if (template.gen <= this.gen && !template.isMega && !template.isPrimal && !template.isNonstandard && template.randomBattleMoves && colors.indexOf(teamColor) >= 0) {
+					pokemonPool.push(id);
+				}
+			} else {
+				if (template.gen <= this.gen && !template.isMega && !template.isPrimal && !template.isNonstandard && template.randomBattleMoves) {
+					pokemonPool.push(id);
+				}
 			}
+		}
+
+		if (this.format.id === 'gen7orbrandom') {
+			pokemonPool = ['shellder', 'cloyster', 'gastly', 'voltorb', 'electrode', 'koffing', 'ditto', 'sunkern', 'unown', 'pineco', 'forretress', 'silcoon', 'cascoon', 'lunatone', 'solrock', 'castformsunny', 'castformrainy', 'shuppet', 'glalie', 'clamperl', 'bronzor', 'rotom',
+			'whirlipede', 'cottonee', 'solosis', 'duosion', 'ferroseed', 'cryogonal', 'shelmet', 'carbink', 'klefki', 'pumpkaboo', 'pumpkaboolarge', 'pumpkaboosmall', 'pumpkaboosuper', 'hoopa', 'goomy', 'chinchou', 'qwilfish', 'wailmer', 'spheal', 'tympole', 'geodude', 'magnemite',
+			'gulpin', 'spoink', 'chimecho', 'metang', 'drifloon', 'drifblim', 'magnezone', 'phione', 'swadloon', 'yamask', 'foongus', 'amoonguss', 'lampent', 'chandelure', 'spritzee', 'phantump', 'burmy', 'spiritomb', 'petilil', 'vanillite', 'litwick', 'spewpa', 'clefairy', 'mankey',
+			'primeape', 'gengar', 'chansey', 'cleffa', 'marill', 'azumarill', 'hoppip', 'skiploom', 'jumpluff', 'whismur', 'gible', 'palpitoad', 'quilladin', 'dedenne', 'oddish', 'poliwag', 'doduo', 'dodrio', 'exeggutor', 'tangela', 'seedot', 'shroomish', 'azurill', 'cherrim', 'cherrimsunshine',
+			'roggenrola', 'swirlix', 'swinub', 'phanpy', 'donphan', 'shelgon', 'shaymin', 'munna', 'hoothoot', 'natu', 'woobat', 'tentacool', 'omanyte', 'omastar', 'jellicent', 'ferrothorn', 'magneton', 'exeggcute', 'weezing', 'cherubi', 'klink', 'klang', 'klinklang', 'jigglypuff',
+			'gloom', 'vileplume', 'venonat', 'poliwhirl', 'poliwrath', 'graveler', 'golem', 'igglybuff', 'togepi', 'blissey', 'cacnea', 'budew', 'chingling', 'happiny', 'tangrowth', 'musharna', 'darumaka', 'trubbish', 'kabuto', 'shuckle', 'dwebble', 'lanturn', 'rowlet', 'cutiefly',
+			'dewpider', 'araquanid', 'shiinotic', 'bounsweet', 'pyukumuku', 'minior', 'togedemaru', 'tapulele', 'tapufini', 'magearna', 'poipole', 'blacephalon'];
 		}
 
 		// PotD stuff
@@ -1549,6 +1625,7 @@ class RandomTeams extends Dex.ModdedDex {
 		let baseFormes = {};
 		let uberCount = 0;
 		let puCount = 0;
+		let nfeCount = 0;
 		let teamDetails = {};
 
 		while (pokemonPool.length && pokemon.length < 6) {
@@ -1558,22 +1635,28 @@ class RandomTeams extends Dex.ModdedDex {
 			// Limit to one of each species (Species Clause)
 			if (baseFormes[template.baseSpecies]) continue;
 
-			// Only certain NFE Pokemon are allowed
-			if (template.evos.length && !allowedNFE.includes(template.species)) continue;
+			if (template.species === 'Unown' || template.species === 'Cosmog' || template.species === 'Cosmoem') continue;
 
 			let tier = template.tier;
-			switch (tier) {
-			case 'Uber':
-				// Ubers are limited to 2 but have a 20% chance of being added anyway.
-				if (uberCount > 1 && this.random(5) >= 1) continue;
-				break;
-			case 'PU':
-				// PUs are limited to 2 but have a 20% chance of being added anyway.
-				if (puCount > 1 && this.random(5) >= 1) continue;
-				break;
-			case 'Unreleased': case 'CAP':
-				// Unreleased and CAP have 20% the normal rate
-				if (this.random(5) >= 1) continue;
+			if (this.format.id !== 'gen7uberrandom' && this.format.id !== 'gen7purandom' && this.format.id !== 'gen7lcrandom') {
+				switch (tier) {
+				case 'Uber':
+					// Ubers are limited to 2 but have a 20% chance of being added anyway.
+					if (uberCount > 1 && this.random(5) >= 1) continue;
+					break;
+				case 'PU':
+					// PUs are limited to 2 but have a 20% chance of being added anyway.
+					if (puCount > 1 && this.random(5) >= 1) continue;
+					break;
+				case 'NFE':
+				case 'LC':
+				case 'LC Uber':
+					if (nfeCount > 0 || this.random(5) >= 1) continue;
+					break;
+				case 'Unreleased': case 'CAP':
+					// Unreleased and CAP have 20% the normal rate
+					if (this.random(5) >= 1) continue;
+				}
 			}
 
 			// Adjust rate for species with multiple formes
@@ -1587,7 +1670,7 @@ class RandomTeams extends Dex.ModdedDex {
 			case 'Genesect':
 				if (this.random(5) >= 1) continue;
 				break;
-			case 'Castform': case 'Gourgeist': case 'Oricorio':
+			case 'Castform': case 'Pumpkaboo': case 'Gourgeist': case 'Oricorio':
 				if (this.random(4) >= 1) continue;
 				break;
 			case 'Basculin': case 'Cherrim': case 'Greninja': case 'Hoopa': case 'Meloetta': case 'Meowstic':
@@ -1596,8 +1679,8 @@ class RandomTeams extends Dex.ModdedDex {
 			}
 
 			if (potd && potd.exists) {
-				// The Pokemon of the Day belongs in slot 2
-				if (pokemon.length === 1) {
+				// The Pokemon of the Day belongs in slot 1
+				if (pokemon.length === 0) {
 					template = potd;
 					if (template.species === 'Magikarp') {
 						template.randomBattleMoves = ['bounce', 'flail', 'splash', 'magikarpsrevenge'];
@@ -1624,6 +1707,15 @@ class RandomTeams extends Dex.ModdedDex {
 			}
 
 			let set = this[this.format.gameType === 'singles' ? 'randomSet' : 'randomDoublesSet'](template, pokemon.length, teamDetails);
+
+			if (this.format.id === 'gen7lcrandom') {
+				set.level = 5;
+			} else if (this.format.id === 'gen7metronome3random' || this.format.id === 'gen7metronome6random') {
+				set.moves = ['Metronome'];
+				if (['Assault Vest'].indexOf(set.item) > -1) {
+					set.item = 'Leftovers';
+				}
+			}
 
 			// Illusion shouldn't be the last Pokemon of the team
 			if (set.ability === 'Illusion' && pokemon.length > 4) continue;
@@ -1668,6 +1760,8 @@ class RandomTeams extends Dex.ModdedDex {
 				uberCount++;
 			} else if (tier === 'PU') {
 				puCount++;
+			} else if (tier === 'NFE' || tier === 'LC' || tier === 'LC Uber') {
+				nfeCount++;
 			}
 
 			// Team has Mega/weather/hazards

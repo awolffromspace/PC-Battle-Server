@@ -224,11 +224,6 @@ exports.simulatorprocesses = 1;
 // from the `users` array. The default is 1 hour.
 exports.inactiveuserthreshold = 1000 * 60 * 60;
 
-// autolockdown - whether or not to automatically kill the server when it is
-// in lockdown mode and the final battle finishes.  This is potentially useful
-// to prevent forgetting to restart after a lockdown where battles are finished.
-exports.autolockdown = true;
-
 // tellsexpiryage - how long an offline message remains in existence before being removed.
 // By default, 7 days
 exports.tellsexpiryage = 1000 * 60 * 60 * 24 * 7;
@@ -238,6 +233,11 @@ exports.tellsexpiryage = 1000 * 60 * 60 * 24 * 7;
 // offline messaging completely. Set to `'autoconfirmed'` to allow only autoconfirmed users
 // to send offline messages.
 exports.tellrank = ' ';
+
+// autolockdown - whether or not to automatically kill the server when it is
+// in lockdown mode and the final battle finishes.  This is potentially useful
+// to prevent forgetting to restart after a lockdown where battles are finished.
+exports.autolockdown = true;
 
 // Custom avatars.
 // This allows you to specify custom avatar images for users on your server.
@@ -678,7 +678,9 @@ exports.customavatars = {
 	'mdki': 'mdki.png',
 	'violentcharizard21': 'violentcharizard21.gif',
 	'voltyshocks': 'voltyshocks.png',
+	'nekyokun': 'voltyshocks.png',
 	'saincweedle12': 'saincweedle12.png',
+	'snorlaxtherain': 'snorlaxtherain.png',
 };
 
 // custom avatars appear in profile by specifiying server url.
@@ -777,25 +779,41 @@ exports.grouplist = [
 		name: "Room Owner",
 		inherit: '&',
 		jurisdiction: 'u',
+		roombot: true,
+		roommod: true,
+		roomdriver: true,
 		roomleader: true,
+		editroom: true,
+		declare: true,
+		modchatall: true,
 		roomonly: true,
+		tournamentsmanagement: true,
+		gamemanagement: true,
 	},
 	{
 		symbol: '&',
 		id: "leader",
 		name: "Leader",
 		inherit: '@',
-		jurisdiction: 'u',
+		jurisdiction: '@u',
+		promote: 'u',
 		roombot: true,
 		roommod: true,
 		roomdriver: true,
+		forcewin: true,
+		declare: true,
+		modchatall: true,
+		rangeban: true,
+		makeroom: true,
 		editroom: true,
-		roomonly: true,
+		potd: true,
+		disableladder: true,
+		globalonly: true,
 		tournamentsmanagement: true,
 		gamemanagement: true,
 	},
 	{
-		symbol: '\u2605',
+		symbol: '=',
 		id: "host",
 		name: "Host",
 		inherit: '@',
@@ -810,7 +828,7 @@ exports.grouplist = [
 		gamemanagement: true,
 	},
 	{
-		symbol: '\u2606',
+		symbol: '-',
 		id: "player",
 		name: "Player",
 		inherit: ' ',
@@ -828,6 +846,8 @@ exports.grouplist = [
 		name: "Bot",
 		inherit: '@',
 		jurisdiction: 'u',
+		declare: true,
+		addhtml: true,
 	},
 	{
 		symbol: '@',
@@ -842,6 +862,8 @@ exports.grouplist = [
 		roomplayer: true,
 		forcerename: true,
 		ip: true,
+		tournaments: true,
+		game: true,
 		rangeban: true,
 		potd: true,
 		gdeclare: true,
@@ -854,6 +876,7 @@ exports.grouplist = [
 		name: "Driver",
 		inherit: '+',
 		jurisdiction: 'u',
+		announce: true,
 		warn: '-u',
 		kick: true,
 		mute: '-u',
@@ -864,6 +887,9 @@ exports.grouplist = [
 		bypassblocks: 'u%@&~',
 		receiveauthmessages: true,
 		tournamentsmoderation: true,
+		jeopardy: true,
+		joinbattle: true,
+		minigame: true,
 	},
 	{
 		symbol: '+',
@@ -889,8 +915,8 @@ exports.grouplist = [
 	{
 		symbol: ' ',
 		ip: 's',
-		broadcast: true,
 		alts: '~u',
+		broadcast: true,
 	},
 	{
 		name: 'Locked',

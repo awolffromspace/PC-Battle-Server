@@ -1294,7 +1294,7 @@ exports.commands = {
 		if (!this.runBroadcast()) return;
 		this.sendReplyBox(
 			"New to competitive Pok&eacute;mon?<br />" +
-			"- <a href=\"http://www.pokecommunity.com/showthread.php?t=332177#resources\">PC's Battling & Team Building Resources</a><br />" +
+			"- <a href=\"https://www.pokecommunity.com/showthread.php?t=397587#resources\">PC's Competitive Pok&eacute;mon Resources</a><br />" +
 			"- <a href=\"http://www.smogon.com/forums/posts/6774481/\">Beginner's Guide to Pok&eacute;mon Showdown</a><br />" +
 			"- <a href=\"http://www.smogon.com/dp/articles/intro_comp_pokemon\">An introduction to competitive Pok&eacute;mon</a><br />" +
 			"- <a href=\"http://www.smogon.com/bw/articles/bw_tiers\">What do 'OU', 'UU', etc mean?</a><br />" +

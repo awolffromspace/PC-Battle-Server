@@ -138,6 +138,14 @@ class Matchmaker {
 	async searchBattle(user, formatid) {
 		if (!user.connected) return;
 
+		if (!user.locked && !Rooms.lobby.isMuted(user)) {
+			if (Rooms.lobby.disableLadderMessages) return false;
+			if (((Date.now() - user.lastLadderTime) < SEARCH_COOLDOWN) && user.lastLadderFormat === formatid) return false;
+			if (Rooms.lobby) Rooms.lobby.add('|c|' + user.group + user.name + '|/me is searching for a ' + Dex.getFormat(formatid).name + ' battle!');
+			user.lastLadderFormat = formatid;
+			user.lastLadderTime = Date.now();
+		}
+
 		const format = Dex.getFormat(formatid);
 		formatid = format.id;
 		let oldUserid = user.userid;
@@ -161,14 +169,6 @@ class Matchmaker {
 
 		const search = new Search(user.userid, validTeam, rating);
 		this.addSearch(search, user, formatid);
-
-		if (!user.locked && !Rooms.lobby.isMuted(user)) {
-			if (Rooms.lobby.disableLadderMessages) return false;
-			if (((Date.now() - user.lastLadderTime) < SEARCH_COOLDOWN) && user.lastLadderFormat === formatid) return false;
-			if (Rooms.lobby) Rooms.lobby.add('|c|' + user.group + user.name + '|/me is searching for a ' + Dex.getFormat(formatid).name + ' battle!');
-			user.lastLadderFormat = formatid;
-			user.lastLadderTime = Date.now();
-		}
 	}
 
 	/**

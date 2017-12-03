@@ -6,7 +6,7 @@ let moment = require('moment');
 
 let BR = '<br>';
 let SPACE = '&nbsp;';
-let profileColor = '#474bb3';
+let profileColor = '#45a0e5';
 let trainersprites = [1, 2, 101, 102, 169, 170, 265, 266, 168];
 
 /**
@@ -96,12 +96,12 @@ function titleCSS(text) {
 
 Profile.prototype.avatar = function () {
 	if (this.isOnline) {
-		if (typeof this.image === 'string') return img(this.url + this.image);
+		if (typeof this.image === 'string') return img(this.url + ':' + Config.port + '/avatars/' + this.image);
 		return img('http://play.pokemonshowdown.com/sprites/trainers/' + this.image + '.png');
 	}
 	for (let name in Config.customAvatars) {
 		if (this.username === name) {
-			return img(this.url + Config.customAvatars[name]);
+			return img(this.url + ':' + Config.port + '/avatars/' + Config.customAvatars[name]);
 		}
 	}
 	let selectedSprite = trainersprites[Math.floor(Math.random() * trainersprites.length)];
@@ -125,7 +125,7 @@ Profile.prototype.group = function () {
 };
 
 Profile.prototype.money = function (amount) {
-	return label('Battle Points') + amount;
+	return label('Money') + amount + currencyName(amount);
 };
 
 Profile.prototype.name = function () {
@@ -144,22 +144,22 @@ Profile.prototype.title = function (amount) {
 
 Profile.prototype.show = function (callback) {
 	let userid = toId(this.username);
-	let title = Db('title').get(toId(userid));
+	let title = Db.title.get(userid);
 
 	if (title) {
 		return this.buttonAvatar() +
-			SPACE + this.title(Db('title').get(userid)) + BR +
+			SPACE + this.title(Db.title.get(userid)) + BR +
 			SPACE + this.name() + BR +
 			SPACE + this.group() + BR +
-			SPACE + this.money(Db('bp').get(userid, 0)) + BR +
-			SPACE + this.seen(Db('seen').get(userid)) +
+			SPACE + this.money(Db.bp.get(userid, 0)) + BR +
+			SPACE + this.seen(Db.seen.get(userid)) +
 			'<br clear="all">';
 	} else {
 		return this.buttonAvatar() +
 			SPACE + this.name() + BR +
 			SPACE + this.group() + BR +
-			SPACE + this.money(Db('bp').get(userid, 0)) + BR +
-			SPACE + this.seen(Db('seen').get(userid)) +
+			SPACE + this.money(Db.bp.get(userid, 0)) + BR +
+			SPACE + this.seen(Db.seen.get(userid)) +
 			'<br clear="all">';
 	}
 };

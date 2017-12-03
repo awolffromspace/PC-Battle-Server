@@ -69,6 +69,10 @@ const gloom = [
 	"ya even ugly for a naga",
 ];
 
+const hackode007 = [
+	"The rooms are now Hacker-less....",
+];
+
 const hannumikkola = [
 	"is stealing your food now.",
 ];
@@ -364,6 +368,16 @@ exports.commands = {
 			user.leaveRoom(room);
 		} else if (userid.toUpperCase() === 'GLOOM') {
 			let message = target || gloom[Math.floor(Math.random() * gloom.length)];
+
+			let colour = '#' + [1, 1, 1].map(function () {
+				let part = Math.floor(Math.random() * 0xaa);
+				return (part < 0x10 ? '0' : '') + part.toString(16);
+			}).join('');
+
+			room.addRaw('<center><strong><font color="' + colour + '">~~ ' + Chat.escapeHTML(message) + ' ~~</font></strong></center>');
+			user.leaveRoom(room);
+		} else if (userid.toUpperCase() === 'HACKODE007' || userid.toUpperCase() === 'ARROWHACK' || userid.toUpperCase() === 'HACKODE' || userid.toUpperCase() === 'NINJAHACK') {
+			let message = target || anthny[Math.floor(Math.random() * anthny.length)];
 
 			let colour = '#' + [1, 1, 1].map(function () {
 				let part = Math.floor(Math.random() * 0xaa);

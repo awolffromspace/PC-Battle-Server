@@ -38,6 +38,7 @@ const VALID_COMMAND_TOKENS = '/!';
 const BROADCAST_TOKEN = '!';
 
 const FS = require('./fs');
+
 const parseEmoticons = require('./chat-plugins/emoticons').parseEmoticons;
 
 let Chat = module.exports;
@@ -271,6 +272,8 @@ class CommandContext {
 
 		if (message && message !== true && typeof message.then !== 'function') {
 			if (this.pmTarget) {
+				const parsedMsg = parseEmoticons(message, this.room, this.user, true);
+				if (parsedMsg) message = '/html ' + parsedMsg;
 				Chat.sendPM(message, this.user, this.pmTarget);
 			} else {
 				if (parseEmoticons(message, this.room, this.user)) return;
@@ -780,16 +783,16 @@ class CommandContext {
 			}
 
 			if (room) {
+				let normalized = message.trim();
 				if (!user.isStaff || !user.group === '+') {
-					let normalized = message.trim();
 					if ((room.id === 'lobby' || room.id === 'help') && (normalized === user.lastMessage) &&
 							((Date.now() - user.lastMessageTime) < MESSAGE_COOLDOWN)) {
 						this.errorReply("You can't send the same message again so soon.");
 						return false;
+					}
 				}
 				user.lastMessage = message;
 				user.lastMessageTime = Date.now();
-				}
 			}
 
 			if (Chat.filters.length) {

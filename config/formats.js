@@ -11,21 +11,38 @@ exports.Formats = [
 		section: "US/UM Singles",
 	},
 	{
-		name: "[Gen 7] Random Battle",
+		name: "[LotF 35] Alola Random",
+
+		mod: 'gen7',
+		team: 'random',
+		ruleset: ['[Gen 7] Random (no PotD)'],
+		onBegin: function() {
+			this.add('raw|This is the Ladder of the Fortnight! Use the "Battle!" button to try and win the LotF. The winner is the user who is #1 on the ladder by the end of the fortnight. They receive a <img src="http://cbc.pokecommunity.com/config/user-list-images/trophy.png" /> beside their name for one fortnight.');
+		},
+	},
+	{
+		name: "[Gen 7] Random",
 		desc: ["Randomized teams of level-balanced Pok&eacute;mon with sets that are generated to be competitively viable."],
 
 		mod: 'gen7',
 		team: 'random',
-		ruleset: ['PotD', 'Pokemon', 'Sleep Clause Mod', 'HP Percentage Mod', 'Cancel Mod'],
+		ruleset: ['PotD', 'Pokemon', 'Sleep Clause Mod', 'HP Percentage Mod', 'Cancel Mod', 'Team Preview'],
 	},
 	{
-		name: "[Gen 7] Unrated Random Battle",
+		name: "[Gen 7] Unrated Random",
 
 		mod: 'gen7',
 		team: 'random',
 		challengeShow: false,
 		rated: false,
-		ruleset: ['PotD', 'Pokemon', 'Sleep Clause Mod', 'HP Percentage Mod', 'Cancel Mod'],
+		ruleset: ['[Gen 7] Random'],
+	},
+	{
+		name: "[Gen 7] Random (no PotD)",
+
+		mod: 'gen7',
+		team: 'random',
+		ruleset: ['Pokemon', 'Sleep Clause Mod', 'HP Percentage Mod', 'Cancel Mod', 'Team Preview'],
 	},
 	{
 		name: "[Gen 7] OU",
@@ -251,7 +268,7 @@ exports.Formats = [
 		mod: 'gen7',
 		gameType: 'doubles',
 		team: 'random',
-		ruleset: ['PotD', 'Pokemon', 'HP Percentage Mod', 'Cancel Mod'],
+		ruleset: ['PotD', 'Pokemon', 'HP Percentage Mod', 'Cancel Mod', 'Team Preview'],
 	},
 	{
 		name: "[Gen 7] Doubles OU",
@@ -388,7 +405,7 @@ exports.Formats = [
 
 	{
 		section: "OM of the Month",
-		column: 2,
+		column: 3,
 	},
 	{
 		name: "[Gen 7] Partners in Crime",
@@ -494,7 +511,7 @@ exports.Formats = [
 	},
 	{
 		section: "Other Metagames",
-		column: 2,
+		column: 3,
 	},
 	{
 		name: "[Gen 7] Balanced Hackmons",
@@ -711,12 +728,11 @@ exports.Formats = [
 		ruleset: ['Pokemon', 'Standard GBU'],
 	},
 	{
-		name: "[Gen 7] Monotype Random Battle",
+		name: "[Gen 7] Monotype Random",
 
 		mod: 'gen7',
 		team: 'random',
-		searchShow: false,
-		ruleset: ['Pokemon', 'Same Type Clause', 'Sleep Clause Mod', 'HP Percentage Mod', 'Cancel Mod'],
+		ruleset: ['[Gen 7] Random (no PotD)'],
 	},
 	{
 		name: "[Gen 7] Challenge Cup 1v1",
@@ -755,45 +771,45 @@ exports.Formats = [
 		gameType: 'doubles',
 		team: 'randomHC',
 		searchShow: false,
-		ruleset: ['Pokemon', 'HP Percentage Mod', 'Cancel Mod'],
+		ruleset: ['Pokemon', 'HP Percentage Mod', 'Cancel Mod', 'Team Preview'],
 	},
 	{
-		name: "[Gen 6] Random Battle",
+		name: "[Gen 6] Random",
 
 		mod: 'gen6',
 		team: 'random',
-		ruleset: ['PotD', 'Pokemon', 'Sleep Clause Mod', 'HP Percentage Mod', 'Cancel Mod'],
+		ruleset: ['PotD', 'Pokemon', 'Sleep Clause Mod', 'HP Percentage Mod', 'Cancel Mod', 'Team Preview'],
 	},
 	{
-		name: "[Gen 5] Random Battle",
+		name: "[Gen 5] Random",
 
 		mod: 'gen5',
 		team: 'random',
 		ruleset: ['Pokemon', 'Sleep Clause Mod', 'HP Percentage Mod', 'Cancel Mod'],
 	},
 	{
-		name: "[Gen 4] Random Battle",
+		name: "[Gen 4] Random",
 
 		mod: 'gen4',
 		team: 'random',
 		ruleset: ['Pokemon', 'Sleep Clause Mod', 'HP Percentage Mod', 'Cancel Mod'],
 	},
 	{
-		name: "[Gen 3] Random Battle",
+		name: "[Gen 3] Random",
 
 		mod: 'gen3',
 		team: 'random',
 		ruleset: ['Pokemon', 'Standard'],
 	},
 	{
-		name: "[Gen 2] Random Battle",
+		name: "[Gen 2] Random",
 
 		mod: 'gen2',
 		team: 'random',
 		ruleset: ['Pokemon', 'Standard'],
 	},
 	{
-		name: "[Gen 1] Random Battle",
+		name: "[Gen 1] Random",
 
 		mod: 'gen1',
 		team: 'random',
@@ -804,9 +820,154 @@ exports.Formats = [
 
 		mod: 'gen1',
 		team: 'randomCC',
-		searchShow: false,
-		challengeShow: false,
-		ruleset: ['Pokemon', 'HP Percentage Mod', 'Cancel Mod'],
+		ruleset: ['Pokemon', 'HP Percentage Mod', 'Cancel Mod', 'Team Preview'],
+	},
+	{
+		name: "[Gen 7] 1v1 Random",
+
+		mod: 'gen7',
+		teamLength: {
+			battle: 1
+		},
+		team: 'random',
+		ruleset: ['[Gen 7] Random (no PotD)'],
+	},
+	{
+		name: "[Gen 7] Uber Random",
+
+		mod: 'gen7',
+		team: 'random',
+		ruleset: ['[Gen 7] Random (no PotD)'],
+	},
+	{
+		name: "[Gen 7] OU/UU Random",
+
+		mod: 'gen7',
+		team: 'random',
+		ruleset: ['[Gen 7] Random (no PotD)'],
+	},
+	{
+		name: "[Gen 7] RU/NU Random",
+
+		mod: 'gen7',
+		team: 'random',
+		ruleset: ['[Gen 7] Random (no PotD)'],
+	},
+	{
+		name: "[Gen 7] PU Random",
+
+		mod: 'gen7',
+		team: 'random',
+		ruleset: ['[Gen 7] Random (no PotD)'],
+	},
+	{
+		name: "[Gen 7] LC Random",
+
+		mod: 'gen7',
+		team: 'random',
+		ruleset: ['[Gen 7] Random (no PotD)'],
+	},
+	{
+		name: "[Gen 7] Generational Random",
+
+		mod: 'gen7',
+		team: 'random',
+		ruleset: ['[Gen 7] Random (no PotD)'],
+	},
+	{
+		name: "[Gen 7] Kanto Random",
+
+		mod: 'gen7',
+		team: 'random',
+		ruleset: ['[Gen 7] Random (no PotD)'],
+	},
+	{
+		name: "[Gen 7] Johto Random",
+
+		mod: 'gen7',
+		team: 'random',
+		ruleset: ['[Gen 7] Random (no PotD)'],
+	},
+	{
+		name: "[Gen 7] Hoenn Random",
+
+		mod: 'gen7',
+		team: 'random',
+		ruleset: ['[Gen 7] Random (no PotD)'],
+	},
+	{
+		name: "[Gen 7] Sinnoh Random",
+
+		mod: 'gen7',
+		team: 'random',
+		ruleset: ['[Gen 7] Random (no PotD)'],
+	},
+	{
+		name: "[Gen 7] Unova Random",
+
+		mod: 'gen7',
+		team: 'random',
+		ruleset: ['[Gen 7] Random (no PotD)'],
+	},
+	{
+		name: "[Gen 7] Kalos Random",
+
+		mod: 'gen7',
+		team: 'random',
+		ruleset: ['[Gen 7] Random (no PotD)'],
+	},
+	{
+		name: "[Gen 7] Alola Random",
+
+		mod: 'gen7',
+		team: 'random',
+		ruleset: ['[Gen 7] Random (no PotD)'],
+	},
+	{
+		name: "[Gen 7] Color Random",
+
+		mod: 'gen7',
+		team: 'random',
+		ruleset: ['[Gen 7] Random (no PotD)'],
+	},
+	{
+		name: "[Gen 7] Inverse Random",
+
+		mod: 'gen7',
+		team: 'random',
+		ruleset: ['[Gen 7] Random (no PotD)'],
+		onNegateImmunity: false,
+		onEffectiveness: function (typeMod, target, type, move) {
+			// The effectiveness of Freeze Dry on Water isn't reverted
+			if (move && move.id === 'freezedry' && type === 'Water') return;
+			if (move && !this.getImmunity(move, type)) return 1;
+			return -typeMod;
+		},
+	},
+	{
+		name: "[Gen 7] Metronome 3 Random",
+
+		mod: 'gen7',
+		teamLength: {
+			validate: [3, 6],
+			battle: 3
+		},
+		team: 'random',
+		ruleset: ['[Gen 7] Random (no PotD)'],
+	},
+	{
+		name: "[Gen 7] Metronome 6 Random",
+
+		mod: 'gen7',
+		team: 'random',
+		ruleset: ['[Gen 7] Random (no PotD)'],
+	},
+	{
+		name: "[Gen 7] Orb Random",
+
+		mod: 'gen7',
+		team: 'random',
+		ruleset: ['[Gen 7] Random (no PotD)'],
 	},
 
 	// RoA Spotlight
@@ -926,7 +1087,7 @@ exports.Formats = [
 
 	{
 		section: "OR/AS Singles",
-		column: 3,
+		column: 4,
 	},
 	{
 		name: "[Gen 6] Ubers",
@@ -1073,6 +1234,7 @@ exports.Formats = [
 
 	{
 		section: "OR/AS Doubles/Triples",
+		column: 4,
 	},
 	{
 		name: "[Gen 6] Doubles OU",
@@ -1333,7 +1495,7 @@ exports.Formats = [
 
 	{
 		section: "DPP Singles",
-		column: 4,
+		column: 5,
 	},
 	{
 		name: "[Gen 4] Ubers",
@@ -1402,7 +1564,7 @@ exports.Formats = [
 
 	{
 		section: "DPP Doubles",
-		column: 4,
+		column: 5,
 	},
 	{
 		name: "[Gen 4] Doubles OU",
@@ -1434,7 +1596,7 @@ exports.Formats = [
 
 	{
 		section: "Past Generations",
-		column: 4,
+		column: 5,
 	},
 	{
 		name: "[Gen 3] Ubers",

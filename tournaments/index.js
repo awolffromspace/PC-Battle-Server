@@ -802,7 +802,7 @@ class Tournament {
 		if (!this.pendingChallenges.get(player)) return;
 
 		if (this.room.id === 'lobby') {
-			var room = Rooms.createBattle(this.teambuilderFormat, {
+			let room = Rooms.createBattle(this.teambuilderFormat, {
 				p1: from,
 				p1team: challenge.team,
 				p2: user,
@@ -811,8 +811,22 @@ class Tournament {
 				tour: this,
 				lobbyTour: this,
 			});
+			if (!room) return;
+
+			this.pendingChallenges.set(challenge.from, null);
+			this.pendingChallenges.set(player, null);
+			from.sendTo(this.room, '|tournament|update|{"challenging":null}');
+			user.sendTo(this.room, '|tournament|update|{"challenged":null}');
+
+			this.inProgressMatches.set(challenge.from, {to: player, room: room});
+			this.room.add('|tournament|battlestart|' + from.name + '|' + user.name + '|' + room.id).update();
+
+			this.isBracketInvalidated = true;
+			if (this.autoDisqualifyTimeout !== Infinity) this.runAutoDisqualify(this.room);
+			if (this.forceTimer) room.battle.timer.start();
+			this.update();
 		} else {
-			var room = Rooms.createBattle(this.teambuilderFormat, {
+			let room = Rooms.createBattle(this.teambuilderFormat, {
 				p1: from,
 				p1team: challenge.team,
 				p2: user,
@@ -820,20 +834,21 @@ class Tournament {
 				rated: !Ladders.disabled && this.isRated,
 				tour: this,
 			});
-		if (!room) return;
+			if (!room) return;
 
-		this.pendingChallenges.set(challenge.from, null);
-		this.pendingChallenges.set(player, null);
-		from.sendTo(this.room, '|tournament|update|{"challenging":null}');
-		user.sendTo(this.room, '|tournament|update|{"challenged":null}');
+			this.pendingChallenges.set(challenge.from, null);
+			this.pendingChallenges.set(player, null);
+			from.sendTo(this.room, '|tournament|update|{"challenging":null}');
+			user.sendTo(this.room, '|tournament|update|{"challenged":null}');
 
-		this.inProgressMatches.set(challenge.from, {to: player, room: room});
-		this.room.add('|tournament|battlestart|' + from.name + '|' + user.name + '|' + room.id).update();
+			this.inProgressMatches.set(challenge.from, {to: player, room: room});
+			this.room.add('|tournament|battlestart|' + from.name + '|' + user.name + '|' + room.id).update();
 
-		this.isBracketInvalidated = true;
-		if (this.autoDisqualifyTimeout !== Infinity) this.runAutoDisqualify(this.room);
-		if (this.forceTimer) room.battle.timer.start();
-		this.update();
+			this.isBracketInvalidated = true;
+			if (this.autoDisqualifyTimeout !== Infinity) this.runAutoDisqualify(this.room);
+			if (this.forceTimer) room.battle.timer.start();
+			this.update();
+		}
 	}
 	forfeit(user) {
 		this.disqualifyUser(user.userid, null, "You left the tournament");
@@ -878,23 +893,22 @@ class Tournament {
 		// Tournament Battle Winnings
 		//
 
+		let color = '#45a0e5';
 		let result = 'draw';
 		let tourSize = this.generator.users.size;
 		let sizeRequiredToEarn = 3;
 		if (from === winner) {
 			result = 'win';
-			if (tourSize >= sizeRequiredToEarn && this.format !== 'gen71v1random' && this.format !== 'gen71v1challengecup' && this.format !== 'gen71v1' && this.format !== 'gen7battlespotspecial4') {
-				Db('bp').set(from, Db('bp').get(from, 0) + 1);
-			}
-			if (this.format !== 'gen71v1random' && this.format !== 'gen71v1challengecup' && this.format !== 'gen71v1' && this.format !== 'gen7battlespotspecial4') {
-				this.push("|raw|<b><font color='" + color + "'>" + Chat.escapeHTML(winner) + "</font> has won " + "<font color='" + color + "'>1</font>" + " Battle Point for winning the tournament battle!</b>");
+			if (tourSize >= sizeRequiredToEarn && this.format !== 'gen71v1' && this.format !== 'gen7challengecup1v1' && this.format !== 'gen71v1random') {
+				Db.bp.set(from, Db.bp.get(from, 0) + 1);
 			}
 		} else if (to === winner) {
 			result = 'loss';
-			if (tourSize >= sizeRequiredToEarn && this.format !== 'gen71v1random' && this.format !== 'gen71v1challengecup' && this.format !== 'gen71v1' && this.format !== 'gen7battlespotspecial4') {
-				Db('bp').set(to, Db('bp').get(to, 0) + 1);
+			if (tourSize >= sizeRequiredToEarn && this.format !== 'gen71v1' && this.format !== 'gen7challengecup1v1' && this.format !== 'gen71v1random') {
+				Db.bp.set(to, Db.bp.get(to, 0) + 1);
 			}
 		}
+		room.push("|raw|<b><font color='" + color + "'>" + Chat.escapeHTML(winner) + "</font> has won " + "<font color='" + color + "'>1</font>" + " Battle Point for winning the tournament battle!</b>");
 
 		if (result === 'draw' && !this.generator.isDrawingSupported) {
 			this.room.add('|tournament|battleend|' + from.name + '|' + to.name + '|' + result + '|' + score.join(',') + '|fail|' + room.id);
@@ -949,7 +963,7 @@ class Tournament {
 		// Tournament Winnings
 		//
 
-		let color = '#474bb3';
+		let color = '#45a0e5';
 		let sizeRequiredToEarn = 3;
 		let currencyName = function (amount) {
 			let name = " Battle Point";
@@ -974,14 +988,15 @@ class Tournament {
 			let firstMoney = Math.round(tourSize / 2);
 			let secondMoney = Math.round(firstMoney / 2);
 
-			Db('bp').set(wid, Db('bp').get(wid, 0) + firstMoney);
+			Db.bp.set(wid, Db.bp.get(wid, 0) + firstMoney);
 			this.room.addRaw("<b><font color='" + color + "'>" + Chat.escapeHTML(winner) + "</font> has won " + "<font color='" + color + "'>" + firstMoney + "</font>" + currencyName(firstMoney) + " for winning the tournament!</b>");
 
 			if (runnerUp) {
-				Db('bp').set(rid, Db('bp').get(rid, 0) + secondMoney);
-				this.room.addRaw("<b><font color='" + color + "'>" + Chat.escapeHTML(runnerUp) + "</font> has won " +  "<font color='" + color + "'>" + secondMoney + "</font>" + currencyName(secondMoney) + " for winning the tournament!</b>");
+				Db.bp.set(rid, Db.bp.get(rid, 0) + secondMoney);
+				this.room.addRaw("<b><font color='" + color + "'>" + Chat.escapeHTML(runnerUp) + "</font> has won " + "<font color='" + color + "'>" + secondMoney + "</font>" + currencyName(secondMoney) + " for winning the tournament!</b>");
 			}
 		}
+
 		delete exports.tournaments[this.room.id];
 		delete this.room.game;
 		for (let i in this.players) {
@@ -1522,7 +1537,7 @@ Chat.commands.tournament = function (paramString, room, user, connection) {
 			}
 		}
 		if (room.id == 'trl') {
-			var format = Tools.getFormat(params[0]);
+			let format = Tools.getFormat(params[0]);
 			if (!(/random/i).test(format['team'])) {
 				return this.sendReply("Only Random Battle tournaments may be created in this room.");
 			}

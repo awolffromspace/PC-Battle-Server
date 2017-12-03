@@ -8,6 +8,21 @@
 let moment = require('moment');
 let request = require('request');
 
+let messages = [
+	"has vanished into nothingness!",
+	"used Explosion!",
+	"fell into the void.",
+	"went into a cave without a repel!",
+	"has left the building.",
+	"was forced to give StevoDuhHero's mom an oil massage!",
+	"was hit by Magikarp's Revenge!",
+	"ate a bomb!",
+	"is blasting off again!",
+	"(Quit: oh god how did this get here i am not good with computer)",
+	"was unfortunate and didn't get a cool message.",
+	"{{user}}'s mama accidently kicked {{user}} from the server!",
+];
+
 function clearRoom(room) {
 	let len = (room.log && room.log.length) || 0;
 	let users = [];
@@ -27,8 +42,37 @@ function clearRoom(room) {
 }
 
 exports.commands = {
+	/*stafflist: 'authority',
+	auth: 'authority',
+	authlist: 'authority',
+	authority: function (target, room, user, connection) {
+		let rankLists = {};
+		let ranks = Object.keys(Config.groups);
+		for (let u in Users.usergroups) {
+			let rank = Users.usergroups[u].charAt(0);
+			// In case the usergroups.csv file is not proper, we check for the server ranks.
+			if (ranks.indexOf(rank) > -1) {
+				let name = Users.usergroups[u].substr(1);
+				if (!rankLists[rank]) rankLists[rank] = [];
+				if (name) rankLists[rank].push(((Users.getExact(name) && Users.getExact(name).connected) ? '**' + name + '**' : name));
+			}
+		}
+
+		let buffer = [];
+		Object.keys(rankLists).sort(function (a, b) {
+			return (Config.groups[b] || {rank: 0}).rank - (Config.groups[a] || {rank: 0}).rank;
+		}).forEach(function (r) {
+			buffer.push((Config.groups[r] ? r + Config.groups[r].name + "s (" + rankLists[r].length + ")" : r) + ":\n" + rankLists[r].sort().join(", "));
+		});
+
+		if (!buffer.length) {
+			return connection.popup("This server has no auth.");
+		}
+		connection.popup(buffer.join("\n\n"));
+	},*/
+
 	clearall: function (target, room, user) {
-		if (!this.can('warn', null, room)) return false;
+		if (!this.can('warn')) return false;
 		if (room.battle) return this.sendReply("You cannot clearall in battle rooms.");
 
 		clearRoom(room);
@@ -43,6 +87,32 @@ exports.commands = {
 		}
 		Rooms.rooms.forEach(clearRoom);
 	},
+
+	/*hide: function (target, room, user) {
+		if (!this.can('lock')) return false;
+		user.hiding = true;
+		user.updateIdentity();
+		this.sendReply("You have hidden your staff symbol.");
+	},
+
+	rk: 'kick',
+	roomkick: 'kick',
+	kick: function (target, room, user) {
+		if (!target) return this.parse('/help kick');
+		if (!this.canTalk() && !user.can('bypassall')) {
+			return this.sendReply("You cannot do this while unable to talk.");
+		}
+
+		target = this.splitTarget(target);
+		let targetUser = this.targetUser;
+		if (!targetUser || !targetUser.connected) return this.sendReply("User \"" + this.targetUsername + "\" not found.");
+		if (!this.can('mute', targetUser, room)) return false;
+
+		this.addModCommand(targetUser.name + " was kicked from the room by " + user.name + ".");
+		targetUser.popup("You were kicked from " + room.id + " by " + user.name + ".");
+		targetUser.leaveRoom(room.id);
+	},
+	kickhelp: ["/kick - Kick a user out of a room. Requires: % @ # & ~"],*/
 
 	masspm: 'pmall',
 	pmall: function (target, room, user) {
@@ -74,6 +144,42 @@ exports.commands = {
 	},
 	pmallstaffhelp: ["/pmallstaff [message] - Sends a PM to every staff member online."],
 
+	/*d: 'poof',
+	cpoof: 'poof',
+	poof: function (target, room, user) {
+		if (Config.poofOff) return this.sendReply("Poof is currently disabled.");
+		if (target && !this.can('broadcast')) return false;
+		if (room.id !== 'lobby') return false;
+		let message = target || messages[Math.floor(Math.random() * messages.length)];
+		if (message.indexOf('{{user}}') < 0) message = '{{user}} ' + message;
+		message = message.replace(/{{user}}/g, user.name);
+		if (!this.canTalk(message)) return false;
+
+		let colour = '#' + [1, 1, 1].map(function () {
+			let part = Math.floor(Math.random() * 0xaa);
+			return (part < 0x10 ? '0' : '') + part.toString(16);
+		}).join('');
+
+		room.addRaw("<strong><font color=\"" + colour + "\">~~ " + Chat.escapeHTML(message) + " ~~</font></strong>");
+		user.disconnectAll();
+	},
+	poofhelp: ["/poof - Disconnects the user and leaves a message in the room."],
+
+	poofon: function () {
+		if (!this.can('poofoff')) return false;
+		Config.poofOff = false;
+		return this.sendReply("Poof is now enabled.");
+	},
+	poofonhelp: ["/poofon - Enable the use /poof command."],
+
+	nopoof: 'poofoff',
+	poofoff: function () {
+		if (!this.can('poofoff')) return false;
+		Config.poofOff = true;
+		return this.sendReply("Poof is now disabled.");
+	},
+	poofoffhelp: ["/poofoff - Disable the use of the /poof command."],*/
+
 	regdate: function (target, room, user) {
 		if (!this.runBroadcast()) return;
 		if (!target || !toId(target)) return this.parse('/help regdate');
@@ -96,6 +202,13 @@ exports.commands = {
 	},
 	regdatehelp: ["/regdate - Please specify a valid username."],
 
+	/*show: function (target, room, user) {
+		if (!this.can('lock')) return false;
+		user.hiding = false;
+		user.updateIdentity();
+		this.sendReply("You have revealed your staff symbol.");
+	},*/
+
 	sb: 'showdownboilerplate',
 	showdownboilerplate: function (target, room, user) {
 		if (!this.runBroadcast()) return;
@@ -109,7 +222,7 @@ exports.commands = {
 		let targetUser = Users.get(target);
 		if (targetUser && targetUser.connected) return this.sendReplyBox(targetUser.name + " is <b>currently online</b>.");
 		target = Chat.escapeHTML(target);
-		let seen = Db('seen').get(toId(target));
+		let seen = Db.seen.get(toId(target));
 		if (!seen) return this.sendReplyBox(target + " has never been online on this server.");
 		this.sendReplyBox(target + " was last seen <b>" + moment(seen).fromNow() + "</b>.");
 	},
