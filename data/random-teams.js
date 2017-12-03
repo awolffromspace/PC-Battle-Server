@@ -1522,7 +1522,7 @@ class RandomTeams extends Dex.ModdedDex {
 		let typePool = Object.keys(this.data.TypeChart);
 		let type = typePool[this.random(typePool.length)];
 
-		if (this.format.id === 'gen7metronome3random' || this.format.id === 'gen7metronome6random') {
+		if (this.format.id === 'gen7metronome3v3random' || this.format.id === 'gen7metronome6v6random') {
 			let metronome = this.getMove('Metronome');
 			metronome.pp = 624.375;
 			metronome.noMetronome.push('imprison', 'taunt', 'torment');
@@ -1710,7 +1710,7 @@ class RandomTeams extends Dex.ModdedDex {
 
 			if (this.format.id === 'gen7lcrandom') {
 				set.level = 5;
-			} else if (this.format.id === 'gen7metronome3random' || this.format.id === 'gen7metronome6random') {
+			} else if (this.format.id === 'gen7metronome3v3random' || this.format.id === 'gen7metronome6v6random') {
 				set.moves = ['Metronome'];
 				if (['Assault Vest'].indexOf(set.item) > -1) {
 					set.item = 'Leftovers';

@@ -934,7 +934,7 @@ exports.Formats = [
 		},
 	},
 	{
-		name: "[Gen 7] Metronome 3 Random",
+		name: "[Gen 7] Metronome 3v3 Random",
 
 		mod: 'gen7',
 		teamLength: {
@@ -945,7 +945,7 @@ exports.Formats = [
 		ruleset: ['[Gen 7] Random (no PotD)'],
 	},
 	{
-		name: "[Gen 7] Metronome 6 Random",
+		name: "[Gen 7] Metronome 6v6 Random",
 
 		mod: 'gen7',
 		team: 'random',
