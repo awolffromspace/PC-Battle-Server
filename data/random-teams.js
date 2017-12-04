@@ -1588,7 +1588,7 @@ class RandomTeams extends Dex.ModdedDex {
 				if (template.gen === 6 && !template.isMega && !template.isPrimal && !template.isNonstandard && template.randomBattleMoves) {
 					pokemonPool.push(id);
 				}
-			} else if (this.format.id === 'gen7alolarandom') {
+			} else if (this.format.id === 'gen7alolarandom' || this.format.id === 'lotf35gen7alolarandom') {
 				if (template.gen === 7 && !template.isMega && !template.isPrimal && !template.isNonstandard && template.randomBattleMoves) {
 					pokemonPool.push(id);
 				}
