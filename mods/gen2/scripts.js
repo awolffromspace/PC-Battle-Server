@@ -122,10 +122,19 @@ exports.BattleScripts = {
 		let negativeBoostTable = [1, 0.75, 0.6, 0.5, 0.43, 0.36, 0.33];
 		let doSelfDestruct = true;
 		let damage = 0;
+		let hitResult = true;
 
 		if (move.selfdestruct && doSelfDestruct) {
 			this.faint(pokemon, pokemon, move);
 		}
+
+		hitResult = this.singleEvent('PrepareHit', move, {}, target, pokemon, move);
+		if (!hitResult) {
+			if (hitResult === false) this.add('-fail', target);
+			return false;
+		}
+		this.runEvent('PrepareHit', pokemon, target, move);
+
 		if (!this.singleEvent('Try', move, null, pokemon, target, move)) {
 			return false;
 		}
@@ -138,7 +147,7 @@ exports.BattleScripts = {
 			return false;
 		}
 
-		let hitResult = this.runEvent('TryHit', target, pokemon, move);
+		hitResult = this.runEvent('TryHit', target, pokemon, move);
 		if (!hitResult) {
 			if (hitResult === false) this.add('-fail', target);
 			return false;
@@ -383,16 +392,16 @@ exports.BattleScripts = {
 			}
 		}
 		if (moveData.secondaries && this.runEvent('TrySecondaryHit', target, pokemon, moveData)) {
-			for (let i = 0; i < moveData.secondaries.length; i++) {
+			for (const secondary of moveData.secondaries) {
 				// We check here whether to negate the probable secondary status if it's burn or freeze.
 				// In the game, this is checked and if true, the random number generator is not called.
 				// That means that a move that does not share the type of the target can status it.
 				// This means tri-attack can burn fire-types and freeze ice-types.
 				// Unlike gen 1, though, paralysis works for all unless the target is immune to direct move (ie. ground-types and t-wave).
-				if (!(moveData.secondaries[i].status && ['brn', 'frz'].includes(moveData.secondaries[i].status) && target && target.hasType(move.type))) {
-					let effectChance = Math.floor(moveData.secondaries[i].chance * 255 / 100);
-					if (typeof moveData.secondaries[i].chance === 'undefined' || this.random(256) <= effectChance) {
-						this.moveHit(target, pokemon, move, moveData.secondaries[i], true, isSelf);
+				if (!(secondary.status && ['brn', 'frz'].includes(secondary.status) && target && target.hasType(move.type))) {
+					let effectChance = Math.floor(secondary.chance * 255 / 100);
+					if (typeof secondary.chance === 'undefined' || this.random(256) <= effectChance) {
+						this.moveHit(target, pokemon, move, secondary, true, isSelf);
 					}
 				}
 			}
@@ -406,7 +415,7 @@ exports.BattleScripts = {
 			}
 		}
 		if (move.selfSwitch && pokemon.hp) {
-			pokemon.switchFlag = move.selfSwitch;
+			pokemon.switchFlag = move.fullname;
 		}
 		return damage;
 	},

@@ -137,11 +137,10 @@ exports.BattleAbilities = {
 		desc: "On switch-in, this Pokemon is alerted if any opposing Pokemon has an attack that is super effective on this Pokemon, or an OHKO move. Counter, Metal Burst, and Mirror Coat count as attacking moves of their respective types, while Hidden Power, Judgment, Natural Gift, Techno Blast, and Weather Ball are considered Normal-type moves.",
 		shortDesc: "On switch-in, this Pokemon shudders if any foe has a supereffective or OHKO move.",
 		onStart: function (pokemon) {
-			let targets = pokemon.side.foe.active;
-			for (let i = 0; i < targets.length; i++) {
-				if (!targets[i] || targets[i].fainted) continue;
-				for (let j = 0; j < targets[i].moveset.length; j++) {
-					let move = this.getMove(targets[i].moveset[j].move);
+			for (const target of pokemon.side.foe.active) {
+				if (target.fainted) continue;
+				for (const moveSlot of target.moveSlots) {
+					let move = this.getMove(moveSlot.move);
 					if (move.category !== 'Status' && (this.getImmunity(move.type, pokemon) && this.getEffectiveness(move.type, pokemon) > 0 || move.ohko)) {
 						this.add('-ability', pokemon, 'Anticipation');
 						return;
@@ -464,7 +463,7 @@ exports.BattleAbilities = {
 				}
 			}
 			if (statsLowered) {
-				this.boost({spa: 2}, null, null, null, true);
+				this.boost({spa: 2}, target, target, null, true);
 			}
 		},
 		id: "competitive",
@@ -537,8 +536,8 @@ exports.BattleAbilities = {
 		num: 56,
 	},
 	"damp": {
-		desc: "While this Pokemon is active, Self-Destruct, Explosion, and the Ability Aftermath are prevented from having an effect.",
-		shortDesc: "While this Pokemon is active, Self-Destruct, Explosion, and Aftermath have no effect.",
+		desc: "While this Pokemon is active, Explosion, Mind Blown, Self-Destruct, and the Ability Aftermath are prevented from having an effect.",
+		shortDesc: "Prevents Explosion/Mind Blown/Self-Destruct/Aftermath while this Pokemon is active.",
 		id: "damp",
 		onAnyTryMove: function (target, source, effect) {
 			if (['explosion', 'mindblown', 'selfdestruct'].includes(effect.id)) {
@@ -631,7 +630,7 @@ exports.BattleAbilities = {
 				}
 			}
 			if (statsLowered) {
-				this.boost({atk: 2}, null, null, null, true);
+				this.boost({atk: 2}, target, target, null, true);
 			}
 		},
 		id: "defiant",
@@ -1087,28 +1086,27 @@ exports.BattleAbilities = {
 		desc: "On switch-in, this Pokemon is alerted to the move with the highest power, at random, known by an opposing Pokemon.",
 		shortDesc: "On switch-in, this Pokemon is alerted to the foes' move with the highest power.",
 		onStart: function (pokemon) {
-			let targets = pokemon.side.foe.active;
 			let warnMoves = [];
 			let warnBp = 1;
-			for (let i = 0; i < targets.length; i++) {
-				if (targets[i].fainted) continue;
-				for (let j = 0; j < targets[i].moveset.length; j++) {
-					let move = this.getMove(targets[i].moveset[j].move);
+			for (const target of pokemon.side.foe.active) {
+				if (target.fainted) continue;
+				for (const moveSlot of target.moveSlots) {
+					let move = this.getMove(moveSlot.move);
 					let bp = move.basePower;
 					if (move.ohko) bp = 160;
 					if (move.id === 'counter' || move.id === 'metalburst' || move.id === 'mirrorcoat') bp = 120;
 					if (!bp && move.category !== 'Status') bp = 80;
 					if (bp > warnBp) {
-						warnMoves = [[move, targets[i]]];
+						warnMoves = [[move, target]];
 						warnBp = bp;
 					} else if (bp === warnBp) {
-						warnMoves.push([move, targets[i]]);
+						warnMoves.push([move, target]);
 					}
 				}
 			}
 			if (!warnMoves.length) return;
-			let warnMove = warnMoves[this.random(warnMoves.length)];
-			this.add('-activate', pokemon, 'ability: Forewarn', warnMove[0], '[of] ' + warnMove[1]);
+			const [warnMoveName, warnTarget] = warnMoves[this.random(warnMoves.length)];
+			this.add('-activate', pokemon, 'ability: Forewarn', warnMoveName, '[of] ' + warnTarget);
 		},
 		id: "forewarn",
 		name: "Forewarn",
@@ -2025,8 +2023,8 @@ exports.BattleAbilities = {
 		id: "mummy",
 		name: "Mummy",
 		onAfterDamage: function (damage, target, source, move) {
-			if (source && source !== target && move && move.flags['contact']) {
-				let oldAbility = source.setAbility('mummy', source, 'mummy', true);
+			if (source && source !== target && move && move.flags['contact'] && source.ability !== 'mummy') {
+				let oldAbility = source.setAbility('mummy', source);
 				if (oldAbility) {
 					this.add('-activate', target, 'ability: Mummy', this.getAbility(oldAbility).name, '[of] ' + source);
 				}

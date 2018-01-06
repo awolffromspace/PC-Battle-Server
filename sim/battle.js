@@ -34,7 +34,7 @@ const Pokemon = require('./pokemon');
  * @property {Move} move - a move to use (move action only)
  * @property {boolean | 'done'} mega - true if megaing or ultra bursting
  * @property {boolean} zmove - true if zmoving
- * @property {Effect?} sourceEffect - effect that did the action
+ * @property {Effect?} sourceEffect - effect that called the move (eg Instruct) if any
  */
 /**
  * A switch action
@@ -45,6 +45,7 @@ const Pokemon = require('./pokemon');
  * @property {number} speed - speed of pokemon switching (higher first if priority tie)
  * @property {Pokemon} pokemon - the pokemon doing the switch
  * @property {Pokemon} target - pokemon to switch to
+ * @property {Effect?} sourceEffect - effect that called the switch (eg U-turn) if any
  */
 /**
  * A Team Preview choice action
@@ -84,7 +85,7 @@ class Battle extends Dex.ModdedDex {
 	 * @param {PRNG} [prng]
 	 */
 	constructor(formatid, rated = false, send = (() => {}), prng = new PRNG()) {
-		let format = Dex.getFormat(formatid);
+		let format = Dex.getFormat(formatid, true);
 		super(format.mod);
 		Object.assign(this, this.data.Scripts);
 
@@ -102,6 +103,7 @@ class Battle extends Dex.ModdedDex {
 
 		this.format = format.id;
 		this.formatid = formatid;
+		this.cachedFormat = format;
 		this.formatData = {id: format.id};
 
 		/**@type {Effect} */
@@ -141,7 +143,8 @@ class Battle extends Dex.ModdedDex {
 		this.started = false;
 		this.active = false;
 		this.eventDepth = 0;
-		this.lastMove = '';
+		/**@type {?Move} */
+		this.lastMove = null;
 		this.activeMove = null;
 		this.activePokemon = null;
 		this.activeTarget = null;
@@ -341,7 +344,8 @@ class Battle extends Dex.ModdedDex {
 	 * @param {string} [format]
 	 */
 	getFormat(format) {
-		return super.getFormat(format || this.formatid);
+		if (!format) return this.cachedFormat;
+		return super.getFormat(format, true);
 	}
 
 	/**
@@ -430,7 +434,7 @@ class Battle extends Dex.ModdedDex {
 	clearActiveMove(failed) {
 		if (this.activeMove) {
 			if (!failed) {
-				this.lastMove = this.activeMove.id;
+				this.lastMove = this.activeMove;
 			}
 			this.activeMove = null;
 			this.activePokemon = null;
@@ -1117,7 +1121,7 @@ class Battle extends Dex.ModdedDex {
 	 *     this.onEvent(eventid, target, priority, callback)
 	 * will set the callback as an event handler for the target when eventid is called with the
 	 * provided priority. Priority can either be a number or an object that contains the priority,
-	 * order, and subOrder for the evend handler as needed (undefined keys will use default values)
+	 * order, and subOrder for the event handler as needed (undefined keys will use default values)
 	 *
 	 * @param {string} eventid
 	 * @param {Format} target
@@ -1222,12 +1226,12 @@ class Battle extends Dex.ModdedDex {
 		}
 
 		case 'teampreview':
-			let maxTeamSize = 6;
 			let teamLengthData = this.getFormat().teamLength;
-			if (teamLengthData && teamLengthData.battle) maxTeamSize = teamLengthData.battle;
+			let maxTeamSize = teamLengthData && teamLengthData.battle;
+			this.add('teampreview' + (maxTeamSize ? '|' + maxTeamSize : ''));
+			if (!maxTeamSize) maxTeamSize = 6;
 			this.p1.maxTeamSize = maxTeamSize;
 			this.p2.maxTeamSize = maxTeamSize;
-			this.add('teampreview' + (maxTeamSize !== 6 ? '|' + maxTeamSize : ''));
 			this.p1.currentRequest = 'teampreview';
 			p1request = {teamPreview: true, maxTeamSize: maxTeamSize, side: this.p1.getData()};
 			this.p2.currentRequest = 'teampreview';
@@ -1341,8 +1345,9 @@ class Battle extends Dex.ModdedDex {
 	/**
 	 * @param {Pokemon} pokemon
 	 * @param {number} [pos]
+	 * @param {Effect?} sourceEffect
 	 */
-	switchIn(pokemon, pos) {
+	switchIn(pokemon, pos, sourceEffect = null) {
 		if (!pokemon || pokemon.isActive) return false;
 		if (!pos) pos = 0;
 		let side = pokemon.side;
@@ -1360,8 +1365,8 @@ class Battle extends Dex.ModdedDex {
 					}
 				}
 			}
-			if (oldActive.switchCopyFlag === 'copyvolatile') {
-				delete oldActive.switchCopyFlag;
+			if (oldActive.switchCopyFlag) {
+				oldActive.switchCopyFlag = false;
 				pokemon.copyVolatileFrom(oldActive);
 			}
 		}
@@ -1381,10 +1386,11 @@ class Battle extends Dex.ModdedDex {
 		}
 		side.active[pos] = pokemon;
 		pokemon.activeTurns = 0;
-		for (let m in pokemon.moveset) {
-			pokemon.moveset[m].used = false;
+		for (let m in pokemon.moveSlots) {
+			pokemon.moveSlots[m].used = false;
 		}
 		this.add('switch', pokemon, pokemon.getDetails);
+		if (sourceEffect) this.log[this.log.length - 1] += `|[from]${sourceEffect.fullname}`;
 		this.insertQueue({pokemon: pokemon, choice: 'runUnnerve'});
 		this.insertQueue({pokemon: pokemon, choice: 'runSwitch'});
 	}
@@ -1463,8 +1469,8 @@ class Battle extends Dex.ModdedDex {
 		pokemon.isActive = true;
 		pokemon.activeTurns = 0;
 		if (this.gen === 2) pokemon.draggedIn = this.turn;
-		for (let m in pokemon.moveset) {
-			pokemon.moveset[m].used = false;
+		for (let m in pokemon.moveSlots) {
+			pokemon.moveSlots[m].used = false;
 		}
 		this.add('drag', pokemon, pokemon.getDetails);
 		if (this.gen >= 5) {
@@ -1520,18 +1526,19 @@ class Battle extends Dex.ModdedDex {
 		let allStale = true;
 		/** @type {?Pokemon} */
 		let oneStale = null;
-		for (let i = 0; i < this.sides.length; i++) {
-			for (let j = 0; j < this.sides[i].active.length; j++) {
-				let pokemon = this.sides[i].active[j];
+		for (const side of this.sides) {
+			for (const pokemon of side.active) {
 				if (!pokemon) continue;
 				pokemon.moveThisTurn = '';
 				pokemon.usedItemThisTurn = false;
 				pokemon.newlySwitched = false;
+				pokemon.moveLastTurnResult = pokemon.moveThisTurnResult;
+				pokemon.moveThisTurnResult = undefined;
 
 				pokemon.maybeDisabled = false;
-				for (let entry of pokemon.moveset) {
-					entry.disabled = false;
-					entry.disabledSource = '';
+				for (let moveSlot of pokemon.moveSlots) {
+					moveSlot.disabled = false;
+					moveSlot.disabledSource = '';
 				}
 				this.runEvent('DisableMove', pokemon);
 				if (!pokemon.ateBerry) pokemon.disableMove('belch');
@@ -1550,9 +1557,7 @@ class Battle extends Dex.ModdedDex {
 					this.runEvent('MaybeTrapPokemon', pokemon);
 				}
 				// Disable the faculty to cancel switches if a foe may have a trapping ability
-				let foeSide = pokemon.side.foe;
-				for (let k = 0; k < foeSide.active.length; ++k) {
-					let source = foeSide.active[k];
+				for (const source of pokemon.side.foe.active) {
 					if (!source || source.fainted) continue;
 					let template = (source.illusion || source).template;
 					if (!template.abilities) continue;
@@ -1588,13 +1593,13 @@ class Battle extends Dex.ModdedDex {
 							if (this.firstStaleWarned && pokemon.isStale < 2) {
 								switch (pokemon.isStaleSource) {
 								case 'struggle':
-									this.add('html', '<div class="broadcast-red">' + Chat.escapeHTML(pokemon.name) + ' isn\'t losing HP from Struggle. If this continues, it will be classified as being in an endless loop.</div>');
+									this.add('html', Chat.html`<div class="broadcast-red">${pokemon.name} isn\'t losing HP from Struggle. If this continues, it will be classified as being in an endless loop.</div>`);
 									break;
 								case 'drag':
-									this.add('html', '<div class="broadcast-red">' + Chat.escapeHTML(pokemon.name) + ' isn\'t losing PP or HP from being forced to switch. If this continues, it will be classified as being in an endless loop.</div>');
+									this.add('html', Chat.html`<div class="broadcast-red">${pokemon.name} isn\'t losing PP or HP from being forced to switch. If this continues, it will be classified as being in an endless loop.</div>`);
 									break;
 								case 'switch':
-									this.add('html', '<div class="broadcast-red">' + Chat.escapeHTML(pokemon.name) + ' isn\'t losing PP or HP from repeatedly switching. If this continues, it will be classified as being in an endless loop.</div>');
+									this.add('html', Chat.html`<div class="broadcast-red">${pokemon.name} isn\'t losing PP or HP from repeatedly switching. If this continues, it will be classified as being in an endless loop.</div>`);
 									break;
 								}
 							}
@@ -1608,7 +1613,7 @@ class Battle extends Dex.ModdedDex {
 							pokemon.isStale++;
 							pokemon.isStaleSource = 'ppstall';
 							if (this.firstStaleWarned && pokemon.isStale < 2) {
-								this.add('html', '<div class="broadcast-red">' + Chat.escapeHTML(pokemon.name) + ' isn\'t losing PP or HP. If it keeps on not losing PP or HP, it will be classified as being in an endless loop.</div>');
+								this.add('html', Chat.html`<div class="broadcast-red">${pokemon.name} isn\'t losing PP or HP. If it keeps on not losing PP or HP, it will be classified as being in an endless loop.</div>`);
 							}
 						}
 						pokemon.isStaleCon = 0;
@@ -1634,52 +1639,51 @@ class Battle extends Dex.ModdedDex {
 				}
 				pokemon.activeTurns++;
 			}
-			this.sides[i].faintedLastTurn = this.sides[i].faintedThisTurn;
-			this.sides[i].faintedThisTurn = false;
+			side.faintedLastTurn = side.faintedThisTurn;
+			side.faintedThisTurn = false;
 		}
 		const ruleTable = this.getRuleTable(this.getFormat());
 		if (ruleTable.has('endlessbattleclause')) {
 			if (oneStale) {
-				let activationWarning = '<br />If all active Pok&eacute;mon go in an endless loop, Endless Battle Clause will activate.';
-				if (allStale) activationWarning = '';
-				let loopReason = '';
+				let activationWarning = `<br />If all active Pok&eacute;mon go in an endless loop, Endless Battle Clause will activate.`;
+				if (allStale) activationWarning = ``;
+				let loopReason = ``;
 				switch (oneStale.isStaleSource) {
 				case 'struggle':
-					loopReason = ": it isn't losing HP from Struggle";
+					loopReason = `: it isn't losing HP from Struggle`;
 					break;
 				case 'drag':
-					loopReason = ": it isn't losing PP or HP from being forced to switch";
+					loopReason = `: it isn't losing PP or HP from being forced to switch`;
 					break;
 				case 'switch':
-					loopReason = ": it isn't losing PP or HP from repeatedly switching";
+					loopReason = `: it isn't losing PP or HP from repeatedly switching`;
 					break;
 				case 'getleppa':
-					loopReason = ": it got a Leppa Berry it didn't start with";
+					loopReason = `: it got a Leppa Berry it didn't start with`;
 					break;
 				case 'useleppa':
-					loopReason = ": it used a Leppa Berry it didn't start with";
+					loopReason = `: it used a Leppa Berry it didn't start with`;
 					break;
 				case 'ppstall':
-					loopReason = ": it isn't losing PP or HP";
+					loopReason = `: it isn't losing PP or HP`;
 					break;
 				case 'ppoverflow':
-					loopReason = ": its PP overflowed";
+					loopReason = `: its PP overflowed`;
 					break;
 				}
-				this.add('html', '<div class="broadcast-red">' + Chat.escapeHTML(oneStale.name) + ' is in an endless loop' + loopReason + '.' + activationWarning + '</div>');
+				this.add('html', Chat.html`<div class="broadcast-red">${oneStale.name} is in an endless loop${loopReason}.${activationWarning}</div>`);
 				oneStale.staleWarned = true;
 				this.firstStaleWarned = true;
 			}
 			if (allStale) {
-				this.add('message', "All active Pok\u00e9mon are in an endless loop. Endless Battle Clause activated!");
+				this.add('message', `All active Pok\u00e9mon are in an endless loop. Endless Battle Clause activated!`);
 				let leppaPokemon = null;
-				for (let i = 0; i < this.sides.length; i++) {
-					for (let j = 0; j < this.sides[i].pokemon.length; j++) {
-						let pokemon = this.sides[i].pokemon[j];
+				for (const side of this.sides) {
+					for (const pokemon of side.pokemon) {
 						if (toId(pokemon.set.item) === 'leppaberry') {
 							if (leppaPokemon) {
 								leppaPokemon = null; // both sides have Leppa
-								this.add('-message', "Both sides started with a Leppa Berry.");
+								this.add('-message', `Both sides started with a Leppa Berry.`);
 							} else {
 								leppaPokemon = pokemon;
 							}
@@ -1688,19 +1692,31 @@ class Battle extends Dex.ModdedDex {
 					}
 				}
 				if (leppaPokemon) {
-					this.add('-message', "" + leppaPokemon.side.name + "'s " + leppaPokemon.name + " started with a Leppa Berry and loses.");
+					this.add('-message', `${leppaPokemon.side.name}'s ${leppaPokemon.name} started with a Leppa Berry and loses.`);
 					this.win(leppaPokemon.side.foe);
 					return;
 				}
 				this.win();
 				return;
 			}
+			if ((this.turn >= 500 && this.turn % 100 === 0) ||
+				(this.turn >= 900 && this.turn % 10 === 0) ||
+				(this.turn >= 990)) {
+				const turnsLeft = 1000 - this.turn;
+				if (turnsLeft < 0) {
+					this.add('message', `It is turn 1000. Endless Battle Clause activated!`);
+					this.tie();
+					return;
+				}
+				const turnsLeftText = (turnsLeft === 1 ? `1 turn` : `${turnsLeft} turns`);
+				this.add('html', `<div class="broadcast-red">You will auto-tie if the battle doesn't end in ${turnsLeftText} (on turn 1000).</div>`);
+			}
 		} else {
 			if (allStale && !this.staleWarned) {
 				this.staleWarned = true;
-				this.add('html', '<div class="broadcast-red">If this format had Endless Battle Clause, it would have activated.</div>');
+				this.add('html', `<div class="broadcast-red">If this format had Endless Battle Clause, it would have activated.</div>`);
 			} else if (oneStale) {
-				this.add('html', '<div class="broadcast-red">' + Chat.escapeHTML(oneStale.name) + ' is in an endless loop.</div>');
+				this.add('html', Chat.html`<div class="broadcast-red">${oneStale.name} is in an endless loop.</div>`);
 				oneStale.staleWarned = true;
 			}
 		}
@@ -1708,10 +1724,10 @@ class Battle extends Dex.ModdedDex {
 		if (this.gameType === 'triples' && !this.sides.filter(side => side.pokemonLeft > 1).length) {
 			// If both sides have one Pokemon left in triples and they are not adjacent, they are both moved to the center.
 			let actives = [];
-			for (let i = 0; i < this.sides.length; i++) {
-				for (let j = 0; j < this.sides[i].active.length; j++) {
-					if (!this.sides[i].active[j] || this.sides[i].active[j].fainted) continue;
-					actives.push(this.sides[i].active[j]);
+			for (const side of this.sides) {
+				for (const pokemon of side.active) {
+					if (!pokemon || pokemon.fainted) continue;
+					actives.push(pokemon);
 				}
 			}
 			// @ts-ignore
@@ -2271,11 +2287,9 @@ class Battle extends Dex.ModdedDex {
 		// Final modifier. Modifiers that modify damage after min damage check, such as Life Orb.
 		baseDamage = this.runEvent('ModifyDamage', pokemon, target, move, baseDamage);
 
-		// TODO: Find out where this actually goes in the damage calculation
 		if (move.isZ && move.zBrokeProtect) {
 			baseDamage = this.modify(baseDamage, 0.25);
-			this.add('-message', target.name + " couldn't fully protect itself and got hurt! (placeholder)");
-			move.zBrokeProtect = false;
+			this.add('-zbroken', target);
 		}
 
 		if (this.gen !== 5 && !Math.floor(baseDamage)) {
@@ -2538,8 +2552,8 @@ class Battle extends Dex.ModdedDex {
 					});
 				}
 			} else if (action.choice === 'switch' || action.choice === 'instaswitch') {
-				if (action.pokemon.switchFlag && action.pokemon.switchFlag !== true) {
-					action.pokemon.switchCopyFlag = action.pokemon.switchFlag;
+				if (typeof action.pokemon.switchFlag === 'string') {
+					action.sourceEffect = this.getEffect(action.pokemon.switchFlag);
 				}
 				action.pokemon.switchFlag = false;
 				if (!action.speed) action.speed = action.pokemon.getActionSpeed();
@@ -2633,9 +2647,9 @@ class Battle extends Dex.ModdedDex {
 	}
 
 	/**
-	 * Makes the passed move action happen next (skipping speed order).
+	 * Makes the passed action happen next (skipping speed order).
 	 *
-	 * @param {MoveAction} action
+	 * @param {MoveAction | SwitchAction} action
 	 * @param {Pokemon} [source]
 	 * @param {Effect} [sourceEffect]
 	 */
@@ -2798,8 +2812,12 @@ class Battle extends Dex.ModdedDex {
 			}
 			if (action.pokemon.hp) {
 				action.pokemon.beingCalledBack = true;
-				let lastMove = this.getMove(action.pokemon.lastMove);
-				if (lastMove.selfSwitch !== 'copyvolatile') {
+				const sourceEffect = action.sourceEffect;
+				// @ts-ignore
+				if (sourceEffect && sourceEffect.selfSwitch === 'copyvolatile') {
+					action.pokemon.switchCopyFlag = true;
+				}
+				if (!action.pokemon.switchCopyFlag) {
 					this.runEvent('BeforeSwitchOut', action.pokemon);
 					if (this.gen >= 5) {
 						this.eachEvent('Update');
@@ -2847,7 +2865,7 @@ class Battle extends Dex.ModdedDex {
 				}
 			}
 
-			this.switchIn(action.target, action.pokemon.position);
+			this.switchIn(action.target, action.pokemon.position, action.sourceEffect);
 			break;
 		case 'runUnnerve':
 			this.singleEvent('PreStart', action.pokemon.getAbility(), action.pokemon.abilityData, action.pokemon);
@@ -2938,8 +2956,8 @@ class Battle extends Dex.ModdedDex {
 			return false;
 		}
 
-		let p1switch = this.p1.active.some(mon => mon && mon.switchFlag);
-		let p2switch = this.p2.active.some(mon => mon && mon.switchFlag);
+		let p1switch = this.p1.active.some(mon => mon && !!mon.switchFlag);
+		let p2switch = this.p2.active.some(mon => mon && !!mon.switchFlag);
 
 		if (p1switch && !this.canSwitch(this.p1)) {
 			for (let i = 0; i < this.p1.active.length; i++) {
@@ -3233,7 +3251,7 @@ class Battle extends Dex.ModdedDex {
 	 * @param {string[]} data
 	 * @param {string} [more]
 	 */
-	receive(data, more) {
+	async receive(data, more) {
 		this.messageLog.push(data.join(' '));
 		let logPos = this.log.length;
 		let alreadyEnded = this.ended;
@@ -3272,7 +3290,14 @@ class Battle extends Dex.ModdedDex {
 			let target = data.slice(2).join('|').replace(/\f/g, '\n');
 			this.add('', '>>> ' + target);
 			try {
-				this.add('', '<<< ' + eval(target));
+				let result = eval(target);
+				if (result && result.then) {
+					result = 'Promise -> ' + Chat.stringify(await result);
+				} else {
+					result = Chat.stringify(result);
+				}
+				result = result.replace(/\n/g, '\n||');
+				this.add('', '<<< ' + result);
 			} catch (e) {
 				this.add('', '<<< error: ' + e.message);
 			}
@@ -3302,7 +3327,6 @@ class Battle extends Dex.ModdedDex {
 						p2: this.p2.name,
 						p1team: this.p1.team,
 						p2team: this.p2.team,
-						log: this.log,
 					};
 					this.send('log', JSON.stringify(log));
 				}

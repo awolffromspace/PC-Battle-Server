@@ -81,7 +81,7 @@ exports.BattleStatuses = {
 				let template = this.getTemplate('Shaymin');
 				target.formeChange(template);
 				target.baseTemplate = template;
-				target.setAbility(template.abilities['0']);
+				target.setAbility(template.abilities['0'], null, true);
 				target.baseAbility = target.ability;
 				target.details = template.species + (target.level === 100 ? '' : ', L' + target.level) + (target.gender === '' ? '' : ', ' + target.gender) + (target.set.shiny ? ', shiny' : '');
 				this.add('detailschange', target, target.details);
@@ -307,10 +307,9 @@ exports.BattleStatuses = {
 			if (pokemon.ignoringItem()) {
 				return;
 			}
-			let moves = pokemon.moveset;
-			for (let i = 0; i < moves.length; i++) {
-				if (moves[i].id !== this.effectData.move) {
-					pokemon.disableMove(moves[i].id, false, this.effectData.sourceEffect);
+			for (const moveSlot of pokemon.moveSlots) {
+				if (moveSlot.id !== this.effectData.move) {
+					pokemon.disableMove(moveSlot.id, false, this.effectData.sourceEffect);
 				}
 			}
 		},
@@ -321,7 +320,7 @@ exports.BattleStatuses = {
 		onBeforeMove: function (pokemon) {
 			this.add('cant', pokemon, 'recharge');
 			pokemon.removeVolatile('mustrecharge');
-			return false;
+			return null;
 		},
 		onLockMove: function (pokemon) {
 			this.add('-mustrecharge', pokemon);

@@ -289,10 +289,9 @@ exports.BattleItems = {
 			return this.chainModify(1.5);
 		},
 		onDisableMove: function (pokemon) {
-			let moves = pokemon.moveset;
-			for (let i = 0; i < moves.length; i++) {
-				if (this.getMove(moves[i].move).category === 'Status') {
-					pokemon.disableMove(moves[i].id);
+			for (const moveSlot of pokemon.moveSlots) {
+				if (this.getMove(moveSlot.move).category === 'Status') {
+					pokemon.disableMove(moveSlot.id);
 				}
 			}
 		},
@@ -463,6 +462,15 @@ exports.BattleItems = {
 		onResidualOrder: 5,
 		onResidualSubOrder: 2,
 		onResidual: function (pokemon) {
+			if (this.isTerrain('grassyterrain')) return;
+			if (pokemon.hasType('Poison')) {
+				this.heal(pokemon.maxhp / 16);
+			} else {
+				this.damage(pokemon.maxhp / 8);
+			}
+		},
+		onTerrain: function (pokemon) {
+			if (!this.isTerrain('grassyterrain')) return;
 			if (pokemon.hasType('Poison')) {
 				this.heal(pokemon.maxhp / 16);
 			} else {
@@ -539,7 +547,7 @@ exports.BattleItems = {
 				this.add('detailschange', pokemon, pokemon.details);
 				this.add('-primal', pokemon);
 			}
-			pokemon.setAbility(template.abilities['0']);
+			pokemon.setAbility(template.abilities['0'], null, true);
 			pokemon.baseAbility = pokemon.ability;
 		},
 		onTakeItem: function (item, source) {
@@ -1029,7 +1037,7 @@ exports.BattleItems = {
 		onModifyPriority: function (priority, pokemon) {
 			if (pokemon.hp <= pokemon.maxhp / 4 || (pokemon.hp <= pokemon.maxhp / 2 && pokemon.hasAbility('gluttony'))) {
 				if (pokemon.eatItem()) {
-					this.add('-activate', pokemon, 'item: Custap Berry');
+					this.add('-activate', pokemon, 'item: Custap Berry', '[consumed]');
 					pokemon.removeVolatile('custapberry');
 					return Math.round(priority) + 0.1;
 				}
@@ -1768,7 +1776,7 @@ exports.BattleItems = {
 		onResidualOrder: 26,
 		onResidualSubOrder: 2,
 		onResidual: function (pokemon) {
-			pokemon.trySetStatus('brn');
+			pokemon.trySetStatus('brn', pokemon);
 		},
 		num: 273,
 		gen: 4,
@@ -2784,6 +2792,11 @@ exports.BattleItems = {
 		onResidualOrder: 5,
 		onResidualSubOrder: 2,
 		onResidual: function (pokemon) {
+			if (this.isTerrain('grassyterrain')) return;
+			this.heal(pokemon.maxhp / 16);
+		},
+		onTerrain: function (pokemon) {
+			if (!this.isTerrain('grassyterrain')) return;
 			this.heal(pokemon.maxhp / 16);
 		},
 		num: 234,
@@ -2801,30 +2814,30 @@ exports.BattleItems = {
 		},
 		onUpdate: function (pokemon) {
 			if (!pokemon.hp) return;
-			let move = pokemon.getMoveData(pokemon.lastMove);
-			if (move && move.pp === 0) {
+			let moveSlot = pokemon.lastMove && pokemon.getMoveData(pokemon.lastMove.id);
+			if (moveSlot && moveSlot.pp === 0) {
 				pokemon.addVolatile('leppaberry');
-				pokemon.volatiles['leppaberry'].move = move;
+				pokemon.volatiles['leppaberry'].moveSlot = moveSlot;
 				pokemon.eatItem();
 			}
 		},
 		onEat: function (pokemon) {
-			let move;
+			let moveSlot;
 			if (pokemon.volatiles['leppaberry']) {
-				move = pokemon.volatiles['leppaberry'].move;
+				moveSlot = pokemon.volatiles['leppaberry'].moveSlot;
 				pokemon.removeVolatile('leppaberry');
 			} else {
 				let pp = 99;
-				for (let moveid in pokemon.moveset) {
-					if (pokemon.moveset[moveid].pp < pp) {
-						move = pokemon.moveset[moveid];
-						pp = move.pp;
+				for (const possibleMoveSlot of pokemon.moveSlots) {
+					if (possibleMoveSlot.pp < pp) {
+						moveSlot = possibleMoveSlot;
+						pp = moveSlot.pp;
 					}
 				}
 			}
-			move.pp += 10;
-			if (move.pp > move.maxpp) move.pp = move.maxpp;
-			this.add('-activate', pokemon, 'item: Leppa Berry', move.move);
+			moveSlot.pp += 10;
+			if (moveSlot.pp > moveSlot.maxpp) moveSlot.pp = moveSlot.maxpp;
+			this.add('-activate', pokemon, 'item: Leppa Berry', moveSlot.move, '[consumed]');
 			if (pokemon.item !== 'leppaberry') {
 				let foeActive = pokemon.side.foe.active;
 				let foeIsStale = false;
@@ -4434,7 +4447,7 @@ exports.BattleItems = {
 		onAfterMoveSecondary: function (target, source, move) {
 			if (source && source !== target && source.hp && target.hp && move && move.category !== 'Status') {
 				if (!source.isActive || !this.canSwitch(source.side) || source.forceSwitchFlag || target.forceSwitchFlag) return;
-				if (target.useItem(null, source)) { // This order is correct - the item is used up even against a pokemon with Ingrain or that otherwise can't be forced out
+				if (target.useItem(source)) { // This order is correct - the item is used up even against a pokemon with Ingrain or that otherwise can't be forced out
 					if (this.runEvent('DragOut', source, target, move)) {
 						source.forceSwitchFlag = true;
 					}
@@ -4466,7 +4479,7 @@ exports.BattleItems = {
 				this.add('detailschange', pokemon, pokemon.details);
 				this.add('-primal', pokemon);
 			}
-			pokemon.setAbility(template.abilities['0']);
+			pokemon.setAbility(template.abilities['0'], null, true);
 			pokemon.baseAbility = pokemon.ability;
 		},
 		onTakeItem: function (item, source) {
@@ -5452,7 +5465,7 @@ exports.BattleItems = {
 		onResidualOrder: 26,
 		onResidualSubOrder: 2,
 		onResidual: function (pokemon) {
-			pokemon.trySetStatus('tox');
+			pokemon.trySetStatus('tox', pokemon);
 		},
 		num: 272,
 		gen: 4,
@@ -6048,30 +6061,30 @@ exports.BattleItems = {
 			type: "Fighting",
 		},
 		onUpdate: function (pokemon) {
-			let move = pokemon.getMoveData(pokemon.lastMove);
-			if (move && move.pp === 0) {
+			let moveSlot = pokemon.lastMove && pokemon.getMoveData(pokemon.lastMove.id);
+			if (moveSlot && moveSlot.pp === 0) {
 				pokemon.addVolatile('leppaberry');
-				pokemon.volatiles['leppaberry'].move = move;
+				pokemon.volatiles['leppaberry'].moveSlot = moveSlot;
 				pokemon.eatItem();
 			}
 		},
 		onEat: function (pokemon) {
-			let move;
+			let moveSlot;
 			if (pokemon.volatiles['leppaberry']) {
-				move = pokemon.volatiles['leppaberry'].move;
+				moveSlot = pokemon.volatiles['leppaberry'].moveSlot;
 				pokemon.removeVolatile('leppaberry');
 			} else {
 				let pp = 99;
-				for (let moveid in pokemon.moveset) {
-					if (pokemon.moveset[moveid].pp < pp) {
-						move = pokemon.moveset[moveid];
-						pp = move.pp;
+				for (const possibleMoveSlot of pokemon.moveSlots) {
+					if (possibleMoveSlot.pp < pp) {
+						moveSlot = possibleMoveSlot;
+						pp = moveSlot.pp;
 					}
 				}
 			}
-			move.pp += 5;
-			if (move.pp > move.maxpp) move.pp = move.maxpp;
-			this.add('-activate', pokemon, 'item: Leppa Berry', move.move);
+			moveSlot.pp += 5;
+			if (moveSlot.pp > moveSlot.maxpp) moveSlot.pp = moveSlot.maxpp;
+			this.add('-activate', pokemon, 'item: Leppa Berry', moveSlot.move);
 			if (pokemon.item !== 'leppaberry') {
 				let foeActive = pokemon.side.foe.active;
 				let foeIsStale = false;

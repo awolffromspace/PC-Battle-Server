@@ -79,7 +79,7 @@ exports.BattleFormats = {
 	pokemon: {
 		effectType: 'ValidatorRule',
 		name: 'Pokemon',
-		desc: ["The foundational rules for any and all formats based on in-game mechanics (everything but Custom Game)"],
+		desc: ["Applies the basic limitations of pokemon games: level 100, 6 pokemon, 4 moves, no CAP, no future-gen pokemon/moves/etc - but does not include illegal move/ability validation"],
 		onValidateTeam: function (team, format) {
 			let problems = [];
 			if (team.length > 6) problems.push('Your team has more than six Pok\u00E9mon.');
@@ -178,6 +178,10 @@ exports.BattleFormats = {
 					set.evs[k] = 0;
 				}
 				totalEV += set.evs[k];
+			}
+			if (this.gen <= 1) {
+				if (set.evs) set.evs['spd'] = set.evs['spa'];
+				if (set.ivs) set.ivs['spd'] = set.ivs['spa'];
 			}
 			// In gen 6, it is impossible to battle other players with pokemon that break the EV limit
 			if (totalEV > 510 && this.gen === 6) {
@@ -575,22 +579,19 @@ exports.BattleFormats = {
 			this.add('rule', 'Baton Pass Clause: Limit one Baton Passer, can\'t pass Spe and other stats simultaneously');
 		},
 		onValidateSet: function (set, format, setHas) {
-			if (!('batonpass' in setHas)) return;
+			if (!('move:batonpass' in setHas)) return;
 
-			// check if Speed is boosted
+			let item = this.getItem(set.item);
+			let ability = toId(set.ability);
 			let speedBoosted = false;
 			let nonSpeedBoosted = false;
-			if (toId(set.item) === 'eeviumz') {
-				speedBoosted = true;
-				nonSpeedBoosted = true;
-			}
-			let item = this.getItem(set.item);
+
 			for (let i = 0; i < set.moves.length; i++) {
 				let move = this.getMove(set.moves[i]);
-				if (move.boosts && move.boosts.spe > 0) {
+				if (move.id === 'flamecharge' || move.boosts && move.boosts.spe > 0) {
 					speedBoosted = true;
 				}
-				if (move.boosts && (move.boosts.atk > 0 || move.boosts.def > 0 || move.boosts.spa > 0 || move.boosts.spd > 0)) {
+				if (['acupressure', 'bellydrum', 'chargebeam', 'curse', 'diamondstorm', 'fellstinger', 'fierydance', 'flowershield', 'poweruppunch', 'rage', 'rototiller', 'skullbash', 'stockpile'].includes(move.id) || move.boosts && (move.boosts.atk > 0 || move.boosts.def > 0 || move.boosts.spa > 0 || move.boosts.spd > 0)) {
 					nonSpeedBoosted = true;
 				}
 				if (item.zMove && move.type === item.zMoveType) {
@@ -603,28 +604,13 @@ exports.BattleFormats = {
 				}
 			}
 
-			let boostSpeed = ['flamecharge', 'geomancy', 'motordrive', 'rattled', 'speedboost', 'steadfast', 'weakarmor', 'blazikenite', 'salacberry'];
-			if (!speedBoosted) {
-				for (let i = 0; i < boostSpeed.length; i++) {
-					if (boostSpeed[i] in setHas) {
-						speedBoosted = true;
-						break;
-					}
-				}
+			if (['motordrive', 'rattled', 'speedboost', 'steadfast', 'weakarmor'].includes(ability) || ['blazikenite', 'eeviumz', 'kommoniumz', 'salacberry'].includes(item.id)) {
+				speedBoosted = true;
 			}
-			if (!speedBoosted) {
-				return;
-			}
+			if (!speedBoosted) return;
 
-			// check if non-Speed boosted
-			let boostNonSpeed = ['acupressure', 'starfberry', 'curse', 'poweruppunch', 'rage', 'rototiller', 'fellstinger', 'bellydrum', 'download', 'justified', 'moxie', 'sapsipper', 'defiant', 'angerpoint', 'cellbattery', 'liechiberry', 'snowball', 'weaknesspolicy', 'diamondstorm', 'flowershield', 'skullbash', 'stockpile', 'cottonguard', 'ganlonberry', 'keeberry', 'chargebeam', 'fierydance', 'geomancy', 'lightningrod', 'stormdrain', 'competitive', 'absorbbulb', 'petayaberry', 'charge', 'apicotberry', 'luminousmoss', 'marangaberry'];
-			if (!nonSpeedBoosted) {
-				for (let i = 0; i < boostNonSpeed.length; i++) {
-					if (boostNonSpeed[i] in setHas) {
-						nonSpeedBoosted = true;
-						break;
-					}
-				}
+			if (['angerpoint', 'competitive', 'defiant', 'download', 'justified', 'lightningrod', 'moxie', 'sapsipper', 'stormdrain'].includes(ability) || ['absorbbulb', 'apicotberry', 'cellbattery', 'eeviumz', 'ganlonberry', 'keeberry', 'kommoniumz', 'liechiberry', 'luminousmoss', 'marangaberry', 'petayaberry', 'snowball', 'starfberry', 'weaknesspolicy'].includes(item.id)) {
+				nonSpeedBoosted = true;
 			}
 			if (!nonSpeedBoosted) return;
 
@@ -692,6 +678,14 @@ exports.BattleFormats = {
 					}
 				}
 			}
+		},
+	},
+	switchpriorityclausemod: {
+		effectType: 'Rule',
+		name: 'Switch Priority Clause Mod',
+		desc: ["Makes a faster Pokémon switch first when double-switching, unlike in Emerald link battles, where player 1's Pokémon would switch first"],
+		onStart: function () {
+			this.add('rule', 'Switch Priority Clause Mod: Faster Pokémon switch first');
 		},
 	},
 	freezeclausemod: {
@@ -797,5 +791,11 @@ exports.BattleFormats = {
 		name: 'Allow CAP',
 		desc: ["Allows the use of Pok&eacute;mon, abilities, moves, and items made by the Create-A-Pok&eacute;mon project"],
 		// Implemented in the 'pokemon' ruleset
+	},
+	allowtradeback: {
+		effectType: 'ValidatorRule',
+		name: 'Allow Tradeback',
+		desc: ["Allows Gen 1 pokemon to have moves from their Gen 2 learnsets"],
+		// Implemented in team-validator.js
 	},
 };

@@ -80,13 +80,12 @@ exports.BattleAbilities = {
 	"forewarn": {
 		inherit: true,
 		onStart: function (pokemon) {
-			let targets = pokemon.side.foe.active;
 			let warnMoves = [];
 			let warnBp = 1;
-			for (let i = 0; i < targets.length; i++) {
-				if (targets[i].fainted) continue;
-				for (let j = 0; j < targets[i].moveset.length; j++) {
-					let move = this.getMove(targets[i].moveset[j].move);
+			for (const target of pokemon.side.foe.active) {
+				if (target.fainted) continue;
+				for (const moveSlot of target.moveSlots) {
+					let move = this.getMove(moveSlot.move);
 					let bp = move.basePower;
 					if (move.ohko) bp = 160;
 					if (move.id === 'counter' || move.id === 'metalburst' || move.id === 'mirrorcoat') bp = 120;
@@ -153,8 +152,8 @@ exports.BattleAbilities = {
 			if (allyActive.length === 1) {
 				return;
 			}
-			for (let i = 0; i < allyActive.length; i++) {
-				if (allyActive[i] && allyActive[i].position !== pokemon.position && !allyActive[i].fainted && allyActive[i].ability === 'plus') {
+			for (const ally of allyActive) {
+				if (ally && ally.position !== pokemon.position && !ally.fainted && ally.ability === 'plus') {
 					return spa * 1.5;
 				}
 			}
@@ -216,8 +215,8 @@ exports.BattleAbilities = {
 			if (allyActive.length === 1) {
 				return;
 			}
-			for (let i = 0; i < allyActive.length; i++) {
-				if (allyActive[i] && allyActive[i].position !== pokemon.position && !allyActive[i].fainted && allyActive[i].ability === 'minus') {
+			for (const ally of allyActive) {
+				if (ally && ally.position !== pokemon.position && !ally.fainted && ally.ability === 'minus') {
 					return spa * 1.5;
 				}
 			}
@@ -247,8 +246,8 @@ exports.BattleAbilities = {
 		onModifyMove: function (move) {
 			if (move.secondaries) {
 				this.debug('doubling secondary chance');
-				for (let i = 0; i < move.secondaries.length; i++) {
-					move.secondaries[i].chance *= 2;
+				for (const secondary of move.secondaries) {
+					secondary.chance *= 2;
 				}
 			}
 		},
