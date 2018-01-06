@@ -1518,7 +1518,7 @@ class RandomTeams extends Dex.ModdedDex {
 		let pokemon = [];
 
 		// For Monotype
-		let isMonotype = this.format.id === 'gen7monotyperandombattle';
+		let isMonotype = this.format.id === 'gen7monotyperandom';
 		let typePool = Object.keys(this.data.TypeChart);
 		let type = typePool[this.random(typePool.length)];
 
