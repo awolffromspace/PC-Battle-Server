@@ -30,6 +30,22 @@ exports.bindaddress = '0.0.0.0';
 //   to 1.
 exports.workers = 1;
 
+// wsdeflate - compresses WebSocket messages
+//	 Toggles use of the Sec-WebSocket-Extension permessage-deflate extension.
+//	 This compresses messages sent and received over a WebSocket connection
+//	 using the zlib compression algorithm. As a caveat, message compression
+//	 may make messages take longer to procress.
+exports.wsdeflate = null;
+/**exports.wsdeflate = {
+	level: 5,
+	memLevel: 8,
+	strategy: 0,
+	noContextTakeover: true,
+	requestNoContextTakeover: true,
+	maxWindowBits: 15,
+	requestMaxWindowBits: 15,
+};**/
+
 // TODO: allow SSL to actually be possible to use for third-party servers at
 // some point.
 
@@ -684,7 +700,7 @@ exports.customavatars = {
 };
 
 // custom avatars appear in profile by specifiying server url.
-exports.avatarurl = 'http://cbc.pokecommunity.com/config/avatars/';
+exports.avatarurl = 'http://cbc.pokecommunity.com/config';
 
 // tourroom - specify a room to receive tournament announcements (defaults to
 // the room 'tournaments').

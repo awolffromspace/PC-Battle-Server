@@ -700,7 +700,7 @@ exports.customavatars = {
 };
 
 // custom avatars appear in profile by specifiying server url.
-exports.avatarurl = 'http://cbc.pokecommunity.com/config/avatars/';
+exports.avatarurl = 'http://cbc.pokecommunity.com/config';
 
 // tourroom - specify a room to receive tournament announcements (defaults to
 // the room 'tournaments').
