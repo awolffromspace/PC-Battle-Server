@@ -296,10 +296,14 @@ class Tournament {
 			return;
 		}
 
-		if (!this.isAllowAlts === true) {
+		if (this.isAllowAlts !== true) {
 			let users = this.generator.getUsers();
 			for (let i = 0; i < users.length; i++) {
 				let otherUser = Users.get(users[i].userid);
+				if (otherUser && otherUser.latestIp === user.latestIp) {
+					output.sendReply('|tournament|error|AltUserAlreadyAdded');
+					return;
+				}
 			}
 		}
 
@@ -887,14 +891,15 @@ class Tournament {
 			result = 'win';
 			if (tourSize >= sizeRequiredToEarn && this.format !== 'gen71v1' && this.format !== 'gen7challengecup1v1' && this.format !== 'gen71v1random') {
 				Db.bp.set(from, Db.bp.get(from, 0) + 1);
+				room.add("|raw|<b><font color='" + color + "'>" + Chat.escapeHTML(winner) + "</font> has won " + "<font color='" + color + "'>1</font>" + " Battle Point for winning the tournament battle!</b>");
 			}
 		} else if (to === winner) {
 			result = 'loss';
 			if (tourSize >= sizeRequiredToEarn && this.format !== 'gen71v1' && this.format !== 'gen7challengecup1v1' && this.format !== 'gen71v1random') {
 				Db.bp.set(to, Db.bp.get(to, 0) + 1);
+				room.add("|raw|<b><font color='" + color + "'>" + Chat.escapeHTML(winner) + "</font> has won " + "<font color='" + color + "'>1</font>" + " Battle Point for winning the tournament battle!</b>");
 			}
 		}
-		room.push("|raw|<b><font color='" + color + "'>" + Chat.escapeHTML(winner) + "</font> has won " + "<font color='" + color + "'>1</font>" + " Battle Point for winning the tournament battle!</b>");
 
 		if (result === 'draw' && !this.generator.isDrawingSupported) {
 			this.room.add('|tournament|battleend|' + from.name + '|' + to.name + '|' + result + '|' + score.join(',') + '|fail|' + room.id);
