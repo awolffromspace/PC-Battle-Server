@@ -429,14 +429,14 @@ class Ladder extends LadderStore {
 	 * @param {Connection} connection
 	 * @return {Promise<void>}
 	 */
-	async searchBattle(user, connection, formatid) {
+	async searchBattle(user, connection) {
 		if (!user.connected) return;
 
 		if (!user.locked && !Rooms.lobby.isMuted(user)) {
 			if (Rooms.lobby.disableLadderMessages) return false;
-			if (((Date.now() - user.lastLadderTime) < SEARCH_COOLDOWN) && user.lastLadderFormat === formatid) return false;
-			if (Rooms.lobby) Rooms.lobby.add('|c|' + user.group + user.name + '|/me is searching for a ' + Dex.getFormat(formatid).name + ' battle!');
-			user.lastLadderFormat = formatid;
+			if (((Date.now() - user.lastLadderTime) < SEARCH_COOLDOWN) && user.lastLadderFormat === this.formatid) return false;
+			if (Rooms.lobby) Rooms.lobby.add('|c|' + user.group + user.name + '|/me is searching for a ' + Dex.getFormat(this.formatid).name + ' battle!');
+			user.lastLadderFormat = this.formatid;
 			user.lastLadderTime = Date.now();
 		}
 
