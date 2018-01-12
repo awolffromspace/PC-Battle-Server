@@ -429,7 +429,7 @@ class Ladder extends LadderStore {
 	 * @param {Connection} connection
 	 * @return {Promise<void>}
 	 */
-	async searchBattle(user, connection) {
+	async searchBattle(user, connection, formatid) {
 		if (!user.connected) return;
 
 		if (!user.locked && !Rooms.lobby.isMuted(user)) {
