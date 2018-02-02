@@ -196,7 +196,7 @@ Punishments.roomPunishmentTypes = new Map([
 
 
 Punishments.loadPunishments = async function () {
-	const data = await FS(PUNISHMENT_FILE).readTextIfExists();
+	const data = await FS(PUNISHMENT_FILE).readIfExists();
 	if (!data) return;
 	for (const row of data.split("\n")) {
 		if (!row || row === '\r') continue;
@@ -220,7 +220,7 @@ Punishments.loadPunishments = async function () {
 };
 
 Punishments.loadRoomPunishments = async function () {
-	const data = await FS(ROOM_PUNISHMENT_FILE).readTextIfExists();
+	const data = await FS(ROOM_PUNISHMENT_FILE).readIfExists();
 	if (!data) return;
 	for (const row of data.split("\n")) {
 		if (!row || row === '\r') continue;
@@ -358,7 +358,7 @@ Punishments.renderEntry = function (entry, id) {
 };
 
 Punishments.loadBanlist = async function () {
-	const data = await FS('config/ipbans.txt').readTextIfExists();
+	const data = await FS('config/ipbans.txt').readIfExists();
 	if (!data) return;
 	let rangebans = [];
 	for (const row of data.split("\n")) {
@@ -377,7 +377,7 @@ Punishments.loadBanlist = async function () {
 // IP, type (in this case always SHARED), note
 
 Punishments.loadSharedIps = async function () {
-	const data = await FS(SHAREDIPS_FILE).readTextIfExists();
+	const data = await FS(SHAREDIPS_FILE).readIfExists();
 	if (!data) return;
 	for (const row of data.split("\n")) {
 		if (!row || row === '\r') continue;
