@@ -64,12 +64,12 @@ exports.commands = {
 		if (!this.can('makeroom')) return;
 		if (target === 'off') {
 			delete room.autojoin;
-			this.addModCommand("" + user.name + " removed this room from the autojoin list.");
+			this.addModAction("" + user.name + " removed this room from the autojoin list.");
 			delete room.chatRoomData.autojoin;
 			Rooms.global.writeChatRoomData();
 		} else {
 			room.autojoin = true;
-			this.addModCommand("" + user.name + " added this room to the autojoin list.");
+			this.addModAction("" + user.name + " added this room to the autojoin list.");
 			room.chatRoomData.autojoin = true;
 			Rooms.global.writeChatRoomData();
 		}
@@ -127,6 +127,6 @@ exports.commands = {
 		if (!this.canTalk()) return;
 
 		this.add('|raw|<div class="profile-title">' + target + '</div>');
-		this.logModCommand(user.name + " declared " + target);
+		this.addModAction(user.name + " declared " + target);
 	},
 };

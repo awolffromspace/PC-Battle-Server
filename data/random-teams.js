@@ -1541,6 +1541,8 @@ class RandomTeams extends Dex.ModdedDex {
 		let teamGeneration = Math.floor(Math.random() * 7) + 1;
 		let colorPool = ['Red', 'Blue', 'Yellow', 'Green', 'Black', 'Brown', 'Purple', 'Gray', 'White', 'Pink']
 		let teamColor = colorPool[this.random(colorPool.length)];
+		let dogs = ['growlithe', 'arcanine', 'snubbull', 'granbull', 'houndour', 'houndoom', 'smeargle', 'poochyena', 'mightyena', 'electrike', 'manectric', 'lillipup', 'herdier', 'stoutland', 'furfrou', 'rockruff', 'lycanroc', 'lycanrocmidnight', 'lycanrocdusk'];
+		let dogTemplate = this.getTemplate(dogs[this.random(dogs.length)]);
 		
 		for (let id in this.data.FormatsData) {
 			let template = this.getTemplate(id);
@@ -1604,6 +1606,16 @@ class RandomTeams extends Dex.ModdedDex {
 			} else if (this.format.id === 'gen7colorrandom') {
 				let colors = template.color;
 				if (template.gen <= this.gen && !template.isMega && !template.isPrimal && !template.isNonstandard && template.randomBattleMoves && colors.indexOf(teamColor) >= 0) {
+					pokemonPool.push(id);
+				}
+			} else if (this.format.id === 'gen7newyearrandom') {
+				let types = template.types;
+				if (template.gen <= this.gen && !template.isMega && !template.isPrimal && !template.isNonstandard && template.randomBattleMoves && (types.indexOf('Ice') >= 0 || types.indexOf('Fire') >= 0)) {
+					pokemonPool.push(id);
+				}
+			} else if (this.format.id === 'gen7valentinerandom' || this.format.id === 'gen7valentinerandomlotf37') {
+				let colors = template.color;
+				if (template.gen <= this.gen && !template.isMega && !template.isPrimal && !template.isNonstandard && template.randomBattleMoves && colors.indexOf('Pink') >= 0) {
 					pokemonPool.push(id);
 				}
 			} else {
@@ -1701,9 +1713,27 @@ class RandomTeams extends Dex.ModdedDex {
 				}
 			}
 
+			if (this.format.id === 'gen7newyearrandom') {
+				if (pokemon.length === 0) {
+					template = dogTemplate;
+				} else if (template.species === dogTemplate.species) {
+					continue;
+				}
+			}
+
+			if (this.format.id === 'gen7valentinerandom' || this.format.id === 'gen7valentinerandomlotf37') {
+				let luvdisc = this.getTemplate('luvdisc')
+				if (pokemon.length === 0) {
+					template = luvdisc;
+					template.randomBattleMoves = ['hydropump', 'icebeam', 'hiddenpowergrass', 'raindance'];
+				} else if (template.species === luvdisc.species) {
+					continue;
+				}
+			}
+
 			let types = template.types;
 
-			if (!isMonotype) {
+			if (!isMonotype && this.format.id !== 'gen7newyearrandom' && this.format.id !== 'gen7valentinerandom') {
 				// Limit 2 of any type
 				let skip = false;
 				for (let t = 0; t < types.length; t++) {
@@ -1784,6 +1814,32 @@ class RandomTeams extends Dex.ModdedDex {
 			if (set.moves.includes('stealthrock')) teamDetails['stealthRock'] = 1;
 			if (set.moves.includes('toxicspikes')) teamDetails['toxicSpikes'] = 1;
 			if (set.moves.includes('defog') || set.moves.includes('rapidspin')) teamDetails['hazardClear'] = 1;
+		}
+		if (this.format.id === 'gen7newyearrandom') {
+			let zCelebrate = false;
+			let isMega = true;
+			for (let i = 0; i < pokemon.length; i++) {
+				pokemon[i].moves[4] = 'Celebrate';
+				if (pokemon[i].item.zMove) {
+					pokemon[i].item = 'Normalium Z';
+					zCelebrate = true;
+				}
+			}
+			if (!zCelebrate) {
+				while (isMega) {
+					let rand = this.random(6);
+					if (!pokemon[rand].item.megaStone && !zCelebrate) {
+						pokemon[rand].item = 'Normalium Z';
+						zCelebrate = true;
+						isMega = false;
+					}
+				}
+			}
+		}
+		if (this.format.id === 'gen7valentinerandom' || this.format.id === 'gen7valentinerandomlotf37') {
+			for (let i = 0; i < pokemon.length; i++) {
+				pokemon[i].moves[4] = 'Attract';
+			}
 		}
 		return pokemon;
 	}

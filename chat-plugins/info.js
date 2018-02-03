@@ -1914,8 +1914,6 @@ exports.commands = {
 		if (!this.can('potd')) return false;
 
 		Config.potd = target;
-		// TODO: support eval in new PM
-		Rooms.PM.eval('Config.potd = \'' + toId(target) + '\'');
 		if (target) {
 			if (Rooms.lobby) Rooms.lobby.addRaw(`<div class="broadcast-blue"><b>The Pok&eacute;mon of the Day is now ${target}!</b><br />This Pokemon will be guaranteed to show up in random battles.</div>`);
 			this.modlog('POTD', null, target);

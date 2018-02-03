@@ -1596,7 +1596,7 @@ exports.commands = {
 		if (!this.can('warn', targetUser, room)) return false;
 		if (targetUser.can('makeroom')) return this.errorReply("You are not allowed to warn upper staff members.");
 
-		this.addModAction("|raw|" + targetUser.name + " was warned by " + user.name + ". <a href=http://www.pokecommunity.com/showthread.php?t=289012#rules>Please follow the PC Battle Server rules</a>, and not those in the pop-up." + (target ? " (" + target + ")" : ""));
+		this.add("|raw|" + targetUser.name + " was warned by " + user.name + ". <a href=http://www.pokecommunity.com/showthread.php?t=289012#rules>Please follow the PC Battle Server rules</a>, and not those in the pop-up." + (target ? " (" + target + ")" : ""));
 		this.modlog('WARN', targetUser, target, {noalts: 1});
 		targetUser.send('|c|~|/warn ' + target);
 		let userid = targetUser.getLastId();
@@ -1949,7 +1949,7 @@ exports.commands = {
 			}
 			this.globalModlog("UNBAN", name, ` by ${user.userid}`);
 		} else if (permanent) {
-			this.addModCommand(unbanMessage);
+			this.addModAction(unbanMessage);
 			// Notify staff room when a user is unbanned outside of it.
 			if (room.id !== 'staff' && Rooms('staff')) {
 				Rooms('staff').addLogMessage(user, `<<${room.id}>> ${unbanMessage}`);
@@ -1975,7 +1975,7 @@ exports.commands = {
 		let userid = toId(name);
 
 		let banMessage = "" + name + " was globally banned by " + user.name + "." + (target ? " (" + target + ")" : " (permanent)");
-		this.privateModCommand(banMessage);
+		this.privateModAction(banMessage);
 
 		// Notify staff room when a user is banned outside of it.
 		if (room.id !== 'staff' && Rooms('staff')) {

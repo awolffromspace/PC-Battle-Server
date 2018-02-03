@@ -69,7 +69,7 @@ exports.commands = {
 			return connection.popup("This server has no auth.");
 		}
 		connection.popup(buffer.join("\n\n"));
-	},*/
+	},
 
 	clearall: function (target, room, user) {
 		if (!this.can('warn', null, room)) return false;
@@ -88,7 +88,7 @@ exports.commands = {
 		Rooms.rooms.forEach(clearRoom);
 	},
 
-	/*hide: function (target, room, user) {
+	hide: function (target, room, user) {
 		if (!this.can('lock')) return false;
 		user.hiding = true;
 		user.updateIdentity();

@@ -384,7 +384,7 @@ exports.commands = {
 	tournamentpoll: 'tourpoll',
 	tourneypoll: 'tourpoll',
 	tourpoll: function (target, room, user) {
-		const formats = ['OU', 'Ubers', 'UU', 'Random', 'BSS Factory', 'Monotype Random', 'Past Gen Random (random pick)', '1v1 Random', 'Tiered Random (random pick)', 'Generational Random', 'Region Random (random pick)', 'Color Random', 'Inverse Random', 'Metronome 3v3 Random'];
+		const formats = ['OU', 'Ubers', 'UU', 'New Year Random', 'Valentine Random', 'Random', 'BSS Factory', 'Monotype Random', 'Past Gen Random (random pick)', '1v1 Random', 'Tiered Random (random pick)', 'Generational Random', 'Region Random (random pick)', 'Color Random', 'Inverse Random', 'Metronome 3v3 Random'];
 		this.parse('/poll new Tournament format?, ' + formats);
 	},
 	teampoll: function (target, room, user) {
@@ -395,7 +395,7 @@ exports.commands = {
 	randbatspoll: 'randompoll',
 	randpoll: 'randompoll',
 	randompoll: function (target, room, user) {
-		const formats = ['Random', 'BSS Factory', 'Monotype Random', 'Past Gen Random (random pick)', '1v1 Random', 'Tiered Random (random pick)', 'Generational Random', 'Region Random (random pick)', 'Color Random', 'Inverse Random', 'Metronome 3v3 Random'];
+		const formats = ['New Year Random', 'Valentine Random', 'Random', 'BSS Factory', 'Monotype Random', 'Past Gen Random (random pick)', '1v1 Random', 'Tiered Random (random pick)', 'Generational Random', 'Region Random (random pick)', 'Color Random', 'Inverse Random', 'Metronome 3v3 Random'];
 		this.parse('/poll new Tournament format?, ' + formats);
 	},
 	vote: function (target, room, user) {

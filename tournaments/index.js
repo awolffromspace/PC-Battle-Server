@@ -1464,11 +1464,11 @@ let commands = {
 	globalmoderation: {
 		allowalts: function (tournament, user) {
 			tournament.allowAlts(this);
-			this.privateModCommand("(" + user.name + " allowed alts in the tournament.)");
+			this.privateModAction("(" + user.name + " allowed alts in the tournament.)");
 		},
 		disallowalts: function (tournament, user) {
 			tournament.disallowAlts(this);
-			this.privateModCommand("(" + user.name + " disallowed alts in the tournament.)");
+			this.privateModAction("(" + user.name + " disallowed alts in the tournament.)");
 		},
 	},
 };

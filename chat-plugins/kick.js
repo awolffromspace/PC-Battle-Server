@@ -13,7 +13,8 @@ exports.commands = {
 		}
 		if (!this.can('kick', targetUser, room)) return false;
 		let msg = "kicked by " + user.name + (target ? " (" + target + ")" : "") + ".";
-		this.addModCommand("" + targetUser.name + " was " + msg);
+		this.addModAction("" + targetUser.name + " was " + msg);
+		this.modlog('KICK', targetUser.userid);
 		targetUser.popup("You have been " + msg);
 		targetUser.leaveRoom(room);
 	},
@@ -30,7 +31,7 @@ exports.commands = {
 		if (targetUser.userid === user.userid && !this.can('kick', targetUser, room)) return this.sendReply('Please buy a poof from the "/shop" instead.');
 		let msg = (target ? " " + target + "" : "");
 		this.add(targetUser.name + msg);
-		this.logModCommand("" + targetUser.name + " was kicked by " + user.name + ".");
+		this.modlog('CUSTOM KICK', targetUser.userid);
 		targetUser.popup(targetUser.name + msg);
 		targetUser.leaveRoom(room);
 	},

@@ -11,19 +11,28 @@ exports.Formats = [
 		section: "US/UM Singles",
 	},
 	{
-		name: "[LotF 36] UU",
-		desc: [
-			"&bullet; <a href=\"http://www.smogon.com/forums/threads/3621032/\">UU Metagame Discussion</a>",
-			"&bullet; <a href=\"http://www.smogon.com/forums/threads/3620980/\">UU Viability Rankings</a>",
-			"&bullet; <a href=\"http://www.smogon.com/forums/threads/3621217/\">UU Sample Teams</a>",
-		],
+		name: "[Gen 7] Valentine Random (LotF37)",
 
-		mod: 'gen7',
-		ruleset: ['[Gen 7] OU'],
-		banlist: ['OU', 'BL', 'Drizzle', 'Kommonium Z', 'Mewnium Z'],
+		mod: 'valentinerandom',
+		team: 'random',
+		ruleset: ['[Gen 7] Random (no PotD)'],
 		onBegin: function() {
 			this.add('raw|This is the Ladder of the Fortnight! Use the "Battle!" button to try and win the LotF. The winner is the user who is #1 on the ladder by the end of the fortnight. They receive a <img src="http://cbc.pokecommunity.com/config/user-list-images/trophy.png" /> beside their name for one fortnight.');
 		},
+	},
+	{
+		name: "[Gen 7] New Year Random",
+
+		mod: 'gen7',
+		team: 'random',
+		ruleset: ['[Gen 7] Random (no PotD)'],
+	},
+	{
+		name: "[Gen 7] Valentine Random",
+
+		mod: 'valentinerandom',
+		team: 'random',
+		ruleset: ['[Gen 7] Random (no PotD)'],
 	},
 	{
 		name: "[Gen 7] Random",

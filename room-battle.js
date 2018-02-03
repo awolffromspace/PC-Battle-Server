@@ -616,7 +616,7 @@ class Battle {
 			//
 
 			let color = '#45a0e5';
-			if (this.format === 'lotf36uu') {
+			if (this.format === 'gen7valentinerandomlotf37') {
 				Db.bp.set(winnerid, Db.bp.get(winnerid, 0) + 2);
 				this.room.add("|raw|<b><font color='" + color + "'>" + Chat.escapeHTML(winnerid) + "</font> has won " + "<font color='" + color + "'>2</font>" + " Battle Points for winning the rated Ladder of the Fortnight battle!</b>");
 			} else if (this.format !== 'gen71v1' && this.format !== 'gen7challengecup1v1' && this.format !== 'gen71v1random') {
@@ -953,10 +953,6 @@ if (!PM.isParentProcess) {
 	// @ts-ignore
 	global.Config = require('./config/config');
 	global.Chat = require('./chat');
-	global.__version = require('child_process')
-		.execSync('git merge-base master HEAD')
-		.toString()
-		.trim();
 
 	if (Config.crashguard) {
 		// graceful crash - allow current battles to finish before restarting
