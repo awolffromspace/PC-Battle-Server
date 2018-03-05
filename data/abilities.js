@@ -260,6 +260,7 @@ exports.BattleAbilities = {
 				this.add('detailschange', source, source.details);
 			}
 		},
+		onModifyMovePriority: -1,
 		onModifyMove: function (move, attacker) {
 			if (move.id === 'watershuriken' && attacker.template.species === 'Greninja-Ash') {
 				move.multihit = 3;
@@ -1353,6 +1354,7 @@ exports.BattleAbilities = {
 		onModifyAtk: function (atk) {
 			return this.modify(atk, 1.5);
 		},
+		onModifyMovePriority: -1,
 		onModifyMove: function (move) {
 			if (move.category === 'Physical' && typeof move.accuracy === 'number') {
 				move.accuracy *= 0.8;
@@ -2025,7 +2027,7 @@ exports.BattleAbilities = {
 		name: "Mummy",
 		onAfterDamage: function (damage, target, source, move) {
 			if (source && source !== target && move && move.flags['contact'] && source.ability !== 'mummy') {
-				let oldAbility = source.setAbility('mummy');
+				let oldAbility = source.setAbility('mummy', target);
 				if (oldAbility) {
 					this.add('-activate', target, 'ability: Mummy', this.getAbility(oldAbility).name, '[of] ' + source);
 				}
@@ -3331,6 +3333,7 @@ exports.BattleAbilities = {
 	},
 	"stench": {
 		shortDesc: "This Pokemon's attacks without a chance to flinch have a 10% chance to flinch.",
+		onModifyMovePriority: -1,
 		onModifyMove: function (move) {
 			if (move.category !== "Status") {
 				this.debug('Adding Stench flinch');
@@ -3965,7 +3968,7 @@ exports.BattleAbilities = {
 		shortDesc: "If a physical attack hits this Pokemon, Defense is lowered by 1, Speed is raised by 2.",
 		onAfterDamage: function (damage, target, source, move) {
 			if (move.category === 'Physical') {
-				this.boost({def: -1, spe: 2});
+				this.boost({def: -1, spe: 2}, target, target);
 			}
 		},
 		id: "weakarmor",

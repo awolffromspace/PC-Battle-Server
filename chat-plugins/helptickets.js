@@ -124,7 +124,10 @@ function notifyUnclaimedTicket(upper) {
 	if (!room) return;
 	clearTimeout(unclaimedTicketTimer[room.id]);
 	unclaimedTicketTimer[room.id] = null;
-	room.send(`|tempnotify|helptickets|Unclaimed help tickets!|There are unclaimed Help tickets`);
+	for (let i in room.users) {
+		let user = room.users[i];
+		if (user.can('mute', null, room)) user.sendTo(room, `|tempnotify|helptickets|Unclaimed help tickets!|There are unclaimed Help tickets`);
+	}
 }
 
 
@@ -165,7 +168,10 @@ function notifyStaff(upper) {
 		buf = `|tempnotifyoff|helptickets`;
 	}
 	if (room.userCount) Sockets.channelBroadcast(room.id, `>view-help-tickets\n${buf}`);
-	room.send(`${buf}|There are unclaimed Help tickets`);
+	for (let i in room.users) {
+		let user = room.users[i];
+		if (user.can('mute', null, room)) user.sendTo(room, `${buf}|There are unclaimed Help tickets`);
+	}
 	pokeUnclaimedTicketTimer(upper, hasUnclaimed);
 }
 
@@ -271,9 +277,9 @@ exports.pages = {
 				password: `I lost my password`,
 				other: `Other`,
 
-				confirmpmharrasment: `Report harassment in a private message (PM)`,
-				confirmbattleharrasment: `Report harassment in a battle`,
-				confirmchatharrasment: `Report harassment in a chatroom`,
+				confirmpmharassment: `Report harassment in a private message (PM)`,
+				confirmbattleharassment: `Report harassment in a battle`,
+				confirmchatharassment: `Report harassment in a chatroom`,
 				confirminap: `Report inappropriate content`,
 				confirminapname: `Report an inappropriate username`,
 				confirminappokemon: `Report inappropriate Pok&eacute;mon nicknames`,
@@ -287,9 +293,9 @@ exports.pages = {
 				confirmother: `Call a Global Staff member`,
 			};
 			const ticketTitles = {
-				pmharrasment: `PM Harassment`,
-				battleharrasment: `Battle Harassment`,
-				chatharrasment: `Chatroom Harassment`,
+				pmharassment: `PM Harassment`,
+				battleharassment: `Battle Harassment`,
+				chatharassment: `Chatroom Harassment`,
 				inap: `Inappropriate Content`,
 				inapname: `Inappropriate Username`,
 				inappokemon: `Inappropriate Pokemon Nicknames`,
@@ -333,7 +339,7 @@ exports.pages = {
 					buf += `<p>If someone is harassing you, click the appropriate button below and a global staff member will take a look. Consider using <code>/ignore [username]</code> if it's minor instead.</p>`;
 					buf += `<p>If you are reporting harassment in a battle, please save a replay of the battle.</p>`;
 					if (!isLast) break;
-					buf += `<p><Button>confirmpmharrasment</Button> <Button>confirmbattleharrasment</Button> <Button>confirmchatharrasment</Button></p>`;
+					buf += `<p><Button>confirmpmharassment</Button> <Button>confirmbattleharassment</Button> <Button>confirmchatharassment</Button></p>`;
 					break;
 				case 'inap':
 					buf += `<p>If a user has posted inappropriate content, has an inappropriate name, or has inappropriate Pok&eacute;mon nicknames, click the appropriate button below and a global staff member will take a look.</p>`;
@@ -341,7 +347,9 @@ exports.pages = {
 					buf += `<p><Button>confirminap</Button> <Button>confirminapname</Button> <Button>confirminappokemon</Button></p>`;
 					break;
 				case 'timerstalling':
-					buf += `<p>If someone is timerstalling in your battle, and the battle has <b>not</b> ended, click the button below and a global staff member will take a look.</p>`;
+					buf += `<p>Timerstalling is the act of intentionally using up almost all the time on the timer, and then moving.</p>`;
+					buf += `<p>Please make sure your opponent is using up most of the timer each turn, has been doing this for at least two turns, and the battle has NOT ended.</p>`;
+					buf += `<p>If the above is true, please click the button below to call a global staff member.</p>`;
 					if (!isLast) break;
 					buf += `<p><Button>confirmtimerstalling</Button></p>`;
 					break;
@@ -370,6 +378,7 @@ exports.pages = {
 					if (user.semilocked || isStaff) {
 						buf += `<p><Button>semilock</Button></p>`;
 					}
+					buf += `<p><Button>appealother</Button></p>`;
 					break;
 				case 'permalock':
 					buf += `<p>Please make a post in the <a href="http://www.smogon.com/forums/threads/discipline-appeal-rules.3583479/">Discipline Appeal Forums</a> to appeal a permalock.</p>`;
@@ -390,7 +399,7 @@ exports.pages = {
 					buf += `<p><Button>confirmappealsemi</Button></p>`;
 					break;
 				case 'appealother':
-					buf += `<p>Please PM the staff member who punished you. If you dont know who punished you, ask another room staff member; they will redirect you to the correct user. If you are banned or blacklisted from the room, use <code>/roomauth [name of room]</code> to get a list of room staff members. Bold names are online.</p>`;
+					buf += `<p>Please PM the staff member who punished you. If you don't know who punished you, ask another room staff member; they will redirect you to the correct user. If you are banned or blacklisted from the room, use <code>/roomauth [name of room]</code> to get a list of room staff members. Bold names are online.</p>`;
 					break;
 				case 'misc':
 					buf += `<p><b>Maybe one of these options will be helpful?</b></p>`;
@@ -497,6 +506,16 @@ exports.commands = {
 		}
 
 		return this.parse('/join view-help-request--report');
+	},
+
+	'!appeal': true,
+	appeal: function (target, room, user, connection) {
+		if (!this.runBroadcast()) return;
+		if (this.broadcasting) {
+			return this.sendReplyBox('<button name="joinRoom" value="view-help-request--appeal" class="button"><strong>Appeal a punishment</strong></button>');
+		}
+
+		return this.parse('/join view-help-request--appeal');
 	},
 
 	requesthelp: 'helpticket',

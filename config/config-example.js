@@ -820,6 +820,7 @@ exports.grouplist = [
 		roomdriver: true,
 		editroom: true,
 		roomonly: true,
+		joinbattle: true,
 	},
 	{
 		symbol: '-',

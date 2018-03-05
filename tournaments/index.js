@@ -285,7 +285,7 @@ class Tournament {
 			return;
 		}
 
-		if (this.checkBanned(user)) {
+		if (this.checkBanned(user) || Punishments.isBattleBanned(user)) {
 			output.sendReply('|tournament|error|Banned');
 			return;
 		}

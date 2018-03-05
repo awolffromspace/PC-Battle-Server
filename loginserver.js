@@ -163,6 +163,9 @@ class LoginServerInstance {
 			Streams.readAll(res).then(buffer => {
 				//console.log('RESPONSE: ' + buffer);
 				let data = parseJSON(buffer).json;
+				if (buffer.startsWith(`[{"actionsuccess":true,`)) {
+					buffer = 'stream interrupt';
+				}
 				for (const [i, resolve] of resolvers.entries()) {
 					if (data) {
 						resolve([data[i], res.statusCode, null]);
@@ -181,6 +184,10 @@ class LoginServerInstance {
 				resolve([null, 0, error]);
 			}
 			this.requestEnd(error);
+		});
+
+		req.on('error', (/** @type {Error} */ error) => {
+			// ignore; will be handled by the 'close' handler
 		});
 
 		req.setTimeout(LOGIN_SERVER_TIMEOUT, () => {
@@ -220,6 +227,8 @@ let LoginServer = Object.assign(new LoginServerInstance(), {
 FS('./config/custom.css').onModify(() => {
 	LoginServer.request('invalidatecss');
 });
-LoginServer.request('invalidatecss');
+if (!Config.nofswriting) {
+	LoginServer.request('invalidatecss');
+}
 
 module.exports = LoginServer;
