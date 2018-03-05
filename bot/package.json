@@ -1,0 +1,68 @@
+{
+  "name": "pokemon-showdown-node-bot",
+  "version": "0.7.2",
+  "author": {
+    "name": "Ecuacion",
+	"email": "alajandro5gt01@gmail.com",
+	"url": "https://github.com/Ecuacion"
+  },
+  "scripts": {
+    "start": "node bot",
+    "test": "gulp && mocha"
+  },
+  "contributors": [
+    {
+      "name": "Freigeist",
+      "url": "https://github.com/Freigeist"
+    },
+    {
+      "name": "Irraquated",
+      "url": "https://irraquated.github.io"
+    },
+    {
+      "name": "panpawn",
+      "url": "https://github.com/panpawn"
+    },
+    {
+      "name": "Spudling",
+      "url": "https://github.com/Spudling"
+    }
+  ],
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/Ecuacion/Pokemon-Showdown-Node-Bot"
+  },
+  "bugs": {
+    "url": "https://github.com/Ecuacion/Pokemon-Showdown-Node-Bot/issues"
+  },
+  "main": "bot",
+  "bin": "./bot",
+  "engines": {
+    "node": ">=0.10.0"
+  },
+  "private": true,
+  "license": "MIT",
+  "dependencies": {
+    "sugar": "1.4.1",
+    "colors": "1.0.3",
+    "websocket": "1.0.18"
+  },
+  "devDependencies": {
+    "cache-swap": "~0.2.0",
+    "gulp": "~3.9.0",
+    "gulp-cache": "~0.4.0",
+    "gulp-jshint": "~2.0.0",
+    "gulp-jscs": "~3.0.2",
+    "gulp-replace": "~0.5.1",
+    "jshint-stylish": "~2.1.0",
+    "lazypipe": "~1.0.1",
+    "merge-stream": "~1.0.0",
+    "mocha": "~2.3.2"
+  },
+  "optionalDependencies": {
+    "githubhook": "^1.1.3",
+    "readline-sync": "1.3.0"
+  },
+  "description": "Pokemon Showdown Bot",
+  "homepage": "https://github.com/Ecuacion/Pokemon-Showdown-Node-Bot"
+}
