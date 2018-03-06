@@ -133,7 +133,7 @@ class BasicRoom {
 		for (let i in this.users) {
 			let user = this.users[i];
 			// hardcoded for performance reasons (this is an inner loop)
-			if (user.isStaff || ((this.auth && (this.auth[user.userid] || '+') !== '+') && (this.auth && (this.auth[user.userid] || '\u2605') !== '\u2605'))) {
+			if (user.isStaff || (this.auth && (this.auth[user.userid] || '+') !== '+')) {
 				user.sendTo(this, data);
 			}
 		}
