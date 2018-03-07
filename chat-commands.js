@@ -1025,7 +1025,7 @@ exports.commands = {
 			this.sendReplyBox(Chat.html`The room description is: ${room.desc}`);
 			return;
 		}
-		if (!this.can('declare')) return false;
+		if (!this.can('declare'), null, room) return false;
 		if (target.length > 80) return this.errorReply(`Error: Room description is too long (must be at most 80 characters).`);
 		let normalizedTarget = ' ' + target.toLowerCase().replace('[^a-zA-Z0-9]+', ' ').trim() + ' ';
 
@@ -1070,7 +1070,7 @@ exports.commands = {
 
 		room.introMessage = target.replace(/\r/g, '');
 		this.sendReply("(The room introduction has been changed to:)");
-		this.sendReply('|raw|<div class="infobox infobox-limited">' + room.introMessage.replace(/\n/g, '') + '</div>');
+		this.sendReply('|raw|<div class="infobox">' + room.introMessage.replace(/\n/g, '') + '</div>');
 
 		this.privateModAction(`(${user.name} changed the roomintro.)`);
 		this.modlog('ROOMINTRO');
@@ -1224,10 +1224,6 @@ exports.commands = {
 		let targetUser = this.targetUser;
 		let name = this.targetUsername;
 		let userid = toId(name);
-
-		if (!Users.isUsernameKnown(userid)) {
-			return this.errorReply(`User '${this.targetUsername}' is offline and unrecognized, and so can't be promoted.`);
-		}
 
 		if (!this.can('makeroom')) return false;
 
@@ -1739,18 +1735,6 @@ exports.commands = {
 
 			if (targetUser.locked && !week) {
 				return this.privateModAction(`(${name} would be locked by ${user.name} but was already locked.)`);
-			}
-
-			if (targetUser.trusted) {
-				if (cmd === 'forcelock') {
-					let from = targetUser.distrust();
-					Monitor.log(`[CrisisMonitor] ${name} was locked by ${user.name} and demoted from ${from.join(", ")}.`);
-					this.globalModlog("CRISISDEMOTE", targetUser, ` from ${from.join(", ")}`);
-				} else {
-					return this.sendReply(`${name} is a trusted user. If you are sure you would like to lock them use /forcelock.`);
-				}
-			} else if (cmd === 'forcelock') {
-				return this.errorReply(`Use /lock; ${name} is not a trusted user.`);
 			}
 
 			let roomauth = [];

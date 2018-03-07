@@ -107,6 +107,30 @@ exports.commands = {
 	},
 	togglebattlemsghelp: ["/togglebattlemsg - Toggle battle messages on or off."],
 
+	settitle: function (target, room, user) {
+		if (!target) return this.parse('/help givetitle');
+
+		let username = user.userid;
+		let title = target;
+
+		Db.title.set(username, title);
+		this.sendReply("Your profile title is now " + title + ".");
+	},
+	settitlehelp: ["/settitle [title] - Set your profile title."],
+	
+	givetitle: function (target, room, user) {
+		if (!this.can('forcewin')) return false;
+		if (!target || target.indexOf(',') < 0) return this.parse('/help givetitle');
+
+		let parts = target.split(',');
+		let username = parts[0];
+		let title = parts[1];
+
+		Db.title.set(toId(username), title);
+		this.sendReply(username + " was given the profile title " + title + ".");
+	},
+	givetitlehelp: ["/givetitle [user], [title] - Give a user a profile title."],
+
 	plain: 'plaintext',
 	plaintext: function (target, room, user) {
 		if (!target) return;

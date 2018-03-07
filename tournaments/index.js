@@ -790,28 +790,54 @@ class Tournament {
 		if (!this.pendingChallenges.get(challenge.from)) return;
 		if (!this.pendingChallenges.get(player)) return;
 
-		let room = Rooms.createBattle(this.teambuilderFormat, {
-			p1: from,
-			p1team: challenge.team,
-			p2: user,
-			p2team: ready.team,
-			rated: !Ladders.disabled && this.isRated,
-			tour: this,
-		});
-		if (!room) return;
+		if (this.room.id === 'lobby') {
+			let room = Rooms.createBattle(this.teambuilderFormat, {
+				p1: from,
+				p1team: challenge.team,
+				p2: user,
+				p2team: ready.team,
+				rated: !Ladders.disabled && this.isRated,
+				tour: this,
+				lobbyTour: this,
+			});
+			if (!room) return;
 
-		this.pendingChallenges.set(challenge.from, null);
-		this.pendingChallenges.set(player, null);
-		from.sendTo(this.room, '|tournament|update|{"challenging":null}');
-		user.sendTo(this.room, '|tournament|update|{"challenged":null}');
+			this.pendingChallenges.set(challenge.from, null);
+			this.pendingChallenges.set(player, null);
+			from.sendTo(this.room, '|tournament|update|{"challenging":null}');
+			user.sendTo(this.room, '|tournament|update|{"challenged":null}');
 
-		this.inProgressMatches.set(challenge.from, {to: player, room: room});
-		this.room.add('|tournament|battlestart|' + from.name + '|' + user.name + '|' + room.id).update();
+			this.inProgressMatches.set(challenge.from, {to: player, room: room});
+			this.room.add('|tournament|battlestart|' + from.name + '|' + user.name + '|' + room.id).update();
 
-		this.isBracketInvalidated = true;
-		if (this.autoDisqualifyTimeout !== Infinity) this.runAutoDisqualify(this.room);
-		if (this.forceTimer) room.battle.timer.start();
-		this.update();
+			this.isBracketInvalidated = true;
+			if (this.autoDisqualifyTimeout !== Infinity) this.runAutoDisqualify(this.room);
+			if (this.forceTimer) room.battle.timer.start();
+			this.update();
+		} else {
+			let room = Rooms.createBattle(this.teambuilderFormat, {
+				p1: from,
+				p1team: challenge.team,
+				p2: user,
+				p2team: ready.team,
+				rated: !Ladders.disabled && this.isRated,
+				tour: this,
+			});
+			if (!room) return;
+
+			this.pendingChallenges.set(challenge.from, null);
+			this.pendingChallenges.set(player, null);
+			from.sendTo(this.room, '|tournament|update|{"challenging":null}');
+			user.sendTo(this.room, '|tournament|update|{"challenged":null}');
+
+			this.inProgressMatches.set(challenge.from, {to: player, room: room});
+			this.room.add('|tournament|battlestart|' + from.name + '|' + user.name + '|' + room.id).update();
+
+			this.isBracketInvalidated = true;
+			if (this.autoDisqualifyTimeout !== Infinity) this.runAutoDisqualify(this.room);
+			if (this.forceTimer) room.battle.timer.start();
+			this.update();
+		}
 	}
 	forfeit(user) {
 		this.disqualifyUser(user.userid, null, "You left the tournament");
