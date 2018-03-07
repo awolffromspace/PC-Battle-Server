@@ -38,8 +38,7 @@ exports.commands = {
 		if (!this.runBroadcast()) return;
 		this.sendReplyBox(
 			"Official chat rooms are English only. Other languages are allowed in battle rooms, private messages, and unofficial chat rooms.<br />" +
-			"- <a href=\"https://translate.google.com/#en/en/Official%20chat%20rooms%20are%20English%20only.%20Other%20languages%20are%20allowed%20in%20battle%20rooms%2C%20private%20messages%2C%20and%20unofficial%20chat%20rooms.\">TRANSLATION</a><br />" +
-			"- <a href=\"http://www.pokecommunity.com/showthread.php?t=289012#rules\">PC Battle Server Rules</a>"
+			"- <a href=\"https://translate.google.com/#en/en/Official%20chat%20rooms%20are%20English%20only.%20Other%20languages%20are%20allowed%20in%20battle%20rooms%2C%20private%20messages%2C%20and%20unofficial%20chat%20rooms.\">TRANSLATION</a>"
 		);
 	},
 
@@ -49,14 +48,16 @@ exports.commands = {
 		if (!this.runBroadcast()) return;
 		this.sendReplyBox(
 			"Sample teams:<br />" +
-			"- <a href=\"http://www.smogon.com/forums/threads/sm-ou-sample-teams.3606650/\">OU</a><br />" +
-			"- <a href=\"http://www.smogon.com/forums/threads/sample-teams-sm-submissions-open.3599816/\">Ubers</a><br />" +
-			"- <a href=\"http://www.smogon.com/forums/threads/sm-uu-sample-teams-thread.3591880/\">UU</a><br />" +
-			"- <a href=\"http://www.smogon.com/forums/threads/sm-ru-sample-teams-thread.3598090/\">RU</a><br />" +
-			"- <a href=\"http://www.smogon.com/forums/threads/multigen-lc-sample-teams-from-adv-to-sm.3588679/\">LC</a><br />" +
-			"- <a href=\"http://www.smogon.com/forums/threads/vgc-17-sample-teams.3590391/\">VGC 2017</a><br />" +
-			"- <a href=\"http://www.smogon.com/forums/threads/doubles-ou-team-bazaar-sample-teams-here.3590987/\">Doubles OU</a><br />" +
-			"- <a href=\"http://www.smogon.com/forums/threads/monotype-sample-teams.3599682/\">Monotype</a>"
+			"- <a href=\"https://www.smogon.com/forums/threads/usm-ou-sample-teams.3626219/\">OU</a><br />" +
+			"- <a href=\"https://www.smogon.com/forums/threads/sample-teams-usm-submissions-open.3599816/\">Ubers</a><br />" +
+			"- <a href=\"https://www.smogon.com/forums/threads/usum-sample-teams.3621217/\">UU</a><br />" +
+			"- <a href=\"https://www.smogon.com/forums/threads/usm-ru-sample-teams-thread.3622057/\">RU</a><br />" +
+			"- <a href=\"https://www.smogon.com/forums/threads/ultra-sm-nu-sample-teams.3612396/\">NU</a><br />" +
+			"- <a href=\"https://www.smogon.com/forums/threads/pu-sample-teams-taking-submissions.3614470/\">PU</a><br />" +
+			"- <a href=\"https://www.smogon.com/forums/threads/multigen-lc-sample-teams-from-adv-to-sm.3588679/\">LC</a><br />" +
+			"- <a href=\"https://www.smogon.com/forums/threads/monotype-sample-teams.3599682/\">Monotype</a><br />" +
+			"- <a href=\"https://www.smogon.com/forums/threads/vgc-18-sample-teams.3628885/\">VGC 2018</a><br />" +
+			"- <a href=\"https://www.smogon.com/forums/threads/doubles-ou-team-bazaar-sample-teams-here.3590987/\">Doubles OU</a>"
 		);
 	},
 

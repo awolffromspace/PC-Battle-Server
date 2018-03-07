@@ -675,7 +675,7 @@ exports.commands = {
 		}
 		if (tarRoom !== 'global' && (!Bot.rooms[tarRoom] || Bot.rooms[tarRoom].type !== 'chat')) return this.reply(this.trad('notchat') + textHelper);
 
-		if (Bot.rooms[tarRoom] && Bot.rooms[tarRoom].type === 'chat' && toId(arg) in {'on': 1, 'enable': 1}) {
+		if (this.can('joinphrasemanagement') && Bot.rooms[tarRoom] && Bot.rooms[tarRoom].type === 'chat' && toId(arg) in {'on': 1, 'enable': 1}) {
 			if (!this.isRanked(Tools.getGroup('roomowner'))) return false;
 			if (!Settings.settings['jpdisable']) Settings.settings['jpdisable'] = {};
 			if (Settings.settings['jpdisable'][tarRoom]) delete Settings.settings['jpdisable'][tarRoom];
@@ -685,7 +685,7 @@ exports.commands = {
 			return this.reply(this.trad('e') + textHelper);
 		}
 
-		if (Bot.rooms[tarRoom] && Bot.rooms[tarRoom].type === 'chat' && toId(arg) in {'off': 1, 'disable': 1}) {
+		if (this.can('joinphrasemanagement') && Bot.rooms[tarRoom] && Bot.rooms[tarRoom].type === 'chat' && toId(arg) in {'off': 1, 'disable': 1}) {
 			if (!this.isRanked(Tools.getGroup('roomowner'))) return false;
 			if (!Settings.settings['jpdisable']) Settings.settings['jpdisable'] = {};
 			if (!Settings.settings['jpdisable'][tarRoom]) Settings.settings['jpdisable'][tarRoom] = 1;
@@ -716,6 +716,7 @@ exports.commands = {
 			case 'add':
 			case 'change':
 				if (!arg || !arg.length) return false;
+				if (user != toId(this.by) && !this.can('joinphrasemanagement')) return false;
 				if (args.length < 3) return this.reply(this.trad('u1') + ": " + this.cmdToken + cmd + " " + this.trad('u2'));
 				if (!Settings.settings['joinphrases'][tarRoom]) Settings.settings['joinphrases'][tarRoom] = {};
 				Settings.settings['joinphrases'][tarRoom][user] = Tools.stripCommands(arg);
@@ -724,6 +725,7 @@ exports.commands = {
 				this.reply(this.trad('jpfor') + " " + user + ' ' + this.trad('modified') + ' ' + ((tarRoom === 'global') ? this.trad('globally') : (this.trad('forthis') + textHelper)));
 				break;
 			case 'delete':
+				if (user != toId(this.by) && !this.can('joinphrasemanagement')) return false;
 				if (!Settings.settings['joinphrases'][tarRoom]) Settings.settings['joinphrases'][tarRoom] = {};
 				if (!Settings.settings['joinphrases'][tarRoom][user]) return this.reply(this.trad('jpfor') + " " + user + " " + this.trad('not') + " " + ((tarRoom === 'global') ? this.trad('globally') : (this.trad('forthis') + textHelper)));
 				delete Settings.settings['joinphrases'][tarRoom][user];

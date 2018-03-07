@@ -11,11 +11,11 @@
 *
 */
 
-exports.server = 'cbc.pokecommunity.com';
+exports.server = 'localhost';
 
 exports.port = 8000;
 
-exports.serverid = 'pokecommunity';
+exports.serverid = 'localhost';
 
 exports.autoReconnectDelay = 10 * 1000;
 exports.connectionTimeout = 7 * 24 * 60 * 60 * 1000;
@@ -44,9 +44,9 @@ exports.watchconfig = true;
 * Login Details
 */
 
-exports.nick = 'PokeCommBot';
+exports.nick = '';
 
-exports.pass = 'filler';
+exports.pass = '';
 
 exports.autoReloginDelay = 60 * 1000;
 
@@ -54,7 +54,7 @@ exports.autoReloginDelay = 60 * 1000;
 * Rooms to join
 */
 
-exports.rooms = ['lobby', 'darkalley', 'trl', 'japanese', 'pokmonphoenixrisingmetagame', 'hug', 'trivia', 'battledome', 'pokmonleague', 'samsclinic', 'studyroom', 'theeliteleague'];
+exports.rooms = ['lobby'];
 
 /*
 * exports.rooms = 'all'; //For joining all rooms
@@ -71,7 +71,7 @@ exports.ignoreRooms = { //Rooms listed here will be ignored by CommandParser (bo
 	//roomid: true
 };
 
-exports.initCmds = []; // Other commands (avatar, blockchallenges, etc)
+exports.initCmds = ['|/avatar 120']; // Other commands (avatar, blockchallenges, etc)
 
 /*
 * Auth configuration
@@ -92,7 +92,7 @@ exports.exceptions = {
 *
 */
 
-exports.ranks = ['\u2605', '+', '%', '@', '*', '-', '&', '#', '~'];
+exports.ranks = ['+', '\u2605', '%', '@', '*', '#', '&', '~'];
 
 exports.globalPermissions = {
 	'voice': '+', //Min rank to broadcast in a server
@@ -108,26 +108,24 @@ exports.globalPermissions = {
 
 exports.commandTokens = ['.']; //Array of valid command characters
 
-exports.defaultPermission = '+';
+exports.defaultPermission = '%';
 
 exports.permissionExceptions = {
 	//command: 'rank'
-	'say': '#',
+	'say': '+',
 	'info': ' ',
-	'wall': '%',
+	'wall': '+',
 	'autoban': '@',
 	'banword': '@',
-	'joinphrase': '@',
-	'challenge': '%',
-	'searchbattle': '@',
-	'tournament': '@',
+	'joinphrase': ' ',
+	'challenge': '+',
+	'searchbattle': '~',
+	'tournament': '+',
 	'games': '+',
-	'jointour': '+',
-	'quote': ' ',
-	'joke': ' '
+	'joinphrasemanagement': '@'
 };
 
-exports.botguide = "https://github.com/awolffromspace/PC-Battle-Server/blob/master/bot/commands/README.md";
+exports.botguide = "https://github.com/Ecuacion/Pokemon-Showdown-Node-Bot/blob/master/commands/README.md";
 
 //When you pm the bot but don't use a command, it replies you this message. Example: "Hi, I'm a bot. Use .help to view a command guide"
 //The var #USER is replaced with the username that pms it
@@ -241,8 +239,7 @@ exports.moderation = {
 	psServersExcepts: {
 		"showdown": 1,
 		"smogtours": 1,
-		"sim": 1,
-		"pokecommunity": 1
+		"sim": 1
 	},
 
 	zeroToleranceDefaultLevel: 'h',

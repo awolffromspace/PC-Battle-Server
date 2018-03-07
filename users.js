@@ -26,8 +26,8 @@
 'use strict';
 /** @typedef {GlobalRoom | GameRoom | ChatRoom} Room */
 
-const PLAYER_SYMBOL = '-';
-const HOST_SYMBOL = '=';
+const PLAYER_SYMBOL = '\u2606';
+const HOST_SYMBOL = '\u2605';
 
 const THROTTLE_DELAY = 600;
 const THROTTLE_BUFFER_LIMIT = 6;
@@ -568,9 +568,6 @@ class User {
 		if (this.semilocked) {
 			const mutedSymbol = (Config.punishgroups && Config.punishgroups.muted ? Config.punishgroups.muted.symbol : '!');
 			return mutedSymbol + this.name;
-		}
-		if (this.customSymbol) {
-			return this.customSymbol + this.name;
 		}
 		return this.group + this.name;
 	}

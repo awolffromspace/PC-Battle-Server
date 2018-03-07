@@ -11,30 +11,6 @@ exports.Formats = [
 		section: "US/UM Singles",
 	},
 	{
-		name: "[Gen 7] Valentine Random (LotF37)",
-
-		mod: 'valentinerandom',
-		team: 'random',
-		ruleset: ['[Gen 7] Random (no PotD)'],
-		onBegin: function() {
-			this.add('raw|This is the Ladder of the Fortnight! Use the "Battle!" button to try and win the LotF. The winner is the user who is #1 on the ladder by the end of the fortnight. They receive a <img src="http://cbc.pokecommunity.com/config/user-list-images/trophy.png" /> beside their name for one fortnight.');
-		},
-	},
-	{
-		name: "[Gen 7] New Year Random",
-
-		mod: 'gen7',
-		team: 'random',
-		ruleset: ['[Gen 7] Random (no PotD)'],
-	},
-	{
-		name: "[Gen 7] Valentine Random",
-
-		mod: 'valentinerandom',
-		team: 'random',
-		ruleset: ['[Gen 7] Random (no PotD)'],
-	},
-	{
 		name: "[Gen 7] Random",
 		desc: [
 			`Randomized teams of level-balanced Pok&eacute;mon with sets that are generated to be competitively viable.`,
@@ -644,6 +620,20 @@ exports.Formats = [
 	{
 		section: "Randomized Metas",
 		column: 2,
+	},
+	{
+		name: "[Gen 7] New Year Random",
+
+		mod: 'gen7',
+		team: 'random',
+		ruleset: ['[Gen 7] Random (no PotD)'],
+	},
+	{
+		name: "[Gen 7] Valentine Random",
+
+		mod: 'valentinerandom',
+		team: 'random',
+		ruleset: ['[Gen 7] Random (no PotD)'],
 	},
 	{
 		name: "[Gen 7] Battle Factory",

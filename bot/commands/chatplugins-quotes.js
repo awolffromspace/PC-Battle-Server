@@ -47,7 +47,7 @@ exports.commands = {
 	getquote: 'quote',
 	quote: function (arg, by, room, cmd) {
 		if (cmd === "addquote" || cmd === "setquote") {
-			if (!this.can('jointour')) return false;
+			if (!this.can('quote')) return false;
 			var args = arg.split(",");
 			if (args.length < 2) return this.reply(this.trad('u1') + ": " + this.cmdToken + cmd + " " + this.trad('u2'));
 			var id = toId(args[0]);
@@ -67,7 +67,7 @@ exports.commands = {
 			this.sclog();
 			this.reply(text);
 		} else if (cmd === "delquote") {
-			if (!this.can('autoban')) return false;
+			if (!this.isRanked('moderator')) return false;
 			var id = toId(arg);
 			if (!id) return this.reply(this.trad('noid'));
 			if (!quotes[id]) return this.reply(this.trad('quote') + ' "' + id + '" ' + this.trad('n'));
@@ -87,7 +87,7 @@ exports.commands = {
 		}
 	},
 	listquotes: function (arg, by, room, cmd) {
-		if (!this.can('jointour')) return false;
+		if (!this.can('quote')) return false;
 		var data = '';
 		for (var i in quotes) {
 			data += i + ' -> ' + quotes[i] + '\n';
@@ -107,7 +107,7 @@ exports.commands = {
 	getjoke: 'joke',
 	joke: function (arg, by, room, cmd) {
 		if (cmd === "addjoke" || cmd === "setjoke") {
-			if (!this.can('jointour')) return false;
+			if (!this.can('joke')) return false;
 			var args = arg.split(",");
 			if (args.length < 2) return this.reply(this.trad('u1') + ": " + this.cmdToken + cmd + " " + this.trad('u2'));
 			var id = toId(args[0]);
@@ -127,7 +127,7 @@ exports.commands = {
 			this.sclog();
 			this.reply(text);
 		} else if (cmd === "deljoke") {
-			if (!this.can('autoban')) return false;
+			if (!this.isRanked('moderator')) return false;
 			var id = toId(arg);
 			if (!id) return this.reply(this.trad('noid'));
 			if (!jokes[id]) return this.reply(this.trad('joke') + ' "' + id + '" ' + this.trad('n'));
@@ -147,7 +147,7 @@ exports.commands = {
 		}
 	},
 	listjokes: function (arg, by, room, cmd) {
-		if (!this.can('jointour')) return false;
+		if (!this.can('joke')) return false;
 		var data = '';
 		for (var i in jokes) {
 			data += i + ' -> ' + jokes[i] + '\n';

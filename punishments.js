@@ -24,7 +24,6 @@ const SHAREDIPS_FILE = 'config/sharedips.tsv';
 const RANGELOCK_DURATION = 60 * 60 * 1000; // 1 hour
 const LOCK_DURATION = 48 * 60 * 60 * 1000; // 48 hours
 const GLOBALBAN_DURATION = 7 * 24 * 60 * 60 * 1000; // 1 week
-const PERMANENT_BAN_DURATION = 10 * 365 * 24 * 60 * 60 * 1000; // 10 years
 const BATTLEBAN_DURATION = 48 * 60 * 60 * 1000; // 48 hours
 
 const ROOMBAN_DURATION = 48 * 60 * 60 * 1000; // 48 hours
@@ -702,49 +701,11 @@ Punishments.ban = function (user, expireTime, id, ...reason) {
 
 	return affected;
 };
-Punishments.permanentBan = function (user, expireTime, id, ...reason) {
-	if (!id) id = user.getLastId();
-
-	if (!expireTime) expireTime = Date.now() + PERMANENT_BAN_DURATION;
-	let punishment = ['PERMABAN', id, expireTime, ...reason];
-
-	let affected = Punishments.punish(user, punishment);
-	for (let curUser of affected) {
-		curUser.locked = id;
-		curUser.disconnectAll();
-	}
-
-	return affected;
-};
-Punishments.offlineBanPunishment = function (user, punishment, recursionKeys) {
-	let keys = recursionKeys || new Set();
-	let affected;
-	if (!recursionKeys) {
-		const [punishType, id, ...rest] = punishment;
-		keys.delete(id);
-		Punishments.appendPunishment({
-			keys: Array.from(keys),
-			punishType: punishType,
-			rest: rest,
-		}, id, PUNISHMENT_FILE);
-		return affected;
-	}
-};
-Punishments.offlineBan = function (userid, expireTime, id, ...reason) {
-	if (!id) id = userid;
-
-	if (!expireTime) expireTime = Date.now() + PERMANENT_BAN_DURATION;
-	let punishment = ['PERMABAN', id, expireTime, ...reason];
-	Punishments.offlineBanPunishment(id, punishment);
-};
 /**
  * @param {string} name
  */
 Punishments.unban = function (name) {
 	return Punishments.unpunish(name, 'BAN');
-};
-Punishments.permanentUnban = function (name) {
-	return Punishments.unpunish(name, 'PERMABAN');
 };
 /**
  * @param {User? | string} user
@@ -1269,7 +1230,7 @@ Punishments.checkName = function (user, userid, registered) {
 	let reason = ``;
 	if (punishment[3]) reason = `||||Reason: ${punishment[3]}`;
 	let appeal = ``;
-	if (Config.appealurl) appeal = `||||You can appeal at: ${Config.appealurl}`;
+	if (Config.appealurl) appeal = `||||Or you can appeal at: ${Config.appealurl}`;
 	let bannedUnder = ``;
 	if (punishUserid !== userid) bannedUnder = ` because you have the same IP as banned user: ${punishUserid}`;
 
@@ -1284,13 +1245,6 @@ Punishments.checkName = function (user, userid, registered) {
 	}
 	if (registered && id === 'BAN') {
 		user.send(`|popup|Your username (${user.name}) is banned${bannedUnder}. Your ban will expire in a few days.${reason}${appeal}`);
-		user.punishmentNotified = true;
-		Punishments.punish(user, punishment);
-		user.disconnectAll();
-		return;
-	}
-	if (registered && id === 'PERMABAN') {
-		user.send(`|popup|Your username (${user.name}) is banned${bannedUnder}.${reason}${appeal}`);
 		user.punishmentNotified = true;
 		Punishments.punish(user, punishment);
 		user.disconnectAll();
@@ -1393,8 +1347,6 @@ Punishments.checkIpBanned = function (connection) {
 	let punishment = Punishments.ipSearch(ip);
 	if (punishment && punishment[0] === 'BAN') {
 		banned = punishment[1];
-	} else if (punishment && punishment[0] === 'PERMABAN') {
-		banned = punishment[1];
 	} else if (Punishments.checkRangeBanned(ip)) {
 		banned = '#ipban';
 	}
@@ -1403,8 +1355,8 @@ Punishments.checkIpBanned = function (connection) {
 	if (banned === '#ipban') {
 		connection.send(`|popup||modal|Your IP (${ip}) is not allowed to connect to PS, because it has been used to spam, hack, or otherwise attack our server.||Make sure you are not using any proxies to connect to PS.`);
 	} else {
-		let appeal = (Config.appealurl ? `||||You can appeal at: ${Config.appealurl}` : ``);
-		connection.send(`|popup||modal|You are banned because you have the same IP (${ip}) as banned user '${banned}'.${appeal}`);
+		let appeal = (Config.appealurl ? `||||Or you can appeal at: ${Config.appealurl}` : ``);
+		connection.send(`|popup||modal|You are banned because you have the same IP (${ip}) as banned user '${banned}'. Your ban will expire in a few days.${appeal}`);
 	}
 	Monitor.notice(`CONNECT BLOCKED - IP BANNED: ${ip} (${banned})`);
 
