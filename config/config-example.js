@@ -907,6 +907,12 @@ exports.grouplist = [
 		voicetourmoderation: true,
 	},
 	{
+		symbol: '\u2605',
+		id: "star",
+		name: "Star",
+		inherit: ' ',
+	},
+	{
 		symbol: ' ',
 		ip: 's',
 		broadcast: true,
