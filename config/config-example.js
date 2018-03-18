@@ -283,7 +283,7 @@ exports.ratedtours = false;
 // appealurl - specify a URL containing information on how users can appeal
 // disciplinary actions on your section. You can also leave this blank, in
 // which case users won't be given any information on how to appeal.
-exports.appealurl = 'http://www.pokecommunity.com/showthread.php?t=289012#seniorstaff';
+exports.appealurl = '';
 
 // repl - whether repl sockets are enabled or not
 // replsocketprefix - the prefix for the repl sockets to be listening on
