@@ -819,7 +819,7 @@ exports.grouplist = [
 		roomonly: true,
 	},
 	{
-		symbol: '\u2605',
+		symbol: '=',
 		id: "host",
 		name: "Host",
 		inherit: '@',
@@ -835,7 +835,7 @@ exports.grouplist = [
 		joinbattle: true,
 	},
 	{
-		symbol: '\u2606',
+		symbol: '-',
 		id: "player",
 		name: "Player",
 		inherit: '+',
@@ -878,9 +878,9 @@ exports.grouplist = [
 		name: "Driver",
 		inherit: '+',
 		jurisdiction: 'u',
-		warn: '\u2606u',
+		warn: '-u',
 		kick: true,
-		mute: '\u2606u',
+		mute: '-u',
 		lock: true,
 		forcerename: true,
 		timer: true,
@@ -902,6 +902,7 @@ exports.grouplist = [
 		tournaments: true,
 		game: true,
 		declare: true,
+		voicetourmoderation: true,
 	},
 	{
 		symbol: ' ',

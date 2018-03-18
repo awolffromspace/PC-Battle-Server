@@ -1462,6 +1462,8 @@ let commands = {
 			this.privateModAction(`${targetUser.name || targetUserid} was unbanned from joining tournaments by ${user.name}.`, `TOURUNBAN: [${targetUser ? targetUser.getLastId() : targetUserid}] by ${user.userid}`);
 			this.modlog('TOUR UNBAN', targetUser, null, {noip: 1, noalts: 1});
 		},
+	},
+	globalmoderation: {
 		allowalts: function (tournament, user) {
 			tournament.allowAlts(this);
 			this.privateModAction("(" + user.name + " allowed alts in the tournament.)");
@@ -1611,6 +1613,14 @@ Chat.commands.tournament = function (paramString, room, user, connection) {
 				return this.errorReply(cmd + " -  Access denied.");
 			}
 			commandHandler = typeof commands.moderation[cmd] === 'string' ? commands.moderation[commands.moderation[cmd]] : commands.moderation[cmd];
+		}
+
+		if (commands.globalmoderation[cmd]) {
+			if (user.can('voicetourmoderation')) {
+				commandHandler = typeof commands.globalmoderation[cmd] === 'string' ? commands.globalmoderation[commands.globalmoderation[cmd]] : commands.globalmoderation[cmd];
+			} else {
+				return this.errorReply(cmd + " -  Access denied.");
+			}
 		}
 
 		if (!commandHandler) {
