@@ -891,13 +891,13 @@ class Tournament {
 		let sizeRequiredToEarn = 3;
 		if (from === winner) {
 			result = 'win';
-			if (tourSize >= sizeRequiredToEarn && this.format !== 'gen71v1' && this.format !== 'gen7challengecup1v1' && this.format !== 'gen71v1random') {
+			if (tourSize >= sizeRequiredToEarn && this.format !== 'gen72v2doubles' && this.format !== 'gen71v1' && this.format !== 'gen7challengecup1v1' && this.format !== 'gen7challengecup2v2' && this.format !== 'gen71v1random' && this.format !== 'gen11v1') {
 				Db.bp.set(from, Db.bp.get(from, 0) + 1);
 				room.add("|raw|<b><font color='" + color + "'>" + Chat.escapeHTML(winner) + "</font> has won " + "<font color='" + color + "'>1</font>" + " Battle Point for winning the tournament battle!</b>");
 			}
 		} else if (to === winner) {
 			result = 'loss';
-			if (tourSize >= sizeRequiredToEarn && this.format !== 'gen71v1' && this.format !== 'gen7challengecup1v1' && this.format !== 'gen71v1random') {
+			if (tourSize >= sizeRequiredToEarn && this.format !== 'gen72v2doubles' && this.format !== 'gen71v1' && this.format !== 'gen7challengecup1v1' && this.format !== 'gen7challengecup2v2' && this.format !== 'gen71v1random' && this.format !== 'gen11v1') {
 				Db.bp.set(to, Db.bp.get(to, 0) + 1);
 				room.add("|raw|<b><font color='" + color + "'>" + Chat.escapeHTML(winner) + "</font> has won " + "<font color='" + color + "'>1</font>" + " Battle Point for winning the tournament battle!</b>");
 			}

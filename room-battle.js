@@ -623,10 +623,10 @@ class Battle {
 			//
 
 			let color = '#45a0e5';
-			if (this.format === 'gen7valentinerandomlotf37') {
+			if (this.format === 'gen7newyearrandomlotf37') {
 				Db.bp.set(winnerid, Db.bp.get(winnerid, 0) + 2);
 				this.room.add("|raw|<b><font color='" + color + "'>" + Chat.escapeHTML(winnerid) + "</font> has won " + "<font color='" + color + "'>2</font>" + " Battle Points for winning the rated Ladder of the Fortnight battle!</b>");
-			} else if (this.format !== 'gen71v1' && this.format !== 'gen7challengecup1v1' && this.format !== 'gen71v1random') {
+			} else if (this.format !== 'gen72v2doubles' && this.format !== 'gen71v1' && this.format !== 'gen7challengecup1v1' && this.format !== 'gen7challengecup2v2' && this.format !== 'gen71v1random' && this.format !== 'gen11v1') {
 				Db.bp.set(winnerid, Db.bp.get(winnerid, 0) + 1);
 				this.room.add("|raw|<b><font color='" + color + "'>" + Chat.escapeHTML(winnerid) + "</font> has won " + "<font color='" + color + "'>1</font>" + " Battle Point for winning the rated battle!</b>");
 			}
