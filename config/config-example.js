@@ -845,6 +845,7 @@ exports.grouplist = [
 		editroom: true,
 		joinbattle: true,
 		nooverride: true,
+		modchatall: true,
 	},
 	{
 		symbol: '*',
@@ -871,6 +872,7 @@ exports.grouplist = [
 		tournamentsmanagement: true,
 		gamemanagement: true,
 		exportinputlog: true,
+		gdeclare: true,
 	},
 	{
 		symbol: '%',
