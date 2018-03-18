@@ -2221,19 +2221,22 @@ exports.commands = {
 		if (!this.canTalk()) return;
 		if (target.length > 2000) return this.errorReply("Declares should not exceed 2000 characters.");
 
-		this.add(`|notify|${room.title} announcement!|${target}`);
+		for (let u in room.users) {
+			if (Users(u).connected) Users(u).sendTo(room, `|notify|${room.title} announcement!|${target}`);
+		}
 		this.add(`|raw|<div class="broadcast-blue"><b>${target}</b></div>`);
 		this.modlog('DECLARE', null, target);
 	},
 	declarehelp: [`/declare [message] - Anonymously announces a message. Requires: # * & ~`],
 
-	html: 'htmldeclare',
 	htmldeclare: function (target, room, user) {
 		if (!target) return this.parse('/help htmldeclare');
-		if (!this.can('declare', null, room)) return false;
+		if (!this.can('gdeclare', null, room)) return false;
 		if (!this.canTalk()) return;
 
-		this.add(`|notify|${room.title} announcement!|${Chat.stripHTML(target)}`);
+		for (let u in room.users) {
+			if (Users(u).connected) Users(u).sendTo(room, `|notify|${room.title} announcement!|${Chat.stripHTML(target)}`);
+		}
 		this.add(`|raw|${target}`);
 		this.modlog(`HTMLDECLARE`, null, target);
 	},
@@ -2264,7 +2267,7 @@ exports.commands = {
 		});
 		this.modlog(`CHATDECLARE`, null, target);
 	},
-	chatdeclarehelp: [`/cdeclare [message] - Anonymously announces a message to all chatrooms on the server. Requires: ~`],
+chatdeclarehelp: [`/cdeclare [message] - Anonymously announces a message to all chatrooms on the server. Requires: ~`],
 
 	'!announce': true,
 	wall: 'announce',
@@ -2491,7 +2494,7 @@ exports.commands = {
 
 		// Notify staff room when a user is banned from battling outside of it.
 		if (room.id !== 'staff' && Rooms('staff')) {
-			Rooms('staff').addByUser(user, `<<${room.id}>>${battlebanMessage}`);
+			Rooms('staff').addByUser(user, `<<${room.id}>> ${battlebanMessage}`);
 		}
 		if (targetUser.trusted) {
 			Monitor.log(`[CrisisMonitor] Trusted user ${targetUser.name} was banned from battling by ${user.name}, and should probably be demoted.`);
@@ -2501,6 +2504,9 @@ exports.commands = {
 		Ladders.cancelSearches(targetUser);
 		Punishments.battleban(targetUser, null, null, reason);
 		targetUser.popup(`|modal|${user.name} has prevented you from starting new battles for 2 days${reasonText}`);
+
+		// Automatically upload replays as evidence/reference to the punishment
+		if (room.battle) this.parse('/savereplay');
 		return true;
 	},
 	battlebanhelp: [`/battleban [username], [reason] - Prevents the user from starting new battles for 2 days and shows them the [reason]. Requires: % @ * & ~`],
@@ -2674,13 +2680,18 @@ exports.commands = {
 		if (!/^[0-9.*]+$/.test(ip)) return this.errorReply("Please enter a valid IP address.");
 
 		if (Punishments.sharedIps.has(ip)) return this.errorReply("This IP is already marked as shared.");
+		if (!note) {
+			this.errorReply(`You must specify who owns this shared IP.`);
+			this.parse(`/help markshared`);
+			return;
+		}
 
 		Punishments.addSharedIp(ip, note);
-		if (note) note = ` (${note})`;
+		note = ` (${note})`;
 		this.globalModlog('SHAREDIP', ip, ` by ${user.name}${note}`);
 		return this.addModAction(`The IP '${ip}' was marked as shared by ${user.name}.${note}`);
 	},
-	marksharedhelp: [`/markshared [ip] - Marks an IP address as shared. Requires @, &, ~`],
+	marksharedhelp: [`/markshared [IP], [owner/organization of IP] - Marks an IP address as shared. Note: the owner/organization (i.e., University of Minnesota) of the shared IP is required. Requires @, &, ~`],
 
 	unmarkshared: function (target, room, user) {
 		if (!target) return this.parse('/help unmarkshared');
@@ -3352,41 +3363,41 @@ exports.commands = {
 		switch (cmd) {
 		case 'hp':
 		case 'h':
-			room.battle.send('eval', "let p=" + getPlayer(targets[0]) + getPokemon(targets[1]) + ";p.sethp(" + parseInt(targets[2]) + ");if (p.isActive)battle.add('-damage',p,p.getHealth);");
+			room.battle.stream.write(`>eval let p=${getPlayer(targets[0]) + getPokemon(targets[1])};p.sethp(${parseInt(targets[2])});if (p.isActive)battle.add('-damage',p,p.getHealth);`);
 			break;
 		case 'status':
 		case 's':
-			room.battle.send('eval', "let pl=" + getPlayer(targets[0]) + ";let p=pl" + getPokemon(targets[1]) + ";p.setStatus('" + toId(targets[2]) + "');if (!p.isActive){battle.add('','please ignore the above');battle.add('-status',pl.active[0],pl.active[0].status,'[silent]');}");
+			room.battle.stream.write(`>eval let pl=${getPlayer(targets[0])};let p=pl${getPokemon(targets[1])};p.setStatus('${toId(targets[2])}');if (!p.isActive){battle.add('','please ignore the above');battle.add('-status',pl.active[0],pl.active[0].status,'[silent]');}`);
 			break;
 		case 'pp':
-			room.battle.send('eval', "let pl=" + getPlayer(targets[0]) + ";let p=pl" + getPokemon(targets[1]) + ";p.moveSlots[p.moves.indexOf('" + toId(targets[2]) + "')].pp = " + parseInt(targets[3]));
+			room.battle.stream.write(`>eval let pl=${getPlayer(targets[0])};let p=pl${getPokemon(targets[1])};p.moveSlots[p.moves.indexOf('${toId(targets[2])}')].pp = ${parseInt(targets[3])};`);
 			break;
 		case 'boost':
 		case 'b':
-			room.battle.send('eval', "let p=" + getPlayer(targets[0]) + getPokemon(targets[1]) + ";battle.boost({" + toId(targets[2]) + ":" + parseInt(targets[3]) + "},p)");
+			room.battle.stream.write(`>eval let p=${getPlayer(targets[0]) + getPokemon(targets[1])};battle.boost({${toId(targets[2])}:${parseInt(targets[3])}},p)`);
 			break;
 		case 'volatile':
 		case 'v':
-			room.battle.send('eval', "let p=" + getPlayer(targets[0]) + getPokemon(targets[1]) + ";p.addVolatile('" + toId(targets[2]) + "')");
+			room.battle.stream.write(`>eval let p=${getPlayer(targets[0]) + getPokemon(targets[1])};p.addVolatile('${toId(targets[2])}')`);
 			break;
 		case 'sidecondition':
 		case 'sc':
-			room.battle.send('eval', "let p=" + getPlayer(targets[0]) + ".addSideCondition('" + toId(targets[1]) + "')");
+			room.battle.stream.write(`>eval let p=${getPlayer(targets[0])}.addSideCondition('${toId(targets[1])}')`);
 			break;
 		case 'fieldcondition': case 'pseudoweather':
 		case 'fc':
-			room.battle.send('eval', "battle.addPseudoWeather('" + toId(targets[0]) + "')");
+			room.battle.stream.write(`>eval battle.addPseudoWeather('${toId(targets[0])}')`);
 			break;
 		case 'weather':
 		case 'w':
-			room.battle.send('eval', "battle.setWeather('" + toId(targets[0]) + "')");
+			room.battle.stream.write(`>eval battle.setWeather('${toId(targets[0])}')`);
 			break;
 		case 'terrain':
 		case 't':
-			room.battle.send('eval', "battle.setTerrain('" + toId(targets[0]) + "')");
+			room.battle.stream.write(`>eval battle.setTerrain('${toId(targets[0])}')`);
 			break;
 		default:
-			this.errorReply("Unknown editbattle command: " + cmd);
+			this.errorReply(`Unknown editbattle command: ${cmd}`);
 			break;
 		}
 	},
