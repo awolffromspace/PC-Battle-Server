@@ -441,7 +441,6 @@ exports.grouplist = [
 		gamemanagement: true,
 		exportinputlog: true,
 		gdeclare: true,
-		clearall: true,
 	},
 	{
 		symbol: '%',
