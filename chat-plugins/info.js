@@ -1273,7 +1273,7 @@ exports.commands = {
 			`- Sylphiel<br />` +
 			`- wolf (wofl)<br /><br />` +
 			`<b>@ Moderators</b><br />` +
-			`N/Ar />` +
+			`N/A<br />` +
 			`<a href="http://www.pokecommunity.com/showthread.php?t=289012#staff">Click here for more details.</a>`
 		);
 	},
