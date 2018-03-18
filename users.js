@@ -26,8 +26,8 @@
 'use strict';
 /** @typedef {GlobalRoom | GameRoom | ChatRoom} Room */
 
-const PLAYER_SYMBOL = '\u2606';
-const HOST_SYMBOL = '\u2605';
+const PLAYER_SYMBOL = '-';
+const HOST_SYMBOL = '=';
 
 const THROTTLE_DELAY = 600;
 const THROTTLE_BUFFER_LIMIT = 6;
