@@ -1,7 +1,7 @@
 'use strict';
 
 // The server ID - a unique ID describing this Showdown server
-exports.serverid = '';
+exports.serverid = 'pokecommunity';
 
 // The server token - to access the login database and ladder on pokemonshowdown.com
 //   This token must be registered for accessing the ladder, but you will
@@ -700,7 +700,7 @@ exports.customavatars = {
 };
 
 // custom avatars appear in profile by specifiying server url.
-exports.avatarurl = '';
+exports.avatarurl = 'http://cbc.pokecommunity.com/config';
 
 // tourroom - specify a room to receive tournament announcements (defaults to
 // the room 'tournaments').
