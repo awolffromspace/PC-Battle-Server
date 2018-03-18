@@ -85,6 +85,11 @@ function label(text) {
 	return bold(font(profileColor, text + ':')) + SPACE;
 }
 
+function currencyName(amount) {
+	let name = " Battle Point";
+	return amount === 1 ? name : name + "s";
+}
+
 function titleCSS(text) {
 	return '<span class="profile-title">' + text + '</span>';
 }
@@ -119,6 +124,10 @@ Profile.prototype.group = function () {
 	return label('Group') + 'Regular User';
 };
 
+Profile.prototype.money = function (amount) {
+	return label('Battle Points') + amount + currencyName(amount);
+};
+
 Profile.prototype.name = function () {
 	return label('Name') + bold(font(color(toId(this.username)), this.username));
 };
@@ -142,12 +151,14 @@ Profile.prototype.show = function (callback) {
 			SPACE + this.title(Db.title.get(userid)) + BR +
 			SPACE + this.name() + BR +
 			SPACE + this.group() + BR +
+			SPACE + this.money(Db.bp.get(userid, 0)) + BR +
 			SPACE + this.seen(Db.seen.get(userid)) +
 			'<br clear="all">';
 	} else {
 		return this.buttonAvatar() +
 			SPACE + this.name() + BR +
 			SPACE + this.group() + BR +
+			SPACE + this.money(Db.bp.get(userid, 0)) + BR +
 			SPACE + this.seen(Db.seen.get(userid)) +
 			'<br clear="all">';
 	}

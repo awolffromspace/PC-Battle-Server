@@ -1263,13 +1263,28 @@ exports.commands = {
 	'!staff': true,
 	staff: function (target, room, user) {
 		if (!this.runBroadcast()) return;
-		this.sendReplyBox(`<a href="http://www.smogon.com/sim/staff_list">Pok&eacute;mon Showdown Staff List</a>`);
+		this.sendReplyBox(
+			`<b>~ Administrators</b><br />` +
+			`- 5qwerty<br />` +
+			`- adventure (Doctor Rika)<br />` +
+			`- Choice Specs (Choice Specs, Michonne)<br />` +
+			`- Dragon (Aerithhh, Captain Syrup, Esper Terra, Futabaa Sakura)<br />` +
+			`- Sheep (Cirnysheep, mareep)<br />` +
+			`- Sylphiel<br />` +
+			`- wolf (wofl)<br /><br />` +
+			`<b>@ Moderators</b><br />` +
+			`N/Ar />` +
+			`<a href="http://www.pokecommunity.com/showthread.php?t=289012#staff">Click here for more details.</a>`
+		);
 	},
 
 	'!forums': true,
 	forums: function (target, room, user) {
 		if (!this.runBroadcast()) return;
-		this.sendReplyBox(`<a href="http://www.smogon.com/forums/forums/209/">Pok&eacute;mon Showdown Forums</a>`);
+		this.sendReplyBox(
+			`- <a href="http://www.pokecommunity.com">The Pok&eacute;Community Forums</a><br />` +
+			`- <a href="http://www.smogon.com/forums/forums/209/">Pok&eacute;mon Showdown Forums</a>`
+		);
 	},
 
 	'!privacypolicy': true,
@@ -1334,6 +1349,7 @@ exports.commands = {
 		if (!this.runBroadcast()) return;
 		this.sendReplyBox(
 			`New to competitive Pok&eacute;mon?<br />` +
+			`- <a href="https://www.pokecommunity.com/showthread.php?t=397587#resources">PC's Competitive Pok&eacute;mon Resources</a><br />` +
 			`- <a href="http://www.smogon.com/forums/threads/3496279/">Beginner's Guide to Pok&eacute;mon Showdown</a><br />` +
 			`- <a href="http://www.smogon.com/dp/articles/intro_comp_pokemon">An introduction to competitive Pok&eacute;mon</a><br />` +
 			`- <a href="http://www.smogon.com/bw/articles/bw_tiers">What do 'OU', 'UU', etc mean?</a><br />` +
@@ -1600,7 +1616,7 @@ exports.commands = {
 			this.sendReplyBox(
 				`Please follow the rules:<br />` +
 				(room && room.rulesLink ? Chat.html`- <a href="${room.rulesLink}">${room.title} room rules</a><br />` : ``) +
-				`- <a href="https://pokemonshowdown.com/rules">${room && room.rulesLink ? "Global rules" : "Rules"}</a>`
+				`- <a href="https://www.pokecommunity.com/showthread.php?t=289012">${room && room.rulesLink ? "Global rules" : "PC Battle Server Rules"}</a>`
 			);
 			return;
 		}
