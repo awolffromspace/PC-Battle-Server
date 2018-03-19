@@ -1633,7 +1633,7 @@ class RandomTeams extends Dex.ModdedDex {
 				if (template.gen <= this.gen && !template.isMega && !template.isPrimal && !template.isNonstandard && template.randomBattleMoves && (types.indexOf('Ice') >= 0 || types.indexOf('Fire') >= 0)) {
 					pokemonPool.push(id);
 				}
-			} else if (this.format.id === 'gen7valentinerandom' || this.format.id === 'gen7valentinerandomlotf37') {
+			} else if (this.format.id === 'gen7valentinerandom') {
 				let colors = template.color;
 				if (template.gen <= this.gen && !template.isMega && !template.isPrimal && !template.isNonstandard && template.randomBattleMoves && colors.indexOf('Pink') >= 0) {
 					pokemonPool.push(id);
@@ -1741,7 +1741,7 @@ class RandomTeams extends Dex.ModdedDex {
 				}
 			}
 
-			if (this.format.id === 'gen7valentinerandom' || this.format.id === 'gen7valentinerandomlotf37') {
+			if (this.format.id === 'gen7valentinerandom') {
 				let luvdisc = this.getTemplate('luvdisc')
 				if (pokemon.length === 0) {
 					template = luvdisc;
@@ -1856,7 +1856,7 @@ class RandomTeams extends Dex.ModdedDex {
 				}
 			}
 		}
-		if (this.format.id === 'gen7valentinerandom' || this.format.id === 'gen7valentinerandomlotf37') {
+		if (this.format.id === 'gen7valentinerandom') {
 			for (let i = 0; i < pokemon.length; i++) {
 				pokemon[i].moves[4] = 'Attract';
 			}
