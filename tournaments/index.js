@@ -130,8 +130,7 @@ class Tournament {
 		let unbans = [];
 		let addedRules = [];
 		let removedRules = [];
-		for (let i = 0; i < this.customRules.length; i++) {
-			let ban = this.customRules[i];
+		for (const ban of this.customRules) {
 			let charAt0 = ban.charAt(0);
 			if (charAt0 === '+') {
 				unbans.push(ban.substr(1));
@@ -156,8 +155,8 @@ class Tournament {
 			if (this.autoDisqualifyTimer) clearTimeout(this.autoDisqualifyTimer);
 			this.inProgressMatches.forEach(match => {
 				if (match) {
-					delete match.room.tour;
-					delete match.room.parent;
+					match.room.tour = null;
+					match.room.parent = null;
 					match.room.addRaw("<div class=\"broadcast-red\"><b>The tournament was forcefully ended.</b><br />You can finish playing, but this battle is no longer considered a tournament battle.</div>");
 				}
 			});
@@ -567,7 +566,8 @@ class Tournament {
 		if (matchFrom) {
 			this.generator.setUserBusy(matchFrom.to, false);
 			this.inProgressMatches.set(player, null);
-			delete matchFrom.room.tour;
+			matchFrom.room.tour = null;
+			matchFrom.room.parent = null;
 			if (matchFrom.room.battle) matchFrom.room.battle.forfeit(player.userid);
 		}
 
@@ -578,7 +578,8 @@ class Tournament {
 		if (matchTo) {
 			this.generator.setUserBusy(matchTo, false);
 			let matchRoom = this.inProgressMatches.get(matchTo).room;
-			delete matchRoom.tour;
+			matchRoom.tour = null;
+			matchRoom.parent = null;
 			if (matchRoom.battle) matchRoom.battle.forfeit(player.userid);
 			this.inProgressMatches.set(matchTo, null);
 		}
@@ -796,6 +797,7 @@ class Tournament {
 			lobbyTour = true;
 		}
 		let room = Rooms.createBattle(this.teambuilderFormat, {
+			isPrivate: this.room.isPrivate,
 			p1: from,
 			p1team: challenge.team,
 			p2: user,
@@ -845,15 +847,17 @@ class Tournament {
 	onBattleJoin(room, user) {
 		if (this.scouting || this.isEnded || user.latestIp === room.p1.latestIp || user.latestIp === room.p2.latestIp) return;
 		if (user.can('makeroom')) return;
-		let users = this.generator.getUsers(true);
-		for (let i = 0; i < users.length; i++) {
-			let otherUser = Users.get(users[i].userid);
+		for (const targetUser of this.generator.getUsers(true)) {
+			let otherUser = Users.get(targetUser.userid);
 			if (otherUser && otherUser.latestIp === user.latestIp) {
 				return "Scouting is banned: tournament players can't watch other tournament battles.";
 			}
 		}
 	}
 	onBattleWin(room, winnerid) {
+		room.tour = null;
+		room.parent = null;
+
 		let from = this.players[room.p1.userid];
 		let to = this.players[room.p2.userid];
 		let winner = this.players[winnerid];
@@ -1057,7 +1061,7 @@ let commands = {
 			if (tournament.customRules.length < 1) {
 				return this.errorReply("The tournament does not have any custom rules.");
 			}
-			this.sendReplyBox("This tournament includes:<br />" + tournament.getCustomRules());
+			this.sendReply("|html|<div class='infobox infobox-limited'>This tournament includes:<br />" + tournament.getCustomRules() + "</div>");
 		},
 	},
 	creation: {
@@ -1146,8 +1150,8 @@ let commands = {
 				return this.errorReply("The custom rules cannot be changed once the tournament has started.");
 			}
 			if (tournament.setCustomRules(params, this)) {
-				this.room.addRaw("<div class='infobox'>This tournament includes:<br />" + tournament.getCustomRules() + "</div>");
-				this.privateModAction("(" + user.name + " set the tournament's custom rules to " + tournament.customRules.join(", ") + ".)");
+				this.room.addRaw("<div class='infobox infobox-limited'>This tournament includes:<br />" + tournament.getCustomRules() + "</div>");
+				this.privateModAction("(" + user.name + " updated the tournament's custom rules.)");
 				this.modlog('TOUR RULES', null, tournament.customRules.join(", "));
 			}
 		},
@@ -1383,7 +1387,7 @@ let commands = {
 
 			Punishments.roomUnpunish(this.room, targetUser, 'TOURBAN');
 			tournament.removeBannedUser(targetUser);
-			this.privateModAction(`${targetUser.name || targetUserid} was unbanned from joining tournaments by ${user.name}.`, `TOURUNBAN: [${targetUser ? targetUser.getLastId() : targetUserid}] by ${user.userid}`);
+			this.privateModAction(`${targetUser.name || targetUserid} was unbanned from joining tournaments by ${user.name}.`);
 			this.modlog('TOUR UNBAN', targetUser, null, {noip: 1, noalts: 1});
 		},
 		allowalts: function (tournament, user) {
@@ -1419,7 +1423,7 @@ Chat.commands.tournament = function (paramString, room, user, connection) {
 	} else if (cmd === 'help') {
 		return this.parse('/help tournament');
 	} else if (this.meansYes(cmd)) {
-		if (!this.can('tournamentsmanagement', null, room)) return;
+		if (!this.can('gamemanagement', null, room)) return;
 		let rank = params[0];
 		if (rank && rank === '@') {
 			if (room.toursEnabled === true) return this.errorReply("Tournaments are already enabled for @ and above in this room.");
@@ -1441,7 +1445,7 @@ Chat.commands.tournament = function (paramString, room, user, connection) {
 			return this.errorReply("Tournament enable setting not recognized.  Valid options include [%|@].");
 		}
 	} else if (this.meansNo(cmd)) {
-		if (!this.can('tournamentsmanagement', null, room)) return;
+		if (!this.can('gamemanagement', null, room)) return;
 		if (!room.toursEnabled) {
 			return this.errorReply("Tournaments are already disabled.");
 		}
@@ -1452,7 +1456,7 @@ Chat.commands.tournament = function (paramString, room, user, connection) {
 		}
 		return this.sendReply("Tournaments are now disabled.");
 	} else if (cmd === 'announce' || cmd === 'announcements') {
-		if (!this.can('tournamentsmanagement', null, room)) return;
+		if (!this.can('gamemanagement', null, room)) return;
 		if (!Config.tourannouncements.includes(room.id)) {
 			return this.errorReply("Tournaments in this room cannot be announced.");
 		}
@@ -1487,9 +1491,9 @@ Chat.commands.tournament = function (paramString, room, user, connection) {
 		if (room.toursEnabled === true) {
 			if (!this.can('tournaments', null, room)) return;
 		} else if (room.toursEnabled === '%') {
-			if (!this.can('tournamentsmoderation', null, room)) return;
+			if (!this.can('gamemoderation', null, room)) return;
 		} else {
-			if (!user.can('tournamentsmanagement', null, room)) {
+			if (!user.can('gamemanagement', null, room)) {
 				return this.errorReply("Tournaments are disabled in this room (" + room.id + ").");
 			}
 		}
@@ -1521,9 +1525,9 @@ Chat.commands.tournament = function (paramString, room, user, connection) {
 			if (room.toursEnabled === true) {
 				if (!this.can('tournaments', null, room)) return;
 			} else if (room.toursEnabled === '%') {
-				if (!this.can('tournamentsmoderation', null, room)) return;
+				if (!this.can('gamemoderation', null, room)) return;
 			} else {
-				if (!user.can('tournamentsmanagement', null, room)) {
+				if (!user.can('gamemanagement', null, room)) {
 					return this.errorReply("Tournaments are disabled in this room (" + room.id + ").");
 				}
 			}
@@ -1531,7 +1535,7 @@ Chat.commands.tournament = function (paramString, room, user, connection) {
 		}
 
 		if (commands.moderation[cmd]) {
-			if (!user.can('tournamentsmoderation', null, room)) {
+			if (!user.can('gamemoderation', null, room)) {
 				return this.errorReply(cmd + " -  Access denied.");
 			}
 			commandHandler = typeof commands.moderation[cmd] === 'string' ? commands.moderation[commands.moderation[cmd]] : commands.moderation[cmd];
@@ -1570,7 +1574,7 @@ Chat.commands.tournamenthelp = function (target, room, user) {
 		`- announce/announcements &lt;on|off>: Enables/disables tournament announcements for the current room.<br />` +
 		`- banuser/unbanuser &lt;user>: Bans/unbans a user from joining tournaments in this room. Lasts 2 weeks.<br />` +
 		`- allowalts/disallowalts: Allows/disallows users with shared IPs to join.<br />` +
-		`More detailed help can be found <a href="http://www.smogon.com/forums/threads/3570628/#post-6777489">here</a>`
+		`More detailed help can be found <a href="https://www.smogon.com/forums/threads/3570628/#post-6777489">here</a>`
 	);
 };
 

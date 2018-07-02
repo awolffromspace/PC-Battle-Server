@@ -344,6 +344,8 @@ class CommandContext {
 			target = '';
 		}
 
+		if (cmd.endsWith(',')) cmd = cmd.slice(0, -1);
+
 		let curCommands = Chat.commands;
 		let commandHandler;
 		let fullCmd = cmd;
@@ -641,11 +643,11 @@ class CommandContext {
 	}
 	/**
 	 * @param {string} action
-	 * @param {string | User} user
-	 * @param {string} note
+	 * @param {string | User?} user
+	 * @param {string?} note
 	 * @param {object} options
 	 */
-	modlog(action, user, note, options = {}) {
+	modlog(action, user, note = null, options = {}) {
 		let buf = `(${this.room.id}) ${action}: `;
 		if (user) {
 			if (typeof user === 'string') {
@@ -690,10 +692,10 @@ class CommandContext {
 	}
 	/**
 	 * @param {string} permission
-	 * @param {string | User} target
-	 * @param {BasicChatRoom} room
+	 * @param {string | User?} target
+	 * @param {BasicChatRoom?} room
 	 */
-	can(permission, target, room) {
+	can(permission, target = null, room = null) {
 		if (!this.user.can(permission, target, room)) {
 			this.errorReply(this.cmdToken + this.fullCmd + " - Access denied.");
 			return false;
@@ -701,27 +703,30 @@ class CommandContext {
 		return true;
 	}
 	/**
+	 * @param {?boolean} ignoreCooldown
 	 * @param {?string} suppressMessage
 	 */
-	canBroadcast(suppressMessage) {
+	canBroadcast(ignoreCooldown, suppressMessage) {
 		if (!this.broadcasting && this.cmdToken === BROADCAST_TOKEN) {
+			// @ts-ignore
 			if (!this.pmTarget && !this.user.can('broadcast', null, this.room)) {
 				this.errorReply("You need to be voiced to broadcast this command's information.");
 				this.errorReply("To see it for yourself, use: /" + this.message.substr(1));
 				return false;
 			}
 
-			if (this.room && this.room.lastBroadcast === this.broadcastMessage &&
-					this.room.lastBroadcastTime >= Date.now() - BROADCAST_COOLDOWN) {
+			// broadcast cooldown
+			const broadcastMessage = (suppressMessage || this.message).toLowerCase().replace(/[^a-z0-9\s!,]/g, '');
+
+			if (!ignoreCooldown && this.room && this.room.lastBroadcast === broadcastMessage &&
+					this.room.lastBroadcastTime >= Date.now() - BROADCAST_COOLDOWN &&
+					!this.user.can('bypassall')) {
 				this.errorReply("You can't broadcast this because it was just broadcasted.");
 				return false;
 			}
 
-			let message = this.canTalk(suppressMessage || this.message);
+			const message = this.canTalk(suppressMessage || this.message);
 			if (!message) return false;
-
-			// broadcast cooldown
-			let broadcastMessage = message.toLowerCase().replace(/[^a-z0-9\s!,]/g, '');
 
 			this.message = message;
 			this.broadcastMessage = broadcastMessage;
@@ -729,9 +734,10 @@ class CommandContext {
 		return true;
 	}
 	/**
-	 * @param {?string} suppressMessage
+	 * @param {boolean} [ignoreCooldown = false]
+	 * @param {?string} [suppressMessage = null]
 	 */
-	runBroadcast(suppressMessage) {
+	runBroadcast(ignoreCooldown = false, suppressMessage = null) {
 		if (this.broadcasting || this.cmdToken !== BROADCAST_TOKEN) {
 			// Already being broadcast, or the user doesn't intend to broadcast.
 			return true;
@@ -739,7 +745,7 @@ class CommandContext {
 
 		if (!this.broadcastMessage) {
 			// Permission hasn't been checked yet. Do it now.
-			if (!this.canBroadcast(suppressMessage)) return false;
+			if (!this.canBroadcast(ignoreCooldown, suppressMessage)) return false;
 		}
 
 		this.broadcasting = true;
@@ -749,7 +755,7 @@ class CommandContext {
 		} else {
 			this.sendReply('|c|' + this.user.getIdentity(this.room.id) + '|' + (suppressMessage || this.message));
 		}
-		if (!this.pmTarget) {
+		if (!ignoreCooldown && !this.pmTarget) {
 			this.room.lastBroadcast = this.broadcastMessage;
 			this.room.lastBroadcastTime = Date.now();
 		}
@@ -777,11 +783,12 @@ class CommandContext {
 		return false;
 	}
 	/**
-	 * @param {string} message
+	 * @param {string?} message
 	 * @param {BasicChatRoom?} [room]
 	 * @param {User?} [targetUser]
 	 */
-	canTalk(message, room, targetUser) {
+	canTalk(message = null, room = null, targetUser = null) {
+		// @ts-ignore
 		if (!room) room = this.room;
 		if (!targetUser && this.pmTarget) {
 			room = null;
@@ -805,7 +812,7 @@ class CommandContext {
 			if (room) {
 				if (lockType && !room.isHelp) {
 					this.errorReply(`You are ${lockType} and can't talk in chat. ${lockExpiration}`);
-					// this.sendReply(`|html|<a href="view-help-request-appeal-lock" class="button">Get help with this</a>`);
+					this.sendReply(`|html|<a href="view-help-request--appeal" class="button">Get help with this</a>`);
 					return false;
 				}
 				if (room.isMuted(user)) {
@@ -844,8 +851,9 @@ class CommandContext {
 				if (targetUser.ignorePMs && targetUser.ignorePMs !== user.group && !user.can('lock')) {
 					if (!targetUser.can('lock')) {
 						return this.errorReply(`This user is blocking private messages right now.`);
-					} else if (targetUser.can('bypassall')) {
-						return this.errorReply(`This admin is too busy to answer private messages right now. Please contact a different staff member.`);
+					} else {
+						this.errorReply(`This ${Config.groups[targetUser.group].name} is too busy to answer private messages right now. Please contact a different staff member.`);
+						return this.sendReply(`|html|If you need help, try opening a <a href="view-help-request" class="button">help ticket</a>`);
 					}
 				}
 				if (user.ignorePMs && user.ignorePMs !== targetUser.group && !targetUser.can('lock')) {
@@ -939,13 +947,14 @@ class CommandContext {
 	 * @param {string} uri
 	 * @param {boolean} isRelative
 	 */
-	canEmbedURI(uri, isRelative) {
+	canEmbedURI(uri, isRelative = false) {
 		if (uri.startsWith('https://')) return uri;
 		if (uri.startsWith('//')) return uri;
 		if (uri.startsWith('data:')) return uri;
 		if (!uri.startsWith('http://')) {
 			if (/^[a-z]+:\/\//.test(uri) || isRelative) {
-				return this.errorReply("URIs must begin with 'https://' or 'http://' or 'data:'");
+				this.errorReply("URIs must begin with 'https://' or 'http://' or 'data:'");
+				return null;
 			}
 		} else {
 			uri = uri.slice(7);
@@ -974,7 +983,8 @@ class CommandContext {
 			return '//' + uri;
 		}
 		if (domain === 'bit.ly') {
-			return this.errorReply("Please don't use URL shorteners.");
+			this.errorReply("Please don't use URL shorteners.");
+			return null;
 		}
 		// unknown URI, allow HTTP to be safe
 		return 'http://' + uri;
@@ -990,7 +1000,7 @@ class CommandContext {
 		while ((match = images.exec(html))) {
 			if (this.room.isPersonal && !this.user.can('announce')) {
 				this.errorReply("Images are not allowed in personal rooms.");
-				return false;
+				return null;
 			}
 			if (!/width=([0-9]+|"[0-9]+")/i.test(match[0]) || !/height=([0-9]+|"[0-9]+")/i.test(match[0])) {
 				// Width and height are required because most browsers insert the
@@ -998,12 +1008,12 @@ class CommandContext {
 				// image is loaded, this changes the height of the chat area, which
 				// messes up autoscrolling.
 				this.errorReply('All images must have a width and height attribute');
-				return false;
+				return null;
 			}
 			let srcMatch = /src\s*=\s*"?([^ "]+)(\s*")?/i.exec(match[0]);
 			if (srcMatch) {
 				let uri = this.canEmbedURI(srcMatch[1], true);
-				if (!uri) return false;
+				if (!uri) return null;
 				html = html.slice(0, match.index + srcMatch.index) + 'src="' + uri + '"' + html.slice(match.index + srcMatch.index + srcMatch[0].length);
 				// lastIndex is inaccurate since html was changed
 				images.lastIndex = match.index + 11;
@@ -1012,7 +1022,7 @@ class CommandContext {
 		if ((this.room.isPersonal || this.room.isPrivate === true) && !this.user.can('lock') && html.replace(/\s*style\s*=\s*"?[^"]*"\s*>/g, '>').match(/<button[^>]/)) {
 			this.errorReply('You do not have permission to use scripted buttons in HTML.');
 			this.errorReply('If you just want to link to a room, you can do this: <a href="/roomid"><button>button contents</button></a>');
-			return false;
+			return null;
 		}
 
 		// check for mismatched tags
@@ -1023,11 +1033,11 @@ class CommandContext {
 				if (tag.charAt(1) === '/') {
 					if (!stack.length) {
 						this.errorReply("Extraneous </" + tag.substr(2) + "> without an opening tag.");
-						return false;
+						return null;
 					}
 					if (tag.substr(2) !== stack.pop()) {
 						this.errorReply("Missing </" + tag.substr(2) + "> or it's in the wrong place.");
-						return false;
+						return null;
 					}
 				} else {
 					stack.push(tag.substr(1));
@@ -1035,7 +1045,7 @@ class CommandContext {
 			}
 			if (stack.length) {
 				this.errorReply("Missing </" + stack.pop() + ">.");
-				return false;
+				return null;
 			}
 		}
 
@@ -1151,14 +1161,14 @@ Chat.uncacheTree = function (root) {
 	do {
 		/** @type {string[]} */
 		let newuncache = [];
-		for (let i = 0; i < uncache.length; ++i) {
-			if (require.cache[uncache[i]]) {
+		for (const target of uncache) {
+			if (require.cache[target]) {
 				newuncache.push.apply(newuncache,
-					require.cache[uncache[i]].children
+					require.cache[target].children
 						.filter(/** @param {{id: string}} cachedModule */ cachedModule => !cachedModule.id.endsWith('.node'))
 						.map(/** @param {{id: string}} cachedModule */ cachedModule => cachedModule.id)
 				);
-				delete require.cache[uncache[i]];
+				delete require.cache[target];
 			}
 		}
 		uncache = newuncache;
@@ -1446,6 +1456,7 @@ Chat.getDataPokemonHTML = function (template, gen = 7, tier = '') {
 	}
 	let bst = 0;
 	for (let i in template.baseStats) {
+		// @ts-ignore
 		bst += template.baseStats[i];
 	}
 	buf += '<span style="float:left;min-height:26px">';
