@@ -826,7 +826,7 @@ let Formats = [
 
 		mod: 'gen1',
 		team: 'randomCC',
-		ruleset: ['Pokemon', 'HP Percentage Mod', 'Cancel Mod', 'Team Preview'],
+		ruleset: ['Pokemon', 'HP Percentage Mod', 'Cancel Mod'],
 	},
 	{
 		name: "[Gen 7] 1v1 Random",
@@ -1001,15 +1001,6 @@ let Formats = [
 		mod: 'gen2',
 		// searchShow: false,
 		ruleset: ['Pokemon', 'Standard'],
-	},
-	{
-		name: "[Gen 1] Challenge Cup",
-
-		mod: 'gen1',
-		team: 'randomCC',
-		// searchShow: false,
-		challengeShow: false,
-		ruleset: ['Pokemon', 'HP Percentage Mod', 'Cancel Mod'],
 	},
 
 	// Past Gens OU
