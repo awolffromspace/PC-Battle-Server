@@ -101,7 +101,7 @@ function merge(user1, user2) {
  * Usage:
  *   Users.get(userid or username)
  *
- * Returns the corresponding User object, or undefined if no matching
+ * Returns the corresponding User object, or null if no matching
  * was found.
  *
  * By default, this function will track users across name changes.
@@ -116,7 +116,7 @@ function merge(user1, user2) {
 function getUser(name, exactName = false) {
 	if (!name || name === '!') return null;
 	// @ts-ignore
-	if (name && name.userid) return name;
+	if (name.userid) return name;
 	let userid = toId(name);
 	let i = 0;
 	if (!exactName) {
@@ -465,7 +465,9 @@ class User {
 		this.locked = false;
 		/** @type {?false | string} */
 		this.semilocked = false;
+		/** @type {?boolean} */
 		this.namelocked = false;
+		/** @type {?false | string} */
 		this.permalocked = false;
 		this.prevNames = Object.create(null);
 		this.inRooms = new Set();
@@ -513,6 +515,9 @@ class User {
 		this.lockNotified = false;
 		/**@type {string} */
 		this.autoconfirmed = '';
+		// Used in punishments
+		/** @type {string} */
+		this.trackRename = '';
 		// initialize
 		Users.add(this);
 	}
@@ -601,7 +606,8 @@ class User {
 			return true;
 		}
 
-		let group = ' ';
+		/** @type {string} */
+		let group;
 		let targetGroup = '';
 		let targetUser = null;
 
@@ -614,6 +620,7 @@ class User {
 		if (room && room.auth) {
 			group = room.getAuth(this);
 			if (targetUser) targetGroup = room.getAuth(targetUser);
+			if (room.isPrivate === true && this.can('makeroom')) group = this.group;
 		} else {
 			group = this.group;
 			if (targetUser) targetGroup = targetUser.group;
@@ -717,7 +724,9 @@ class User {
 	 * @param {Connection} connection The connection asking for the rename
 	 */
 	async rename(name, token, newlyRegistered, connection) {
+		let userid = toId(name);
 		for (const roomid of this.games) {
+			if (userid === this.userid) break;
 			const game = Rooms(roomid).game;
 			if (!game || game.ended) continue; // should never happen
 			if (game.allowRenames || !this.named) continue;
@@ -743,7 +752,6 @@ class User {
 			return false;
 		}
 
-		let userid = toId(name);
 		if (userid.length > 18) {
 			this.send(`|nametaken||Your name must be 18 characters or shorter.`);
 			return false;
@@ -944,7 +952,7 @@ class User {
 		this.name = name;
 
 		let joining = !this.named;
-		this.named = !userid.startsWith('guest') || this.namelocked;
+		this.named = !userid.startsWith('guest') || !!this.namelocked;
 
 		for (const connection of this.connections) {
 			//console.log('' + name + ' renaming: socket ' + i + ' of ' + this.connections.length);
@@ -1700,5 +1708,5 @@ let Users = Object.assign(getUser, {
 	}, 1000 * 60 * 30),
 	socketConnect: socketConnect,
 });
-
+// @ts-ignore
 module.exports = Users;

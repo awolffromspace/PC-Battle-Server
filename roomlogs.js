@@ -184,14 +184,35 @@ class Roomlog {
 		return false;
 	}
 	/**
+	 * @param {string[]} userids
+	 */
+	clearText(userids) {
+		const messageStart = this.logTimes ? '|c:|' : '|c|';
+		const section = this.logTimes ? 4 : 3; // ['', 'c' timestamp?, author, message]
+		/** @type {string[]} */
+		let cleared = [];
+		this.log = this.log.filter(line => {
+			if (line.startsWith(messageStart)) {
+				const parts = Chat.splitFirst(line, '|', section);
+				const userid = toId(parts[section - 1]);
+				if (userids.includes(userid)) {
+					if (!cleared.includes(userid)) cleared.push(userid);
+					return false;
+				}
+			}
+			return true;
+		});
+		return cleared;
+	}
+	/**
 	 * @param {string} message
 	 */
 	uhtmlchange(message) {
-		let thirdPipe = message.indexOf('|', 13);
-		let originalStart = '|uhtml|' + message.slice(13, thirdPipe + 1);
-		for (let line of this.log) {
+		const thirdPipe = message.indexOf('|', 13);
+		const originalStart = '|uhtml|' + message.slice(13, thirdPipe + 1);
+		for (const [i, line] of this.log.entries()) {
 			if (line.startsWith(originalStart)) {
-				line = originalStart + message.slice(thirdPipe + 1);
+				this.log[i] = originalStart + message.slice(thirdPipe + 1);
 				break;
 			}
 		}

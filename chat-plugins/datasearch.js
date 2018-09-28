@@ -755,7 +755,7 @@ function runMovesearch(target, cmd, canAll, message) {
 	let allCategories = ['physical', 'special', 'status'];
 	let allContestTypes = ['beautiful', 'clever', 'cool', 'cute', 'tough'];
 	let allProperties = ['basePower', 'accuracy', 'priority', 'pp'];
-	let allFlags = ['authentic', 'bite', 'bullet', 'contact', 'defrost', 'powder', 'protect', 'pulse', 'punch', 'secondary', 'snatch', 'sound'];
+	let allFlags = ['authentic', 'bite', 'bullet', 'contact', 'dance', 'defrost', 'powder', 'protect', 'pulse', 'punch', 'secondary', 'snatch', 'sound'];
 	let allStatus = ['psn', 'tox', 'brn', 'par', 'frz', 'slp'];
 	let allVolatileStatus = ['flinch', 'confusion', 'partiallytrapped'];
 	let allBoosts = ['hp', 'atk', 'def', 'spa', 'spd', 'spe', 'accuracy', 'evasion'];
@@ -1204,10 +1204,12 @@ function runItemsearch(target, cmd, canAll, message) {
 	let showAll = false;
 
 	target = target.trim();
-	if (target.substr(target.length - 5) === ', all') {
+	const lastCommaIndex = target.lastIndexOf(',');
+	const lastArgumentSubstr = target.substr(lastCommaIndex + 1).trim();
+	if (lastArgumentSubstr === 'all') {
 		if (!canAll) return {reply: "A search ending in ', all' cannot be broadcast."};
 		showAll = true;
-		target = target.substr(0, target.length - 5);
+		target = target.substr(0, lastCommaIndex);
 	}
 
 	target = target.toLowerCase().replace('-', ' ').replace(/[^a-z0-9.\s/]/g, '');
@@ -1377,27 +1379,13 @@ function runItemsearch(target, cmd, canAll, message) {
 				if (descWords.includes(word)) matched++;
 			}
 
-			if (matched >= bestMatched && matched >= (searchedWords.length * 3 / 5)) foundItems.push(item.name);
-			if (matched > bestMatched) bestMatched = matched;
-		}
-
-		// iterate over found items again to make sure they all are the best match
-		for (let [i, id] of foundItems.entries()) {
-			let item = Dex.getItem(id);
-			let matched = 0;
-			let descWords = item.desc;
-			if (/[1-9.]+x/.test(descWords)) descWords += ' increases';
-			if (item.isBerry) descWords += ' berry';
-			descWords = descWords.replace(/super[-\s]effective/g, 'supereffective');
-			descWords = descWords.toLowerCase().replace('-', ' ').replace(/[^a-z0-9\s/]/g, '').replace(/(\D)\./, (p0, p1) => p1).split(' ');
-
-			for (const word of searchedWords) {
-				if (descWords.includes(word)) matched++;
-			}
-
-			if (matched !== bestMatched) {
-				foundItems.splice(i, 1);
-				i--;
+			if (matched >= (searchedWords.length * 3 / 5)) {
+				if (matched === bestMatched) {
+					foundItems.push(item.name);
+				} else if (matched > bestMatched) {
+					foundItems = [item.name];
+					bestMatched = matched;
+				}
 			}
 		}
 	}
@@ -1436,6 +1424,8 @@ function runLearn(target, cmd) {
 			format = Dex.getFormat(targetid);
 			formatid = targetid;
 			formatName = format.name;
+			targets.shift();
+			continue;
 		}
 		if (targetid.startsWith('gen') && parseInt(targetid.charAt(3))) {
 			gen = parseInt(targetid.slice(3));
@@ -1452,12 +1442,14 @@ function runLearn(target, cmd) {
 		}
 		break;
 	}
-	if (!formatid) format = new Dex.Data.Format(format);
-	if (!formatid) formatid = 'gen' + gen + 'ou';
-	if (!formatName) formatName = 'Gen ' + gen;
+	if (!formatName) {
+		format = new Dex.Data.Format(format, {mod: `gen${gen}`});
+		formatName = `Gen ${gen}`;
+		if (format.requirePentagon) formatName += ' Pentagon';
+	}
 	let lsetData = {set: {}, sources: [], sourcesBefore: gen};
 
-	const validator = TeamValidator(formatid);
+	const validator = TeamValidator(format);
 	let template = validator.dex.getTemplate(targets.shift());
 	let move = {};
 	let all = (cmd === 'learnall');
