@@ -636,6 +636,23 @@ let Formats = [
 		column: 3,
 	},
 	{
+		name: "[Gen 7] OU w/ Primal Groudon",
+
+		mod: 'gen7',
+		ruleset: ['Pokemon', 'Standard', 'Team Preview'],
+		banlist: ['Arena Trap', 'Power Construct', 'Shadow Tag', 'Baton Pass'],
+		onValidateTeam: function (team) {
+			let groudon = 0;
+			for (const set of team) {
+				let template = this.getTemplate(set.species || set.name);
+				if (template.species === 'Groudon' && set.item === 'Red Orb') {
+					groudon++;
+				}
+			}
+			if (groudon < 1) return ["You must have one Primal Groudon."];
+		},
+	},
+	{
 		name: "[Gen 7] Balanced Hackmons",
 		desc: `Anything that can be hacked in-game and is usable in local battles is allowed.`,
 		threads: [
@@ -853,6 +870,13 @@ let Formats = [
 		column: 2,
 	},
 	{
+		name: "[Gen 7] Let's Go Random",
+
+		mod: 'gen7',
+		team: 'random',
+		ruleset: ['[Gen 7] Random (no PotD)'],
+	},
+	{
 		name: "[Gen 7] New Year Random",
 
 		mod: 'gen7',
@@ -860,7 +884,7 @@ let Formats = [
 		ruleset: ['[Gen 7] Random (no PotD)'],
 	},
 	{
-		name: "[Gen 7] Valentine Random",
+		name: "[Gen 7] Luvdisc Random",
 
 		mod: 'valentinerandom',
 		team: 'random',
