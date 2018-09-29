@@ -198,6 +198,7 @@ let BattleFormatsData = {
 		tier: "LC",
 	},
 	rattataalola: {
+		randomBattleMoves: ["doubleedge", "return", "suckerpunch", "crunch", "uturn", "pursuit", "quickattack"],
 		tier: "LC",
 	},
 	raticate: {
@@ -463,6 +464,7 @@ let BattleFormatsData = {
 		tier: "LC",
 	},
 	sandshrewalola: {
+		randomBattleMoves: ["iciclespear", "iciclecrash", "ironhead", "earthquake", "swordsdance", "rapidspin", "knockoff"],
 		eventPokemon: [
 			{"generation": 7, "level": 10, "isHidden": false, "moves": ["rapidspin", "iceball", "powdersnow", "bide"], "pokeball": "cherishball"},
 		],
@@ -544,6 +546,7 @@ let BattleFormatsData = {
 		tier: "LC Uber",
 	},
 	vulpixalola: {
+		randomBattleMoves: ["auroraveil", "blizzard", "freezedry", "hiddenpowerground", "hiddenpowerfighting"],
 		eventPokemon: [
 			{"generation": 7, "level": 10, "isHidden": false, "moves": ["celebrate", "tailwhip", "babydolleyes", "iceshard"], "pokeball": "cherishball"},
 			{"generation": 7, "level": 10, "gender": "F", "nature": "Modest", "isHidden": false, "moves": ["powdersnow"], "pokeball": "cherishball"},
@@ -668,6 +671,7 @@ let BattleFormatsData = {
 		tier: "LC",
 	},
 	diglettalola: {
+		randomBattleMoves: ["ironhead", "earthquake", "rockslide", "substitute"],
 		eventPokemon: [
 			{"generation": 7, "level": 10, "isHidden": false, "abilities": ["tanglinghair"], "moves": ["mudslap", "astonish", "growl", "metalclaw"], "pokeball": "cherishball"},
 		],
@@ -704,6 +708,7 @@ let BattleFormatsData = {
 		tier: "LC",
 	},
 	meowthalola: {
+		randomBattleMoves: ["partingshot", "darkpulse", "hiddenpowerfighting", "taunt", "thunderbolt", "nastyplot"],
 		tier: "LC",
 	},
 	persian: {
@@ -893,6 +898,7 @@ let BattleFormatsData = {
 		tier: "LC",
 	},
 	geodudealola: {
+		randomBattleMoves: ["stealthrock", "return", "fireblast", "earthquake", "explosion"],
 		tier: "LC",
 	},
 	graveler: {
@@ -1028,6 +1034,7 @@ let BattleFormatsData = {
 		tier: "LC",
 	},
 	grimeralola: {
+		randomBattleMoves: ["pursuit", "knockoff", "poisonjab", "gunkshot", "shadowsneak", "firepunch"],
 		eventPokemon: [
 			{"generation": 7, "level": 10, "isHidden": false, "abilities": ["poisontouch"], "moves": ["bite", "harden", "poisongas", "pound"], "pokeball": "cherishball"},
 		],
