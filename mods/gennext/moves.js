@@ -677,11 +677,9 @@ let BattleMovedex = {
 					}
 					this.add('-end', pokemon, 'Bide');
 					let target = this.effectData.sourceSide.active[this.effectData.sourcePosition];
-					/**@type {Move} */
-					// @ts-ignore
-					let moveData = {
+					let moveData = /** @type {ActiveMove} */ ({
 						damage: this.effectData.totalDamage * 2,
-					};
+					});
 					this.moveHit(target, pokemon, 'bide', moveData);
 					return false;
 				}
@@ -772,6 +770,7 @@ let BattleMovedex = {
 			if (pokemon.baseTemplate.species !== 'Meloetta' || pokemon.transformed) {
 				return;
 			}
+			/**@type {{[k: string]: string}} */
 			let natureChange = {
 				'Modest': 'Adamant',
 				'Adamant': 'Modest',
@@ -891,6 +890,7 @@ let BattleMovedex = {
 					}
 					if (stats.length) {
 						let randomStat = this.sample(stats);
+						/**@type {{[k: string]: number}} */
 						let boost = {};
 						boost[randomStat] = 1;
 						this.boost(boost);
@@ -924,6 +924,7 @@ let BattleMovedex = {
 					}
 					if (stats.length) {
 						let randomStat = this.sample(stats);
+						/**@type {{[k: string]: number}} */
 						let boost = {};
 						boost[randomStat] = 1;
 						this.boost(boost);
@@ -951,6 +952,7 @@ let BattleMovedex = {
 					}
 					if (stats.length) {
 						let randomStat = this.sample(stats);
+						/**@type {{[k: string]: number}} */
 						let boost = {};
 						boost[randomStat] = 1;
 						this.boost(boost);

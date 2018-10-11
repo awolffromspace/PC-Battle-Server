@@ -16,24 +16,22 @@ let BattleScripts = {
 	 * externalMove skips LockMove and PP deduction, mostly for use by
 	 * Dancer.
 	 */
-	runMove: function (move, pokemon, targetLoc, sourceEffect, zMove, externalMove) {
-		let target = this.getTarget(pokemon, zMove || move, targetLoc);
-		let baseMove = this.getMoveCopy(move);
+	runMove(moveOrMoveName, pokemon, targetLoc, sourceEffect, zMove, externalMove) {
+		let target = this.getTarget(pokemon, zMove || moveOrMoveName, targetLoc);
+		let baseMove = this.getActiveMove(moveOrMoveName);
 		const pranksterBoosted = baseMove.pranksterBoosted;
-		if (!sourceEffect && toId(move) !== 'struggle' && !zMove) {
-			let changedMove = this.runEvent('OverrideAction', pokemon, target, move);
+		if (!sourceEffect && baseMove.id !== 'struggle' && !zMove) {
+			let changedMove = this.runEvent('OverrideAction', pokemon, target, baseMove);
 			if (changedMove && changedMove !== true) {
-				baseMove = this.getMoveCopy(changedMove);
+				baseMove = this.getActiveMove(changedMove);
 				if (pranksterBoosted) baseMove.pranksterBoosted = pranksterBoosted;
 				target = null;
 			}
 		}
-		move = zMove ? this.getZMoveCopy(baseMove, pokemon) : baseMove;
+		let move = zMove ? this.getActiveZMove(baseMove, pokemon) : baseMove;
 
 		if (!target && target !== false) target = this.resolveTarget(pokemon, move);
 
-		// copy the priority for Quick Guard
-		if (zMove) move.priority = baseMove.priority;
 		move.isExternal = externalMove;
 
 		this.setActiveMove(move, pokemon, target);
@@ -131,7 +129,7 @@ let BattleScripts = {
 	 * The only ones that use runMove are Instruct, Pursuit, and
 	 * Dancer.
 	 */
-	useMove: function (move, pokemon, target, sourceEffect, zMove) {
+	useMove(move, pokemon, target, sourceEffect, zMove) {
 		pokemon.moveThisTurnResult = undefined;
 		/** @type {boolean? | undefined} */ // Typescript bug
 		let oldMoveResult = pokemon.moveThisTurnResult;
@@ -139,19 +137,19 @@ let BattleScripts = {
 		if (oldMoveResult === pokemon.moveThisTurnResult) pokemon.moveThisTurnResult = moveResult;
 		return moveResult;
 	},
-	useMoveInner: function (move, pokemon, target, sourceEffect, zMove) {
+	useMoveInner(moveOrMoveName, pokemon, target, sourceEffect, zMove) {
 		if (!sourceEffect && this.effect.id) sourceEffect = this.effect;
-		move = this.getMoveCopy(move);
-		if (zMove && move.id === 'weatherball') {
-			let baseMove = move;
-			this.singleEvent('ModifyMove', move, null, pokemon, target, move, move);
-			move = this.getZMoveCopy(move, pokemon);
-			move.zPowered = true;
-			if (move.type !== 'Normal') sourceEffect = baseMove;
-		} else if (zMove || (move.category !== 'Status' && sourceEffect && sourceEffect.isZ && sourceEffect.id !== 'instruct')) {
-			move = this.getZMoveCopy(move, pokemon);
-			move.zPowered = true;
+		if (sourceEffect && sourceEffect.id === 'instruct') sourceEffect = null;
+
+		let move = this.getActiveMove(moveOrMoveName);
+		if (zMove || (move.category !== 'Status' && sourceEffect && sourceEffect.isZ)) {
+			if (move.id === 'weatherball') {
+				this.singleEvent('ModifyMove', move, null, pokemon, target, move, move);
+				if (move.type !== 'Normal') sourceEffect = move;
+			}
+			move = this.getActiveZMove(move, pokemon);
 		}
+
 		if (this.activeMove) {
 			move.priority = this.activeMove.priority;
 			if (!move.hasBounced) move.pranksterBoosted = this.activeMove.pranksterBoosted;
@@ -296,7 +294,7 @@ let BattleScripts = {
 		}
 		return true;
 	},
-	tryMoveHit: function (target, pokemon, move) {
+	tryMoveHit(target, pokemon, move) {
 		this.setActiveMove(move, pokemon, target);
 		move.zBrokeProtect = false;
 		let hitResult = true;
@@ -437,6 +435,7 @@ let BattleScripts = {
 		}
 
 		if (move.stealsBoosts) {
+			/** @type {{[k: string]: number}} */
 			let boosts = {};
 			let stolen = false;
 			for (let statName in target.boosts) {
@@ -487,6 +486,7 @@ let BattleScripts = {
 			let i;
 			for (i = 0; i < hits && target.hp && pokemon.hp; i++) {
 				if (pokemon.status === 'slp' && !isSleepUsable) break;
+				move.hit = i + 1;
 
 				if (move.multiaccuracy && i > 0) {
 					accuracy = move.accuracy;
@@ -562,9 +562,9 @@ let BattleScripts = {
 
 		return damage;
 	},
-	moveHit: function (target, pokemon, move, moveData, isSecondary, isSelf) {
+	moveHit(target, pokemon, moveOrMoveName, moveData, isSecondary, isSelf) {
 		let damage;
-		move = this.getMoveCopy(move);
+		let move = this.getActiveMove(moveOrMoveName);
 
 		if (!moveData) moveData = move;
 		if (!moveData.flags) moveData.flags = {};
@@ -804,7 +804,7 @@ let BattleScripts = {
 		return damage;
 	},
 
-	calcRecoilDamage: function (damageDealt, move) {
+	calcRecoilDamage(damageDealt, move) {
 		// @ts-ignore
 		return this.clampIntRange(Math.round(damageDealt * move.recoil[0] / move.recoil[1]), 1);
 	},
@@ -830,7 +830,7 @@ let BattleScripts = {
 		Fairy: "Twinkle Tackle",
 	},
 
-	getZMove: function (move, pokemon, skipChecks) {
+	getZMove(move, pokemon, skipChecks) {
 		let item = pokemon.getItem();
 		if (!skipChecks) {
 			if (pokemon.side.zMoveUsed) return;
@@ -841,7 +841,7 @@ let BattleScripts = {
 		}
 
 		if (item.zMoveFrom) {
-			if (move.name === item.zMoveFrom) return item.zMove;
+			if (move.name === item.zMoveFrom) return /** @type {string} */ (item.zMove);
 		} else if (item.zMove === true) {
 			if (move.type === item.zMoveType) {
 				if (move.category === "Status") {
@@ -853,29 +853,34 @@ let BattleScripts = {
 		}
 	},
 
-	getZMoveCopy: function (move, pokemon) {
-		let zMove;
+	getActiveZMove(move, pokemon) {
 		if (pokemon) {
 			let item = pokemon.getItem();
 			if (move.name === item.zMoveFrom) {
 				// @ts-ignore
-				return this.getMoveCopy(item.zMove);
+				let zMove = this.getActiveMove(item.zMove);
+				zMove.isZPowered = true;
+				return zMove;
 			}
 		}
 
 		if (move.category === 'Status') {
-			zMove = this.getMoveCopy(move);
+			let zMove = this.getActiveMove(move);
 			zMove.isZ = true;
+			zMove.isZPowered = true;
 			return zMove;
 		}
-		zMove = this.getMoveCopy(this.zMoveTable[move.type]);
+		let zMove = this.getActiveMove(this.zMoveTable[move.type]);
 		// @ts-ignore
 		zMove.basePower = move.zMovePower;
 		zMove.category = move.category;
+		// copy the priority for Quick Guard
+		zMove.priority = move.priority;
+		zMove.isZPowered = true;
 		return zMove;
 	},
 
-	canZMove: function (pokemon) {
+	canZMove(pokemon) {
 		if (pokemon.side.zMoveUsed || (pokemon.transformed && (pokemon.template.isMega || pokemon.template.isPrimal || pokemon.template.forme === "Ultra"))) return;
 		let item = pokemon.getItem();
 		if (!item.zMove) return;
@@ -902,7 +907,7 @@ let BattleScripts = {
 		if (atLeastOne) return zMoves;
 	},
 
-	canMegaEvo: function (pokemon) {
+	canMegaEvo(pokemon) {
 		let altForme = pokemon.baseTemplate.otherFormes && this.getTemplate(pokemon.baseTemplate.otherFormes[0]);
 		let item = pokemon.getItem();
 		if (altForme && altForme.isMega && altForme.requiredMove && pokemon.baseMoves.includes(toId(altForme.requiredMove)) && !item.zMove) return altForme.species;
@@ -912,7 +917,7 @@ let BattleScripts = {
 		return item.megaStone;
 	},
 
-	canUltraBurst: function (pokemon) {
+	canUltraBurst(pokemon) {
 		if (['Necrozma-Dawn-Wings', 'Necrozma-Dusk-Mane'].includes(pokemon.baseTemplate.species) &&
 			pokemon.getItem().id === 'ultranecroziumz') {
 			return "Necrozma-Ultra";
@@ -920,7 +925,7 @@ let BattleScripts = {
 		return null;
 	},
 
-	runMegaEvo: function (pokemon) {
+	runMegaEvo(pokemon) {
 		const templateid = pokemon.canMegaEvo || pokemon.canUltraBurst;
 		if (!templateid) return false;
 		const side = pokemon.side;
@@ -948,7 +953,7 @@ let BattleScripts = {
 		return true;
 	},
 
-	runZPower: function (move, pokemon) {
+	runZPower(move, pokemon) {
 		const zPower = this.getEffect('zpower');
 		if (move.category !== 'Status') {
 			this.attrLastMove('[zeffect]');
@@ -963,6 +968,7 @@ let BattleScripts = {
 				move.self = {sideCondition: 'healreplacement'};
 				break;
 			case 'clearnegativeboost':
+				/** @type {{[k: string]: number}} */
 				let boosts = {};
 				for (let i in pokemon.boosts) {
 					// @ts-ignore
@@ -989,13 +995,13 @@ let BattleScripts = {
 		}
 	},
 
-	isAdjacent: function (pokemon1, pokemon2) {
+	isAdjacent(pokemon1, pokemon2) {
 		if (pokemon1.fainted || pokemon2.fainted) return false;
 		if (pokemon1.side === pokemon2.side) return Math.abs(pokemon1.position - pokemon2.position) === 1;
 		return Math.abs(pokemon1.position + pokemon2.position + 1 - pokemon1.side.active.length) <= 1;
 	},
 
-	targetTypeChoices: function (targetType) {
+	targetTypeChoices(targetType) {
 		return CHOOSABLE_TARGETS.has(targetType);
 	},
 };

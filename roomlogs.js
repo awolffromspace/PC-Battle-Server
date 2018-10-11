@@ -32,6 +32,7 @@ const FS = require('./lib/fs');
 class Roomlog {
 	/**
 	 * @param {BasicChatRoom} room
+	 * @param {{isMultichannel?: any, autoTruncate?: any, logTimes?: any}} [options]
 	 */
 	constructor(room, options = {}) {
 		this.id = room.id;
@@ -197,6 +198,7 @@ class Roomlog {
 				const userid = toId(parts[section - 1]);
 				if (userids.includes(userid)) {
 					if (!cleared.includes(userid)) cleared.push(userid);
+					if (this.id.startsWith('battle-')) return true; // Don't remove messages in battle rooms to preserve evidence
 					return false;
 				}
 			}

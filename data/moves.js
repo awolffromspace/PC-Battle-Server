@@ -220,6 +220,7 @@ let BattleMovedex = {
 			}
 			if (stats.length) {
 				let randomStat = this.sample(stats);
+				/**@type {{[k: string]: number}} */
 				let boost = {};
 				boost[randomStat] = 2;
 				this.boost(boost);
@@ -661,7 +662,7 @@ let BattleMovedex = {
 		accuracy: 100,
 		basePower: 60,
 		basePowerCallback: function (pokemon, target, move) {
-			if (pokemon.volatiles.assurance && pokemon.volatiles.assurance.hurt) {
+			if (pokemon.volatiles.assurance && pokemon.volatiles.assurance.hurt[target.position]) {
 				this.debug('Boosted for being damaged this turn');
 				return move.basePower * 2;
 			}
@@ -677,20 +678,16 @@ let BattleMovedex = {
 		flags: {contact: 1, protect: 1, mirror: 1},
 		beforeTurnCallback: function (pokemon, target) {
 			pokemon.addVolatile('assurance');
-			pokemon.volatiles.assurance.position = target.position;
+			pokemon.volatiles.assurance.hurt = [];
 		},
 		effect: {
 			duration: 1,
 			onFoeAfterDamage: function (damage, target) {
-				if (target.position === this.effectData.position) {
-					this.debug('damaged this turn');
-					this.effectData.hurt = true;
-				}
+				this.effectData.hurt[target.position] = true;
+				this.debug('damaged this turn');
 			},
 			onFoeSwitchOut: function (pokemon) {
-				if (pokemon.position === this.effectData.position) {
-					this.effectData.hurt = false;
-				}
+				this.effectData.hurt[pokemon.position] = false;
 			},
 		},
 		secondary: null,
@@ -1037,7 +1034,7 @@ let BattleMovedex = {
 				return null;
 			},
 			onHit: function (target, source, move) {
-				if (move.zPowered && move.flags['contact']) {
+				if (move.isZPowered && move.flags['contact']) {
 					source.trySetStatus('psn', target);
 				}
 			},
@@ -8873,7 +8870,7 @@ let BattleMovedex = {
 				return null;
 			},
 			onHit: function (target, source, move) {
-				if (move.zPowered && move.flags['contact']) {
+				if (move.isZPowered && move.flags['contact']) {
 					this.boost({atk: -2}, source, target, this.getMove("King's Shield"));
 				}
 			},
@@ -9638,7 +9635,7 @@ let BattleMovedex = {
 				if (target === source || move.hasBounced || !move.flags['reflectable']) {
 					return;
 				}
-				let newMove = this.getMoveCopy(move.id);
+				let newMove = this.getActiveMove(move.id);
 				newMove.hasBounced = true;
 				newMove.pranksterBoosted = this.effectData.pranksterBoosted;
 				this.useMove(newMove, target, source);
@@ -9648,7 +9645,7 @@ let BattleMovedex = {
 				if (target.side === source.side || move.hasBounced || !move.flags['reflectable']) {
 					return;
 				}
-				let newMove = this.getMoveCopy(move.id);
+				let newMove = this.getActiveMove(move.id);
 				newMove.hasBounced = true;
 				newMove.pranksterBoosted = false;
 				this.useMove(newMove, this.effectData.target, source);
@@ -9950,7 +9947,7 @@ let BattleMovedex = {
 				let noMeFirst = [
 					'chatter', 'counter', 'covet', 'focuspunch', 'mefirst', 'metalburst', 'mirrorcoat', 'struggle', 'thief',
 				];
-				let move = this.getMoveCopy(action.move.id);
+				let move = this.getActiveMove(action.move.id);
 				if (move.category !== 'Status' && !noMeFirst.includes(move.id)) {
 					pokemon.addVolatile('mefirst');
 					this.useMove(move, pokemon, target);
@@ -15544,7 +15541,7 @@ let BattleMovedex = {
 				return null;
 			},
 			onHit: function (target, source, move) {
-				if (move.zPowered && move.flags['contact']) {
+				if (move.isZPowered && move.flags['contact']) {
 					this.damage(source.maxhp / 8, source, target);
 				}
 			},
@@ -17950,11 +17947,6 @@ let BattleMovedex = {
 		accuracy: 90,
 		basePower: 10,
 		basePowerCallback: function (pokemon, target, move) {
-			if (move.hit) {
-				move.hit++;
-			} else {
-				move.hit = 1;
-			}
 			return 10 * move.hit;
 		},
 		category: "Physical",

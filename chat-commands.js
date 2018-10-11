@@ -26,9 +26,6 @@ const HOURMUTE_LENGTH = 60 * 60 * 1000;
 
 const MAX_CHATROOM_ID_LENGTH = 225;
 
-/** @typedef {(this: Chat.CommandContext, target: string, room: Room, user: User, connection: Connection, cmd: string) => (void)} ChatHandler */
-/** @typedef {{[k: string]: ChatHandler | string | true | string[]}} ChatCommands */
-
 /** @type {ChatCommands} */
 const commands = {
 
@@ -1802,7 +1799,13 @@ const commands = {
 		let weekMsg = week ? ' for a week' : '';
 
 		if (targetUser) {
-			targetUser.popup(`|modal|${user.name} has locked you from talking in chats, battles, and PMing regular users${weekMsg}.${(userReason ? `\n\nReason: ${userReason}` : "")}\n\nIf you feel that your lock was unjustified, you can still PM staff members (%, @, &, and ~) to discuss it${(Config.appealurl ? ` or you can appeal:\n${Config.appealurl}` : ".")}\n\nYour lock will expire in a few days.`);
+			let appeal = ``;
+			if (Chat.pages.help) {
+				appeal += `<a href="view-help-request--appeal"><button class="button"><strong>Appeal your punishment</strong></button></a>`;
+			} else if (Config.appealurl) {
+				appeal += `appeal: <a href="${Config.appealurl}">${Config.appealurl}</a>`;
+			}
+			targetUser.send(`|popup||html||modal|${user.name} has locked you from talking in chats, battles, and PMing regular users${weekMsg}.${(userReason ? `\n\nReason: ${userReason}` : "")}\n\nIf you feel that your lock was unjustified, you can ${appeal}.\n\nYour lock will expire in a few days.`);
 		}
 
 		let lockMessage = `${name} was locked from talking${weekMsg} by ${user.name}.` + (userReason ? ` (${userReason})` : "");
@@ -1896,7 +1899,13 @@ const commands = {
 			}
 		}
 		this.globalModlog("UNLOCKNAME", userid, ` by ${user.name}`);
-		this.addModAction(`The name '${target}' was unlocked by ${user.name}.`);
+
+		const unlockMessage = `The name '${target}' was unlocked by ${user.name}.`;
+
+		this.addModAction(unlockMessage);
+		if (room.id !== 'staff' && Rooms('staff')) {
+			Rooms('staff').addByUser(user, `<<${room.id}>> ${unlockMessage}`);
+		}
 	},
 	unlockip: function (target, room, user) {
 		target = target.trim();
@@ -1921,7 +1930,9 @@ const commands = {
 			}
 		}
 		this.globalModlog(`UNLOCK${range ? 'RANGE' : 'IP'}`, target, ` by ${user.name}`);
-		this.addModAction(`${user.name} unlocked the ${range ? "IP range" : "IP"}: ${target}`);
+
+		const broadcastRoom = Rooms('staff') || room;
+		broadcastRoom.addByUser(user, `${user.name} unlocked the ${range ? "IP range" : "IP"}: ${target}`);
 	},
 	unlockhelp: [
 		`/unlock [username] - Unlocks the user. Requires: % @ * & ~`,
@@ -2283,6 +2294,7 @@ const commands = {
 	},
 
 	declare: function (target, room, user) {
+		target = target.trim();
 		if (!target) return this.parse('/help declare');
 		if (!this.can('declare', null, room)) return false;
 		if (!this.canTalk()) return;
@@ -2356,24 +2368,35 @@ const commands = {
 		if (!target) return this.parse(`/help notifyrank`);
 		if (!this.can('addhtml', null, room)) return false;
 		if (!this.canTalk()) return;
-		let [rank, notification] = this.splitOne(target);
+		let [rank, titleNotification] = this.splitOne(target);
+		if (rank === 'all') rank = ` `;
 		if (!(rank in Config.groups)) return this.errorReply(`Group '${rank}' does not exist.`);
-		const id = `${room.id}-rank-${Config.groups[rank].id}`;
+		const id = `${room.id}-rank-${(Config.groups[rank].id || `all`)}`;
 		if (cmd === 'notifyoffrank') {
-			room.sendRankedUsers(`|tempnotifyoff|${id}`, rank);
+			if (rank === ' ') {
+				room.send(`|tempnotifyoff|${id}`);
+			} else {
+				room.sendRankedUsers(`|tempnotifyoff|${id}`, rank);
+			}
 		} else {
-			let [title, message] = this.splitOne(notification);
-			if (!title) title = `${room.title} ${Config.groups[rank].name}+ message!`;
+			let [title, notificationHighlight] = this.splitOne(titleNotification);
+			if (!title) title = `${room.title} ${(Config.groups[rank].name ? `${Config.groups[rank].name}+ ` : ``)}message!`;
 			if (!user.can('addhtml')) {
 				title += ` (notification from ${user.name})`;
 			}
-			if (message.length > 300) return this.errorReply(`Notifications should not exceed 300 characters.`);
-			room.sendRankedUsers(`|tempnotify|${id}|${title}|${message}`, rank);
+			const [notification, highlight] = this.splitOne(notificationHighlight);
+			if (notification.length > 300) return this.errorReply(`Notifications should not exceed 300 characters.`);
+			const message = `|tempnotify|${id}|${title}|${notification}${(highlight ? `|${highlight}` : ``)}`;
+			if (rank === ' ') {
+				room.send(message);
+			} else {
+				room.sendRankedUsers(message, rank);
+			}
 			this.modlog(`NOTIFYRANK`, null, target);
 		}
 	},
 	notifyrankhelp: [
-		`/notifyrank [rank], [title], [message] - Sends a notification to everyone with the specified rank or higher. Requires: # * & ~`,
+		`/notifyrank [rank], [title], [message], [highlight] - Sends a notification to users who are [rank] or higher (and highlight on [highlight], if specified). Requires: # * & ~`,
 		`/notifyoffrank [rank] - Closes the notification previously sent with /notifyrank [rank]. Requires: # * & ~`,
 	],
 
@@ -2922,7 +2945,7 @@ const commands = {
 
 	hotpatchlock: 'nohotpatch',
 	nohotpatch: function (target, room, user) {
-		if (!this.can('hotpatch')) return;
+		if (!this.can('declare')) return;
 		if (!target) return this.parse('/help nohotpatch');
 
 		const separator = ' ';
@@ -2946,7 +2969,7 @@ const commands = {
 		}
 		Rooms.global.notifyRooms(['development', 'staff', 'upperstaff'], `|c|${user.getIdentity()}|/log ${user.name} has disabled hot-patching ${hotpatch}. Reason: ${reason}`);
 	},
-	nohotpatchhelp: [`/nohotpatch [chat|formats|battles|validator|tournaments|punishments|all] [reason] - Disables hotpatching the specified part of the simulator. Requires: ~`],
+	nohotpatchhelp: [`/nohotpatch [chat|formats|battles|validator|tournaments|punishments|all] [reason] - Disables hotpatching the specified part of the simulator. Requires: & ~`],
 
 	savelearnsets: function (target, room, user) {
 		if (!this.can('hotpatch')) return false;

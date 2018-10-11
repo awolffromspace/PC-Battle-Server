@@ -119,6 +119,23 @@ class Ladder extends LadderStore {
 			return null;
 		}
 
+		const regex = /(?:^|])([^|]*)\|/g;
+		let match = regex.exec(team);
+		while (match) {
+			let nickname = match[1];
+			if (nickname) {
+				nickname = Chat.nicknamefilter(nickname, user);
+				if (!nickname || nickname !== match[1]) {
+					connection.popup(
+						`Your team was rejected for the following reason:\n\n` +
+						`- Your Pokémon has a banned nickname: ${match[1]}`
+					);
+					return null;
+				}
+			}
+			match = regex.exec(team);
+		}
+
 		let rating = 0, valResult;
 		if (isRated && !Ladders.disabled) {
 			let userid = user.userid;
@@ -304,6 +321,7 @@ class Ladder extends LadderStore {
 	static updateChallenges(user, connection = null) {
 		if (!user.connected) return;
 		let challengeTo = null;
+		/**@type {{[k: string]: string}} */
 		let challengesFrom = {};
 		const userChalls = Ladders.challenges.get(user.userid);
 		if (userChalls) {
