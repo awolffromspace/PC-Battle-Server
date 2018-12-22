@@ -165,7 +165,7 @@ let BattleMovedex = {
 					return damage;
 				}
 				if (damage > target.volatiles['substitute'].hp) {
-					damage = target.volatiles['substitute'].hp;
+					damage = /** @type {number} */ (target.volatiles['substitute'].hp);
 				}
 				target.volatiles['substitute'].hp -= damage;
 				source.lastDamage = damage;
@@ -229,7 +229,7 @@ let BattleMovedex = {
 					}
 				}
 				if (move.flags['contact']) {
-					this.boost({atk: -2}, source, target, this.getMove("King's Shield"));
+					this.boost({atk: -2}, source, target, move);
 				}
 				return null;
 			},
@@ -339,15 +339,13 @@ let BattleMovedex = {
 		onTryHit: function (target) {
 			target.removeVolatile('substitute');
 		},
-		onTry: function (attacker, defender, move) {
+		onTryMove: function (attacker, defender, move) {
 			if (attacker.removeVolatile(move.id)) {
 				return;
 			}
 			this.add('-prepare', attacker, move.name, defender);
-			this.boost({def: 1, spd: 1, accuracy: 1}, attacker, attacker, this.getMove('skullbash'));
+			this.boost({def: 1, spd: 1, accuracy: 1}, attacker, attacker, move);
 			if (!this.runEvent('ChargeMove', attacker, defender, move)) {
-				this.add('-anim', attacker, move.name, defender);
-				attacker.removeVolatile(move.id);
 				return;
 			}
 			attacker.addVolatile('twoturnmove', defender);
@@ -654,7 +652,7 @@ let BattleMovedex = {
 			onDamage: function (damage, target, source, effect) {
 				if (!effect || effect.effectType !== 'Move') return;
 				if (!source || source.side === target.side) return;
-				if (effect && effect.effectType === 'Move' && damage >= target.hp) {
+				if (effect.effectType === 'Move' && damage >= target.hp) {
 					damage = target.hp - 1;
 				}
 				this.effectData.totalDamage += damage;
@@ -975,9 +973,12 @@ let BattleMovedex = {
 	avalanche: {
 		inherit: true,
 		basePowerCallback: function (pokemon, source) {
-			if ((source.lastDamage > 0 && pokemon.lastAttackedBy && pokemon.lastAttackedBy.thisTurn)) {
-				this.debug('Boosted for getting hit by ' + pokemon.lastAttackedBy.move);
-				return this.isWeather('hail') ? 180 : 120;
+			let lastAttackedBy = pokemon.getLastAttackedBy();
+			if (lastAttackedBy) {
+				if (lastAttackedBy.damage > 0 && lastAttackedBy.thisTurn) {
+					this.debug('Boosted for getting hit by ' + lastAttackedBy.move);
+					return this.isWeather('hail') ? 180 : 120;
+				}
 			}
 			return this.isWeather('hail') ? 90 : 60;
 		},

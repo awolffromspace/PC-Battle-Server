@@ -25,12 +25,10 @@ let BattleScripts = {
 			if (changedMove && changedMove !== true) {
 				baseMove = this.getActiveMove(changedMove);
 				if (pranksterBoosted) baseMove.pranksterBoosted = pranksterBoosted;
-				target = null;
+				target = this.resolveTarget(pokemon, baseMove);
 			}
 		}
 		let move = zMove ? this.getActiveZMove(baseMove, pokemon) : baseMove;
-
-		if (!target && target !== false) target = this.resolveTarget(pokemon, move);
 
 		move.isExternal = externalMove;
 
@@ -142,11 +140,13 @@ let BattleScripts = {
 		if (sourceEffect && sourceEffect.id === 'instruct') sourceEffect = null;
 
 		let move = this.getActiveMove(moveOrMoveName);
+		if (move.id === 'weatherball' && zMove) {
+			// Z-Weather Ball only changes types if it's used directly,
+			// not if it's called by Z-Sleep Talk or something.
+			this.singleEvent('ModifyMove', move, null, pokemon, target, move, move);
+			if (move.type !== 'Normal') sourceEffect = move;
+		}
 		if (zMove || (move.category !== 'Status' && sourceEffect && sourceEffect.isZ)) {
-			if (move.id === 'weatherball') {
-				this.singleEvent('ModifyMove', move, null, pokemon, target, move, move);
-				if (move.type !== 'Normal') sourceEffect = move;
-			}
 			move = this.getActiveZMove(move, pokemon);
 		}
 
@@ -155,7 +155,7 @@ let BattleScripts = {
 			if (!move.hasBounced) move.pranksterBoosted = this.activeMove.pranksterBoosted;
 		}
 		let baseTarget = move.target;
-		if (!target && target !== false) target = this.resolveTarget(pokemon, move);
+		if (target === undefined) target = this.resolveTarget(pokemon, move);
 		if (move.target === 'self' || move.target === 'allies') {
 			target = pokemon;
 		}
@@ -182,10 +182,6 @@ let BattleScripts = {
 
 		let attrs = '';
 
-		if (move.flags['charge'] && !pokemon.volatiles[move.id]) {
-			attrs = '|[still]'; // suppress the default move animation
-		}
-
 		let movename = move.name;
 		if (move.id === 'hiddenpower') movename = 'Hidden Power';
 		if (sourceEffect) attrs += '|[from]' + this.getEffect(sourceEffect);
@@ -197,9 +193,9 @@ let BattleScripts = {
 
 		if (zMove) this.runZPower(move, pokemon);
 
-		if (target === false) {
+		if (!target) {
 			this.attrLastMove('[notarget]');
-			this.add('-notarget');
+			this.add(this.gen >= 5 ? '-fail' : '-notarget', pokemon);
 			if (move.target === 'normal') pokemon.isStaleCon = 0;
 			return false;
 		}
@@ -235,7 +231,7 @@ let BattleScripts = {
 			this.faint(pokemon, pokemon, move);
 		}
 
-		/**@type {number | false} */
+		/** @type {number | false | undefined} */
 		let damage = false;
 		if (move.target === 'all' || move.target === 'foeSide' || move.target === 'allySide' || move.target === 'allyTeam') {
 			damage = this.tryMoveHit(target, pokemon, move);
@@ -243,7 +239,7 @@ let BattleScripts = {
 		} else if (move.target === 'allAdjacent' || move.target === 'allAdjacentFoes') {
 			if (!targets.length) {
 				this.attrLastMove('[notarget]');
-				this.add('-notarget');
+				this.add(this.gen >= 5 ? '-fail' : '-notarget', pokemon);
 				return false;
 			}
 			if (targets.length > 1) move.spreadHit = true;
@@ -254,7 +250,7 @@ let BattleScripts = {
 					moveResult = true;
 					hitTargets.push(source.toString().substr(0, 3));
 				}
-				if (damage !== false) {
+				if (damage) {
 					damage += hitResult || 0;
 				} else {
 					damage = hitResult;
@@ -269,9 +265,9 @@ let BattleScripts = {
 					lacksTarget = !this.isAdjacent(target, pokemon);
 				}
 			}
-			if (lacksTarget && (!move.flags['charge'] || pokemon.volatiles['twoturnmove']) && !move.isFutureMove) {
+			if (lacksTarget && !move.isFutureMove) {
 				this.attrLastMove('[notarget]');
-				this.add('-notarget');
+				this.add(this.gen >= 5 ? '-fail' : '-notarget', pokemon);
 				if (move.target === 'normal') pokemon.isStaleCon = 0;
 				return false;
 			}
@@ -297,11 +293,13 @@ let BattleScripts = {
 	tryMoveHit(target, pokemon, move) {
 		this.setActiveMove(move, pokemon, target);
 		move.zBrokeProtect = false;
-		let hitResult = true;
 
-		hitResult = this.singleEvent('PrepareHit', move, {}, target, pokemon, move);
+		let hitResult = this.singleEvent('PrepareHit', move, {}, target, pokemon, move);
 		if (!hitResult) {
-			if (hitResult === false) this.add('-fail', target);
+			if (hitResult === false) {
+				this.add('-fail', pokemon);
+				this.attrLastMove('[still]');
+			}
 			return false;
 		}
 		this.runEvent('PrepareHit', pokemon, target, move);
@@ -317,7 +315,10 @@ let BattleScripts = {
 				hitResult = this.runEvent('TryHitSide', target, pokemon, move);
 			}
 			if (!hitResult) {
-				if (hitResult === false) this.add('-fail', target);
+				if (hitResult === false) {
+					this.add('-fail', pokemon);
+					this.attrLastMove('[still]');
+				}
 				return false;
 			}
 			return this.moveHit(target, pokemon, move);
@@ -342,7 +343,10 @@ let BattleScripts = {
 
 		hitResult = this.runEvent('TryHit', target, pokemon, move);
 		if (!hitResult) {
-			if (hitResult === false) this.add('-fail', target);
+			if (hitResult === false) {
+				this.add('-fail', pokemon);
+				this.attrLastMove('[still]');
+			}
 			return false;
 		}
 
@@ -351,13 +355,13 @@ let BattleScripts = {
 		}
 		if (move.flags['powder'] && target !== pokemon && !this.getImmunity('powder', target)) {
 			this.debug('natural powder immunity');
-			this.add('-immune', target, '[msg]');
+			this.add('-immune', target);
 			return false;
 		}
 		if (this.gen >= 7 && move.pranksterBoosted && pokemon.hasAbility('prankster') && target.side !== pokemon.side && !this.getImmunity('prankster', target)) {
 			this.debug('natural prankster immunity');
 			if (!target.illusion) this.add('-hint', "In gen 7, Dark is immune to Prankster moves.");
-			this.add('-immune', target, '[msg]');
+			this.add('-immune', target);
 			return false;
 		}
 
@@ -455,12 +459,12 @@ let BattleScripts = {
 					boosts[statName] = 0;
 				}
 				target.setBoost(boosts);
-				this.add('-anim', pokemon, "Spectral Thief", target);
+				this.addMove('-anim', pokemon, "Spectral Thief", target);
 			}
 		}
 
 		move.totalDamage = 0;
-		/**@type {number | false} */
+		/** @type {number | false | undefined} */
 		let damage = 0;
 		pokemon.lastDamage = 0;
 		if (move.multihit) {
@@ -479,7 +483,7 @@ let BattleScripts = {
 			}
 			hits = Math.floor(hits);
 			let nullDamage = true;
-			/**@type {number | false} */
+			/** @type {number | false | undefined} */
 			let moveDamage;
 			// There is no need to recursively check the ´sleepUsable´ flag as Sleep Talk can only be used while asleep.
 			let isSleepUsable = move.sleepUsable || this.getMove(move.sourceEffect).sleepUsable;
@@ -563,12 +567,13 @@ let BattleScripts = {
 		return damage;
 	},
 	moveHit(target, pokemon, moveOrMoveName, moveData, isSecondary, isSelf) {
-		let damage;
+		/** @type {number | false | null | undefined} */
+		let damage = undefined;
 		let move = this.getActiveMove(moveOrMoveName);
 
 		if (!moveData) moveData = move;
 		if (!moveData.flags) moveData.flags = {};
-		/**@type {?boolean | number} */
+		/** @type {?boolean | number} */
 		let hitResult = true;
 
 		// TryHit events:
@@ -609,7 +614,10 @@ let BattleScripts = {
 			hitResult = this.singleEvent('TryHit', moveData, {}, target, pokemon, move);
 		}
 		if (!hitResult) {
-			if (hitResult === false) this.add('-fail', target);
+			if (hitResult === false) {
+				this.add('-fail', pokemon);
+				this.attrLastMove('[still]');
+			}
 			return false;
 		}
 
@@ -654,7 +662,8 @@ let BattleScripts = {
 
 			if (damage === false || damage === null) {
 				if (damage === false && !isSecondary && !isSelf) {
-					this.add('-fail', target);
+					this.add('-fail', pokemon);
+					this.attrLastMove('[still]');
 				}
 				this.debug('damage calculation interrupted');
 				return false;
@@ -681,7 +690,8 @@ let BattleScripts = {
 			if (moveData.heal && !target.fainted) {
 				let d = target.heal((this.gen < 5 ? Math.floor : Math.round)(target.maxhp * moveData.heal[0] / moveData.heal[1]));
 				if (!d && d !== 0) {
-					this.add('-fail', target);
+					this.add('-fail', pokemon);
+					this.attrLastMove('[still]');
 					this.debug('heal interrupted');
 					return false;
 				}
@@ -690,7 +700,7 @@ let BattleScripts = {
 			}
 			if (moveData.status) {
 				hitResult = target.trySetStatus(moveData.status, pokemon, moveData.ability ? moveData.ability : move);
-				if (!hitResult && move.status) return hitResult;
+				if (!hitResult && move.status) return false;
 				didSomething = didSomething || hitResult;
 			}
 			if (moveData.forceStatus) {
@@ -718,7 +728,7 @@ let BattleScripts = {
 				didSomething = didSomething || hitResult;
 			}
 			if (moveData.forceSwitch) {
-				hitResult = this.canSwitch(target.side);
+				hitResult = !!this.canSwitch(target.side);
 				didSomething = didSomething || hitResult;
 			}
 			if (moveData.selfSwitch) {
@@ -762,7 +772,10 @@ let BattleScripts = {
 
 			if (!didSomething && !moveData.self && !moveData.selfdestruct) {
 				if (!isSelf && !isSecondary) {
-					if (didSomething === false) this.add('-fail', pokemon);
+					if (didSomething === false) {
+						this.add('-fail', pokemon);
+						this.attrLastMove('[still]');
+					}
 				}
 				this.debug('move failed because it did nothing');
 				return false;
@@ -794,7 +807,8 @@ let BattleScripts = {
 			if (hitResult) {
 				target.forceSwitchFlag = true;
 			} else if (hitResult === false && move.category === 'Status') {
-				this.add('-fail', target);
+				this.add('-fail', pokemon);
+				this.attrLastMove('[still]');
 				return false;
 			}
 		}

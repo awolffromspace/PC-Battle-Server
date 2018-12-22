@@ -149,14 +149,17 @@ let BattleMovedex = {
 						this.add('-fail', pokemon);
 						return false;
 					}
-					if (!target.isActive) target = this.resolveTarget(pokemon, this.getMove('pound'));
-					if (!this.isAdjacent(pokemon, target)) {
-						this.add('-miss', pokemon, target);
-						return false;
+					if (!target.isActive) {
+						const possibleTarget = this.resolveTarget(pokemon, this.getMove('pound'));
+						if (!possibleTarget) {
+							this.add('-miss', pokemon);
+							return false;
+						}
+						target = possibleTarget;
 					}
 					/**@type {Move} */
 					// @ts-ignore
-					let moveData = {
+					let moveData = /** @type {ActiveMove} */ ({
 						id: 'bide',
 						name: "Bide",
 						accuracy: true,
@@ -167,7 +170,7 @@ let BattleMovedex = {
 						ignoreImmunity: true,
 						effectType: 'Move',
 						type: 'Normal',
-					};
+					});
 					this.tryMoveHit(target, pokemon, moveData);
 					return false;
 				}
@@ -488,7 +491,7 @@ let BattleMovedex = {
 		desc: "The target is unaffected by this move unless it is asleep and does not have a substitute. The user recovers 1/2 the HP lost by the target, rounded down, but not less than 1 HP. If Big Root is held by the user, the HP recovered is 1.3x normal, rounded down.",
 		onTryHit: function (target) {
 			if (target.status !== 'slp' || target.volatiles['substitute']) {
-				this.add('-immune', target, '[msg]');
+				this.add('-immune', target);
 				return null;
 			}
 		},
@@ -517,12 +520,13 @@ let BattleMovedex = {
 			durationCallback: function () {
 				return this.random(4, 9);
 			},
-			onStart: function (target) {
+			onStart: function (target, source) {
 				let noEncore = ['encore', 'mimic', 'mirrormove', 'sketch', 'struggle', 'transform'];
 				let moveIndex = target.lastMove ? target.moves.indexOf(target.lastMove.id) : -1;
 				if (!target.lastMove || noEncore.includes(target.lastMove.id) || !target.moveSlots[moveIndex] || target.moveSlots[moveIndex].pp <= 0) {
 					// it failed
-					this.add('-fail', target);
+					this.add('-fail', source);
+					this.attrLastMove('[still]');
 					delete target.volatiles['encore'];
 					return;
 				}
@@ -848,7 +852,7 @@ let BattleMovedex = {
 			move.causedCrashDamage = true;
 			let damage = this.getDamage(source, target, move, true);
 			if (!damage) damage = target.maxhp;
-			this.damage(this.clampIntRange(damage / 2, 1, Math.floor(target.maxhp / 2)), source, source, 'highjumpkick');
+			this.damage(this.clampIntRange(damage / 2, 1, Math.floor(target.maxhp / 2)), source, source, move);
 		},
 	},
 	iciclespear: {
@@ -884,7 +888,7 @@ let BattleMovedex = {
 			move.causedCrashDamage = true;
 			let damage = this.getDamage(source, target, move, true);
 			if (!damage) damage = target.maxhp;
-			this.damage(this.clampIntRange(damage / 2, 1, Math.floor(target.maxhp / 2)), source, source, 'jumpkick');
+			this.damage(this.clampIntRange(damage / 2, 1, Math.floor(target.maxhp / 2)), source, source, move);
 		},
 	},
 	knockoff: {
@@ -1101,10 +1105,11 @@ let BattleMovedex = {
 		onTryHit: function () { },
 		onHit: function (pokemon) {
 			let noMirror = ['acupressure', 'aromatherapy', 'assist', 'chatter', 'copycat', 'counter', 'curse', 'doomdesire', 'feint', 'focuspunch', 'futuresight', 'gravity', 'hail', 'haze', 'healbell', 'helpinghand', 'lightscreen', 'luckychant', 'magiccoat', 'mefirst', 'metronome', 'mimic', 'mirrorcoat', 'mirrormove', 'mist', 'mudsport', 'naturepower', 'perishsong', 'psychup', 'raindance', 'reflect', 'roleplay', 'safeguard', 'sandstorm', 'sketch', 'sleeptalk', 'snatch', 'spikes', 'spitup', 'stealthrock', 'struggle', 'sunnyday', 'tailwind', 'toxicspikes', 'transform', 'watersport'];
-			if (!pokemon.lastAttackedBy || !pokemon.lastAttackedBy.pokemon.lastMove || !pokemon.lastAttackedBy.move || noMirror.includes(pokemon.lastAttackedBy.move) || !pokemon.lastAttackedBy.pokemon.hasMove(pokemon.lastAttackedBy.move)) {
-				return false;
+			let lastAttackedBy = pokemon.getLastAttackedBy();
+			if (!lastAttackedBy || !lastAttackedBy.source.lastMove || !lastAttackedBy.move || noMirror.includes(lastAttackedBy.move) || !lastAttackedBy.source.hasMove(lastAttackedBy.move)) {
+				 return false;
 			}
-			this.useMove(pokemon.lastAttackedBy.move, pokemon);
+			this.useMove(lastAttackedBy.move, pokemon);
 		},
 		target: "self",
 	},
@@ -1157,6 +1162,9 @@ let BattleMovedex = {
 		inherit: true,
 		desc: "This move calls another move for use based on the battle terrain. Tri Attack in Wi-Fi battles.",
 		shortDesc: "Attack changes based on terrain. (Tri Attack)",
+		onHit: function (pokemon) {
+			this.useMove('triattack', pokemon);
+		},
 	},
 	odorsleuth: {
 		inherit: true,

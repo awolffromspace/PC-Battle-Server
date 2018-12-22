@@ -45,8 +45,12 @@ function splitFirst(str, delimiter, limit = 1) {
 }
 
 class BattleStream extends Streams.ObjectReadWriteStream {
-	constructor() {
+	/**
+	 * @param {{debug?: boolean}} options
+	 */
+	constructor({debug} = {}) {
 		super();
+		this.debug = !!debug;
 		/** @type {Battle} */
 		// @ts-ignore
 		this.battle = null;
@@ -94,6 +98,7 @@ class BattleStream extends Streams.ObjectReadWriteStream {
 				if (Array.isArray(data)) data = data.join("\n");
 				this.push(`${type}\n${data}`);
 			};
+			if (this.debug) options.debug = true;
 			this.battle = new Battle(options);
 			break;
 		case 'player':
@@ -192,11 +197,11 @@ function getPlayerStreams(stream) {
 			const [type, data] = splitFirst(chunk, `\n`);
 			switch (type) {
 			case 'update':
-				const p1Update = data.replace(/\n\|split\n[^\n]*\n([^\n]*)\n[^\n]*\n[^\n]*/g, '\n$1');
+				const p1Update = data.replace(/\n\|split\n[^\n]*\n([^\n]*)\n[^\n]*\n[^\n]*/g, '\n$1').replace(/\n\n/g, '\n');
 				p1.push(p1Update);
-				const p2Update = data.replace(/\n\|split\n[^\n]*\n[^\n]*\n([^\n]*)\n[^\n]*/g, '\n$1');
+				const p2Update = data.replace(/\n\|split\n[^\n]*\n[^\n]*\n([^\n]*)\n[^\n]*/g, '\n$1').replace(/\n\n/g, '\n');
 				p2.push(p2Update);
-				const specUpdate = data.replace(/\n\|split\n([^\n]*)\n[^\n]*\n[^\n]*\n[^\n]*/g, '\n$1');
+				const specUpdate = data.replace(/\n\|split\n([^\n]*)\n[^\n]*\n[^\n]*\n[^\n]*/g, '\n$1').replace(/\n\n/g, '\n');
 				spectator.push(specUpdate);
 				const omniUpdate = data.replace(/\n\|split\n[^\n]*\n[^\n]*\n[^\n]*/g, '');
 				omniscient.push(omniUpdate);
@@ -273,9 +278,12 @@ class BattlePlayer {
 }
 
 class BattleTextStream extends Streams.ReadWriteStream {
-	constructor() {
+	/**
+	 * @param {{debug?: boolean}} options
+	 */
+	constructor(options) {
 		super();
-		this.battleStream = new BattleStream();
+		this.battleStream = new BattleStream(options);
 		/** @type {string} */
 		this.currentMessage = '';
 		this._listen();

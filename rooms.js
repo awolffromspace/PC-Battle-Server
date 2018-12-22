@@ -115,6 +115,7 @@ class BasicRoom {
 		/** @type {Map<string, ChatRoom>?} */
 		this.subRooms = null;
 		this.gameNumber = 0;
+		this.highTraffic = false;
 	}
 
 	/**
@@ -842,7 +843,6 @@ class GlobalRoom extends BasicRoom {
 	onConnect(user, connection) {
 		let initdata = '|updateuser|' + user.name + '|' + (user.named ? '1' : '0') + '|' + user.avatar + '\n';
 		connection.send(initdata + this.configRankList + this.formatListText);
-		if (this.chatRooms.length > 2) connection.send('|queryresponse|rooms|null'); // should display room list
 	}
 	/**
 	 * @param {User} user
@@ -964,16 +964,34 @@ class GlobalRoom extends BasicRoom {
 	/**
 	 * @param {Error} err
 	 */
-	reportCrash(err) {
-		if (this.lockdown) return;
+	reportCrash(err, crasher = "The server") {
 		const time = Date.now();
 		if (time - this.lastReportedCrash < CRASH_REPORT_THROTTLE) {
 			return;
 		}
 		this.lastReportedCrash = time;
 		// @ts-ignore
-		const stack = (err ? Chat.escapeHTML(err.stack).split(`\n`).slice(0, 2).join(`<br />`) : ``);
-		const crashMessage = `|html|<div class="broadcast-red"><b>The server has crashed:</b> ${stack}</div>`;
+		let stackLines = (err ? Chat.escapeHTML(err.stack).split(`\n`) : []);
+		if (stackLines.length > 2) {
+			for (let i = 1; i < stackLines.length; i++) {
+				if (stackLines[i].includes('&#x2f;') || stackLines[i].includes('\\')) {
+					if (!stackLines[i].includes('node_modules')) {
+						stackLines = [stackLines[0], stackLines[i]];
+						break;
+					}
+				}
+			}
+		}
+		if (stackLines.length > 2) {
+			for (let i = 1; i < stackLines.length; i++) {
+				if (stackLines[i].includes('&#x2f;') || stackLines[i].includes('\\')) {
+					stackLines = [stackLines[0], stackLines[i]];
+					break;
+				}
+			}
+		}
+		const stack = stackLines.slice(0, 2).join(`<br />`);
+		const crashMessage = `|html|<div class="broadcast-red"><b>${crasher} has crashed:</b> ${stack}</div>`;
 		const devRoom = Rooms('development');
 		if (devRoom) {
 			devRoom.add(crashMessage).update();
@@ -1188,20 +1206,28 @@ class BasicChatRoom extends BasicRoom {
 	 * @param {User} user
 	 */
 	getIntroMessage(user) {
-		let message = '';
-		if (this.introMessage) message += '\n|raw|<div class="infobox infobox-roomintro"><div>' + this.introMessage.replace(/\n/g, '') + '</div>';
-		if (this.staffMessage && user.can('mute', null, this)) message += (message ? '<br />' : '\n|raw|<div class="infobox">') + '(Staff intro:)<br /><div>' + this.staffMessage.replace(/\n/g, '') + '</div>';
+		let message = Chat.html`\n|raw|<div class="infobox"> You joined ${this.title}`;
 		if (this.modchat) {
-			message += (message ? '<br />' : '\n|raw|<div class="infobox">') + '<div class="broadcast-red">' +
-				'Must be rank ' + this.modchat + ' or higher to talk right now.' +
-				'</div>';
+			message += ` [${this.modchat} or higher to talk]`;
 		}
-		if (this.slowchat && user.can('mute', null, this)) {
-			message += (message ? '<br />' : '\n|raw|<div class="infobox">') + '<div class="broadcast-red">' +
-				'Messages must have at least ' + this.slowchat + ' seconds between them.' +
-				'</div>';
+		if (this.modjoin) {
+			let modjoin = this.modjoin === true ? this.modchat : this.modjoin;
+			message += ` [${modjoin} or higher to join]`;
 		}
-		if (message) message += '</div>';
+		if (this.slowchat) {
+			message += ` [Slowchat ${this.slowchat}s]`;
+		}
+		message += `</div>`;
+		if (this.introMessage) {
+			message += `\n|raw|<div class="infobox infobox-roomintro">` +
+				this.introMessage.replace(/\n/g, '') +
+				`</div>`;
+		}
+		if (this.staffMessage && user.can('mute', null, this)) {
+			message += `\n|raw|<div class="infobox">(Staff intro:)<br /><div>` +
+				this.staffMessage.replace(/\n/g, '') +
+				`</div>`;
+		}
 		return message;
 	}
 	/**

@@ -659,7 +659,7 @@ class MafiaTracker extends Rooms.RoomGame {
 		let player = this.players[userid];
 		if (!player && this.dead[userid] && this.dead[userid].restless) player = this.dead[userid];
 		if (!player || !player.lynching) return this.sendUser(userid, `|error|You are not lynching anyone.`);
-		if (player.lastLynch + 2000 >= Date.now() && !force) this.sendUser(userid, `|error|You must wait another ${Chat.toDurationString((player.lastLynch + 2000) - Date.now()) || '1 second'} before you can change your lynch.`);
+		if (player.lastLynch + 2000 >= Date.now() && !force) return this.sendUser(userid, `|error|You must wait another ${Chat.toDurationString((player.lastLynch + 2000) - Date.now()) || '1 second'} before you can change your lynch.`);
 		let lynch = this.lynches[player.lynching];
 		lynch.count--;
 		lynch.trueCount -= this.getLynchValue(userid);
@@ -1050,7 +1050,7 @@ class MafiaTracker extends Rooms.RoomGame {
 		if (oldPlayer.lynching) {
 			// Dont change plurality
 			let lynch = this.lynches[oldPlayer.lynching];
-			lynch.lynchers.splice(lynch.lynchers.indexOf(oldPlayer.userid, 1));
+			lynch.lynchers.splice(lynch.lynchers.indexOf(oldPlayer.userid), 1);
 			lynch.lynchers.push(newPlayer.userid);
 			newPlayer.lynching = oldPlayer.lynching;
 			oldPlayer.lynching = '';
@@ -1395,7 +1395,7 @@ class MafiaTracker extends Rooms.RoomGame {
 		if (this.cohosts.includes(user.userid)) return `${targetString} a cohost.`;
 		if (!force) {
 			for (const alt of user.getAltUsers(true)) {
-				if (this.players[alt.userid]) return `${self ? `You already have` : `${user.userid} already has`} an alt in the game.`;
+				if (this.players[alt.userid] || this.played.includes(alt.userid)) return `${self ? `You already have` : `${user.userid} already has`} an alt in the game.`;
 				if (this.hostid === alt.userid || this.cohosts.includes(alt.userid)) return `${self ? `You have` : `${user.userid} has`} an alt as a game host.`;
 			}
 		}
@@ -2304,7 +2304,7 @@ const commands = {
 				if (isNaN(num)) {
 					if ((game.hostid === user.userid || game.cohosts.includes(user.userid)) && this.cmdToken === "!") {
 						const broadcastMessage = this.message.toLowerCase().replace(/[^a-z0-9\s!,]/g, '');
-						if (room && room.lastBroadcast === broadcastMessage &&
+						if (room.lastBroadcast === broadcastMessage &&
 							room.lastBroadcastTime >= Date.now() - 20 * 1000) {
 							return this.errorReply("You can't broadcast this because it was just broadcasted.");
 						}
@@ -2444,7 +2444,7 @@ const commands = {
 			if (!game.started) return this.errorReply(`The game of mafia has not started yet.`);
 			if ((game.hostid === user.userid || game.cohosts.includes(user.userid)) && this.cmdToken === "!") {
 				const broadcastMessage = this.message.toLowerCase().replace(/[^a-z0-9\s!,]/g, '');
-				if (room && room.lastBroadcast === broadcastMessage &&
+				if (room.lastBroadcast === broadcastMessage &&
 					room.lastBroadcastTime >= Date.now() - 20 * 1000) {
 					return this.errorReply("You can't broadcast this because it was just broadcasted.");
 				}
@@ -2465,7 +2465,7 @@ const commands = {
 			const game = /** @type {MafiaTracker} */ (room.game);
 			if ((game.hostid === user.userid || game.cohosts.includes(user.userid)) && this.cmdToken === "!") {
 				const broadcastMessage = this.message.toLowerCase().replace(/[^a-z0-9\s!,]/g, '');
-				if (room && room.lastBroadcast === broadcastMessage &&
+				if (room.lastBroadcast === broadcastMessage &&
 					room.lastBroadcastTime >= Date.now() - 20 * 1000) {
 					return this.errorReply("You can't broadcast this because it was just broadcasted.");
 				}

@@ -34,11 +34,15 @@ function getAlias(roomid, key) {
 
 /** @type {ChatCommands} */
 const commands = {
-	addfaq: function (target, room, user) {
-		if (!this.canTalk()) return this.errorReply("You cannot do this while unable to talk.");
+	addfaq: function (target, room, user, connection) {
 		if (!this.can('declare', null, room)) return false;
 		if (!room.chatRoomData) return this.errorReply("This command is unavailable in temporary rooms.");
-		let [topic, ...rest] = target.split(',');
+		if (!target) return this.parse('/help roomfaq');
+
+		target = target.trim();
+		let input = Chat.filter(this, target, user, room, connection);
+		if (target !== input) return this.errorReply("You are not allowed to use fitered words in roomfaq entries.");
+		let [topic, ...rest] = input.split(',');
 
 		topic = toId(topic);
 		if (!(topic && rest.length)) return this.parse('/help roomfaq');

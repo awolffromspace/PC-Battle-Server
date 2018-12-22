@@ -32,7 +32,13 @@ To reload chat commands:
 /** @typedef {(this: CommandContext, target: string, room: ChatRoom | GameRoom, user: User, connection: Connection, cmd: string, message: string) => (void)} ChatHandler */
 /** @typedef {{[k: string]: ChatHandler | string | true | string[] | ChatCommands}} ChatCommands */
 
-/** @typedef {(this: CommandContext, message: string, user: User, room: ChatRoom?, connection: Connection, targetUser: User?) => (string | boolean)} ChatFilter */
+/**
+ * Chat filters can choose to:
+ * 1. return false OR null - to not send a user's message
+ * 2. return an altered string - to alter a user's message
+ * 3. return undefined to send the original message through
+ * @typedef {(this: CommandContext, message: string, user: User, room: ChatRoom | GameRoom?, connection: Connection, targetUser: User?, originalMessage: string) => (string | false | null | undefined)} ChatFilter
+ */
 /** @typedef {(name: string, user: User) => (string)} NameFilter */
 
 const LINK_WHITELIST = ['*.pokemonshowdown.com', 'psim.us', 'smogtours.psim.us', '*.smogon.com', '*.pastebin.com', '*.hastebin.com'];
@@ -136,22 +142,24 @@ Chat.pages = undefined;
 /**@type {ChatFilter[]} */
 Chat.filters = [];
 /**
+ * @param {CommandContext} context
  * @param {string} message
  * @param {User} user
- * @param {ChatRoom} room
+ * @param {GameRoom | ChatRoom?} room
  * @param {Connection} connection
  * @param {User?} [targetUser]
+ * @return {string | false | null}
  */
-Chat.filter = function (message, user, room, connection, targetUser = null) {
+Chat.filter = function (context, message, user, room, connection, targetUser = null) {
 	// Chat filters can choose to:
 	// 1. return false OR null - to not send a user's message
 	// 2. return an altered string - to alter a user's message
 	// 3. return undefined to send the original message through
 	const originalMessage = message;
 	for (const filter of Chat.filters) {
-		const output = filter.call(this, message, user, room, connection, targetUser, originalMessage);
+		const output = filter.call(context, message, user, room, connection, targetUser, originalMessage);
+		if (!output && output !== undefined) return output;
 		if (output !== undefined) message = output;
-		if (!message) return message;
 	}
 
 	return message;
@@ -284,21 +292,22 @@ class CommandContext {
 	}
 
 	/**
-	 * @param {any} [message]
+	 * @param {string} [msg]
 	 * @return {any}
 	 */
-	parse(message) {
-		if (message) {
+	parse(msg) {
+		if (typeof msg === 'string') {
 			// spawn subcontext
 			let subcontext = new CommandContext(this);
 			subcontext.recursionDepth++;
 			if (subcontext.recursionDepth > MAX_PARSE_RECURSION) {
 				throw new Error("Too much command recursion");
 			}
-			subcontext.message = message;
+			subcontext.message = msg;
 			return subcontext.parse();
 		}
-		message = this.message;
+		/** @type {any} */
+		let message = this.message;
 
 		let commandHandler = this.splitCommand(message);
 
@@ -480,13 +489,12 @@ class CommandContext {
 			// @ts-ignore
 			result = commandHandler.call(this, this.target, this.room, this.user, this.connection, this.cmd, this.message);
 		} catch (err) {
-			require('./lib/crashlogger')(err, 'A chat command', {
+			Monitor.crashlog(err, 'A chat command', {
 				user: this.user.name,
 				room: this.room && this.room.id,
 				pmTarget: this.pmTarget && this.pmTarget.name,
 				message: this.message,
 			});
-			Rooms.global.reportCrash(err);
 			this.sendReply(`|html|<div class="broadcast-red"><b>Pokemon Showdown crashed!</b><br />Don't worry, we're working on fixing it.</div>`);
 		}
 		if (result === undefined) result = false;
@@ -544,6 +552,8 @@ class CommandContext {
 	/**
 	 * @param {BasicChatRoom | undefined?} room
 	 * @param {string} message
+	 *
+	 * @return {boolean}
 	 */
 	checkBanwords(room, message) {
 		if (!room) return true;
@@ -558,7 +568,7 @@ class CommandContext {
 		if (room.banwordRegex !== true && room.banwordRegex.test(message)) {
 			return false;
 		}
-		return true;
+		return this.checkBanwords(/** @type {ChatRoom} */ (room.parent), message);
 	}
 	checkGameFilter() {
 		if (!this.room || !this.room.game || !this.room.game.onChatMessage) return false;
@@ -781,7 +791,7 @@ class CommandContext {
 			const message = this.canTalk(suppressMessage || this.message);
 			if (!message) return false;
 
-			this.message = message;
+			this.message = /** @type {string} */ (message);
 			this.broadcastMessage = broadcastMessage;
 		}
 		return true;
@@ -838,8 +848,8 @@ class CommandContext {
 	}
 	/**
 	 * @param {string?} message
-	 * @param {BasicChatRoom?} [room]
-	 * @param {User?} [targetUser]
+	 * @param {GameRoom | ChatRoom?} room
+	 * @param {User?} targetUser
 	 */
 	canTalk(message = null, room = null, targetUser = null) {
 		if (!targetUser && this.pmTarget) {
@@ -895,7 +905,8 @@ class CommandContext {
 			}
 			if (targetUser) {
 				if (lockType && !targetUser.can('lock')) {
-					return this.errorReply(`You are ${lockType} and can only private message members of the global moderation team (users marked by @ or above in the Help room). ${lockExpiration}`);
+					this.errorReply(`You are ${lockType} and can only private message members of the global moderation team. ${lockExpiration}`);
+					return this.sendReply(`|html|<a href="view-help-request--appeal" class="button">Get help with this</a>`);
 				}
 				if (targetUser.locked && !user.can('lock')) {
 					return this.errorReply(`The user "${targetUser.name}" is locked and cannot be PMed.`);
@@ -993,8 +1004,13 @@ class CommandContext {
 			user.lastMessageTime = Date.now();
 		}
 
+		if (room && room.highTraffic && toId(message).replace(/[^a-z]+/, '').length < 2 && !user.can('mute', null, room)) {
+			this.errorReply('Due to this room being a high traffic room, your message must contain at least two letters.');
+			return false;
+		}
+
 		if (Chat.filters.length) {
-			return Chat.filter.call(this, message, user, room, connection, targetUser);
+			return Chat.filter(this, message, user, room, connection, targetUser);
 		}
 
 		return message;
@@ -1659,10 +1675,9 @@ Chat.getImageDimensions = function (url) {
 Chat.fitImage = async function (url, maxHeight = 300, maxWidth = 300) {
 	let {height, width} = await Chat.getImageDimensions(url);
 
-	let ratio = 1;
-
 	if (width <= maxWidth && height <= maxHeight) return [width, height];
 
+	let ratio;
 	if (height * (maxWidth / maxHeight) > width) {
 		ratio = maxHeight / height;
 	} else {
@@ -1672,10 +1687,25 @@ Chat.fitImage = async function (url, maxHeight = 300, maxWidth = 300) {
 	return [Math.round(width * ratio), Math.round(height * ratio)];
 };
 
-// Used (and populated) by ChatMonitor.
-/** @type {{[k: string]: string[]}} */
-Chat.filterKeys = {};
-/** @type {{[k: string]: [(string | RegExp), string, string?, number][]}} */
+/**
+ * Used by ChatMonitor.
+ * @typedef {[(string | RegExp), string, string?, number]} FilterWord
+ * @typedef {(this: CommandContext, line: FilterWord, room: ChatRoom | GameRoom?, user: User, message: string, lcMessage: string, isStaff: boolean) => (string | false | undefined)} MonitorHandler
+ * @typedef {{location: string, punishment: string, label: string, condition?: string, monitor?: MonitorHandler}} Monitor
+ */
+
+/** @type {{[k: string]: FilterWord[]}} */
 Chat.filterWords = {};
+/** @type {{[k: string]: Monitor}} */
+Chat.monitors = {};
 /** @type {Map<string, string>} */
 Chat.namefilterwhitelist = new Map();
+
+/**
+ * @param {string} id
+ * @param {Monitor} entry
+ */
+Chat.registerMonitor = function (id, entry) {
+	if (!Chat.filterWords[id]) Chat.filterWords[id] = [];
+	Chat.monitors[id] = entry;
+};

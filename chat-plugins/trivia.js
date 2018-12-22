@@ -906,6 +906,10 @@ class NumberModeTrivia extends Trivia {
 		return correctPlayers && (6 - (5 * correctPlayers / this.playerCount | 0));
 	}
 
+	getRoundLength() {
+		return 6 * 1000;
+	}
+
 	tallyAnswers() {
 		this.phase = INTERMISSION_PHASE;
 
@@ -1693,7 +1697,7 @@ const commands = {
 			name = Chat.escapeHTML(user.name);
 			userid = user.userid;
 		} else {
-			target = this.splitTarget(target, true);
+			this.splitTarget(target, true);
 			name = Chat.escapeHTML(this.targetUsername);
 			userid = toId(name);
 		}

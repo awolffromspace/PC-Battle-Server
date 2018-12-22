@@ -61,7 +61,7 @@ const DATA_FILES = {
 	'Natures': 'natures',
 };
 
-const nullEffect = new Data.PureEffect({name: '', exists: false});
+const nullEffect = /** @type {PureEffect} */ (new Data.PureEffect({name: '', exists: false}));
 
 /** @typedef {{id: string, name: string, [k: string]: any}} DexTemplate */
 
@@ -460,21 +460,28 @@ class ModdedDex {
 		return moveCopy;
 	}
 	/**
+	 * While this function can technically return any kind of effect at
+	 * all, that's not a feature TypeScript needs to know about.
+	 *
 	 * @param {?string | Effect} [name]
-	 * @return {Effect}
+	 * @return {PureEffect}
 	 */
 	getEffect(name) {
 		if (!name) {
 			return nullEffect;
 		}
 		if (typeof name !== 'string') {
+			// @ts-ignore
 			return name;
 		}
 		if (name.startsWith('move:')) {
+			// @ts-ignore
 			return this.getMove(name.slice(5));
 		} else if (name.startsWith('item:')) {
+			// @ts-ignore
 			return this.getItem(name.slice(5));
 		} else if (name.startsWith('ability:')) {
+			// @ts-ignore
 			return this.getAbility(name.slice(8));
 		}
 		let id = toId(name);
@@ -499,6 +506,7 @@ class ModdedDex {
 		} else {
 			effect = new Data.PureEffect({name, exists: false});
 		}
+		// @ts-ignore
 		return effect;
 	}
 	/**
@@ -671,6 +679,22 @@ class ModdedDex {
 		return nature;
 	}
 	/**
+	 * @param {PokemonSet} set
+	 * @param {string} [statName]
+	 */
+	getAwakeningValues(set, statName) {
+		if (typeof statName === 'string') statName = toId(statName);
+		/** @type {StatsTable} */
+		let avs = {hp: 0, atk: 0, def: 0, spa: 0, spd: 0, spe: 0};
+		for (let ev in set.evs) {
+			// @ts-ignore
+			avs[ev] = set.evs[ev];
+		}
+		// @ts-ignore
+		if (typeof statName === 'string' && statName in avs) return avs[statName];
+		return avs;
+	}
+	/**
 	 * Given a table of base stats and a pokemon set, return the actual stats.
 	 * @param {StatsTable} baseStats
 	 * @param {PokemonSet} set
@@ -689,15 +713,15 @@ class ModdedDex {
 			let stat = baseStats['hp'];
 			modStats['hp'] = Math.floor(Math.floor(2 * stat + set.ivs['hp'] + Math.floor(set.evs['hp'] / 4) + 100) * set.level / 100 + 10);
 		}
-		return this.natureModify(modStats, set.nature);
+		return this.natureModify(modStats, set);
 	}
 	/**
 	 * @param {StatsTable} stats
-	 * @param {string | AnyObject} nature
+	 * @param {PokemonSet} set
 	 * @return {StatsTable}
 	 */
-	natureModify(stats, nature) {
-		nature = this.getNature(nature);
+	natureModify(stats, set) {
+		let nature = this.getNature(set.nature);
 		// @ts-ignore
 		if (nature.plus) stats[nature.plus] = Math.floor(stats[nature.plus] * 1.1);
 		// @ts-ignore

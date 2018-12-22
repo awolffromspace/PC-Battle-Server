@@ -744,9 +744,9 @@ Punishments.lock = function (user, expireTime, id, ...reason) {
  * @param {string} reason
  * @param {string?} message
  * @param {boolean} week
- * @param {boolean} name
+ * @param {string?} [name]
  */
-Punishments.autolock = function (user, room, source, reason, message, week = false, name = false) {
+Punishments.autolock = function (user, room, source, reason, message, week = false, name) {
 	if (!message) message = reason;
 
 	let punishment = `LOCKED`;
@@ -755,15 +755,17 @@ Punishments.autolock = function (user, room, source, reason, message, week = fal
 		expires = Date.now() + 7 * 24 * 60 * 60 * 1000;
 		punishment = `WEEKLOCKED`;
 	}
+
+	const userid = toId(user);
 	if (name) {
 		punishment = `NAMELOCKED`;
-		Punishments.namelock(user, expires, toId(user), `Autonamelock: ${user.name || toId(user)}: ${reason}`);
+		Punishments.namelock(user, expires, toId(name), `Autonamelock: ${user.name || userid}: ${reason}`);
 	} else {
-		Punishments.lock(user, expires, toId(user), `Autolock: ${user.name || toId(user)}: ${reason}`);
+		Punishments.lock(user, expires, toId(user), `Autolock: ${user.name || userid}: ${reason}`);
 	}
 	Monitor.log(`[${source}] ${punishment}: ${message}`);
 	const ipStr = typeof user !== 'string' ? ` [${user.latestIp}]` : '';
-	Rooms.global.modlog(`(${toId(room)}) AUTO${name ? `NAME` : ''}LOCK: [${toId(user)}]${ipStr}: ${reason}`);
+	Rooms.global.modlog(`(${toId(room)}) AUTO${name ? `NAME` : ''}LOCK: [${userid}]${ipStr}: ${reason}`);
 };
 /**
  * @param {string} name
@@ -830,6 +832,9 @@ Punishments.unnamelock = function (name) {
 	let id = toId(name);
 	/** @type {string[]} */
 	let success = [];
+	// @ts-ignore
+	if (user && user.namelocked) name = user.namelocked;
+
 	let unpunished = Punishments.unpunish(name, 'NAMELOCK');
 	if (user && user.locked) {
 		id = user.locked;
@@ -837,16 +842,16 @@ Punishments.unnamelock = function (name) {
 		user.namelocked = false;
 		user.resetName();
 		success.push(user.getLastName());
-		if (id.charAt(0) !== '#') {
-			Users.users.forEach(curUser => {
-				if (curUser.locked === id) {
-					curUser.locked = false;
-					curUser.namelocked = false;
-					curUser.resetName();
-					success.push(curUser.getLastName());
-				}
-			});
-		}
+	}
+	if (id.charAt(0) !== '#') {
+		Users.users.forEach(curUser => {
+			if (curUser.locked === id) {
+				curUser.locked = false;
+				curUser.namelocked = false;
+				curUser.resetName();
+				success.push(curUser.getLastName());
+			}
+		});
 	}
 	if (unpunished && !success.length) success.push(name);
 	if (!success.length) return false;
@@ -1084,6 +1089,7 @@ Punishments.addSharedIp = function (ip, note) {
 				user.semilocked = `#sharedip ${user.locked}`;
 			}
 			user.locked = false;
+			user.namelocked = false;
 
 			user.updateIdentity();
 		}
@@ -1270,11 +1276,12 @@ Punishments.checkName = function (user, userid, registered) {
 	let bannedUnder = ``;
 	if (punishUserid !== userid) bannedUnder = ` because you have the same IP as banned user: ${punishUserid}`;
 
-	if ((id === 'LOCK' || id === 'NAMELOCK') && punishUserid !== user.userid && Punishments.sharedIps.has(user.latestIp)) {
+	if ((id === 'LOCK' || id === 'NAMELOCK') && punishUserid !== userid && Punishments.sharedIps.has(user.latestIp)) {
 		if (!user.autoconfirmed) {
 			user.semilocked = `#sharedip ${user.locked}`;
 		}
 		user.locked = false;
+		user.namelocked = false;
 
 		user.updateIdentity();
 		return;

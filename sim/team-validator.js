@@ -26,7 +26,9 @@ class Validator {
 	 * @return {string[]?}
 	 */
 	validateTeam(team, removeNicknames = false) {
-		if (this.format.validateTeam) return this.format.validateTeam.call(this, team, removeNicknames);
+		if (team && this.format.validateTeam) {
+			return this.format.validateTeam.call(this, team, removeNicknames) || null;
+		}
 		return this.baseValidateTeam(team, removeNicknames);
 	}
 
@@ -170,7 +172,7 @@ class Validator {
 		for (const [rule] of ruleTable) {
 			let subformat = dex.getFormat(rule);
 			if (subformat.onChangeSet && ruleTable.has(subformat.id)) {
-				problems = problems.concat(subformat.onChangeSet.call(dex, set, format) || []);
+				problems = problems.concat(subformat.onChangeSet.call(dex, set, format, setHas, teamHas) || []);
 			}
 		}
 		if (format.onChangeSet) {
@@ -431,7 +433,7 @@ class Validator {
 				problems.push(`${name} has exactly 510 EVs, but this format does not restrict you to 510 EVs: you can max out every EV (If this was intentional, add exactly 1 to one of your EVs, which won't change its stats but will tell us that it wasn't a mistake).`);
 			}
 		}
-		if (set.evs && !Object.values(set.evs).some(value => value > 0)) {
+		if (set.evs && !Object.values(set.evs).some(value => value > 0) && !format.id.includes('letsgo')) {
 			problems.push(`${name} has exactly 0 EVs - did you forget to EV it? (If this was intentional, add exactly 1 to one of your EVs, which won't change its stats but will tell us that it wasn't a mistake).`);
 		}
 

@@ -19,13 +19,17 @@ let BattleAliases = {
 	"bh": "[Gen 7] Balanced Hackmons",
 	"mnm": "[Gen 7] Mix and Mega",
 	"aaa": "[Gen 7] Almost Any Ability",
+	"pic": "[Gen 7] Partners in Crime",
 	"2v2": "[Gen 7] 2v2 Doubles",
+	"letsgosingles": "[Gen 7 Let's Go] Singles No Restrictions",
+	"letsgodoubles": "[Gen 7 Let's Go] Doubles No Restrictions",
 	"cc1v1": "[Gen 7] Challenge Cup 1v1",
 	"cc2v2": "[Gen 7] Challenge Cup 2v2",
 	"hc": "[Gen 7] Hackmons Cup",
 	"monorandom": "[Gen 7] Monotype Random Battle",
 	"bf": "[Gen 7] Battle Factory",
 	"gen6bf": "[Gen 6] Battle Factory",
+	"ssb": "[Gen 7] Super Staff Bros Brawl",
 
 	// mega evos
 	"fabio": "Ampharos-Mega",
