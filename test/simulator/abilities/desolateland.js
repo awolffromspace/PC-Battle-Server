@@ -86,7 +86,7 @@ describe('Desolate Land', function () {
 		battle.makeChoices('move helpinghand', 'switch 3');
 		assert.false.fullHP(p2.active[0], "Charizard should be hurt by Solar Power");
 		battle.makeChoices('move solarbeam', 'switch 4');
-		assert.strictEqual(p2.active[0].getStat('spe'), 2 * p2.active[0].stats['spe'], "Venusaur's speed should be doubled by Chlorophyll");
+		assert.strictEqual(p2.active[0].getStat('spe'), 2 * p2.active[0].storedStats['spe'], "Venusaur's speed should be doubled by Chlorophyll");
 		assert.false.fullHP(p2.active[0], "Solar Beam should skip its charge turn");
 		battle.makeChoices('move helpinghand', 'switch 5');
 		assert.false.fullHP(p2.active[0], "Toxicroak should be hurt by Dry Skin");
@@ -109,7 +109,7 @@ describe('Desolate Land', function () {
 			{species: "Ho-Oh", ability: 'pressure', moves: ['roost']},
 		]);
 		battle.join('p2', 'Guest 2', 1, [{species: "Groudon", ability: 'desolateland', moves: ['bulkup']}]);
-		assert.constant(() => battle.isWeather('desolateland'), () => battle.makeChoices('move helpinghand', 'switch 2'));
+		assert.constant(() => battle.isWeather('desolateland'), () => battle.makeChoices('switch 2', 'move bulkup'));
 	});
 
 	it('should cause the Desolate Land weather to fade if its ability is suppressed and no other Desolate Land Pokemon are active', function () {

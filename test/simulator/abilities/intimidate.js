@@ -27,8 +27,33 @@ describe('Intimidate', function () {
 			{species: "Gyarados", item: 'leftovers', ability: 'intimidate', moves: ['splash']},
 		]);
 		battle.makeChoices('move substitute', 'move uturn');
-		battle.makeChoices('move substitute', 'switch gyarados');
+		battle.makeChoices('', 'switch gyarados');
 		assert.statStage(battle.p1.active[0], 'atk', 0);
+	});
+
+	it('should not activate if U-turn breaks the Substitute in Gen 4', function () {
+		battle = common.gen(4).createBattle({gameType: 'doubles'});
+		battle.join('p1', 'Guest 1', 1, [
+			{species: "Gengar", level: 1, item: 'leftovers', ability: 'levitate', moves: ['substitute']},
+			{species: "Suicune", level: 1, item: 'leftovers', ability: 'pressure', moves: ['substitute']},
+		]);
+		battle.join('p2', 'Guest 2', 1, [
+			{species: "Gliscor", item: 'laggingtail', ability: 'sandveil', moves: ['uturn']},
+			{species: "Scizor", item: 'laggingtail', ability: 'technician', moves: ['batonpass']},
+			{species: "Gyarados", item: 'leftovers', ability: 'intimidate', moves: ['splash']},
+			{species: "Salamence", item: 'leftovers', ability: 'intimidate', moves: ['splash']},
+		]);
+		battle.makeChoices('move substitute, move substitute', 'move uturn 1, move batonpass');
+		battle.makeChoices('', 'switch 3, pass');
+
+		const activate = '|-ability|p2a: Gyarados|Intimidate|boost';
+		assert.strictEqual(battle.log.filter(m => m === activate).length, 0);
+		assert.statStage(battle.p1.active[0], 'atk', 0);
+		assert.statStage(battle.p1.active[1], 'atk', 0);
+
+		battle.makeChoices('', 'pass, switch 4');
+		assert.statStage(battle.p1.active[0], 'atk', -1);
+		assert.statStage(battle.p1.active[1], 'atk', 0);
 	});
 
 	it('should affect adjacent foes only', function () {
@@ -58,7 +83,7 @@ describe('Intimidate', function () {
 			assert.species(source, intimidateCount === 0 ? 'Arcanine' : 'Gyarados');
 			intimidateCount++;
 		});
-		battle.makeChoices('teampreview', 'teampreview'); // Finish Team Preview, switch both Pokemon in
+		battle.makeChoices('default', 'default'); // Finish Team Preview, switch both Pokemon in
 		assert.strictEqual(intimidateCount, 2);
 		assert.statStage(p1.active[0], 'atk', -1);
 		assert.statStage(p2.active[0], 'atk', -1);
@@ -73,7 +98,7 @@ describe('Intimidate', function () {
 			assert.species(source, intimidateCount === 0 ? 'Arcanine' : 'Gyarados');
 			intimidateCount++;
 		});
-		battle.makeChoices('teampreview', 'teampreview'); // Finish Team Preview, switch both Pokemon in
+		battle.makeChoices('default', 'default'); // Finish Team Preview, switch both Pokemon in
 		assert.strictEqual(intimidateCount, 2);
 		assert.statStage(p1.active[0], 'atk', -1);
 		assert.statStage(p2.active[0], 'atk', -1);
@@ -96,7 +121,7 @@ describe('Intimidate', function () {
 			assert.species(source, intimidateCount % 2 === 0 ? 'Arcanine' : 'Gyarados');
 			intimidateCount++;
 		});
-		battle.makeChoices('teampreview', 'teampreview'); // Team Preview
+		battle.makeChoices('default', 'default'); // Team Preview
 
 		battle.makeChoices('move healingwish', 'move healingwish');
 

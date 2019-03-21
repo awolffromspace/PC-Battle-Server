@@ -29,7 +29,7 @@ describe('Rock Head', function () {
 		battle.join('p1', 'Guest 1', 1, [{species: 'Aerodactyl', ability: 'rockhead', moves: ['roost']}]);
 		battle.join('p2', 'Guest 2', 1, [{species: 'Sableye', ability: 'prankster', moves: ['taunt']}]);
 		battle.makeChoices('move roost', 'move taunt');
-		assert.hurts(battle.p1.active[0], () => battle.makeChoices('move roost', 'move taunt'));
+		assert.hurts(battle.p1.active[0], () => battle.makeChoices('move 1', 'move taunt'));
 	});
 
 	it('should not block crash damage', function () {
@@ -43,6 +43,6 @@ describe('Rock Head', function () {
 		battle = common.createBattle();
 		battle.join('p1', 'Guest 1', 1, [{species: 'Rampardos', ability: 'rockhead', moves: ['splash']}]);
 		battle.join('p2', 'Guest 2', 1, [{species: 'Abomasnow', ability: 'snowwarning', moves: ['splash']}]);
-		assert.hurts(battle.p1.active[0], () => battle.commitDecisions());
+		assert.hurts(battle.p1.active[0], () => battle.makeChoices());
 	});
 });

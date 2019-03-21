@@ -44,20 +44,21 @@ The beginning of a battle will look something like this:
 > Player details.
 >
 > - `PLAYER` is `p1` or `p2`
+> - `PLAYER` may also be `p3` or `p4` in 4 player battles
 > - `USERNAME` is the username
 > - `AVATAR` is the player's avatar identifier (usually a number, but other
 >    values can be used for custom avatars)
 
 `|teamsize|PLAYER|NUMBER`
 
-> - `PLAYER` is `p1` or `p2`
+> - `PLAYER` is `p1`, `p2`, `p3`, or `p4`
 > - `NUMBER` is the number of Pokémon your opponent starts with. In games
 >   without Team Preview, you don't know which Pokémon your opponent has, but
 >   you at least know how many there are.
 
 `|gametype|GAMETYPE`
 
-> - `GAMETYPE` is `singles`, `doubles`, or `triples`.
+> - `GAMETYPE` is `singles`, `doubles`, `triples`, `multi`, or `free-for-all`.
 
 `|gen|GENNUM`
 
@@ -134,6 +135,11 @@ The beginning of a battle will look something like this:
 > `inactive` means that the timer is on at the time the message was sent,
 > while `inactiveoff` means that the timer is off.
 
+`|upkeep`
+
+> Signals the upkeep phase of the turn where the number of turns left for field
+> conditions are updated.
+
 `|turn|NUMBER`
 
 > It is now turn `NUMBER`.
@@ -175,6 +181,15 @@ Doubles, player 2's perspective:
 
     p1b p1a
     p2a p2b
+
+In multi and free-for-all battles, players are grouped by parity. That is,
+`p1` and `p3` share a side, as do `p2` and `p4`. The position letters still
+follow the same conventions as in double battles, so the layout looks like:
+
+Multi, player 1's perspective
+
+    p4b p2a
+    p1a p3b
 
 - `NAME` is the nickname of the Pokémon (or the species name, if no nickname
   is given).
@@ -300,6 +315,17 @@ stat boosts are minor actions.
 > where `STAT` indicates where the ability prevents stat drops. (For abilities
 > that block all stat drops, like Clear Body, `|STAT` does not appear.) 
 
+`|-notarget|POKEMON`
+
+> A move has failed due to their being no target Pokémon `POKEMON`. `POKEMON` is
+> not present in Generation 1. This action is specific to Generations 1-4 as in
+> later Generations a failed move will display using `-fail`.
+
+`|-miss|SOURCE|TARGET`
+
+> The move used by the `SOURCE` Pokémon missed (maybe absent) the `TARGET`
+> Pokémon.
+
 `|-damage|POKEMON|HP STATUS`
 
 > The specified Pokémon `POKEMON` has taken damage, and is now at
@@ -336,6 +362,44 @@ stat boosts are minor actions.
 
 > Same as `-boost`, but for negative stat changes instead.
 
+`|-setboost|POKEMON|STAT|AMOUNT`
+
+> Same as `-boost` and `-unboost`, but `STAT` is *set* to `AMOUNT` instead of
+> boosted *by* `AMOUNT`. (For example: Anger Point, Belly Drum)
+
+`|-swapboost|SOURCE|TARGET|STATS`
+
+> Swaps the boosts from `STATS` between the `SOURCE` Pokémon and `TARGET
+> Pokémon.`STATS`takes the form of a comma-separated list of`STAT`abbreviations
+> as described in`-boost`. (For example: Guard Swap, Heart Swap).
+
+`|-invertboost|POKEMON`
+
+> Invert the boosts of the target Pokémon `POKEMON`. (For example: Topsy-Turvy).
+
+`|-clearboost|POKEMON`
+
+> Clears all of the boosts of the target `POKEMON`. (For example: Clear Smog).
+
+`|-clearallboost`
+
+> Clears all boosts from all Pokémon on both sides. (For example: Haze).
+
+`|-clearpositiveboost|TARGET|POKEMON|EFFECT`
+
+> Clear the positive boosts from the `TARGET` Pokémon due to an `EFFECT` of the
+> `POKEMON` Pokémon. (For example: 'move: Spectral Thief').
+
+`|-clearnegativeboost|POKEMON`
+
+> Clear the negative boosts from the target Pokémon `POKEMON`. (For example:
+> usually as the result of a `[zeffect]`).
+
+`|-copyboost|SOURCE|TARGET`
+
+> Copy the boosts from `SOURCE` Pokémon to `TARGET` Pokémon (For example: Psych
+> Up).
+
 `|-weather|WEATHER`
 
 > Indicates the weather that is currently in effect. If `|[upkeep]` is present,
@@ -362,6 +426,17 @@ stat boosts are minor actions.
 `|-sideend|SIDE|CONDITION`
 
 > Indicates that the side condition `CONDITION` ended for the given `SIDE`.
+
+`|-start|POKEMON|EFFECT`
+
+> A [*volatile* status](https://bulbapedia.bulbagarden.net/wiki/Status_condition#Volatile_status)
+> has been inflicted on the `POKEMON` Pokémon by `EFFECT`. (For example:
+> confusion, Taunt, Substitute).
+
+`|-end|POKEMON|EFFECT`
+
+> The volatile status from `EFFECT` inflicted on the `POKEMON` Pokémon has
+> ended.
 
 `|-crit|POKEMON`
 
@@ -419,6 +494,22 @@ stat boosts are minor actions.
 
 > The Pokémon `POKEMON` used `MEGASTONE` to Mega Evolve.
 
+`|-primal|POKEMON`
+
+> The Pokémon `POKEMON` has reverted to its primal forme.
+
+`|-burst|POKEMON|SPECIES|ITEM`
+
+> The Pokémon `POKEMON` has used `ITEM` to Ultra Burst into `SPECIES`.
+
+`|-zpower|POKEMON`
+
+> The Pokémon `POKEMON` has used the z-move version of its move.
+
+`|-zbroken|POKEMON`
+
+> A z-move has broken through protect and hit the `POKEMON`.
+
 `|-activate|EFFECT`
 
 > A miscellaneous effect has activated. This is triggered whenever an effect could 
@@ -443,10 +534,42 @@ stat boosts are minor actions.
 > for messages from game mods that aren't supported by the client, like rule clauses 
 > such as Sleep Clause, or other metagames with custom messages for specific scenarios. 
 
-I'll document all the message types eventually, but for now this should be
-enough to get you started. You can watch the data sent and received from
-the server on a regular connection, or look at the client source code
-for a full list of message types.
+`|-combine`
+
+> A move has been combined with another (For example: Fire Pledge).
+
+`|-waiting|SOURCE|TARGET`
+
+> The `SOURCE` Pokémon has used a move and is waiting for the `TARGET` Pokémon
+> (For example: Fire Pledge).
+
+`|-prepare|ATTACKER|MOVE|DEFENDER`
+
+> The `ATTACKER` Pokémon is preparing to use a charge `MOVE` on the `DEFENDER`
+> (For example: Dig, Fly).
+
+`|-mustrecharge|POKEMON`
+
+> The Pokémon `POKEMON` must spend the turn recharging from a previous move.
+
+`|-nothing`
+
+> **DEPRECATED**: A move did absolutely nothing. (For example: Splash). In the
+> future this will be of the form `|-activate||move:Splash`.
+
+`|-hitcount|POKEMON|NUM`
+
+> A multi-hit move hit the `POKEMON` `NUM` times.
+
+`|-singlemove|POKEMON|MOVE`
+
+> The Pokémon `POKEMON` used move `MOVE` which causes a temporary effect lasting
+> the duration of the move. (For example: Grudge, Destiny Bond).
+
+`|-singleturn|POKEMON|MOVE`
+
+> The Pokémon `POKEMON` used move `MOVE` which causes a temporary effect lasting
+> the duration of the turn. (For example: Protect, Focus Punch, Roost).
 
 
 Sending decisions
@@ -535,9 +658,9 @@ To be exact, `CHOICE` is one of:
 
 `SWITCHSPEC` is:
 
-- a pokemon nickname or 1-based slot number
-  - Note that if you have multiple Pokémon with the same nickname, using the
-    nickname will select the first unfainted one. If you want another Pokémon,
+- a Pokémon nickname/species or 1-based slot number
+  - Note that if you have multiple Pokémon with the same nickname/species, using the
+    nickname/species will select the first unfainted one. If you want another Pokémon,
     you'll need to specify it by slot number.
 
 Once a choice has been set for all players who need to make a choice, the

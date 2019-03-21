@@ -4,8 +4,9 @@
   "description": "The server for the Pokémon Showdown battle simulator",
   "version": "0.11.2",
   "dependencies": {
-	"probe-image-size": "^4.0.0",
+    "probe-image-size": "^4.0.0",
     "sockjs": "0.3.18",
+    "sucrase": "^3.9.5",
     "moment": "2.19.3",
     "nef": "^1.1.0",
     "nef-fs": "^1.0.0",
@@ -22,8 +23,9 @@
     "node": ">=7.7.0"
   },
   "scripts": {
-    "start": "node pokemon-showdown",
-    "test": "eslint --cache . && tsc && mocha",
+    "start": "node pokemon-showdown start",
+    "build": "node build",
+    "test": "eslint --cache . && tslint --project . && node build && mocha && tsc",
     "tsc": "tsc",
     "lint": "eslint --cache ."
   },
@@ -63,9 +65,10 @@
     "@types/node-static": "^0.7.2",
     "@types/nodemailer": "^4.6.5",
     "@types/sockjs": "^0.3.31",
-    "eslint": "^5.7.0",
+    "eslint": "^5.13.0",
     "husky": "^1.1.2",
     "mocha": "^5.2.0",
-    "typescript": "^3.2.1"
+    "tslint": "^5.13.0",
+    "typescript": "~3.3.3333"
   }
 }

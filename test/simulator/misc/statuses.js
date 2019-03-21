@@ -70,6 +70,41 @@ describe('Paralysis', function () {
 		battle.makeChoices('move aquaring', 'move thunderwave');
 		assert.strictEqual(battle.p1.active[0].getStat('spe'), battle.modify(speed, 0.25));
 	});
+
+	it('should reduce speed to 25% of its original value in Stadium', function () {
+		battle = common.mod('stadium').createBattle([
+			[{species: 'Vaporeon', moves: ['growl']}],
+			[{species: 'Jolteon', moves: ['thunderwave']}],
+		]);
+		let speed = battle.p1.active[0].getStat('spe');
+		battle.makeChoices('move growl', 'move thunderwave');
+		assert.strictEqual(battle.p1.active[0].getStat('spe'), battle.modify(speed, 0.25));
+	});
+
+	it('should reapply its speed drop when an opponent uses a stat-altering move in Gen 1', function () {
+		battle = common.gen(1).createBattle([
+			[{species: 'Electrode', moves: ['rest']}],
+			[{species: 'Slowpoke', moves: ['amnesia', 'thunderwave']}],
+		]);
+		battle.makeChoices('move rest', 'move thunderwave');
+		let speed = battle.p1.active[0].getStat('spe');
+		battle.makeChoices('move rest', 'move amnesia');
+		assert.strictEqual(battle.p1.active[0].getStat('spe'), battle.modify(speed, 0.25));
+	});
+
+	it('should not reapply its speed drop when an opponent uses a failed stat-altering move in Gen 1', function () {
+		battle = common.gen(1).createBattle([
+			[{species: 'Electrode', moves: ['rest']}],
+			[{species: 'Slowpoke', moves: ['amnesia', 'thunderwave']}],
+		]);
+		battle.makeChoices('move rest', 'move amnesia');
+		battle.makeChoices('move rest', 'move amnesia');
+		battle.makeChoices('move rest', 'move amnesia');
+		battle.makeChoices('move rest', 'move thunderwave');
+		let speed = battle.p1.active[0].getStat('spe');
+		battle.makeChoices('move rest', 'move amnesia');
+		assert.strictEqual(battle.p1.active[0].getStat('spe'), speed);
+	});
 });
 
 describe('Toxic Poison', function () {
@@ -95,7 +130,7 @@ describe('Toxic Poison', function () {
 			[{species: 'Crobat', ability: 'infiltrator', moves: ['toxic', 'whirlwind']}],
 		]);
 		for (let i = 0; i < 4; i++) {
-			battle.makeChoices('move curse', 'move toxic');
+			battle.makeChoices('move counter', 'move toxic');
 		}
 		let pokemon = battle.p1.active[0];
 		pokemon.hp = pokemon.maxhp;
@@ -178,5 +213,78 @@ describe('Toxic Poison [Gen 1]', function () {
 		battle.makeChoices('move leechseed', 'move splash');
 		// (1/16) + (2/16) + (3/16) = (6/16)
 		assert.strictEqual(pokemon.maxhp - pokemon.hp, Math.floor(pokemon.maxhp / 16) * 6);
+	});
+});
+
+
+describe('Toxic Poison [Gen 2]', function () {
+	afterEach(function () {
+		battle.destroy();
+	});
+
+	it('should not affect Leech Seed damage counter', function () {
+		battle = common.gen(2).createBattle([
+			[{species: 'Venusaur', moves: ['toxic', 'leechseed']}],
+			[{species: 'Chansey', moves: ['splash']}],
+		]);
+		battle.makeChoices('move toxic', 'move splash');
+		let pokemon = battle.p2.active[0];
+		assert.strictEqual(pokemon.maxhp - pokemon.hp, Math.floor(pokemon.maxhp / 16));
+		battle.makeChoices('move leechseed', 'move splash');
+		// (1/16) + (2/16) + (1/8) = (5/16)
+		assert.strictEqual(pokemon.maxhp - pokemon.hp, Math.floor(pokemon.maxhp / 16) * 5);
+	});
+
+	it('should pass the damage counter to Pokemon with Baton Pass', function () {
+		battle = common.gen(2).createBattle([
+			[{species: 'Smeargle', moves: ['toxic', 'sacredfire', 'splash']}],
+			[
+				{species: 'Chansey', moves: ['splash']},
+				{species: 'Celebi', moves: ['batonpass', 'splash']},
+			],
+		]);
+		battle.resetRNG(); // Guarantee Sacred Fire burns
+		battle.makeChoices('move sacredfire', 'move splash');
+		let pokemon = battle.p2.active[0];
+		battle.resetRNG(); // Guarantee Toxic hits.
+		battle.makeChoices('move toxic', 'switch 2');
+		battle.makeChoices('move splash', 'move splash');
+		battle.makeChoices('move splash', 'move splash');
+		battle.makeChoices('move splash', 'move batonpass');
+		battle.makeChoices('', 'switch 2');
+		let hp = pokemon.hp;
+		battle.makeChoices('move splash', 'move splash');
+		assert.strictEqual(hp - pokemon.hp, Math.floor(pokemon.maxhp / 16) * 4);
+
+		// Only hint about this once per battle, not every turn.
+		assert.strictEqual(battle.log.filter(m => m.startsWith('|-hint')).length, 1);
+
+		// Damage counter should be removed on regular switch out
+		battle.makeChoices('move splash', 'switch 2');
+		hp = pokemon.hp;
+		battle.makeChoices('move splash', 'switch 2');
+		assert.strictEqual(hp - pokemon.hp, Math.floor(pokemon.maxhp / 8));
+	});
+
+	it('should not have its damage counter affected by Heal Bell', function () {
+		battle = common.gen(2).createBattle([
+			[{species: 'Smeargle', moves: ['toxic', 'sacredfire', 'splash']}],
+			[{species: 'Chansey', moves: ['splash', 'healbell']}],
+		]);
+		battle.makeChoices('move toxic', 'move splash');
+		let pokemon = battle.p2.active[0];
+		battle.makeChoices('move splash', 'move healbell');
+		battle.resetRNG(); // Guarantee Sacred Fire burns
+		battle.makeChoices('move sacredfire', 'move splash');
+		let hp = pokemon.hp;
+		battle.makeChoices('move splash', 'move splash');
+		assert.strictEqual(hp - pokemon.hp, Math.floor(pokemon.maxhp / 16) * 3);
+		hp = pokemon.hp;
+
+		battle.makeChoices('move splash', 'move healbell');
+		battle.resetRNG(); // Guarantee Toxic hits
+		battle.makeChoices('move toxic', 'move splash');
+		// Toxic counter should be reset by a successful Toxic
+		assert.strictEqual(hp - pokemon.hp, Math.floor(pokemon.maxhp / 16));
 	});
 });
