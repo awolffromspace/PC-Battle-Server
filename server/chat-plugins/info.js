@@ -295,7 +295,7 @@ const commands = {
 
 	sp: 'showpunishments',
 	showpunishments(target, room, user) {
-		if (!room.chatRoomData) return this.errorReply("This command is unavailable in temporary rooms.");
+		if (!room.chatRoomData || room.id.includes('-')) return this.errorReply("This command is unavailable in temporary rooms.");
 		return this.parse(`/join view-punishments-${room}`);
 	},
 	showpunishmentshelp: [`/showpunishments - Shows the current punishments in the room. Requires: % @ # & ~`],
@@ -1522,6 +1522,7 @@ const commands = {
 	randbatscalc: 'calc',
 	rcalc: 'calc',
 	calc(target, room, user, connection, cmd) {
+		if (cmd === 'calc' && target) return this.parse(`/math ${target}`);
 		if (!this.runBroadcast()) return;
 		let isRandomBattle = (room && room.battle && room.battle.format === 'gen7randombattle');
 		if (['randomscalc', 'randbatscalc', 'rcalc'].includes(cmd) || isRandomBattle) {
@@ -1933,23 +1934,21 @@ const commands = {
 			const supportedLanguages = {
 				spanish: 'es',
 				french: 'fr',
-				italian: 'ita',
-				german: 'ger',
-				portuguese: 'por',
+				italian: 'it',
+				german: 'de',
+				portuguese: 'pt',
 			};
 			let speciesid = pokemon.speciesid;
 			// Special case for Meowstic-M
 			if (speciesid === 'meowstic') speciesid = 'meowsticm';
-			if (formatId === 'ou' && generation === 'sm' && room && room.language in supportedLanguages) {
+			if (['ou', 'uu'].includes(formatId) && generation === 'sm' && room && room.language in supportedLanguages) {
 				// Limited support for translated analysis
 				// Translated analysis do not support automatic redirects from a speciesid to the proper page
-				let pageid = pokemon.name.toLowerCase().replace(' ', '_');
-				this.sendReplyBox(`<a href="https://www.smogon.com/translations/${supportedLanguages[room.language]}/analyses/ou/${pageid}">${generation.toUpperCase()} ${Chat.escapeHTML(formatName)} ${pokemon.name} analysis</a>, brought to you by <a href="https://www.smogon.com">Smogon University</a>`);
-			} else if (formatId === 'ou' && generation === 'sm') {
-				let pageid = pokemon.name.toLowerCase().replace(' ', '_');
-				this.sendReplyBox(`<a href="https://www.smogon.com/dex/${generation}/pokemon/${speciesid}/ou">${generation.toUpperCase()} ${Chat.escapeHTML(formatName)} ${pokemon.name} analysis</a>, brought to you by <a href="https://www.smogon.com">Smogon University</a><br />` +
-					`Other languages: <a href="https://www.smogon.com/translations/es/analyses/ou/${pageid}">Español</a>, <a href="https://www.smogon.com/translations/fr/analyses/ou/${pageid}">Français</a>, <a href="https://www.smogon.com/translations/ita/analyses/ou/${pageid}">Italiano</a>, ` +
-					`<a href="https://www.smogon.com/translations/ger/analyses/ou/${pageid}">Deutsch</a>, <a href="https://www.smogon.com/translations/por/analyses/ou/${pageid}">Português</a>`
+				this.sendReplyBox(`<a href="https://www.smogon.com/dex/${generation}/pokemon/${speciesid}/${formatId}/?lang=${supportedLanguages[room.language]}">${generation.toUpperCase()} ${Chat.escapeHTML(formatName)} ${pokemon.name} analysis</a>, brought to you by <a href="https://www.smogon.com">Smogon University</a>`);
+			} else if (['ou', 'uu'].includes(formatId) && generation === 'sm') {
+				this.sendReplyBox(`<a href="https://www.smogon.com/dex/${generation}/pokemon/${speciesid}/${formatId}">${generation.toUpperCase()} ${Chat.escapeHTML(formatName)} ${pokemon.name} analysis</a>, brought to you by <a href="https://www.smogon.com">Smogon University</a><br />` +
+					`Other languages: <a href="https://www.smogon.com/dex/${generation}/pokemon/${speciesid}/${formatId}/?lang=es">Español</a>, <a href="https://www.smogon.com/dex/${generation}/pokemon/${speciesid}/${formatId}/?lang=fr">Français</a>, <a href="https://www.smogon.com/dex/${generation}/pokemon/${speciesid}/${formatId}/?lang=it">Italiano</a>, ` +
+					`<a href="https://www.smogon.com/dex/${generation}/pokemon/${speciesid}/${formatId}/?lang=de">Deutsch</a>, <a href="https://www.smogon.com/dex/${generation}/pokemon/${speciesid}/${formatId}/?lang=pt">Português</a>`
 				);
 			} else {
 				this.sendReplyBox(`<a href="https://www.smogon.com/dex/${generation}/pokemon/${speciesid}${(formatId ? '/' + formatId : '')}">${generation.toUpperCase()} ${Chat.escapeHTML(formatName)} ${pokemon.name} analysis</a>, brought to you by <a href="https://www.smogon.com">Smogon University</a>`);
@@ -2280,11 +2279,58 @@ const commands = {
 	},
 	showimagehelp: [`/showimage [url], [width], [height] - Show an image. Any CSS units may be used for the width or height (default: px). If width and height aren't provided, automatically scale the image to fit in chat. Requires: # & ~`],
 
+	'!pi': true,
+	pi(target, room, user) {
+		return this.sendReplyBox(
+			'Did you mean: 1. 3.1415926535897932384626... (Decimal)<br />' +
+			'2. 3.184809493B91866... (Duodecimal)<br />' +
+			'3. 3.243F6A8885A308D... (Hexadecimal)<br /><br />' +
+			'How many digits of pi do YOU know? Test it out <a href="http://guangcongluo.com/mempi/">here</a>!');
+	},
+
+	'!code': true,
+	code(target, room, user) {
+		if (!target) return this.parse('/help code');
+		if (!this.canTalk()) return;
+		if (target.startsWith('\n')) target = target.slice(1);
+		if (target.length >= 8192) return this.errorReply("Your code must be under 8192 characters long!");
+		const separator = '\n';
+		if (target.includes(separator) || target.length > 150) {
+			const params = target.split(separator);
+			let output = [];
+			let cutoff = 3;
+			for (const param of params) {
+				if (output.length < 2 && param.length > 80) cutoff = 2;
+				output.push(Chat.escapeHTML(param));
+			}
+			let code;
+			if (output.length > cutoff) {
+				code = `<div class="chat"><details class="readmore code" style="white-space: pre-wrap; display: table; tab-size: 3"><summary>${output.slice(0, cutoff).join('<br />')}</summary>${output.slice(cutoff).join('<br />')}</details></div>`;
+			} else {
+				code = `<div class="chat"><code style="white-space: pre-wrap; display: table; tab-size: 3">${output.join('<br />')}</code></div>`;
+			}
+
+			if (!this.canBroadcast(true, '!code')) return;
+			if (this.broadcastMessage && !this.can('broadcast', null, room)) return false;
+
+			if (!this.runBroadcast(true, '!code')) return;
+
+			this.sendReplyBox(code);
+		} else {
+			return this.errorReply("You can simply use ``[code]`` for code messages that are only one line.");
+		}
+	},
+	codehelp: [
+		`!code [code] - Broadcasts code to a room. Accepts multi-line arguments. Requires: + % @ & # ~`,
+		`In order to use !code in private messages you must be a global voice or higher`,
+		`/code [code] - Shows you code. Accepts multi-line arguments.`,
+	],
+
 	htmlbox(target, room, user) {
 		if (!target) return this.parse('/help htmlbox');
 		target = this.canHTML(target);
 		if (!target) return;
-
+		target = Chat.collapseLineBreaksHTML(target);
 		if (!this.canBroadcast(true, '!htmlbox')) return;
 		if (this.broadcastMessage && !this.can('declare', null, room)) return false;
 
@@ -2302,7 +2348,7 @@ const commands = {
 		target = this.canHTML(target);
 		if (!target) return;
 		if (!this.can('addhtml', null, room)) return;
-
+		target = Chat.collapseLineBreaksHTML(target);
 		if (!user.can('addhtml')) {
 			target += Chat.html`<div style="float:right;color:#888;font-size:8pt">[${user.name}]</div><div style="clear:both"></div>`;
 		}
@@ -2320,7 +2366,7 @@ const commands = {
 		html = this.canHTML(html);
 		if (!html) return;
 		if (!this.can('addhtml', null, room)) return;
-
+		html = Chat.collapseLineBreaksHTML(html);
 		if (!user.can('addhtml')) {
 			html += Chat.html`<div style="float:right;color:#888;font-size:8pt">[${user.name}]</div><div style="clear:both"></div>`;
 		}
@@ -2340,7 +2386,7 @@ const commands = {
 		html = this.canHTML(html);
 		if (!html) return;
 		if (!this.can('addhtml', null, room)) return;
-
+		html = Chat.collapseLineBreaksHTML(html);
 		if (!user.can('addhtml')) {
 			html += Chat.html`<div style="float:right;color:#888;font-size:8pt">[${user.name}]</div><div style="clear:both"></div>`;
 		}
@@ -2366,7 +2412,7 @@ const commands = {
 		html = this.canHTML(html);
 		if (!html) return;
 		if (!this.can('addhtml', null, room)) return;
-
+		html = Chat.collapseLineBreaksHTML(html);
 		if (!user.can('addhtml')) {
 			html += Chat.html`<div style="float:right;color:#888;font-size:8pt">[${user.name}]</div><div style="clear:both"></div>`;
 		}
@@ -2389,55 +2435,39 @@ const pages = {
 		let buf = "";
 		this.extractRoom();
 		if (!user.named) return Rooms.RETRY_AFTER_LOGIN;
-		buf += `<div class="pad"><h2>List of active punishments:</h2>`;
+		if (!this.room.chatRoomData) return;
 		if (!this.can('mute', null, this.room)) return;
-		if (!this.room.chatRoomData) {
-			return buf + `<div class="notice message-error">This page is unavailable in temporary rooms / non-existent rooms.</div>`;
-		}
-		const store = new Map();
-		const possessive = (word) => {
-			const suffix = word.endsWith('s') ? `'` : `'s`;
-			return `${word}${suffix}`;
-		};
-
-		if (Punishments.roomUserids.get(this.room.id)) {
-			for (let [key, value] of Punishments.roomUserids.get(this.room.id)) {
-				if (!store.has(value)) store.set(value, [new Set([value.id]), new Set()]);
-				store.get(value)[0].add(key);
+		const sortedPunishments = Punishments.getPunishmentsOfRoom(this.room).sort((a, b) =>
+			// Ascending order
+			a.expiresIn - b.expiresIn
+		);
+		if (sortedPunishments.length) {
+			buf += `<div class="pad"><h2>List of active punishments:</h2>`;
+			buf += `<table style="border: 1px solid black; border-collapse:collapse; width:100%;">`;
+			buf += `<tr>`;
+			buf += `<th style="border: 1px solid black;">Username</th>`;
+			buf += `<th style="border: 1px solid black;">Punishment type</th>`;
+			buf += `<th style="border: 1px solid black;">Expire time</th>`;
+			buf += `<th style="border: 1px solid black;">Reason</th>`;
+			buf += `<th style="border: 1px solid black;">Alts</th>`;
+			if (user.can('ban')) buf += `<th style="border: 1px solid black;">IPs</th>`;
+			buf += `</tr>`;
+			for (const punishment of sortedPunishments) {
+				let expireString = Chat.toDurationString(punishment.expiresIn, {precision: 1});
+				buf += `<tr>`;
+				buf += `<td style="border: 1px solid black;">${punishment.id}</td>`;
+				buf += `<td style="border: 1px solid black;">${punishment.punishType.toLowerCase()}</td>`;
+				buf += `<td style="border: 1px solid black;">${expireString}</td>`;
+				buf += (punishment.reason) ? `<td style="border: 1px solid black;">${punishment.reason}</td>` : `<td style="border: 1px solid black;"> - </td>`;
+				buf += (punishment.alts.length) ? `<td style="border: 1px solid black;">${punishment.alts.join(", ")}</td>` : `<td style="border: 1px solid black;"> - </td>`;
+				buf += (user.can('ban') && punishment.ips.length) ? `<td style="border: 1px solid black;">${punishment.ips.join(", ")}</td>` : (user.can('ban') && !punishment.ips.length) ? `<td style="border: 1px solid black;"> - </td>` : ``;
+				buf += `</tr>`;
 			}
+			buf += `</table>`;
+			buf += `</div>`;
+		} else {
+			buf += `<h2>No user in ${this.room} is currently punished.</h2>`;
 		}
-
-		if (Punishments.roomIps.get(this.room.id)) {
-			for (let [key, value] of Punishments.roomIps.get(this.room.id)) {
-				if (!store.has(value)) store.set(value, [new Set([value.id]), new Set()]);
-				store.get(value)[1].add(key);
-			}
-		}
-
-		for (const [punishment, data] of store) {
-			let [punishType, id, expireTime, reason] = punishment;
-			let alts = [...data[0]].filter(user => user !== id);
-			let ip = [...data[1]];
-			let expiresIn = new Date(expireTime).getTime() - Date.now();
-			let expireString = Chat.toDurationString(expiresIn, {precision: 1});
-			let punishDesc = "";
-			if (reason) punishDesc += ` Reason: ${reason}.`;
-			if (alts.length) punishDesc += ` Alts: ${alts.join(", ")}.`;
-			if (user.can('ban') && ip.length) {
-				punishDesc += ` IPs: ${ip.join(", ")}.`;
-			}
-			buf += `<p>- ${possessive(id)} ${punishType.toLowerCase()} expires in ${expireString}.${punishDesc}</p>`;
-		}
-
-		if (this.room.muteQueue) {
-			for (const entry of this.room.muteQueue) {
-				let expiresIn = new Date(entry.time).getTime() - Date.now();
-				if (expiresIn < 0) continue;
-				let expireString = Chat.toDurationString(expiresIn, {precision: 1});
-				buf += `<p>- ${possessive(entry.userid)} mute expires in ${expireString}.</p>`;
-			}
-		}
-		buf += `</div>`;
 		return buf;
 	},
 };
@@ -2447,4 +2477,7 @@ exports.commands = commands;
 
 process.nextTick(() => {
 	Dex.includeData();
+	Chat.multiLinePattern.register(
+		'/htmlbox', '!htmlbox', '/addhtmlbox', '/addrankhtmlbox', '/adduthml', '/changeuhtml', '/addrankuhtmlbox', '/changerankuhtmlbox'
+	);
 });

@@ -514,6 +514,7 @@ exports.grouplist = [
 		inherit: '@',
 		jurisdiction: 'u',
 		declare: true,
+		addhtml: true,
 		modchat: true,
 		roomonly: true,
 		gamemanagement: true,
@@ -530,6 +531,7 @@ exports.grouplist = [
 		joinbattle: true,
 		nooverride: true,
 		editprivacy: true,
+		exportinputlog: true,
 		modchatall: true,
 	},
 	{

@@ -8,7 +8,7 @@ let BattleAbilities = {
 		shortDesc: "If this Pokemon or its substitute takes a critical hit, its Attack is raised 12 stages.",
 		onAfterSubDamage(damage, target, source, move) {
 			if (!target.hp) return;
-			if (move && move.effectType === 'Move' && move.crit) {
+			if (move && move.effectType === 'Move' && target.getMoveHitData(move).crit) {
 				target.setBoost({atk: 6});
 				this.add('-setboost', target, 'atk', 12, '[from] ability: Anger Point');
 			}
@@ -92,12 +92,12 @@ let BattleAbilities = {
 		desc: "If Sunny Day is active, the Attack and Special Defense of this Pokemon and its allies are multiplied by 1.5.",
 		shortDesc: "If Sunny Day is active, Attack and Sp. Def of this Pokemon and its allies are 1.5x.",
 		onAllyModifyAtk(atk) {
-			if (this.isWeather('sunnyday')) {
+			if (this.field.isWeather('sunnyday')) {
 				return this.chainModify(1.5);
 			}
 		},
 		onAllyModifySpD(spd) {
-			if (this.isWeather('sunnyday')) {
+			if (this.field.isWeather('sunnyday')) {
 				return this.chainModify(1.5);
 			}
 		},
@@ -172,7 +172,7 @@ let BattleAbilities = {
 		onSetStatus(status, target, source, effect) {
 			if (effect && effect.id === 'rest') {
 				return;
-			} else if (this.isWeather('sunnyday')) {
+			} else if (this.field.isWeather('sunnyday')) {
 				return false;
 			}
 		},

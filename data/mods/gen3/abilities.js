@@ -107,8 +107,7 @@ let BattleAbilities = {
 		desc: "If an active Pokemon has the Plus Ability, this Pokemon's Special Attack is multiplied by 1.5.",
 		shortDesc: "If an active Pokemon has the Plus Ability, this Pokemon's Sp. Atk is 1.5x.",
 		onModifySpA(spa, pokemon) {
-			let allActives = pokemon.side.active.concat(pokemon.side.foe.active);
-			for (const active of allActives) {
+			for (const active of this.getAllActive()) {
 				if (!active.fainted && active.hasAbility('plus')) {
 					return this.chainModify(1.5);
 				}
@@ -120,8 +119,7 @@ let BattleAbilities = {
 		desc: "If an active Pokemon has the Minus Ability, this Pokemon's Special Attack is multiplied by 1.5.",
 		shortDesc: "If an active Pokemon has the Minus Ability, this Pokemon's Sp. Atk is 1.5x.",
 		onModifySpA(spa, pokemon) {
-			let allActives = pokemon.side.active.concat(pokemon.side.foe.active);
-			for (const active of allActives) {
+			for (const active of this.getAllActive()) {
 				if (!active.fainted && active.hasAbility('minus')) {
 					return this.chainModify(1.5);
 				}
@@ -142,14 +140,7 @@ let BattleAbilities = {
 	"pressure": {
 		inherit: true,
 		onStart(pokemon) {
-			this.add('split');
-			for (const line of [false, 0, 1, true]) {
-				if (line === true || line === pokemon.side.n % 2) {
-					this.add('-ability', pokemon, 'Pressure', '[silent]');
-				} else {
-					this.log.push('');
-				}
-			}
+			this.addSplit(pokemon.side.id, ['-ability', pokemon, 'Pressure', '[silent]']);
 		},
 	},
 	"roughskin": {
@@ -195,6 +186,23 @@ let BattleAbilities = {
 			if (pokemon.setAbility(ability)) {
 				this.add('-ability', pokemon, ability, '[from] ability: Trace', '[of] ' + target);
 			}
+		},
+	},
+	"truant": {
+		inherit: true,
+		onStart() {},
+		onSwitchIn(pokemon) {
+			pokemon.truantTurn = this.turn !== 0;
+		},
+		onBeforeMove(pokemon) {
+			if (pokemon.truantTurn) {
+				this.add('cant', pokemon, 'ability: Truant');
+				return false;
+			}
+		},
+		onResidualOrder: 27,
+		onResidual(pokemon) {
+			pokemon.truantTurn = !pokemon.truantTurn;
 		},
 	},
 	"voltabsorb": {

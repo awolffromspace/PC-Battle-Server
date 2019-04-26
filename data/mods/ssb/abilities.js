@@ -22,12 +22,12 @@ let BattleAbilities = {
 		name: "Season's Gift",
 		isNonstandard: "Custom",
 		onModifyAtk(atk) {
-			if (this.isWeather(['sunnyday', 'desolateland'])) {
+			if (this.field.isWeather(['sunnyday', 'desolateland'])) {
 				return this.chainModify(1.5);
 			}
 		},
 		onModifySpe(spe) {
-			if (this.isWeather(['sunnyday', 'desolateland'])) {
+			if (this.field.isWeather(['sunnyday', 'desolateland'])) {
 				return this.chainModify(2);
 			}
 		},
@@ -85,20 +85,9 @@ let BattleAbilities = {
 			}
 		},
 		onModifySpe(spe, pokemon) {
-			if (this.isWeather(['raindance', 'primordialsea'])) {
+			if (this.field.isWeather(['raindance', 'primordialsea'])) {
 				return this.chainModify(2);
 			}
-		},
-	},
-	// Bimp
-	learnsomethingnew: {
-		desc: "This Pokemon's Attack is raised by one stage when another Pokemon faints.",
-		shortDesc: "This Pokemon's Attack is raised by 1 stage when another Pokemon faints.",
-		id: "learnsomethingnew",
-		name: "Learn Something New!",
-		isNonstandard: "Custom",
-		onAnyFaint() {
-			this.boost({atk: 1}, this.effectData.target);
 		},
 	},
 	// Brandon
@@ -173,8 +162,8 @@ let BattleAbilities = {
 		id: "starkmountain",
 		name: "Stark Mountain",
 		isNonstandard: "Custom",
-		onStart(target, source) {
-			this.setWeather('sunnyday', source);
+		onStart(pokemon) {
+			this.field.setWeather('sunnyday', pokemon);
 		},
 		onSourceBasePower(basePower, attacker, defender, move) {
 			if (move.type === 'Water') {
@@ -190,13 +179,13 @@ let BattleAbilities = {
 		name: "Scripter",
 		isNonstandard: "Custom",
 		onModifyDamage(damage, source, target, move) {
-			if (this.isTerrain('scriptedterrain')) {
+			if (this.field.isTerrain('scriptedterrain')) {
 				this.debug('Scripter boost');
 				return this.chainModify(1.5);
 			}
 		},
 		onModifySpe(spe, pokemon) {
-			if (this.isTerrain('scriptedterrain')) {
+			if (this.field.isTerrain('scriptedterrain')) {
 				return this.chainModify(2);
 			}
 		},
@@ -229,7 +218,7 @@ let BattleAbilities = {
 		name: "Frozen Skin",
 		isNonstandard: "Custom",
 		onModifySpe(spe, pokemon) {
-			if (this.isWeather('hail')) {
+			if (this.field.isWeather('hail')) {
 				return this.chainModify(2);
 			}
 		},
@@ -293,7 +282,7 @@ let BattleAbilities = {
 		name: "Prismatic Surge",
 		isNonstandard: "Custom",
 		onStart() {
-			this.setTerrain('prismaticterrain');
+			this.field.setTerrain('prismaticterrain');
 		},
 	},
 	// Osiris
@@ -377,10 +366,10 @@ let BattleAbilities = {
 				if (action.choice === 'runPrimal' && action.pokemon === source && source.template.speciesid === 'kyogre') return;
 				if (action.choice !== 'runSwitch' && action.choice !== 'runPrimal') break;
 			}
-			this.setWeather('raindance');
+			this.field.setWeather('raindance');
 		},
 		onModifyDef(def, pokemon) {
-			if (this.isWeather(['raindance', 'primordialsea'])) {
+			if (this.field.isWeather(['raindance', 'primordialsea'])) {
 				return this.chainModify(1.5);
 			}
 		},
@@ -427,14 +416,14 @@ let BattleAbilities = {
 		id: "thiccerfat",
 		name: "Thiccer Fat",
 		isNonstandard: "Custom",
-		onModifyAtkPriority: 6,
+		onSourceModifyAtkPriority: 6,
 		onSourceModifyAtk(atk, attacker, defender, move) {
 			if (move.type === 'Ice' || move.type === 'Fire') {
 				this.debug('Thiccer Fat weaken');
 				return this.chainModify(0.5);
 			}
 		},
-		onModifySpAPriority: 5,
+		onSourceModifySpAPriority: 5,
 		onSourceModifySpA(atk, attacker, defender, move) {
 			if (move.type === 'Ice' || move.type === 'Fire') {
 				this.debug('Thiccer Fat weaken');
@@ -521,7 +510,7 @@ let BattleAbilities = {
 				if (action.choice === 'runPrimal' && action.pokemon === source && source.template.speciesid === 'groudon') return;
 				if (action.choice !== 'runSwitch' && action.choice !== 'runPrimal') break;
 			}
-			this.setWeather('sunnyday');
+			this.field.setWeather('sunnyday');
 		},
 		onSourceModifyDamage(damage, source, target, move) {
 			let mod = 1;
@@ -536,8 +525,8 @@ let BattleAbilities = {
 		id: "interdimensional",
 		name: "Interdimensional",
 		isNonstandard: "Custom",
-		onStart(target, source) {
-			this.addPseudoWeather('gravity', source);
+		onStart(pokemon) {
+			this.field.addPseudoWeather('gravity', pokemon);
 		},
 	},
 	// urkerab
@@ -561,7 +550,7 @@ let BattleAbilities = {
 		onStart() {
 			let snowStorm = this.deepClone(this.getEffect('hail'));
 			snowStorm.duration = -1;
-			this.setWeather(snowStorm);
+			this.field.setWeather(snowStorm);
 		},
 	},
 	// Modified Illusion to support SSB volatiles

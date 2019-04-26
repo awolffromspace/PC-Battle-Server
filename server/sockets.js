@@ -20,6 +20,8 @@ const fs = require('fs');
 /** @type {typeof import('../lib/fs').FS} */
 const FS = require(/** @type {any} */('../.lib-dist/fs')).FS;
 
+/** @typedef {0 | 1 | 2 | 3 | 4} ChannelID */
+
 const Monitor = {
 	crashlog: require(/** @type {any} */('../.lib-dist/crashlogger')),
 };
@@ -233,11 +235,11 @@ if (cluster.isMaster) {
 	/**
 	 * @param {cluster.Worker} worker
 	 * @param {string} roomid
-	 * @param {number} channelIndex
+	 * @param {ChannelID} channelid
 	 * @param {string} socketid
 	 */
-	exports.channelMove = function (worker, roomid, channelIndex, socketid) {
-		worker.send(`.${roomid}\n${channelIndex}\n${socketid}`);
+	exports.channelMove = function (worker, roomid, channelid, socketid) {
+		worker.send(`.${roomid}\n${channelid}\n${socketid}`);
 	};
 
 	/**
@@ -425,8 +427,8 @@ if (cluster.isMaster) {
 	 */
 	const rooms = new Map();
 	/**
-	 * roomid:socketid:channelIndex
-	 * @type {Map<string, Map<string, string>>}
+	 * roomid:socketid:channelid
+	 * @type {Map<string, Map<string, ChannelID>>}
 	 */
 	const roomChannels = new Map();
 
@@ -446,6 +448,29 @@ if (cluster.isMaster) {
 		}
 	}, 10 * MINUTES);
 
+	/**
+	 * @param {string} message
+	 * @param {-1 | ChannelID} channelid
+	 */
+	const extractChannel = (message, channelid) => {
+		if (channelid === -1) {
+			// Grab all privileged messages
+			return message.replace(/\n\|split\|p[1234]\n([^\n]*)\n(?:[^\n]*)/g, '\n$1');
+		}
+
+		// Grab privileged messages channel has access to
+		switch (channelid) {
+		case 1: message = message.replace(/\n\|split\|p1\n([^\n]*)\n(?:[^\n]*)/g, '\n$1'); break;
+		case 2: message = message.replace(/\n\|split\|p2\n([^\n]*)\n(?:[^\n]*)/g, '\n$1'); break;
+		case 3: message = message.replace(/\n\|split\|p3\n([^\n]*)\n(?:[^\n]*)/g, '\n$1'); break;
+		case 4: message = message.replace(/\n\|split\|p4\n([^\n]*)\n(?:[^\n]*)/g, '\n$1'); break;
+		}
+
+		// Discard remaining privileged messages
+		// Note: the last \n? is for privileged messages that are empty when non-privileged
+		return message.replace(/\n\|split\|(?:[^\n]*)\n(?:[^\n]*)\n\n?/g, '\n');
+	};
+
 	process.on('message', data => {
 		// console.log('worker received: ' + data);
 		/** @type {import('sockjs').Connection | undefined?} */
@@ -454,9 +479,10 @@ if (cluster.isMaster) {
 		/** @type {Map<string, import('sockjs').Connection> | undefined?} */
 		let room = null;
 		let roomid = '';
-		/** @type {Map<string, string> | undefined?} */
+		/** @type {Map<string, ChannelID> | undefined?} */
 		let roomChannel = null;
-		let channelid = '';
+		/** @type {ChannelID} */
+		let channelid = 0;
 		let nlLoc = -1;
 		let message = '';
 
@@ -544,7 +570,7 @@ if (cluster.isMaster) {
 			nlLoc = data.indexOf('\n');
 			roomid = data.slice(1, nlLoc);
 			let nlLoc2 = data.indexOf('\n', nlLoc + 1);
-			channelid = data.slice(nlLoc + 1, nlLoc2);
+			channelid = /** @type {ChannelID} */(Number(data.slice(nlLoc + 1, nlLoc2)));
 			socketid = data.slice(nlLoc2 + 1);
 
 			roomChannel = roomChannels.get(roomid);
@@ -552,7 +578,7 @@ if (cluster.isMaster) {
 				roomChannel = new Map();
 				roomChannels.set(roomid, roomChannel);
 			}
-			if (channelid === '0') {
+			if (channelid === 0) {
 				roomChannel.delete(socketid);
 			} else {
 				roomChannel.set(socketid, channelid);
@@ -567,31 +593,14 @@ if (cluster.isMaster) {
 			room = rooms.get(roomid);
 			if (!room) return;
 
-			/** @type {[string?, string?, string?]} */
-			let messages = [null, null, null];
+			/** @type {[string?, string?, string?, string?, string?]} */
+			const messages = [null, null, null, null, null];
 			message = data.substr(nlLoc + 1);
 			roomChannel = roomChannels.get(roomid);
 			for (const [socketid, socket] of room) {
-				switch (roomChannel ? roomChannel.get(socketid) : '0') {
-				case '1':
-					if (!messages[1]) {
-						messages[1] = message.replace(/\n\|split\n[^\n]*\n([^\n]*)\n[^\n]*\n[^\n]*/g, '\n$1').replace(/\n\n/g, '\n');
-					}
-					socket.write(messages[1]);
-					break;
-				case '2':
-					if (!messages[2]) {
-						messages[2] = message.replace(/\n\|split\n[^\n]*\n[^\n]*\n([^\n]*)\n[^\n]*/g, '\n$1').replace(/\n\n/g, '\n');
-					}
-					socket.write(messages[2]);
-					break;
-				default:
-					if (!messages[0]) {
-						messages[0] = message.replace(/\n\|split\n([^\n]*)\n[^\n]*\n[^\n]*\n[^\n]*/g, '\n$1').replace(/\n\n/g, '\n');
-					}
-					socket.write(messages[0]);
-					break;
-				}
+				channelid = (roomChannel && roomChannel.get(socketid)) || 0;
+				if (!messages[channelid]) messages[channelid] = extractChannel(message, channelid);
+				socket.write(/** @type {string} */(messages[channelid]));
 			}
 			break;
 		}
@@ -622,60 +631,6 @@ if (cluster.isMaster) {
 	// this is global so it can be hotpatched if necessary
 	let isTrustedProxyIp = Dnsbl.checker(Config.proxyip);
 	let socketCounter = 0;
-
-	/**
-	 * socket:id
-	 * @type {WeakMap<import('sockjs').Connection, string>}
-	 */
-	let socketIds = new WeakMap();
-
-	/**
-	 * @this {import('sockjs').Connection}
-	 * @param {string | Buffer} message
-	 */
-	const wsOnData = function (message) {
-		// drop empty messages (DDoS?)
-		if (!message) return;
-		// drop messages over 100KB
-		if (message.length > (100 * 1024)) {
-			console.log(`Dropping client message ${message.length / 1024} KB...`);
-			console.log(message.slice(0, 160));
-			return;
-		}
-		// drop legacy JSON messages
-		if (typeof message !== 'string' || message.startsWith('{')) return;
-		// drop blank messages (DDoS?)
-		let pipeIndex = message.indexOf('|');
-		if (pipeIndex < 0 || pipeIndex === message.length - 1) return;
-
-		const socketId = socketIds.get(this);
-		if (socketId === undefined) return; // should never happen
-
-		// @ts-ignore
-		process.send(`<${socketId}\n${message}`);
-	};
-
-	/**
-	 * @this {import('sockjs').Connection}
-	 */
-	const wsOnClose = function () {
-		const socketId = socketIds.get(this);
-		if (socketId === undefined) return; // should never happen
-
-		// @ts-ignore
-		process.send(`!${socketId}`);
-		sockets.delete(socketId);
-		for (const room of rooms.values()) room.delete(socketId);
-	};
-
-	/**
-	 * @param {import('sockjs').Connection} socket
-	 */
-	const wsOnTimeout = function (socket) {
-		// @ts-ignore
-		if (socket._session.recv) socket._session.recv.didClose();
-	};
-
 	server.on('connection', socket => {
 		// For reasons that are not entirely clear, SockJS sometimes triggers
 		// this event with a null `socket` argument.
@@ -692,7 +647,6 @@ if (cluster.isMaster) {
 
 		let socketid = '' + (++socketCounter);
 		sockets.set(socketid, socket);
-		socketIds.set(socket, socketid);
 
 		let socketip = socket.remoteAddress;
 		if (isTrustedProxyIp(socketip)) {
@@ -718,16 +672,41 @@ if (cluster.isMaster) {
 			socket._session.recv.thingy.setTimeout(
 				// @ts-ignore
 				socket._session.recv.options.heartbeat_delay + 1000,
-				wsOnTimeout,
-				socket
+				() => {
+					// @ts-ignore
+					if (socket._session.recv) socket._session.recv.didClose();
+				}
 			);
 		}
 
 		// @ts-ignore
 		process.send(`*${socketid}\n${socketip}\n${socket.protocol}`);
 
-		socket.on('data', wsOnData);
-		socket.once('close', wsOnClose);
+		socket.on('data', message => {
+			// drop empty messages (DDoS?)
+			if (!message) return;
+			// drop messages over 100KB
+			if (message.length > (100 * 1024)) {
+				console.log(`Dropping client message ${message.length / 1024} KB...`);
+				console.log(message.slice(0, 160));
+				return;
+			}
+			// drop legacy JSON messages
+			if (typeof message !== 'string' || message.startsWith('{')) return;
+			// drop blank messages (DDoS?)
+			let pipeIndex = message.indexOf('|');
+			if (pipeIndex < 0 || pipeIndex === message.length - 1) return;
+
+			// @ts-ignore
+			process.send(`<${socketid}\n${message}`);
+		});
+
+		socket.once('close', () => {
+			// @ts-ignore
+			process.send(`!${socketid}`);
+			sockets.delete(socketid);
+			for (const room of rooms.values()) room.delete(socketid);
+		});
 	});
 	server.installHandlers(app, {});
 	app.listen(Config.port, Config.bindaddress);

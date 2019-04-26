@@ -427,45 +427,6 @@ const commands = {
 		return this.parse(`/search ${target}`);
 	},
 
-	'!pi': true,
-	pi(target, room, user) {
-		return this.sendReplyBox(
-			'Did you mean: 1. 3.1415926535897932384626... (Decimal)<br />' +
-			'2. 3.184809493B91866... (Duodecimal)<br />' +
-			'3. 3.243F6A8885A308D... (Hexadecimal)<br /><br />' +
-			'How many digits of pi do YOU know? Test it out <a href="http://guangcongluo.com/mempi/">here</a>!');
-	},
-
-	code(target, room, user) {
-		if (!target) return this.parse('/help code');
-		if (!this.canTalk()) return;
-		if (target.startsWith('\n')) target = target.slice(1);
-		if (target.length >= 8192) return this.errorReply("Your code must be under 8192 characters long!");
-		const separator = '\n';
-		if (target.includes(separator) || target.length > 150) {
-			const params = target.split(separator);
-			let output = [];
-			for (const param of params) {
-				output.push(Chat.escapeHTML(param));
-			}
-			let code = `<div class="chat"><code style="white-space: pre-wrap; display: table; tab-size: 3">${output.join('<br />')}</code></div>`;
-			if (output.length > 3) code = `<details><summary>See code...</summary>${code}</details>`;
-
-			if (!this.canBroadcast(true, '!code')) return;
-			if (this.broadcastMessage && !this.can('broadcast', null, room)) return false;
-
-			if (!this.runBroadcast(true, '!code')) return;
-
-			this.sendReplyBox(code);
-		} else {
-			return this.errorReply("You can simply use ``[code]`` for code messages that are only one line.");
-		}
-	},
-	codehelp: [
-		`!code [code] - Broadcasts code to a room. Accepts multi-line arguments. Requires: + % @ & # ~`,
-		`/code [code] - Shows you code. Accepts multi-line arguments.`,
-	],
-
 	'!avatar': true,
 	avatar(target, room, user) {
 		if (!target) return this.parse(`${this.cmdToken}avatars`);
@@ -589,7 +550,7 @@ const commands = {
 
 		if (!targetUser || !targetUser.connected) return this.errorReply(`User ${this.targetUsername} is not currently online.`);
 		if (!(targetUser in room.users) && !user.can('addhtml')) return this.errorReply("You do not have permission to use this command to users who are not in this room.");
-		if (targetUser.ignorePMs && targetUser.ignorePMs !== user.group && !user.can('lock')) return this.errorReply("This user is currently ignoring PMs.");
+		if (targetUser.blockPMs && targetUser.blockPMs !== user.group && !user.can('lock')) return this.errorReply("This user is currently blocking PMs.");
 		if (targetUser.locked && !user.can('lock')) return this.errorReply("This user is currently locked, so you cannot send them a pminfobox.");
 
 		// Apply the infobox to the message
@@ -615,7 +576,7 @@ const commands = {
 
 		if (!targetUser || !targetUser.connected) return this.errorReply(`User ${this.targetUsername} is not currently online.`);
 		if (!(targetUser in room.users) && !user.can('addhtml')) return this.errorReply("You do not have permission to use this command to users who are not in this room.");
-		if (targetUser.ignorePMs && targetUser.ignorePMs !== user.group && !user.can('lock')) return this.errorReply("This user is currently ignoring PMs.");
+		if (targetUser.blockPMs && targetUser.blockPMs !== user.group && !user.can('lock')) return this.errorReply("This user is currently blocking PMs.");
 		if (targetUser.locked && !user.can('lock')) return this.errorReply("This user is currently locked, so you cannot send them UHTML.");
 
 		let message = `|pm|${user.getIdentity()}|${targetUser.getIdentity()}|/uhtml${(cmd === 'pmuhtmlchange' ? 'change' : '')} ${target}`;
@@ -628,31 +589,34 @@ const commands = {
 	pmuhtmlhelp: [`/pmuhtml [user], [name], [html] - PMs [html] that can change to [user]. Requires * ~`],
 	pmuhtmlchangehelp: [`/pmuhtmlchange [user], [name], [html] - Changes html that was previously PMed to [user] to [html]. Requires * ~`],
 
-	'!ignorepms': true,
-	blockpm: 'ignorepms',
-	blockpms: 'ignorepms',
-	ignorepm: 'ignorepms',
-	ignorepms(target, room, user) {
-		if (user.ignorePMs === (target || true)) return this.errorReply("You are already blocking private messages! To unblock, use /unblockpms");
-		user.ignorePMs = true;
+	'!blockpms': true,
+	blockpm: 'blockpms',
+	ignorepms: 'blockpms',
+	ignorepm: 'blockpms',
+	blockpms(target, room, user) {
+		if (user.blockPMs === (target || true)) return this.errorReply("You are already blocking private messages! To unblock, use /unblockpms");
+		user.blockPMs = true;
 		if (target in Config.groups) {
-			user.ignorePMs = target;
+			user.blockPMs = target;
+			user.update('blockPMs');
 			return this.sendReply(`You are now blocking private messages, except from staff and ${target}.`);
 		}
+		user.update();
 		return this.sendReply("You are now blocking private messages, except from staff.");
 	},
-	ignorepmshelp: [`/blockpms - Blocks private messages. Unblock them with /unignorepms.`],
+	blockpmshelp: [`/blockpms - Blocks private messages. Unblock them with /unblockpms.`],
 
-	'!unignorepms': true,
-	unblockpm: 'unignorepms',
-	unblockpms: 'unignorepms',
-	unignorepm: 'unignorepms',
-	unignorepms(target, room, user) {
-		if (!user.ignorePMs) return this.errorReply("You are not blocking private messages! To block, use /blockpms");
-		user.ignorePMs = false;
+	'!unblockpms': true,
+	unblockpm: 'unblockpms',
+	unignorepms: 'unblockpms',
+	unignorepm: 'unblockpms',
+	unblockpms(target, room, user) {
+		if (!user.blockPMs) return this.errorReply("You are not blocking private messages! To block, use /blockpms");
+		user.blockPMs = false;
+		user.update('blockPMs');
 		return this.sendReply("You are no longer blocking private messages.");
 	},
-	unignorepmshelp: [`/unblockpms - Unblocks private messages. Block them with /blockpms.`],
+	unblockpmshelp: [`/unblockpms - Unblocks private messages. Block them with /blockpms.`],
 
 	'!away': true,
 	idle: 'away',
@@ -1478,19 +1442,20 @@ const commands = {
 			return `${Config.groups[r] ? `${Config.groups[r].name}s (${r})` : r}:\n${roomRankList.join(", ")}`;
 		});
 
-		if (!buffer.length) {
-			connection.popup(`The room '${targetRoom.title}' has no auth. ${userLookup}`);
-			return;
-		}
 		let curRoom = targetRoom;
 		while (curRoom.parent) {
 			const modjoinSetting = curRoom.modjoin === true ? curRoom.modchat : curRoom.modjoin;
 			const roomType = (modjoinSetting ? `modjoin ${modjoinSetting} ` : '');
 			const inheritedUserType = (modjoinSetting ? ` of rank ${modjoinSetting} and above` : '');
 			if (curRoom.parent) {
-				buffer.push(`${curRoom.title} is a ${roomType}subroom of ${curRoom.parent.title}, so ${curRoom.parent.title} users${inheritedUserType} also have authority in this room.`);
+				const also = buffer.length === 0 ? `` : ` also`;
+				buffer.push(`${curRoom.title} is a ${roomType}subroom of ${curRoom.parent.title}, so ${curRoom.parent.title} users${inheritedUserType}${also} have authority in this room.`);
 			}
 			curRoom = curRoom.parent;
+		}
+		if (!buffer.length) {
+			connection.popup(`The room '${targetRoom.title}' has no auth. ${userLookup}`);
+			return;
 		}
 		if (!curRoom.isPrivate) {
 			buffer.push(`${curRoom.title} is a public room, so global auth with no relevant roomauth will have authority in this room.`);
@@ -1695,12 +1660,19 @@ const commands = {
 		if (!this.canTalk()) return;
 		if (room.isPersonal && !user.can('warn')) return this.errorReply("Warning is unavailable in group chats.");
 		// If used in staff, help tickets or battles, log the warn to the global modlog.
-		const global = room.id === 'staff' || room.id.startsWith('help-') || (room.battle && !room.parent);
+		const globalWarn = room.id === 'staff' || room.id.startsWith('help-') || (room.battle && !room.parent);
 
 		target = this.splitTarget(target);
 		let targetUser = this.targetUser;
-		if (!targetUser || !targetUser.connected) return this.errorReply(`User '${this.targetUsername}' not found.`);
-		if (!(targetUser in room.users) && !global) {
+		if (!targetUser || !targetUser.connected) {
+			if (!targetUser || !globalWarn) return this.errorReply(`User '${this.targetUsername}' not found.`);
+
+			this.addModAction(`${targetUser.name} would be warned by ${user.name} but is offline.${(target ? ` (${target})` : ``)}`);
+			this.modlog('WARN', targetUser, target, {noalts: 1});
+			this.globalModlog('WARN', targetUser, ` by ${user.userid}${(target ? `: ${target}` : ``)}`);
+			return;
+		}
+		if (!(targetUser in room.users) && !globalWarn) {
 			return this.errorReply(`User ${this.targetUsername} is not in the room ${room.id}.`);
 		}
 		if (target.length > MAX_REASON_LENGTH) {
@@ -1711,7 +1683,7 @@ const commands = {
 
 		this.addModAction(`${targetUser.name} was warned by ${user.name}.${(target ? ` (${target})` : ``)}`);
 		this.modlog('WARN', targetUser, target, {noalts: 1});
-		if (global) {
+		if (globalWarn) {
 			this.globalModlog('WARN', targetUser, ` by ${user.userid}${(target ? `: ${target}` : ``)}`);
 		}
 		targetUser.send(`|c|~|/warn ${target}`);
@@ -1841,7 +1813,9 @@ const commands = {
 
 		target = this.splitTarget(target);
 		let targetUser = this.targetUser;
-		if (!targetUser && !Punishments.search(toId(this.targetUsername))[0].length) return this.errorReply(`User '${this.targetUsername}' not found.`);
+		if (!targetUser && !Punishments.search(toId(this.targetUsername)).length) {
+			return this.errorReply(`User '${this.targetUsername}' not found.`);
+		}
 		if (target.length > MAX_REASON_LENGTH) {
 			return this.errorReply(`The reason is too long. It cannot exceed ${MAX_REASON_LENGTH} characters.`);
 		}
@@ -1882,17 +1856,6 @@ const commands = {
 			affected = Punishments.lock(null, duration, userid, userReason);
 		}
 
-		let acAccount = (targetUser && targetUser.autoconfirmed !== userid && targetUser.autoconfirmed);
-		let displayMessage = '';
-		if (affected.length > 1) {
-			displayMessage = `(${name}'s ${(acAccount ? ` ac account: ${acAccount}, ` : "")} locked alts: ${affected.slice(1).map(user => user.getLastName()).join(", ")})`;
-			this.privateModAction(displayMessage);
-		} else if (acAccount) {
-			displayMessage = `(${name}'s ac account: ${acAccount})`;
-			this.privateModAction(displayMessage);
-		}
-		room.hideText([userid, toId(this.inputUsername)]);
-
 		const globalReason = (target ? `: ${userReason} ${proof}` : '');
 		this.globalModlog((week ? "WEEKLOCK" : "LOCK"), targetUser || userid, ` by ${user.userid}${globalReason}`);
 
@@ -1902,6 +1865,17 @@ const commands = {
 		// Notify staff room when a user is locked outside of it.
 		if (room.id !== 'staff' && Rooms('staff')) {
 			Rooms('staff').addByUser(user, `<<${room.id}>> ${lockMessage}`);
+		}
+
+		room.hideText([userid, toId(this.inputUsername)]);
+		let acAccount = (targetUser && targetUser.autoconfirmed !== userid && targetUser.autoconfirmed);
+		let displayMessage = '';
+		if (affected.length > 1) {
+			displayMessage = `(${name}'s ${(acAccount ? ` ac account: ${acAccount}, ` : "")} locked alts: ${affected.slice(1).map(user => user.getLastName()).join(", ")})`;
+			this.privateModAction(displayMessage);
+		} else if (acAccount) {
+			displayMessage = `(${name}'s ac account: ${acAccount})`;
+			this.privateModAction(displayMessage);
 		}
 
 		if (targetUser) {
@@ -2590,7 +2564,7 @@ const commands = {
 		if (!targetUser && !room.log.hasUsername(target)) return this.errorReply(`User ${target} not found or has no roomlogs.`);
 		if (!targetUser && !user.can('lock')) return this.errorReply(`User ${name} not found.`);
 		let userid = toId(this.inputUsername);
-		if (!this.can('mute', targetUser, room)) return;
+		if (!this.can('mute', null, room)) return;
 
 		if (targetUser && (cmd === 'hidealtstext' || cmd === 'hidetextalts' || cmd === 'hidealttext')) {
 			room.sendByUser(user, `${name}'s alts messages were cleared from ${room.title} by ${user.name}.`);
@@ -2995,10 +2969,6 @@ const commands = {
 				if (lock['validator']) return this.errorReply(`Hot-patching the validator has been disabled by ${lock['validator'].by} (${lock['validator'].reason})`);
 
 				// uncache the .sim-dist/dex.js dependency tree
-				this.sendReply('Rebuilding...');
-				await new Promise(resolve => {
-					require('child_process').exec('../build', {cwd: __dirname}, resolve);
-				});
 				Chat.uncacheDir('./.sim-dist');
 				Chat.uncacheDir('./data');
 				Chat.uncache('./config/formats');
@@ -3417,7 +3387,9 @@ const commands = {
 		function exec(/** @type {string} */ command) {
 			logRoom.roomlog(`$ ${command}`);
 			return new Promise((resolve, reject) => {
-				require('child_process').exec(command, (error, stdout, stderr) => {
+				require('child_process').exec(command, {
+					cwd: __dirname,
+				}, (error, stdout, stderr) => {
 					let log = `[o] ${stdout}[e] ${stderr}`;
 					if (error) log = `[c] ${error.code}\n${log}`;
 					logRoom.roomlog(log);
@@ -3433,7 +3405,13 @@ const commands = {
 		if (code) throw new Error(`updateserver: Crash while fetching - make sure this is a Git repository`);
 		if (!stdout && !stderr) {
 			Chat.updateServerLock = false;
-			return this.sendReply(`There were no updates.`);
+			this.sendReply(`There were no updates.`);
+			[code, stdout, stderr] = await exec('../build');
+			if (stderr) {
+				return this.errorReply(`Crash while rebuilding: ${stderr}`);
+			}
+			this.sendReply(`Rebuilt.`);
+			return;
 		}
 
 		[code, stdout, stderr] = await exec(`git rev-parse HEAD`);
@@ -3479,6 +3457,11 @@ const commands = {
 			await exec(`git stash pop`);
 			this.sendReply(`FAILED, old changes restored.`);
 		}
+		[code, stdout, stderr] = await exec('../build');
+		if (stderr) {
+			return this.errorReply(`Crash while rebuilding: ${stderr}`);
+		}
+		this.sendReply(`Rebuilt.`);
 		Chat.updateServerLock = false;
 	},
 
@@ -4044,6 +4027,7 @@ const commands = {
 	blockchallenges(target, room, user) {
 		if (user.blockChallenges) return this.errorReply("You are already blocking challenges!");
 		user.blockChallenges = true;
+		user.update('blockChallenges');
 		this.sendReply("You are now blocking all incoming challenge requests.");
 	},
 	blockchallengeshelp: [`/blockchallenges - Blocks challenges so no one can challenge you. Unblock them with /unblockchallenges.`],
@@ -4057,6 +4041,7 @@ const commands = {
 	allowchallenges(target, room, user) {
 		if (!user.blockChallenges) return this.errorReply("You are already available for challenges!");
 		user.blockChallenges = false;
+		user.update('blockChallenges');
 		this.sendReply("You are available for challenges from now on.");
 	},
 	allowchallengeshelp: [`/unblockchallenges - Unblocks challenges so you can be challenged again. Block them with /blockchallenges.`],
@@ -4199,6 +4184,7 @@ const commands = {
 			}
 
 			let roominfo = {
+				id: targetRoom.id,
 				title: targetRoom.title,
 				type: targetRoom.type,
 				visibility: visibility,

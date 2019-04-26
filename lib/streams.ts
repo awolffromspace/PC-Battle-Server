@@ -12,6 +12,9 @@
 
 const BUF_SIZE = 65536 * 4;
 
+type BufferEncoding =
+	'ascii' | 'utf8' | 'utf-8' | 'utf16le' | 'ucs2' | 'ucs-2' | 'base64' | 'latin1' | 'binary' | 'hex';
+
 export class ReadStream {
 	buf: Buffer;
 	bufStart: number;
@@ -20,7 +23,7 @@ export class ReadStream {
 	readSize: number;
 	atEOF: boolean;
 	errorBuf: Error[] | null;
-	encoding: string;
+	encoding: BufferEncoding;
 	isReadable: boolean;
 	isWritable: boolean;
 	nodeReadableStream: NodeJS.ReadableStream | null;
@@ -116,7 +119,7 @@ export class ReadStream {
 		this.expandBuf(newCapacity);
 	}
 
-	push(buf: Buffer | string | null, encoding: string = this.encoding) {
+	push(buf: Buffer | string | null, encoding: BufferEncoding = this.encoding) {
 		let size;
 		if (this.atEOF) return;
 		if (buf === null) {
@@ -189,7 +192,10 @@ export class ReadStream {
 	loadIntoBuffer(byteCount: number | null | true = null, readError?: boolean) {
 		this[readError ? 'readError' : 'peekError']();
 		if (byteCount === 0) return;
-		this.readSize = Math.max(byteCount === true ? this.bufSize + 1 : byteCount || 0, this.readSize);
+		this.readSize = Math.max(
+			byteCount === true ? this.bufSize + 1 : byteCount === null ? 1 : byteCount,
+			this.readSize
+		);
 		if (!this.errorBuf && !this.atEOF && this.bufSize < this.readSize) {
 			let bytes: number | null = this.readSize - this.bufSize;
 			if (bytes === Infinity || byteCount === null) bytes = null;
@@ -206,19 +212,19 @@ export class ReadStream {
 		}
 	}
 
-	peek(byteCount?: number | null, encoding?: string): string | null | Promise<string | null>;
-	peek(encoding: string): string | null | Promise<string | null>;
-	peek(byteCount: number | string | null = null, encoding = this.encoding) {
+	peek(byteCount?: number | null, encoding?: BufferEncoding): string | null | Promise<string | null>;
+	peek(encoding: BufferEncoding): string | null | Promise<string | null>;
+	peek(byteCount: number | string | null = null, encoding: BufferEncoding = this.encoding) {
 		if (typeof byteCount === 'string') {
-			encoding = byteCount;
+			encoding = byteCount as BufferEncoding;
 			byteCount = null;
 		}
 		const maybeLoad = this.loadIntoBuffer(byteCount);
 		if (maybeLoad) return maybeLoad.then(() => this.peek(byteCount as number, encoding));
 
+		if (!this.bufSize && byteCount !== 0) return null;
 		if (byteCount === null) return this.buf.toString(encoding, this.bufStart, this.bufEnd);
 		if (byteCount > this.bufSize) byteCount = this.bufSize;
-		if (!this.bufSize) return null;
 		return this.buf.toString(encoding, this.bufStart, this.bufStart + byteCount);
 	}
 
@@ -226,17 +232,17 @@ export class ReadStream {
 		const maybeLoad = this.loadIntoBuffer(byteCount);
 		if (maybeLoad) return maybeLoad.then(() => this.peekBuffer(byteCount));
 
+		if (!this.bufSize && byteCount !== 0) return null;
 		if (byteCount === null) return this.buf.slice(this.bufStart, this.bufEnd);
 		if (byteCount > this.bufSize) byteCount = this.bufSize;
-		if (!this.bufSize) return null;
 		return this.buf.slice(this.bufStart, this.bufStart + byteCount);
 	}
 
-	async read(byteCount?: number | null, encoding?: string): Promise<string | null>;
-	async read(encoding: string): Promise<string | null>;
-	async read(byteCount: number | string | null = null, encoding = this.encoding) {
+	async read(byteCount?: number | null, encoding?: BufferEncoding): Promise<string | null>;
+	async read(encoding: BufferEncoding): Promise<string | null>;
+	async read(byteCount: number | string | null = null, encoding: BufferEncoding = this.encoding) {
 		if (typeof byteCount === 'string') {
-			encoding = byteCount;
+			encoding = byteCount as BufferEncoding;
 			byteCount = null;
 		}
 		await this.loadIntoBuffer(byteCount, true);
@@ -262,7 +268,7 @@ export class ReadStream {
 		return out;
 	}
 
-	async indexOf(symbol: string, encoding: string = this.encoding) {
+	async indexOf(symbol: string, encoding: BufferEncoding = this.encoding) {
 		let idx = this.buf.indexOf(symbol, this.bufStart, encoding);
 		while (!this.atEOF && (idx >= this.bufEnd || idx < 0)) {
 			await this.loadIntoBuffer(true);
@@ -272,15 +278,15 @@ export class ReadStream {
 		return idx - this.bufStart;
 	}
 
-	async readAll(encoding = this.encoding) {
+	async readAll(encoding: BufferEncoding = this.encoding) {
 		return (await this.read(Infinity, encoding)) || '';
 	}
 
-	peekAll(encoding = this.encoding) {
+	peekAll(encoding: BufferEncoding = this.encoding) {
 		return this.peek(Infinity, encoding);
 	}
 
-	async readDelimitedBy(symbol: string, encoding: string = this.encoding) {
+	async readDelimitedBy(symbol: string, encoding: BufferEncoding = this.encoding) {
 		if (this.atEOF && !this.bufSize) return null;
 		const idx = await this.indexOf(symbol, encoding);
 		if (idx < 0) {
@@ -292,7 +298,7 @@ export class ReadStream {
 		}
 	}
 
-	async readLine(encoding = this.encoding) {
+	async readLine(encoding: BufferEncoding = this.encoding) {
 		if (!encoding) throw new Error(`readLine must have an encoding`);
 		let line = await this.readDelimitedBy('\n', encoding);
 		if (line && line.endsWith('\r')) line = line.slice(0, -1);
@@ -332,7 +338,7 @@ interface WriteStreamOptions {
 export class WriteStream {
 	isReadable: boolean;
 	isWritable: true;
-	encoding: string;
+	encoding: BufferEncoding;
 	nodeWritableStream: NodeJS.WritableStream | null;
 	drainListeners: (() => void)[];
 
@@ -363,11 +369,14 @@ export class WriteStream {
 					this.drainListeners.push(resolve);
 				});
 			};
-			options.end = function () {
-				return new Promise(resolve => {
-					this.nodeWritableStream!.end(() => resolve());
-				});
-			};
+			// Prior to Node v10.12.0, attempting to close STDOUT or STDERR will throw
+			if (nodeStream !== process.stdout && nodeStream !== process.stderr) {
+				options.end = function () {
+					return new Promise(resolve => {
+						this.nodeWritableStream!.end(() => resolve());
+					});
+				};
+			}
 		}
 
 		if (options.write) this._write = options.write;
@@ -668,11 +677,14 @@ export class ObjectWriteStream<T> {
 				}
 			};
 
-			options.end = function () {
-				return new Promise(resolve => {
-					this.nodeWritableStream!.end(() => resolve());
-				});
-			};
+			// Prior to Node v10.12.0, attempting to close STDOUT or STDERR will throw
+			if (nodeStream !== process.stdout && nodeStream !== process.stderr) {
+				options.end = function () {
+					return new Promise(resolve => {
+						this.nodeWritableStream!.end(() => resolve());
+					});
+				};
+			}
 		}
 
 		if (options.write) this._write = options.write;
