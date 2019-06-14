@@ -576,11 +576,6 @@ class User extends Chat.MessageContext {
 			const lockedSymbol = (Config.punishgroups && Config.punishgroups.locked ? Config.punishgroups.locked.symbol : '\u203d');
 			return lockedSymbol + this.name;
 		}
-		// Boilerplate start
-		if (this.hiding) {
-			return ' ' + this.name;
-		}
-		// Boilerplate end
 		if (roomid && roomid !== 'global') {
 			let room = Rooms(roomid);
 			if (!room) {

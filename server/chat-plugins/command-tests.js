@@ -1,7 +1,7 @@
 'use strict';
 
 exports.commands = {
-	test: function (target, room, user) {
+	/*test: function (target, room, user) {
 		if (!this.can('forcewin')) return false;
 		this.parse('/afk');
 		this.parse('/back');
@@ -33,5 +33,5 @@ exports.commands = {
 		this.parse('/endddice');
 		this.parse(`/takemoney ${user.name}, 5`);
 		this.parse('/bucks');
-	},
+	},*/
 };
