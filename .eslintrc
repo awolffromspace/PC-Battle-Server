@@ -15,12 +15,8 @@
 		"Config": false, "Monitor": false, "toID": false, "Dex": false, "LoginServer": false,
 		"Users": false, "Punishments": false, "Rooms": false, "Verifier": false, "Chat": false,
 		"Tournaments": false, "IPTools": false, "Sockets": false, "TeamValidator": false,
-<<<<<<< HEAD
 		"TeamValidatorAsync": false, "Ladders": false,
 		"Db": false, "Tells": false
-=======
-		"TeamValidatorAsync": false, "Ladders": false
->>>>>>> upstream/master
 	},
 	"extends": "eslint:recommended",
 	"rules": {
