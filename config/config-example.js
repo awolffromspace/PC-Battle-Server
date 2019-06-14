@@ -189,6 +189,11 @@ exports.disablebasicnamefilter = true;
 exports.allowrequestingties = true;
 
 /**
+ * allowrequestingties - enables the use of `/offerdraw` and `/acceptdraw`
+ */
+exports.allowrequestingties = true;
+
+/**
  * report joins and leaves - shows messages like "<USERNAME> joined"
  *   Join and leave messages are small and consolidated, so there will never
  *   be more than one line of messages.

@@ -89,19 +89,22 @@ let Formats = [
 		mod: 'gen7',
 		ruleset: ['[Gen 7] UU'],
 		banlist: ['UU', 'RUBL', 'Aurora Veil'],
-		unbanlist: ['Talonflame', 'Drought'],
+		unbanlist: ['Drought'],
 	},
 	{
 		name: "[Gen 7] NU",
 		threads: [
-			`&bullet; <a href="https://www.smogon.com/forums/threads/3650028/">NU Metagame Discussion</a>`,
+			`&bullet; <a href="https://www.smogon.com/forums/threads/3650934/">NU Metagame Discussion</a>`,
 			`&bullet; <a href="https://www.smogon.com/forums/threads/3645166/">NU Viability Rankings</a>`,
 			`&bullet; <a href="https://www.smogon.com/forums/threads/3632667/">NU Sample Teams</a>`,
 		],
 
 		mod: 'gen7',
 		ruleset: ['[Gen 7] RU'],
-		banlist: ['RU', 'NUBL', 'Talonflame', 'Drought'],
+		banlist: ['RU', 'NUBL', 'Drought'],
+		onBegin() {
+			if (this.rated && this.format === 'gen7nu') this.add('html', `<div class="broadcast-red"><strong>NU is currently suspecting Vileplume! For information on how to participate check out the <a href="https://www.smogon.com/forums/threads/3650934/">suspect thread</a>.</strong></div>`);
+		},
 	},
 	{
 		name: "[Gen 7] PU",
@@ -219,16 +222,19 @@ let Formats = [
 		mod: 'gen7',
 		ruleset: ['[Gen 7] PU'],
 		banlist: [
-			'PU', 'Carracosta', 'Crabominable', 'Exeggutor-Base', 'Gorebyss', 'Jynx', 'Musharna', 'Raticate-Alola',
+			'PU', 'Carracosta', 'Crabominable', 'Gorebyss', 'Jynx', 'Musharna', 'Raticate-Alola',
 			'Raticate-Alola-Totem', 'Throh', 'Turtonator', 'Type: Null', 'Ursaring', 'Victreebel', 'Zangoose',
 		],
+		onBegin() {
+			if (this.rated && this.format === 'gen7zu') this.add('html', `<div class="broadcast-green"><strong>ZU is currently suspecting Exeggutor! For information on how to participate check out the <a href="https://www.smogon.com/forums/threads/3651197/">suspect thread</a>.</strong></div>`);
+		},
 	},
 	{
 		name: "[Gen 7] CAP",
 		threads: [
 			`&bullet; <a href="https://www.smogon.com/forums/threads/3621207/">CAP Metagame Discussion</a>`,
 			`&bullet; <a href="https://www.smogon.com/forums/threads/3626018/">CAP Viability Rankings</a>`,
-			`&bullet; <a href="https://www.smogon.com/forums/threads/3634419/">CAP Sample Teams</a>`,
+			`&bullet; <a href="https://www.smogon.com/forums/threads/3648521/">CAP Sample Teams</a>`,
 		],
 
 		mod: 'gen7',
@@ -263,26 +269,23 @@ let Formats = [
 		requirePentagon: true,
 	},
 	{
-		name: "[Gen 7] Battle Spot Special 15",
-		threads: [`&bullet; <a href="https://www.smogon.com/forums/threads/3648618/">Battle Spot Special 15</a>`],
+		name: "[Gen 7] Battle Spot Special 16",
+		threads: [`&bullet; <a href="https://www.smogon.com/forums/threads/3651251/">Battle Spot Special 16</a>`],
 
 		mod: 'gen7',
-		forcedLevel: 50,
+		maxForcedLevel: 50,
 		teamLength: {
-			validate: [1, 6],
-			battle: 1,
+			validate: [3, 6],
+			battle: 3,
 		},
-		ruleset: ['Pokemon', 'Species Clause', 'Nickname Clause', 'Item Clause', 'Team Preview', 'Cancel Mod'],
-		banlist: ['Unreleased', 'Illegal', 'Mewtwo', 'Dusclops', 'Dusknoir'],
-		onValidateSet(set, format) {
-			if (set.moves.length !== 1 || this.getMove(set.moves[0]).id !== 'metronome') {
-				return [`${set.name || set.species} has illegal moves.`, `(${format.name} only allows the move Metronome)`];
-			}
-			if (set.item) {
-				const item = this.getItem(set.item);
-				if (item.megaStone) return [`${set.name || set.species} has ${item.name}, which is banned in ${format.name}.`];
-			}
-		},
+		ruleset: ['Pokemon', 'Standard GBU'],
+		banlist: [
+			'Aegislash', 'Azumarill', 'Blaziken', 'Breloom', 'Celesteela', 'Charizard', 'Cloyster', 'Dragonite',
+			'Excadrill', 'Ferrothorn', 'Garchomp', 'Gengar', 'Gliscor', 'Greninja', 'Gyarados', 'Heatran', 'Hippowdon',
+			'Hydreigon', 'Kangaskhan', 'Kartana', 'Landorus', 'Lucario', 'Mamoswine', 'Mawile', 'Metagross', 'Mimikyu',
+			'Naganadel', 'Porygon2', 'Rotom', 'Salamence', 'Scizor', 'Serperior', 'Skarmory', 'Snorlax', 'Tapu Fini',
+			'Tapu Koko', 'Tapu Lele', 'Thundurus', 'Toxapex', 'Tyranitar', 'Venusaur', 'Volcarona', 'Zapdos',
+		],
 	},
 	{
 		name: "[Gen 7] Custom Game",
@@ -778,10 +781,7 @@ let Formats = [
 
 		mod: 'gen7',
 		ruleset: ['Pokemon', 'Ability Clause', 'OHKO Clause', 'Evasion Moves Clause', 'CFZ Clause', 'Sleep Clause Mod', 'Endless Battle Clause', 'HP Percentage Mod', 'Cancel Mod', 'Team Preview'],
-		banlist: ['Groudon-Primal', 'Arena Trap', 'Huge Power', 'Illusion', 'Innards Out', 'Magnet Pull', 'Moody', 'Parental Bond', 'Protean', 'Psychic Surge', 'Pure Power', 'Shadow Tag', 'Stakeout', 'Water Bubble', 'Wonder Guard', 'Gengarite', 'Chatter', 'Comatose + Sleep Talk'],
-		onBegin() {
-			if (this.rated && this.format === 'gen7balancedhackmons') this.add('html', `<div class="broadcast-green"><strong>Balanced Hackmons is currently suspecting Contrary! For information on how to participate check out the <a href="https://www.smogon.com/forums/thread/3650437/">suspect thread</a>.</strong></div>`);
-		},
+		banlist: ['Groudon-Primal', 'Arena Trap', 'Contrary', 'Huge Power', 'Illusion', 'Innards Out', 'Magnet Pull', 'Moody', 'Parental Bond', 'Protean', 'Psychic Surge', 'Pure Power', 'Shadow Tag', 'Stakeout', 'Water Bubble', 'Wonder Guard', 'Gengarite', 'Chatter', 'Comatose + Sleep Talk'],
 	},
 	{
 		name: "[Gen 7] Mix and Mega",
