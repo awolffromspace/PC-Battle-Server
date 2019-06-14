@@ -1,7 +1,7 @@
 'use strict';
 
-/** @type {typeof import('../sim/dex')} */
-const Dex = require(/** @type {any} */ ('../.sim-dist/dex'));
+/** @type {typeof import('../sim/dex').Dex} */
+const Dex = require(/** @type {any} */ ('../.sim-dist/dex')).Dex;
 /** @type {typeof import('../sim/prng').PRNG} */
 const PRNG = require(/** @type {any} */ ('../.sim-dist/prng')).PRNG;
 
@@ -176,7 +176,7 @@ class RandomTeams extends Dex.ModdedDex {
 			}
 
 			// Make sure forme is legal
-			if (template.battleOnly || template.requiredItems && !template.requiredItems.some(req => toId(req) === item)) {
+			if (template.battleOnly || template.requiredItems && !template.requiredItems.some(req => toID(req) === item)) {
 				template = this.getTemplate(template.baseSpecies);
 				species = template.name;
 			}
@@ -893,7 +893,7 @@ class RandomTeams extends Dex.ModdedDex {
 					if (hasAbility['Galvanize'] && !!counter['Normal']) rejected = true;
 					break;
 				case 'dazzlinggleam':
-					if (hasMove['drainingkiss'] || hasMove['playrough'] && counter.setupType !== 'Special') rejected = true;
+					if (hasMove['playrough'] && counter.setupType !== 'Special') rejected = true;
 					break;
 				case 'moonblast':
 					if (isDoubles && hasMove['dazzlinggleam']) rejected = true;
@@ -1144,8 +1144,9 @@ class RandomTeams extends Dex.ModdedDex {
 					(hasType['Dragon'] && !counter['Dragon'] && !hasAbility['Aerilate'] && !hasAbility['Pixilate'] && !hasMove['rest'] && !hasMove['sleeptalk']) ||
 					(hasType['Electric'] && !counter['Electric'] && !hasAbility['Galvanize']) ||
 					(hasType['Fairy'] && !counter['Fairy'] && (!!counter['speedsetup'] || !counter['Status'])) ||
-					(hasType['Fighting'] && !counter['Fighting'] && (counter.setupType || !counter['Status'])) ||
+					(hasType['Fighting'] && !counter['Fighting'] && (hasAbility['Unburden'] || counter.setupType || !counter['Status'])) ||
 					(hasType['Fire'] && !counter['Fire']) ||
+					(hasType['Flying'] && !counter['Flying'] && (hasAbility['Gale Wings'] || hasAbility['Guts'])) ||
 					(hasType['Ghost'] && !hasType['Dark'] && !counter['Ghost'] && !hasAbility['Steelworker']) ||
 					(hasType['Grass'] && !hasType['Fairy'] && !hasType['Poison'] && !hasType['Steel'] && !counter['Grass']) ||
 					(hasType['Ground'] && !counter['Ground'] && !hasMove['rest'] && !hasMove['sleeptalk']) ||
@@ -1158,13 +1159,12 @@ class RandomTeams extends Dex.ModdedDex {
 					((hasAbility['Adaptability'] && !counter.setupType && template.types.length > 1 && (!counter[template.types[0]] || !counter[template.types[1]])) ||
 					((hasAbility['Aerilate'] || (hasAbility['Galvanize'] && !counter['Electric']) || hasAbility['Pixilate'] || (hasAbility['Refrigerate'] && !hasMove['blizzard'])) && !counter['Normal']) ||
 					(hasAbility['Contrary'] && !counter['contrary'] && template.species !== 'Shuckle') ||
-					(hasAbility['Gale Wings'] && !counter['Flying']) ||
 					(hasAbility['Guts'] && hasType['Normal'] && movePool.includes('facade')) ||
 					(hasAbility['Psychic Surge'] && !counter['Psychic']) ||
 					(hasAbility['Slow Start'] && movePool.includes('substitute')) ||
 					(hasAbility['Stance Change'] && !counter.setupType && movePool.includes('kingsshield')) ||
 					(!counter.recovery && (movePool.includes('softboiled') || template.nfe && !!counter['Status'] && (movePool.includes('recover') || movePool.includes('roost')))) ||
-					(template.requiredMove && movePool.includes(toId(template.requiredMove)))))) {
+					(template.requiredMove && movePool.includes(toID(template.requiredMove)))))) {
 					// Reject Status or non-STAB
 					if (!isSetup && !move.weather && !move.damage && !move.heal && moveid !== 'judgment' && moveid !== 'rest' && moveid !== 'sleeptalk') {
 						if (move.category === 'Status' || !hasType[move.type] || move.selfSwitch || move.basePower && move.basePower < 40 && !move.multihit) rejected = true;
@@ -1224,7 +1224,7 @@ class RandomTeams extends Dex.ModdedDex {
 				if (counterAbilities.includes(ability)) {
 					// Adaptability, Contrary, Hustle, Iron Fist, Skill Link
 					// @ts-ignore
-					rejectAbility = !counter[toId(ability)];
+					rejectAbility = !counter[toID(ability)];
 				} else if (ateAbilities.includes(ability)) {
 					rejectAbility = !counter['Normal'];
 				} else if (ability === 'Blaze') {
@@ -1700,6 +1700,7 @@ class RandomTeams extends Dex.ModdedDex {
 		let typePool = Object.keys(this.data.TypeChart);
 		let type = this.sample(typePool);
 
+		// For Metronome
 		if (this.format.id === 'gen7metronome3v3random' || this.format.id === 'gen7metronome6v6random') {
 			let metronome = this.getMove('Metronome');
 			metronome.pp = 624.375;
@@ -1707,96 +1708,51 @@ class RandomTeams extends Dex.ModdedDex {
 		}
 
 		let pokemonPool = [];
+
+		// For Generational
 		let teamGeneration = Math.floor(Math.random() * 7) + 1;
-		let colorPool = ['Red', 'Blue', 'Yellow', 'Green', 'Black', 'Brown', 'Purple', 'Gray', 'White', 'Pink']
+		// For Color
+		let colorPool = ['Red', 'Blue', 'Yellow', 'Green', 'Black', 'Brown', 'Purple', 'Gray', 'White', 'Pink'];
 		let teamColor = colorPool[this.random(colorPool.length)];
-		let dogs = ['growlithe', 'arcanine', 'snubbull', 'granbull', 'houndour', 'houndoom', 'smeargle', 'poochyena', 'mightyena', 'electrike', 'manectric', 'lillipup', 'herdier', 'stoutland', 'furfrou', 'rockruff', 'lycanroc', 'lycanrocmidnight', 'lycanrocdusk'];
-		let dogTemplate = this.getTemplate(dogs[this.random(dogs.length)]);
-		let letsGoMascots = ['pikachu', 'eevee'];
-		let letsGoTemplate = this.getTemplate(letsGoMascots[this.random(letsGoMascots.length)]);
-		
+
 		for (let id in this.data.FormatsData) {
 			let template = this.getTemplate(id);
 			if (isMonotype) {
 				let types = template.types;
 				if (template.battleOnly) types = this.getTemplate(template.baseSpecies).types;
 				if (types.indexOf(type) < 0) continue;
-			}
-			if (this.format.id === 'gen7uberrandom') {
-				if (template.gen <= this.gen && !template.isMega && !template.isPrimal && !template.isNonstandard && template.randomBattleMoves && template.tier === 'Uber') {
-					pokemonPool.push(id);
-				}
+			} else if (this.format.id === 'gen7uberrandom') {
+				if (template.tier !== 'Uber') continue;
 			} else if (this.format.id === 'gen7ouuurandom') {
-				if (template.gen <= this.gen && !template.isMega && !template.isPrimal && !template.isNonstandard && template.randomBattleMoves && (template.tier === 'OU' || template.tier === 'BL' || template.tier === 'UU' || template.tier === 'BL2')) {
-					pokemonPool.push(id);
-				}
+				if (template.tier !== 'OU' && template.tier !== 'BL' && template.tier !== 'UU' && template.tier !== 'BL2') continue;
 			} else if (this.format.id === 'gen7runurandom') {
-				if (template.gen <= this.gen && !template.isMega && !template.isPrimal && !template.isNonstandard && template.randomBattleMoves && (template.tier === 'RU' || template.tier === 'BL3' || template.tier === 'NU' || template.tier === 'BL4')) {
-					pokemonPool.push(id);
-				}
+				if (template.tier !== 'RU' && template.tier !== 'BL3' && template.tier !== 'NU' && template.tier !== 'BL4') continue;
 			} else if (this.format.id === 'gen7purandom') {
-				if (template.gen <= this.gen && !template.isMega && !template.isPrimal && !template.isNonstandard && template.randomBattleMoves && template.tier === 'PU') {
-					pokemonPool.push(id);
-				}
+				if (template.tier !== 'PU') continue;
 			} else if (this.format.id === 'gen7lcrandom') {
-				if (template.gen <= this.gen && !template.isMega && !template.isPrimal && !template.isNonstandard && template.randomBattleMoves && template.tier === 'LC') {
-					pokemonPool.push(id);
-				}
-			} else if (this.format.id === 'gen7letsgorandom' || this.format.id === 'gen7letsgorandomlotm42') {
-				if ((template.gen === 1 || template.species === 'Rattata-Alola' || template.species === 'Sandshrew-Alola' || template.species === 'Vulpix-Alola' || template.species === 'Diglett-Alola' || template.species === 'Meowth-Alola' || template.species === 'Geodude-Alola' || template.species === 'Grimer-Alola') && !template.isMega && !template.isPrimal && !template.isNonstandard && template.randomBattleMoves && template.tier === 'LC') {
-					pokemonPool.push(id);
-				}
+				if (template.tier !== 'LC') continue;
 			} else if (this.format.id === 'gen7generationalrandom') {
-				if (template.gen == teamGeneration && !template.isMega && !template.isPrimal && !template.isNonstandard && template.randomBattleMoves) {
-					pokemonPool.push(id);
-				}
+				if (template.gen !== teamGeneration) continue;
 			} else if (this.format.id === 'gen7kantorandom') {
-				if (template.gen === 1 && !template.isMega && !template.isPrimal && !template.isNonstandard && template.randomBattleMoves) {
-					pokemonPool.push(id);
-				}
+				if (template.gen !== 1) continue;
 			} else if (this.format.id === 'gen7johtorandom') {
-				if (template.gen === 2 && !template.isMega && !template.isPrimal && !template.isNonstandard && template.randomBattleMoves) {
-					pokemonPool.push(id);
-				}
+				if (template.gen !== 2) continue;
 			} else if (this.format.id === 'gen7hoennrandom') {
-				if (template.gen === 3 && !template.isMega && !template.isPrimal && !template.isNonstandard && template.randomBattleMoves) {
-					pokemonPool.push(id);
-				}
+				if (template.gen !== 3) continue;
 			} else if (this.format.id === 'gen7sinnohrandom') {
-				if (template.gen === 4 && !template.isMega && !template.isPrimal && !template.isNonstandard && template.randomBattleMoves) {
-					pokemonPool.push(id);
-				}
+				if (template.gen !== 4) continue;
 			} else if (this.format.id === 'gen7unovarandom') {
-				if (template.gen === 5 && !template.isMega && !template.isPrimal && !template.isNonstandard && template.randomBattleMoves) {
-					pokemonPool.push(id);
-				}
+				if (template.gen !== 5) continue;
 			} else if (this.format.id === 'gen7kalosrandom') {
-				if (template.gen === 6 && !template.isMega && !template.isPrimal && !template.isNonstandard && template.randomBattleMoves) {
-					pokemonPool.push(id);
-				}
+				if (template.gen !== 6) continue;
 			} else if (this.format.id === 'gen7alolarandom') {
-				if (template.gen === 7 && !template.isMega && !template.isPrimal && !template.isNonstandard && template.randomBattleMoves) {
-					pokemonPool.push(id);
-				}
+				if (template.gen !== 7) continue;
 			} else if (this.format.id === 'gen7colorrandom') {
 				let colors = template.color;
-				if (template.gen <= this.gen && !template.isMega && !template.isPrimal && !template.isNonstandard && template.randomBattleMoves && colors.indexOf(teamColor) >= 0) {
+				if (colors.indexOf(teamColor) < 0) continue;
+			}
+			if (template.gen <= this.gen && !template.isMega && !template.isPrimal && !template.isNonstandard && template.randomBattleMoves) {
 					pokemonPool.push(id);
-				}
-			} else if (this.format.id === 'gen7newyearrandom') {
-				let types = template.types;
-				if (template.gen <= this.gen && !template.isMega && !template.isPrimal && !template.isNonstandard && template.randomBattleMoves && (types.indexOf('Ice') >= 0 || types.indexOf('Fire') >= 0)) {
-					pokemonPool.push(id);
-				}
-			} else if (this.format.id === 'gen7luvdiscrandom') {
-				let colors = template.color;
-				if (template.gen <= this.gen && !template.isMega && !template.isPrimal && !template.isNonstandard && template.randomBattleMoves && colors.indexOf('Pink') >= 0) {
-					pokemonPool.push(id);
-				}
-			} else {
-				if (template.gen <= this.gen && !template.isMega && !template.isPrimal && !template.isNonstandard && template.randomBattleMoves) {
-					pokemonPool.push(id);
-				}
 			}
 		}
 
@@ -1824,11 +1780,6 @@ class RandomTeams extends Dex.ModdedDex {
 		let typeCount = {};
 		/**@type {{[k: string]: number}} */
 		let typeComboCount = {};
-		/**@type {{[k: string]: number}} */
-		let baseFormes = {};
-		let uberCount = 0;
-		let puCount = 0;
-		let nfeCount = 0;
 		/**@type {RandomTeamsTypes.TeamDetails} */
 		let teamDetails = {};
 
@@ -1839,45 +1790,18 @@ class RandomTeams extends Dex.ModdedDex {
 			// Limit to one of each species (Species Clause)
 			if (baseFormes[template.baseSpecies]) continue;
 
-			if (template.species === 'Unown' || template.species === 'Cosmog' || template.species === 'Cosmoem') continue;
-
-			let tier = template.tier;
-			if (this.format.id !== 'gen7uberrandom' && this.format.id !== 'gen7purandom' && this.format.id !== 'gen7lcrandom' && this.format.id !== 'gen7letsgorandom' && this.format.id !== 'gen7letsgorandomlotm42') {
-				switch (tier) {
-				case 'Uber':
-					// Ubers are limited to 2 but have a 20% chance of being added anyway.
-					if (uberCount > 1 && this.randomChance(4, 5)) continue;
-					break;
-				case 'PU':
-					// PUs are limited to 2 but have a 20% chance of being added anyway.
-					if (puCount > 1 && this.randomChance(4, 5)) continue;
-					break;
-				case 'NFE':
-				case 'LC':
-				case 'LC Uber':
-					if (nfeCount > 0 || this.randomChance(4, 5)) continue;
-					break;
-				case 'Unreleased': case 'CAP':
-					// Unreleased and CAP have 20% the normal rate
-					if (this.randomChance(4, 5)) continue;
-				}
-			}
+			// Exclude Pokemon that are useless in battle
+			if (template.species === 'Magikarp' || template.species === 'Unown' || template.species === 'Cosmog' || template.species === 'Cosmoem') continue;
 
 			// Adjust rate for species with multiple formes
 			switch (template.baseSpecies) {
 			case 'Arceus': case 'Silvally':
 				if (this.randomChance(17, 18)) continue;
 				break;
-			case 'Pikachu':
-				if (this.randomChance(6, 7)) continue;
-				continue;
-			case 'Genesect':
-				if (this.randomChance(4, 5)) continue;
-				break;
 			case 'Rotom':
 				if (this.randomChance(5, 6)) continue;
 				break;
-			case 'Deoxys': case 'Pumpkaboo': case 'Gourgeist': case 'Oricorio':
+			case 'Deoxys': case 'Gourgeist': case 'Pumpkaboo': case 'Oricorio':
 				if (this.randomChance(3, 4)) continue;
 				break;
 			case 'Castform': case 'Kyurem': case 'Lycanroc': case 'Necrozma': case 'Wormadam':
@@ -1886,57 +1810,32 @@ class RandomTeams extends Dex.ModdedDex {
 			case 'Basculin': case 'Cherrim': case 'Floette': case 'Giratina': case 'Hoopa': case 'Landorus': case 'Meloetta': case 'Meowstic': case 'Shaymin': case 'Thundurus': case 'Tornadus':
 				if (this.randomChance(1, 2)) continue;
 				break;
-			case 'Dugtrio': case 'Exeggutor': case 'Golem': case 'Greninja': case 'Marowak': case 'Muk': case 'Ninetales': case 'Persian': case 'Raichu': case 'Sandslash': case 'Zygarde':
+			case 'Dugtrio': case 'Diglett': case 'Exeggutor': case 'Golem': case 'Graveler': case 'Geodude': case 'Greninja': case 'Marowak': case 'Muk': case 'Grimer': case 'Ninetales': case 'Vulpix': case 'Persian': case 'Meowth': case 'Raichu': case 'Sandslash': case 'Sandshrew': case 'Zygarde':
 				if (this.gen >= 7 && this.randomChance(1, 2)) continue;
 				break;
 			}
 
-			if (potd && potd.exists) {
-				// The Pokemon of the Day belongs in slot 1
-				if (pokemon.length === 0) {
-					template = potd;
-					if (template.species === 'Magikarp') {
-						// @ts-ignore
-						template.randomBattleMoves = ['bounce', 'flail', 'splash', 'magikarpsrevenge'];
-					} else if (template.species === 'Delibird') {
-						// @ts-ignore
-						template.randomBattleMoves = ['present', 'bestow'];
+			let tier = template.tier;
+
+			// Limit two Pokemon per tier
+			if (this.format.id !== 'gen7uberrandom' && this.format.id !== 'gen7ouuurandom' && this.format.id !== 'gen7runurandom' && this.format.id !== 'gen7purandom' && this.format.id !== 'gen7lcrandom') {
+				if (!tierCount[tier]) {
+					if (tier === 'LC' || tier === 'LC Uber' || tier === 'NFE') {
+						tierCount['LC'] = 2;
+						tierCount['LC Uber'] = 2;
+						tierCount['NFE'] = 2;
+					} else {
+						tierCount[tier] = 1;
 					}
-				} else if (template.species === potd.species) {
-					continue; // No thanks, I've already got one
-				}
-			}
-
-			if (this.format.id === 'gen7newyearrandom') {
-				if (pokemon.length === 0) {
-					template = dogTemplate;
-				} else if (template.species === dogTemplate.species) {
-					continue;
-				}
-			}
-
-			if (this.format.id === 'gen7luvdiscrandom') {
-				let luvdisc = this.getTemplate('luvdisc');
-				if (pokemon.length === 0) {
-					template = luvdisc;
-					template.randomBattleMoves = ['hydropump', 'icebeam', 'hiddenpowergrass', 'raindance'];
-				} else if (template.species === luvdisc.species) {
-					continue;
-				}
-			}
-
-			if (this.format.id === 'gen7letsgorandom' || this.format.id === 'gen7letsgorandomlotm42') {
-				if (pokemon.length === 0) {
-					template = letsGoTemplate;
-				} else if (template.species === letsGoTemplate.species) {
+				} else if (tierCount[tier] > 1) {
 					continue;
 				}
 			}
 
 			let types = template.types;
 
-			if (!isMonotype && this.format.id !== 'gen7newyearrandom' && this.format.id !== 'gen7luvdiscrandom') {
-				// Limit 2 of any type
+			if (!isMonotype) {
+				// Limit two of any type
 				let skip = false;
 				for (const type of types) {
 					if (typeCount[type] > 1 && this.randomChance(4, 5)) {
@@ -1958,7 +1857,7 @@ class RandomTeams extends Dex.ModdedDex {
 
 			let set = this.randomSet(template, pokemon.length, teamDetails, this.format.gameType !== 'singles');
 
-			if (this.format.id === 'gen7lcrandom' || this.format.id === 'gen7letsgorandom' || this.format.id === 'gen7letsgorandomlotm42') {
+			if (this.format.id === 'gen7lcrandom') {
 				set.level = 5;
 			} else if (this.format.id === 'gen7metronome3v3random' || this.format.id === 'gen7metronome6v6random') {
 				set.moves = ['Metronome'];
@@ -2018,15 +1917,6 @@ class RandomTeams extends Dex.ModdedDex {
 				typeComboCount[typeCombo] = 1;
 			}
 
-			// Increment Uber/PU counters
-			if (tier === 'Uber') {
-				uberCount++;
-			} else if (tier === 'PU') {
-				puCount++;
-			} else if (tier === 'NFE' || tier === 'LC' || tier === 'LC Uber') {
-				nfeCount++;
-			}
-
 			// Team has Mega/weather/hazards
 			if (item.megaStone) teamDetails['megaStone'] = 1;
 			if (item.zMove) teamDetails['zMove'] = 1;
@@ -2041,32 +1931,6 @@ class RandomTeams extends Dex.ModdedDex {
 			// For setting Zoroark's level
 			if (set.ability === 'Illusion') teamDetails['illusion'] = pokemon.length;
 		}
-		if (this.format.id === 'gen7newyearrandom') {
-			let zCelebrate = false;
-			let isMega = true;
-			for (let i = 0; i < pokemon.length; i++) {
-				pokemon[i].moves[4] = 'Celebrate';
-				if (pokemon[i].item.zMove) {
-					pokemon[i].item = 'Normalium Z';
-					zCelebrate = true;
-				}
-			}
-			if (!zCelebrate) {
-				while (isMega) {
-					let rand = this.random(6);
-					if (!pokemon[rand].item.megaStone && !zCelebrate) {
-						pokemon[rand].item = 'Normalium Z';
-						zCelebrate = true;
-						isMega = false;
-					}
-				}
-			}
-		}
-		if (this.format.id === 'gen7luvdiscrandom') {
-			for (let i = 0; i < pokemon.length; i++) {
-				pokemon[i].moves[4] = 'Attract';
-			}
-		}
 		return pokemon;
 	}
 
@@ -2078,7 +1942,7 @@ class RandomTeams extends Dex.ModdedDex {
 	 * @return {RandomTeamsTypes.RandomFactorySet | false}
 	 */
 	randomFactorySet(template, slot, teamData, tier) {
-		let speciesId = toId(template.species);
+		let speciesId = toID(template.species);
 		// let flags = this.randomFactorySets[tier][speciesId].flags;
 		let setList = this.randomFactorySets[tier][speciesId].sets;
 
@@ -2116,7 +1980,7 @@ class RandomTeams extends Dex.ModdedDex {
 			let curSetVariants = [];
 			for (const move of curSet.moves) {
 				let variantIndex = this.random(move.length);
-				let moveId = toId(move[variantIndex]);
+				let moveId = toID(move[variantIndex]);
 				if (movesMax[moveId] && teamData.has[moveId] >= movesMax[moveId]) {
 					reject = true;
 					break;
@@ -2302,7 +2166,7 @@ class RandomTeams extends Dex.ModdedDex {
 			}
 
 			for (const move of set.moves) {
-				let moveId = toId(move);
+				let moveId = toID(move);
 				if (moveId in teamData.has) {
 					teamData.has[moveId]++;
 				} else {
@@ -2353,7 +2217,7 @@ class RandomTeams extends Dex.ModdedDex {
 	 * @return {RandomTeamsTypes.RandomFactorySet | false}
 	 */
 	randomBSSFactorySet(template, slot, teamData) {
-		let speciesId = toId(template.species);
+		let speciesId = toID(template.species);
 		// let flags = this.randomBSSFactorySets[tier][speciesId].flags;
 		let setList = this.randomBSSFactorySets[speciesId].sets;
 
@@ -2390,7 +2254,7 @@ class RandomTeams extends Dex.ModdedDex {
 			let curSetVariants = [];
 			for (const move of curSet.moves) {
 				let variantIndex = this.random(move.length);
-				let moveId = toId(move[variantIndex]);
+				let moveId = toID(move[variantIndex]);
 				if (movesMax[moveId] && teamData.has[moveId] >= movesMax[moveId]) {
 					reject = true;
 					break;
@@ -2529,7 +2393,7 @@ class RandomTeams extends Dex.ModdedDex {
 			}
 
 			for (const move of set.moves) {
-				let moveId = toId(move);
+				let moveId = toID(move);
 				if (moveId in teamData.has) {
 					teamData.has[moveId]++;
 				} else {

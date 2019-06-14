@@ -1,1 +1,14 @@
+html,body{margin:0;padding:0}body{background:#02142a url("https://static.pokecommunity.com/bs/backgrounds/vaporeon.png") no-repeat fixed left top}
+.mainmenufooter a{color:#f2f2f2}
+.mainmenufooter a:hover{color:white}
+.menugroup .button{color:white;background:#2e2e2e!important;border:solid 1px black!important}
+.menugroup .button:hover,.menugroup .button:active{color:white;background:#212121!important;border:solid 1px black!important}
+.mainmenu .menugroup:nth-child(1) .button.disabled,.mainmenu .menugroup:nth-child(1) .button.disabled:hover,.mainmenu .menugroup:nth-child(1) .button.disabled:active{color:white!important}
+.userlist li button:hover{background:rgba(220,228,236,0.4)}
+.userlist li button:active{background:rgba(204,212,220,0.4)}
+.dark .userlist li button:hover{background:rgba(34,34,34,0.4)}
+.dark .userlist li button:active{background:rgba(0,0,0,0.4)}
+@media(max-width:1300px){.roomintro-img-small{display:none}}
+@media(max-width:1348px){.roomintro-img-medium{display:none}}
+@media(max-width:1450px){.roomintro-img-large{display:none}}
 .profile-title{font-family:georgia,times,serif;font-size:14pt;font-weight:bold;font-style:italic}

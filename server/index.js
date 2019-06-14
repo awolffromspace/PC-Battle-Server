@@ -88,10 +88,10 @@ if (Config.watchconfig) {
  * Set up most of our globals
  *********************************************************/
 
-global.Dex = require('../.sim-dist/dex');
-global.toId = Dex.getId;
+global.Dex = require('../.sim-dist/dex').Dex;
+global.toID = Dex.getId;
 
-global.LoginServer = require('./loginserver');
+global.LoginServer = require('../.server-dist/loginserver').LoginServer;
 
 global.Ladders = require('./ladders');
 
@@ -103,19 +103,21 @@ global.Punishments = require('./punishments');
 
 global.Rooms = require('./rooms');
 
-global.Tells = require('./tells.js');
+// Boilerplate start
+global.Tells = require('../tells.js');
 
 global.Db = require('nef')(require('nef-fs')('config/db'));
 
 delete process.send; // in case we're a child process
+// Boilerplate end
 
-global.Verifier = require('./verifier');
+global.Verifier = require('../.server-dist/verifier');
 Verifier.PM.spawn();
 
 global.Tournaments = require('./tournaments');
 
-global.Dnsbl = require('./dnsbl');
-Dnsbl.loadDatacenters();
+global.IPTools = require('../.server-dist/ip-tools').IPTools;
+IPTools.loadDatacenters();
 
 if (Config.crashguard) {
 	// graceful crash - allow current battles to finish before restarting

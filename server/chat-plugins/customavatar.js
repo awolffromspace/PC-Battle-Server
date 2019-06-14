@@ -39,15 +39,15 @@ function load_custom_avatars() {
 load_custom_avatars();
 
 exports.commands = {
-	customavatar: {
-		set(target, room, user) {
+	/*customavatar: {
+		set: function (target, room, user) {
 			if (!this.can('customavatar')) return false;
 
 			const parts = target.split(',');
 
 			if (parts.length < 2) return this.parse('/help customavatar');
 
-			const name = toId(parts[0]);
+			const name = toID(parts[0]);
 			const image = Config.customavatars[name];
 
 			if (image) delete Config.customavatars[name];
@@ -65,13 +65,13 @@ exports.commands = {
 
 			download_image(image_url, name, ext);
 			this.sendReply(parts[0] + "'s avatar has been set.");
-			Users.get(name).popup(user.name + " set your custom avatar. Refresh your page if you don\'t see it.");
+			Users.get(name).popup(user.name + " set's your custom avatar. Refresh your page if you don\'t see it.");
 		},
 
-		delete(target, room, user) {
+		delete: function (target, room, user) {
 			if (!this.can('customavatar')) return false;
 
-			const userid = toId(target);
+			const userid = toID(target);
 			const image = Config.customavatars[userid];
 
 			if (!image) {
@@ -91,11 +91,11 @@ exports.commands = {
 		},
 
 		'': 'help',
-		help(target, room, user) {
+		help: function (target, room, user) {
 			this.parse('/help customavatar');
 		},
 	},
 	customavatarhelp: ["Commands for /customavatar are:",
 		"/customavatar set [username], [image link] - Set a user's avatar.",
-		"/customavatar delete [username] - Delete a user's avatar."],
+		"/customavatar delete [username] - Delete a user's avatar."],*/
 };

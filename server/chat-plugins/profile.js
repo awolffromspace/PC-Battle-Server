@@ -1,12 +1,12 @@
 'use strict';
 /*eslint no-restricted-modules: [0]*/
 
-let color = require('../config/color');
+let color = require('../../config/color');
 let moment = require('moment');
 
 let BR = '<br>';
 let SPACE = '&nbsp;';
-let profileColor = '#45a0e5';
+let profileColor = '#36bbd9';
 let trainersprites = [1, 2, 101, 102, 169, 170, 265, 266, 168];
 
 /**
@@ -85,18 +85,19 @@ function label(text) {
 	return bold(font(profileColor, text + ':')) + SPACE;
 }
 
-function titleCSS(text) {
-	return '<span class="profile-title">' + text + '</span>';
+function currencyName(amount) {
+	let name = " Battle Point";
+	return amount === 1 ? name : name + "s";
 }
 
 Profile.prototype.avatar = function () {
 	if (this.isOnline) {
-		if (typeof this.image === 'string') return img(this.url + '/avatars/' + this.image);
+		if (typeof this.image === 'string') return img(this.url + ':' + Config.port + '/avatars/' + this.image);
 		return img('http://play.pokemonshowdown.com/sprites/trainers/' + this.image + '.png');
 	}
 	for (let name in Config.customAvatars) {
 		if (this.username === name) {
-			return img(this.url + '/avatars/' + Config.customAvatars[name]);
+			return img(this.url + ':' + Config.port + '/avatars/' + Config.customAvatars[name]);
 		}
 	}
 	let selectedSprite = trainersprites[Math.floor(Math.random() * trainersprites.length)];
@@ -112,15 +113,19 @@ Profile.prototype.group = function () {
 	if (this.isOnline && this.user.group === ' ') return label('Group') + 'Regular User';
 	if (this.isOnline) return label('Group') + Config.groups[this.user.group].name;
 	for (let name in Users.usergroups) {
-		if (toId(this.username) === name) {
+		if (toID(this.username) === name) {
 			return label('Group') + Config.groups[Users.usergroups[name].charAt(0)].name;
 		}
 	}
 	return label('Group') + 'Regular User';
 };
 
+Profile.prototype.money = function (amount) {
+	return label('Money') + amount + currencyName(amount);
+};
+
 Profile.prototype.name = function () {
-	return label('Name') + bold(font(color(toId(this.username)), this.username));
+	return label('Name') + bold(font(color(toID(this.username)), this.username));
 };
 
 Profile.prototype.seen = function (timeAgo) {
@@ -129,32 +134,19 @@ Profile.prototype.seen = function (timeAgo) {
 	return label('Last Seen') + moment(timeAgo).fromNow();
 };
 
-Profile.prototype.title = function (amount) {
-	return titleCSS(amount);
-};
-
 Profile.prototype.show = function (callback) {
-	let userid = toId(this.username);
-	let title = Db.title.get(userid);
+	let userid = toID(this.username);
 
-	if (title) {
-		return this.buttonAvatar() +
-			SPACE + this.title(Db.title.get(userid)) + BR +
-			SPACE + this.name() + BR +
-			SPACE + this.group() + BR +
-			SPACE + this.seen(Db.seen.get(userid)) +
-			'<br clear="all">';
-	} else {
-		return this.buttonAvatar() +
-			SPACE + this.name() + BR +
-			SPACE + this.group() + BR +
-			SPACE + this.seen(Db.seen.get(userid)) +
-			'<br clear="all">';
-	}
+	return this.buttonAvatar() +
+		SPACE + this.name() + BR +
+		SPACE + this.group() + BR +
+		SPACE + this.money(Db.money.get(userid, 0)) + BR +
+		SPACE + this.seen(Db.seen.get(userid)) +
+		'<br clear="all">';
 };
 
 exports.commands = {
-	profile(target, room, user) {
+	profile: function (target, room, user) {
 		if (!this.runBroadcast()) return;
 		if (target.length >= 19) return this.sendReply("Usernames are required to be less than 19 characters long.");
 		let targetUser = this.targetUserOrSelf(target);
@@ -166,5 +158,5 @@ exports.commands = {
 		}
 		this.sendReplyBox(profile.show());
 	},
-	profilehelp: ["/profile -	Shows information regarding user's name, group, Battle Points, and when they were last seen."],
+	profilehelp: ["/profile -	Shows information regarding user's name, group, money, and when they were last seen."],
 };

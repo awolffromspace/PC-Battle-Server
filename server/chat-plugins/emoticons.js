@@ -1,258 +1,264 @@
 'use strict';
 
-let color = require('../config/color');
+const color = require('../../config/color');
+let demFeels = function () {};
+demFeels.getEmotes = function () {
+	return {};
+};
+try {
+	demFeels = require('dem-feels');
+} catch (e) {
+	console.error(e);
+}
 
 exports.parseEmoticons = parseEmoticons;
 
-let emotes = {
-	':4head:': 'http://cbc.pokecommunity.com/config/emoticons/4head.png',
-	':absol:': 'http://cbc.pokecommunity.com/config/emoticons/absol.png',
-	':aggron:': 'http://cbc.pokecommunity.com/config/emoticons/aggron.png',
-	':aids:': 'http://cbc.pokecommunity.com/config/emoticons/aids.png',
-	':alarm:': 'http://cbc.pokecommunity.com/config/emoticons/alarm.gif',
-	':ampharos:': 'http://cbc.pokecommunity.com/config/emoticons/ampharos.png',
-	':ana:': 'http://cbc.pokecommunity.com/config/emoticons/ana.png',
-	':arcanine:': 'http://cbc.pokecommunity.com/config/emoticons/arcanine.png',
-	':arceus:': 'http://cbc.pokecommunity.com/config/emoticons/arceus.png',
-	':armycat:': 'http://cbc.pokecommunity.com/config/emoticons/armycat.png',
-	':ashhug:': 'http://cbc.pokecommunity.com/config/emoticons/ashhug.png',
-	':ball:': 'http://cbc.pokecommunity.com/config/emoticons/ball.gif',
-	':barrel:': 'http://cbc.pokecommunity.com/config/emoticons/barrel.gif',
-	':bastion:': 'http://cbc.pokecommunity.com/config/emoticons/bastion.png',
-	':bearhug:': 'http://cbc.pokecommunity.com/config/emoticons/bearhug.png',
-	':bed:': 'http://cbc.pokecommunity.com/config/emoticons/bed.gif',
-	':bellossom:': 'http://cbc.pokecommunity.com/config/emoticons/bellossom.png',
-	':bidoof:': 'http://cbc.pokecommunity.com/config/emoticons/bidoof.png',
-	':blastoise:': 'http://cbc.pokecommunity.com/config/emoticons/blastoise.png',
-	':blink:': 'http://cbc.pokecommunity.com/config/emoticons/blink.gif',
-	':blissey:': 'http://cbc.pokecommunity.com/config/emoticons/blissey.png',
-	':blush:': 'http://cbc.pokecommunity.com/config/emoticons/blush.png',
-	':blust:': 'http://cbc.pokecommunity.com/config/emoticons/blust.gif',
-	':boatydrugs:': 'http://cbc.pokecommunity.com/config/emoticons/boatydrugs.png',
-	':bowie:': 'http://cbc.pokecommunity.com/config/emoticons/bowie.png',
-	':bulbasaur:': 'http://cbc.pokecommunity.com/config/emoticons/bulbasaur.png',
-	':bunny:': 'http://cbc.pokecommunity.com/config/emoticons/bunny.gif',
-	':camiss:': 'http://cbc.pokecommunity.com/config/emoticons/camiss.png',
-	':carol:': 'http://cbc.pokecommunity.com/config/emoticons/carol.png',
-	':castform:': 'http://cbc.pokecommunity.com/config/emoticons/castform.png',
-	':catflip:': 'http://cbc.pokecommunity.com/config/emoticons/catflip.png',
-	':censor:': 'http://cbc.pokecommunity.com/config/emoticons/censor.png',
-	':chansey:': 'http://cbc.pokecommunity.com/config/emoticons/chansey.png',
-	':charizard:': 'http://cbc.pokecommunity.com/config/emoticons/charizard.png',
-	':charmander:': 'http://cbc.pokecommunity.com/config/emoticons/charmander.png',
-	':cheers:': 'http://cbc.pokecommunity.com/config/emoticons/cheers.png',
-	':chikorita:': 'http://cbc.pokecommunity.com/config/emoticons/chikorita.png',
-	':choicehug:': 'http://cbc.pokecommunity.com/config/emoticons/choicehug.png',
-	':choke:': 'http://cbc.pokecommunity.com/config/emoticons/choke.png',
-	':christos:': 'http://cbc.pokecommunity.com/config/emoticons/christos.png',
-	':clefairy:': 'http://cbc.pokecommunity.com/config/emoticons/clefairy.png',
-	':clown:': 'http://cbc.pokecommunity.com/config/emoticons/clown.png',
-	':cookie:': 'http://cbc.pokecommunity.com/config/emoticons/cookie.png',
-	':cthulhu:': 'http://cbc.pokecommunity.com/config/emoticons/cthulhu.png',
-	':curry:': 'http://cbc.pokecommunity.com/config/emoticons/curry.png',
-	':dab:': 'http://cbc.pokecommunity.com/config/emoticons/dab.png',
-	':dance:': 'http://cbc.pokecommunity.com/config/emoticons/dance.gif',
-	':dedenne:': 'http://cbc.pokecommunity.com/config/emoticons/dedenne.png',
-	':delivert:': 'http://cbc.pokecommunity.com/config/emoticons/delivert.png',
-	':diddy:': 'http://cbc.pokecommunity.com/config/emoticons/diddy.png',
-	':dinner:': 'http://cbc.pokecommunity.com/config/emoticons/dinner.png',
-	':ditto:': 'http://cbc.pokecommunity.com/config/emoticons/ditto.png',
-	':dk:': 'http://cbc.pokecommunity.com/config/emoticons/dk.png',
-	':doomfist:': 'http://cbc.pokecommunity.com/config/emoticons/doomfist.png',
-	':drama:': 'http://cbc.pokecommunity.com/config/emoticons/drama.png',
-	':drowzee:': 'http://cbc.pokecommunity.com/config/emoticons/drowzee.png',
-	':dva:': 'http://cbc.pokecommunity.com/config/emoticons/dva.png',
-	':eevee:': 'http://cbc.pokecommunity.com/config/emoticons/eevee.png',
-	':electrode:': 'http://cbc.pokecommunity.com/config/emoticons/electrode.png',
-	':emboar:': 'http://cbc.pokecommunity.com/config/emoticons/emboar.png',
-	':espurr:': 'http://cbc.pokecommunity.com/config/emoticons/espurr.png',
-	':eyes:': 'http://cbc.pokecommunity.com/config/emoticons/eyes.png',
-	':fatbowie:': 'http://cbc.pokecommunity.com/config/emoticons/bowie.png',
-	':feebas:': 'http://cbc.pokecommunity.com/config/emoticons/feebas.png',
-	':fish:': 'http://cbc.pokecommunity.com/config/emoticons/fish.gif',
-	':flirt:': 'http://cbc.pokecommunity.com/config/emoticons/flirt.png',
-	':flygon:': 'http://cbc.pokecommunity.com/config/emoticons/flygon.png',
-	':frank:': 'http://cbc.pokecommunity.com/config/emoticons/frank.png',
-	':gav:': 'http://cbc.pokecommunity.com/config/emoticons/gav.png',
-	':gawk:': 'http://cbc.pokecommunity.com/config/emoticons/gawk.png',
-	':genji:': 'http://cbc.pokecommunity.com/config/emoticons/genji.png',
-	':glare:': 'http://cbc.pokecommunity.com/config/emoticons/glare.png',
-	':gloom:': 'http://cbc.pokecommunity.com/config/emoticons/gloom.png',
-	':goodra:': 'http://cbc.pokecommunity.com/config/emoticons/goodra.png',
-	':goomy:': 'http://cbc.pokecommunity.com/config/emoticons/goomy.png',
-	':growlithe:': 'http://cbc.pokecommunity.com/config/emoticons/growlithe.png',
-	':hamster:': 'http://cbc.pokecommunity.com/config/emoticons/hamster.png',
-	':hamtaro:': 'http://cbc.pokecommunity.com/config/emoticons/hamtaro.gif',
-	':hanzo:': 'http://cbc.pokecommunity.com/config/emoticons/hanzo.png',
-	':harambe:': 'http://cbc.pokecommunity.com/config/emoticons/harambe.png',
-	':helix:': 'http://cbc.pokecommunity.com/config/emoticons/helix.png',
-	':houndoom:': 'http://cbc.pokecommunity.com/config/emoticons/houndoom.png',
-	':hug:': 'http://cbc.pokecommunity.com/config/emoticons/hug.png',
-	':hypno:': 'http://cbc.pokecommunity.com/config/emoticons/hypno.png',
-	':infernape:': 'http://cbc.pokecommunity.com/config/emoticons/infernape.png',
-	':jack:': 'http://cbc.pokecommunity.com/config/emoticons/jack.png',
-	':jigglypuff:': 'http://cbc.pokecommunity.com/config/emoticons/jigglypuff.png',
-	':joanne:': 'http://cbc.pokecommunity.com/config/emoticons/joanne.png',
-	':junkrat:': 'http://cbc.pokecommunity.com/config/emoticons/junkrat.png',
-	':jynx:': 'http://cbc.pokecommunity.com/config/emoticons/jynx.png',
-	':kanye:': 'http://cbc.pokecommunity.com/config/emoticons/kanye.png',
-	':kappa:': 'http://cbc.pokecommunity.com/config/emoticons/kappa.png',
-	':kappapride:': 'http://cbc.pokecommunity.com/config/emoticons/kappapride.png',
-	':kappaross:': 'http://cbc.pokecommunity.com/config/emoticons/kappaross.png',
-	':keepo:': 'http://cbc.pokecommunity.com/config/emoticons/keepo.png',
-	':kermit:': 'http://cbc.pokecommunity.com/config/emoticons/kermit.png',
-	':khaled:': 'http://cbc.pokecommunity.com/config/emoticons/khaled.png',
-	':kitty:': 'http://cbc.pokecommunity.com/config/emoticons/kitty.png',
-	':kreygasm:': 'http://cbc.pokecommunity.com/config/emoticons/kreygasm.png',
-	':lapras:': 'http://cbc.pokecommunity.com/config/emoticons/lapras.png',
-	':latias:': 'http://cbc.pokecommunity.com/config/emoticons/latias.png',
-	':latios:': 'http://cbc.pokecommunity.com/config/emoticons/latios.png',
-	':ledian:': 'http://cbc.pokecommunity.com/config/emoticons/ledian.png',
-	':leg:': 'http://cbc.pokecommunity.com/config/emoticons/leg.png',
-	':lewd:': 'http://cbc.pokecommunity.com/config/emoticons/lewd.png',
-	':lickilicky:': 'http://cbc.pokecommunity.com/config/emoticons/lickilicky.png',
-	':lickitung:': 'http://cbc.pokecommunity.com/config/emoticons/lickitung.gif',
-	':lileep:': 'http://cbc.pokecommunity.com/config/emoticons/lileep.png',
-	':link:': 'http://cbc.pokecommunity.com/config/emoticons/link.png',
-	':loudred:': 'http://cbc.pokecommunity.com/config/emoticons/loudred.png',
-	':lucio:': 'http://cbc.pokecommunity.com/config/emoticons/lucio.png',
-	':ludicolo:': 'http://cbc.pokecommunity.com/config/emoticons/ludicolo.png',
-	':luvdisc:': 'http://cbc.pokecommunity.com/config/emoticons/luvdisc.png',
-	':lyin:': 'http://cbc.pokecommunity.com/config/emoticons/lyin.png',
-	':magikarp:': 'http://cbc.pokecommunity.com/config/emoticons/magikarp.png',
-	':mccree:': 'http://cbc.pokecommunity.com/config/emoticons/mccree.png',
-	':meganium:': 'http://cbc.pokecommunity.com/config/emoticons/meganium.png',
-	':mei:': 'http://cbc.pokecommunity.com/config/emoticons/mei.png',
-	':meowstic:': 'http://cbc.pokecommunity.com/config/emoticons/meowstic.png',
-	':meowsticf:': 'http://cbc.pokecommunity.com/config/emoticons/meowsticf.png',
-	':meowth:': 'http://cbc.pokecommunity.com/config/emoticons/meowth.png',
-	':mercy:': 'http://cbc.pokecommunity.com/config/emoticons/mercy.png',
-	':mermaid:': 'http://cbc.pokecommunity.com/config/emoticons/mermaid.png',
-	':metagross:': 'http://cbc.pokecommunity.com/config/emoticons/metagross.png',
-	':mind:': 'http://cbc.pokecommunity.com/config/emoticons/mind.png',
-	':moo:': 'http://cbc.pokecommunity.com/config/emoticons/moo.gif',
-	':mrmime:': 'http://cbc.pokecommunity.com/config/emoticons/mrmime.png',
-	':mudkip:': 'http://cbc.pokecommunity.com/config/emoticons/mudkip.png',
-	':muk:': 'http://cbc.pokecommunity.com/config/emoticons/muk.png',
-	':no:': 'http://cbc.pokecommunity.com/config/emoticons/no.png',
-	':nw:': 'http://cbc.pokecommunity.com/config/emoticons/nw.gif',
-	':oddish:': 'http://cbc.pokecommunity.com/config/emoticons/oddish.png',
-	':ok:': 'http://cbc.pokecommunity.com/config/emoticons/ok.png',
-	':orisa:': 'http://cbc.pokecommunity.com/config/emoticons/orisa.png',
-	':pachirisu:': 'http://cbc.pokecommunity.com/config/emoticons/pachirisu.png',
-	':pancham:': 'http://cbc.pokecommunity.com/config/emoticons/pancham.png',
-	':pangoro:': 'http://cbc.pokecommunity.com/config/emoticons/pangoro.png',
-	':papabless:': 'http://cbc.pokecommunity.com/config/emoticons/papabless.png',
-	':papi:': 'http://cbc.pokecommunity.com/config/emoticons/papi.png',
-	':pear:': 'http://cbc.pokecommunity.com/config/emoticons/pear.png',
-	':petty:': 'http://cbc.pokecommunity.com/config/emoticons/petty.png',
-	':pharah:': 'http://cbc.pokecommunity.com/config/emoticons/pharah.png',
-	':pikachu:': 'http://cbc.pokecommunity.com/config/emoticons/pikachu.png',
-	':pikahug:': 'http://cbc.pokecommunity.com/config/emoticons/pikahug.png',
-	':pix:': 'http://cbc.pokecommunity.com/config/emoticons/pix.png',
-	':pjsalt:': 'http://cbc.pokecommunity.com/config/emoticons/pjsalt.png',
-	':plot:': 'http://cbc.pokecommunity.com/config/emoticons/plot.gif',
-	':pogchamp:': 'http://cbc.pokecommunity.com/config/emoticons/pogchamp.png',
-	':pole:': 'http://cbc.pokecommunity.com/config/emoticons/pole.png',
-	':pose:': 'http://cbc.pokecommunity.com/config/emoticons/pose.gif',
-	':potato:': 'http://cbc.pokecommunity.com/config/emoticons/potato.png',
-	':primeape:': 'http://cbc.pokecommunity.com/config/emoticons/primeape.png',
-	':psyduck:': 'http://cbc.pokecommunity.com/config/emoticons/psyduck.png',
-	':pyoshi:': 'http://cbc.pokecommunity.com/config/emoticons/pyoshi.png',
-	':raffey:': 'http://cbc.pokecommunity.com/config/emoticons/raffey.png',
-	':raichu:': 'http://cbc.pokecommunity.com/config/emoticons/raichu.png',
-	':rainbow:': 'http://cbc.pokecommunity.com/config/emoticons/rainbow.gif',
-	':ralts:': 'http://cbc.pokecommunity.com/config/emoticons/ralts.png',
-	':reaper:': 'http://cbc.pokecommunity.com/config/emoticons/reaper.png',
-	':reinhardt:': 'http://cbc.pokecommunity.com/config/emoticons/reinhardt.png',
-	':respek:': 'http://cbc.pokecommunity.com/config/emoticons/respek.png',
-	':roadhog:': 'http://cbc.pokecommunity.com/config/emoticons/roadhog.png',
-	':roll:': 'http://cbc.pokecommunity.com/config/emoticons/roll.gif',
-	':roselia:': 'http://cbc.pokecommunity.com/config/emoticons/roselia.png',
-	':rude:': 'http://cbc.pokecommunity.com/config/emoticons/rude.gif',
-	':sableye:': 'http://cbc.pokecommunity.com/config/emoticons/sableye.png',
-	':salute:': 'http://cbc.pokecommunity.com/config/emoticons/salute.png',
-	':scarfhug:': 'http://cbc.pokecommunity.com/config/emoticons/scarfhug.png',
-	':scizor:': 'http://cbc.pokecommunity.com/config/emoticons/scizor.png',
-	':seduce:': 'http://cbc.pokecommunity.com/config/emoticons/seduce.png',
-	':senpai:': 'http://cbc.pokecommunity.com/config/emoticons/senpai.png',
-	':sharpie:': 'http://cbc.pokecommunity.com/config/emoticons/sharpie.png',
-	':shift:': 'http://cbc.pokecommunity.com/config/emoticons/shift.gif',
-	':shifty:': 'http://cbc.pokecommunity.com/config/emoticons/shifty.png',
-	':shinx:': 'http://cbc.pokecommunity.com/config/emoticons/shinx.png',
-	':shinyhug:': 'http://cbc.pokecommunity.com/config/emoticons/shinyhug.png',
-	':sims:': 'http://cbc.pokecommunity.com/config/emoticons/sims.png',
-	':skarmory:': 'http://cbc.pokecommunity.com/config/emoticons/skarmory.png',
-	':slowbro:': 'http://cbc.pokecommunity.com/config/emoticons/slowbro.png',
-	':slowking:': 'http://cbc.pokecommunity.com/config/emoticons/slowking.png',
-	':slowpoke:': 'http://cbc.pokecommunity.com/config/emoticons/slowpoke.png',
-	':snivy:': 'http://cbc.pokecommunity.com/config/emoticons/snivy.png',
-	':snorlax:': 'http://cbc.pokecommunity.com/config/emoticons/snorlax.png',
-	':soldier76:': 'http://cbc.pokecommunity.com/config/emoticons/soldier76.png',
-	':sombra:': 'http://cbc.pokecommunity.com/config/emoticons/sombra.png',
-	':spasm:': 'http://cbc.pokecommunity.com/config/emoticons/spasm.gif',
-	':spheal:': 'http://cbc.pokecommunity.com/config/emoticons/spheal.png',
-	':spinda:': 'http://cbc.pokecommunity.com/config/emoticons/spinda.png',
-	':squint:': 'http://cbc.pokecommunity.com/config/emoticons/squint.png',
-	':squirtle:': 'http://cbc.pokecommunity.com/config/emoticons/squirtle.png',
-	':steelix:': 'http://cbc.pokecommunity.com/config/emoticons/steelix.png',
-	':stephenking:': 'http://cbc.pokecommunity.com/config/emoticons/stephenking.png',
-	':strut:': 'http://cbc.pokecommunity.com/config/emoticons/strut.png',
-	':suicune:': 'http://cbc.pokecommunity.com/config/emoticons/suicune.png',
-	':superman:': 'http://cbc.pokecommunity.com/config/emoticons/superman.png',
-	':sweep:': 'http://cbc.pokecommunity.com/config/emoticons/sweep.gif',
-	':swiftrage:': 'http://cbc.pokecommunity.com/config/emoticons/swiftrage.png',
-	':symmetra:': 'http://cbc.pokecommunity.com/config/emoticons/symmetra.png',
-	':taco:': 'http://cbc.pokecommunity.com/config/emoticons/taco.png',
-	':taillow:': 'http://cbc.pokecommunity.com/config/emoticons/taillow.png',
-	':thinkeng:': 'http://cbc.pokecommunity.com/config/emoticons/thinkeng.png',
-	':thonkeng:': 'http://cbc.pokecommunity.com/config/emoticons/thinkeng.png',
-	':thinkform:': 'http://cbc.pokecommunity.com/config/emoticons/thinkform.png',
-	':thonk:': 'http://cbc.pokecommunity.com/config/emoticons/thonk.png',
-	':thonkang:': 'http://cbc.pokecommunity.com/config/emoticons/thonkang.png',
-	':thugga:': 'http://cbc.pokecommunity.com/config/emoticons/thugga.png',
-	':torbjorn:': 'http://cbc.pokecommunity.com/config/emoticons/torbjorn.png',
-	':toxic:': 'http://cbc.pokecommunity.com/config/emoticons/toxic.png',
-	':tracer:': 'http://cbc.pokecommunity.com/config/emoticons/tracer.png',
-	':tyranitar:': 'http://cbc.pokecommunity.com/config/emoticons/tyranitar.png',
-	':ugh:': 'http://cbc.pokecommunity.com/config/emoticons/ugh.gif',
-	':uhhuh:': 'http://cbc.pokecommunity.com/config/emoticons/uhhuh.png',
-	':venusaur:': 'http://cbc.pokecommunity.com/config/emoticons/venusaur.png',
-	':victini:': 'http://cbc.pokecommunity.com/config/emoticons/victini.gif',
-	':viper:': 'http://cbc.pokecommunity.com/config/emoticons/viper.png',
-	':voltypride:': 'http://cbc.pokecommunity.com/config/emoticons/voltypride.png',
-	':vulpix:': 'http://cbc.pokecommunity.com/config/emoticons/vulpix.png',
-	':wailmer:': 'http://cbc.pokecommunity.com/config/emoticons/wailmer.png',
-	':wave:': 'http://cbc.pokecommunity.com/config/emoticons/wave.gif',
-	':weedle:': 'http://cbc.pokecommunity.com/config/emoticons/weedle.png',
-	':what:': 'http://cbc.pokecommunity.com/config/emoticons/what.png',
-	':why:': 'http://cbc.pokecommunity.com/config/emoticons/why.png',
-	':widowmaker:': 'http://cbc.pokecommunity.com/config/emoticons/widowmaker.png',
-	':wigglytuff:': 'http://cbc.pokecommunity.com/config/emoticons/wigglytuff.png',
-	':wink:': 'http://cbc.pokecommunity.com/config/emoticons/wink.png',
-	':winston:': 'http://cbc.pokecommunity.com/config/emoticons/winston.png',
-	':wlink:': 'http://cbc.pokecommunity.com/config/emoticons/wlink.gif',
-	':wobbuffet:': 'http://cbc.pokecommunity.com/config/emoticons/wobbuffet.png',
-	':wooper:': 'http://cbc.pokecommunity.com/config/emoticons/wooper.png',
-	':wutface:': 'http://cbc.pokecommunity.com/config/emoticons/wutface.png',
-	':wynaut:': 'http://cbc.pokecommunity.com/config/emoticons/wynaut.png',
-	':y:': 'http://cbc.pokecommunity.com/config/emoticons/y.png',
-	':yoshi:': 'http://cbc.pokecommunity.com/config/emoticons/yoshi.png',
-	':zarya:': 'http://cbc.pokecommunity.com/config/emoticons/zarya.png',
-	':zenyatta:': 'http://cbc.pokecommunity.com/config/emoticons/zenyatta.png',
-	':zzz:': 'http://cbc.pokecommunity.com/config/emoticons/zzz.gif',
-};
-
-let emotesKeys = Object.keys(emotes);
-let patterns = [];
-let metachars = /[[\]{}()*+?.\\|^$\-,&#\s]/g;
-
-for (let i in emotes) {
-	if (emotes.hasOwnProperty(i)) {
-		patterns.push('(' + i.replace(metachars, '\\$&') + ')');
-	}
+// for travis build
+if (typeof demFeels.extendEmotes === 'function') {
+	// example extending emotes
+	demFeels.extendEmotes({
+		':4head:': 'https://static.pokecommunity.com/bs/emoticons/4head.png',
+		':absol:': 'https://static.pokecommunity.com/bs/emoticons/absol.png',
+		':aggron:': 'https://static.pokecommunity.com/bs/emoticons/aggron.png',
+		':aids:': 'https://static.pokecommunity.com/bs/emoticons/aids.png',
+		':alarm:': 'https://static.pokecommunity.com/bs/emoticons/alarm.gif',
+		':ampharos:': 'https://static.pokecommunity.com/bs/emoticons/ampharos.png',
+		':ana:': 'https://static.pokecommunity.com/bs/emoticons/ana.png',
+		':arcanine:': 'https://static.pokecommunity.com/bs/emoticons/arcanine.png',
+		':arceus:': 'https://static.pokecommunity.com/bs/emoticons/arceus.png',
+		':armycat:': 'https://static.pokecommunity.com/bs/emoticons/armycat.png',
+		':ashhug:': 'https://static.pokecommunity.com/bs/emoticons/ashhug.png',
+		':ball:': 'https://static.pokecommunity.com/bs/emoticons/ball.gif',
+		':barrel:': 'https://static.pokecommunity.com/bs/emoticons/barrel.gif',
+		':bastion:': 'https://static.pokecommunity.com/bs/emoticons/bastion.png',
+		':bearhug:': 'https://static.pokecommunity.com/bs/emoticons/bearhug.png',
+		':bed:': 'https://static.pokecommunity.com/bs/emoticons/bed.gif',
+		':bellossom:': 'https://static.pokecommunity.com/bs/emoticons/bellossom.png',
+		':bidoof:': 'https://static.pokecommunity.com/bs/emoticons/bidoof.png',
+		':blastoise:': 'https://static.pokecommunity.com/bs/emoticons/blastoise.png',
+		':blink:': 'https://static.pokecommunity.com/bs/emoticons/blink.gif',
+		':blissey:': 'https://static.pokecommunity.com/bs/emoticons/blissey.png',
+		':blush:': 'https://static.pokecommunity.com/bs/emoticons/blush.png',
+		':blust:': 'https://static.pokecommunity.com/bs/emoticons/blust.gif',
+		':boatydrugs:': 'https://static.pokecommunity.com/bs/emoticons/boatydrugs.png',
+		':bowie:': 'https://static.pokecommunity.com/bs/emoticons/bowie.png',
+		':bulbasaur:': 'https://static.pokecommunity.com/bs/emoticons/bulbasaur.png',
+		':bunny:': 'https://static.pokecommunity.com/bs/emoticons/bunny.gif',
+		':camiss:': 'https://static.pokecommunity.com/bs/emoticons/camiss.png',
+		':carol:': 'https://static.pokecommunity.com/bs/emoticons/carol.png',
+		':castform:': 'https://static.pokecommunity.com/bs/emoticons/castform.png',
+		':catflip:': 'https://static.pokecommunity.com/bs/emoticons/catflip.png',
+		':censor:': 'https://static.pokecommunity.com/bs/emoticons/censor.png',
+		':chansey:': 'https://static.pokecommunity.com/bs/emoticons/chansey.png',
+		':charizard:': 'https://static.pokecommunity.com/bs/emoticons/charizard.png',
+		':charmander:': 'https://static.pokecommunity.com/bs/emoticons/charmander.png',
+		':cheers:': 'https://static.pokecommunity.com/bs/emoticons/cheers.png',
+		':chikorita:': 'https://static.pokecommunity.com/bs/emoticons/chikorita.png',
+		':choicehug:': 'https://static.pokecommunity.com/bs/emoticons/choicehug.png',
+		':choke:': 'https://static.pokecommunity.com/bs/emoticons/choke.png',
+		':christos:': 'https://static.pokecommunity.com/bs/emoticons/christos.png',
+		':clefairy:': 'https://static.pokecommunity.com/bs/emoticons/clefairy.png',
+		':clown:': 'https://static.pokecommunity.com/bs/emoticons/clown.png',
+		':cookie:': 'https://static.pokecommunity.com/bs/emoticons/cookie.png',
+		':cthulhu:': 'https://static.pokecommunity.com/bs/emoticons/cthulhu.png',
+		':curry:': 'https://static.pokecommunity.com/bs/emoticons/curry.png',
+		':dab:': 'https://static.pokecommunity.com/bs/emoticons/dab.png',
+		':dance:': 'https://static.pokecommunity.com/bs/emoticons/dance.gif',
+		':dedenne:': 'https://static.pokecommunity.com/bs/emoticons/dedenne.png',
+		':delivert:': 'https://static.pokecommunity.com/bs/emoticons/delivert.png',
+		':diddy:': 'https://static.pokecommunity.com/bs/emoticons/diddy.png',
+		':dinner:': 'https://static.pokecommunity.com/bs/emoticons/dinner.png',
+		':ditto:': 'https://static.pokecommunity.com/bs/emoticons/ditto.png',
+		':dk:': 'https://static.pokecommunity.com/bs/emoticons/dk.png',
+		':doomfist:': 'https://static.pokecommunity.com/bs/emoticons/doomfist.png',
+		':drama:': 'https://static.pokecommunity.com/bs/emoticons/drama.png',
+		':drowzee:': 'https://static.pokecommunity.com/bs/emoticons/drowzee.png',
+		':dva:': 'https://static.pokecommunity.com/bs/emoticons/dva.png',
+		':eevee:': 'https://static.pokecommunity.com/bs/emoticons/eevee.png',
+		':electrode:': 'https://static.pokecommunity.com/bs/emoticons/electrode.png',
+		':emboar:': 'https://static.pokecommunity.com/bs/emoticons/emboar.png',
+		':espurr:': 'https://static.pokecommunity.com/bs/emoticons/espurr.png',
+		':eyes:': 'https://static.pokecommunity.com/bs/emoticons/eyes.png',
+		':fatbowie:': 'https://static.pokecommunity.com/bs/emoticons/bowie.png',
+		':feebas:': 'https://static.pokecommunity.com/bs/emoticons/feebas.png',
+		':fish:': 'https://static.pokecommunity.com/bs/emoticons/fish.gif',
+		':flirt:': 'https://static.pokecommunity.com/bs/emoticons/flirt.png',
+		':flygon:': 'https://static.pokecommunity.com/bs/emoticons/flygon.png',
+		':frank:': 'https://static.pokecommunity.com/bs/emoticons/frank.png',
+		':gav:': 'https://static.pokecommunity.com/bs/emoticons/gav.png',
+		':gawk:': 'https://static.pokecommunity.com/bs/emoticons/gawk.png',
+		':genji:': 'https://static.pokecommunity.com/bs/emoticons/genji.png',
+		':glare:': 'https://static.pokecommunity.com/bs/emoticons/glare.png',
+		':gloom:': 'https://static.pokecommunity.com/bs/emoticons/gloom.png',
+		':goodra:': 'https://static.pokecommunity.com/bs/emoticons/goodra.png',
+		':goomy:': 'https://static.pokecommunity.com/bs/emoticons/goomy.png',
+		':growlithe:': 'https://static.pokecommunity.com/bs/emoticons/growlithe.png',
+		':hamster:': 'https://static.pokecommunity.com/bs/emoticons/hamster.png',
+		':hamtaro:': 'https://static.pokecommunity.com/bs/emoticons/hamtaro.gif',
+		':hanzo:': 'https://static.pokecommunity.com/bs/emoticons/hanzo.png',
+		':harambe:': 'https://static.pokecommunity.com/bs/emoticons/harambe.png',
+		':helix:': 'https://static.pokecommunity.com/bs/emoticons/helix.png',
+		':houndoom:': 'https://static.pokecommunity.com/bs/emoticons/houndoom.png',
+		':hug:': 'https://static.pokecommunity.com/bs/emoticons/hug.png',
+		':hypno:': 'https://static.pokecommunity.com/bs/emoticons/hypno.png',
+		':infernape:': 'https://static.pokecommunity.com/bs/emoticons/infernape.png',
+		':jack:': 'https://static.pokecommunity.com/bs/emoticons/jack.png',
+		':jigglypuff:': 'https://static.pokecommunity.com/bs/emoticons/jigglypuff.png',
+		':joanne:': 'https://static.pokecommunity.com/bs/emoticons/joanne.png',
+		':junkrat:': 'https://static.pokecommunity.com/bs/emoticons/junkrat.png',
+		':jynx:': 'https://static.pokecommunity.com/bs/emoticons/jynx.png',
+		':kanye:': 'https://static.pokecommunity.com/bs/emoticons/kanye.png',
+		':kappa:': 'https://static.pokecommunity.com/bs/emoticons/kappa.png',
+		':kappapride:': 'https://static.pokecommunity.com/bs/emoticons/kappapride.png',
+		':kappaross:': 'https://static.pokecommunity.com/bs/emoticons/kappaross.png',
+		':keepo:': 'https://static.pokecommunity.com/bs/emoticons/keepo.png',
+		':kermit:': 'https://static.pokecommunity.com/bs/emoticons/kermit.png',
+		':khaled:': 'https://static.pokecommunity.com/bs/emoticons/khaled.png',
+		':kitty:': 'https://static.pokecommunity.com/bs/emoticons/kitty.png',
+		':kreygasm:': 'https://static.pokecommunity.com/bs/emoticons/kreygasm.png',
+		':lapras:': 'https://static.pokecommunity.com/bs/emoticons/lapras.png',
+		':latias:': 'https://static.pokecommunity.com/bs/emoticons/latias.png',
+		':latios:': 'https://static.pokecommunity.com/bs/emoticons/latios.png',
+		':ledian:': 'https://static.pokecommunity.com/bs/emoticons/ledian.png',
+		':leg:': 'https://static.pokecommunity.com/bs/emoticons/leg.png',
+		':lewd:': 'https://static.pokecommunity.com/bs/emoticons/lewd.png',
+		':lickilicky:': 'https://static.pokecommunity.com/bs/emoticons/lickilicky.png',
+		':lickitung:': 'https://static.pokecommunity.com/bs/emoticons/lickitung.gif',
+		':lileep:': 'https://static.pokecommunity.com/bs/emoticons/lileep.png',
+		':link:': 'https://static.pokecommunity.com/bs/emoticons/link.png',
+		':loudred:': 'https://static.pokecommunity.com/bs/emoticons/loudred.png',
+		':lucio:': 'https://static.pokecommunity.com/bs/emoticons/lucio.png',
+		':ludicolo:': 'https://static.pokecommunity.com/bs/emoticons/ludicolo.png',
+		':luvdisc:': 'https://static.pokecommunity.com/bs/emoticons/luvdisc.png',
+		':lyin:': 'https://static.pokecommunity.com/bs/emoticons/lyin.png',
+		':magikarp:': 'https://static.pokecommunity.com/bs/emoticons/magikarp.png',
+		':mccree:': 'https://static.pokecommunity.com/bs/emoticons/mccree.png',
+		':meganium:': 'https://static.pokecommunity.com/bs/emoticons/meganium.png',
+		':mei:': 'https://static.pokecommunity.com/bs/emoticons/mei.png',
+		':meowstic:': 'https://static.pokecommunity.com/bs/emoticons/meowstic.png',
+		':meowsticf:': 'https://static.pokecommunity.com/bs/emoticons/meowsticf.png',
+		':meowth:': 'https://static.pokecommunity.com/bs/emoticons/meowth.png',
+		':mercy:': 'https://static.pokecommunity.com/bs/emoticons/mercy.png',
+		':mermaid:': 'https://static.pokecommunity.com/bs/emoticons/mermaid.png',
+		':metagross:': 'https://static.pokecommunity.com/bs/emoticons/metagross.png',
+		':mind:': 'https://static.pokecommunity.com/bs/emoticons/mind.png',
+		':moo:': 'https://static.pokecommunity.com/bs/emoticons/moo.gif',
+		':mrmime:': 'https://static.pokecommunity.com/bs/emoticons/mrmime.png',
+		':mudkip:': 'https://static.pokecommunity.com/bs/emoticons/mudkip.png',
+		':muk:': 'https://static.pokecommunity.com/bs/emoticons/muk.png',
+		':no:': 'https://static.pokecommunity.com/bs/emoticons/no.png',
+		':nw:': 'https://static.pokecommunity.com/bs/emoticons/nw.gif',
+		':oddish:': 'https://static.pokecommunity.com/bs/emoticons/oddish.png',
+		':ok:': 'https://static.pokecommunity.com/bs/emoticons/ok.png',
+		':orisa:': 'https://static.pokecommunity.com/bs/emoticons/orisa.png',
+		':pachirisu:': 'https://static.pokecommunity.com/bs/emoticons/pachirisu.png',
+		':pancham:': 'https://static.pokecommunity.com/bs/emoticons/pancham.png',
+		':pangoro:': 'https://static.pokecommunity.com/bs/emoticons/pangoro.png',
+		':papabless:': 'https://static.pokecommunity.com/bs/emoticons/papabless.png',
+		':papi:': 'https://static.pokecommunity.com/bs/emoticons/papi.png',
+		':pear:': 'https://static.pokecommunity.com/bs/emoticons/pear.png',
+		':petty:': 'https://static.pokecommunity.com/bs/emoticons/petty.png',
+		':pharah:': 'https://static.pokecommunity.com/bs/emoticons/pharah.png',
+		':pikachu:': 'https://static.pokecommunity.com/bs/emoticons/pikachu.png',
+		':pikahug:': 'https://static.pokecommunity.com/bs/emoticons/pikahug.png',
+		':pix:': 'https://static.pokecommunity.com/bs/emoticons/pix.png',
+		':pjsalt:': 'https://static.pokecommunity.com/bs/emoticons/pjsalt.png',
+		':plot:': 'https://static.pokecommunity.com/bs/emoticons/plot.gif',
+		':pogchamp:': 'https://static.pokecommunity.com/bs/emoticons/pogchamp.png',
+		':pole:': 'https://static.pokecommunity.com/bs/emoticons/pole.png',
+		':pose:': 'https://static.pokecommunity.com/bs/emoticons/pose.gif',
+		':potato:': 'https://static.pokecommunity.com/bs/emoticons/potato.png',
+		':primeape:': 'https://static.pokecommunity.com/bs/emoticons/primeape.png',
+		':psyduck:': 'https://static.pokecommunity.com/bs/emoticons/psyduck.png',
+		':pyoshi:': 'https://static.pokecommunity.com/bs/emoticons/pyoshi.png',
+		':raffey:': 'https://static.pokecommunity.com/bs/emoticons/raffey.png',
+		':raichu:': 'https://static.pokecommunity.com/bs/emoticons/raichu.png',
+		':rainbow:': 'https://static.pokecommunity.com/bs/emoticons/rainbow.gif',
+		':ralts:': 'https://static.pokecommunity.com/bs/emoticons/ralts.png',
+		':reaper:': 'https://static.pokecommunity.com/bs/emoticons/reaper.png',
+		':reinhardt:': 'https://static.pokecommunity.com/bs/emoticons/reinhardt.png',
+		':respek:': 'https://static.pokecommunity.com/bs/emoticons/respek.png',
+		':roadhog:': 'https://static.pokecommunity.com/bs/emoticons/roadhog.png',
+		':roll:': 'https://static.pokecommunity.com/bs/emoticons/roll.gif',
+		':roselia:': 'https://static.pokecommunity.com/bs/emoticons/roselia.png',
+		':rude:': 'https://static.pokecommunity.com/bs/emoticons/rude.gif',
+		':sableye:': 'https://static.pokecommunity.com/bs/emoticons/sableye.png',
+		':salute:': 'https://static.pokecommunity.com/bs/emoticons/salute.png',
+		':scarfhug:': 'https://static.pokecommunity.com/bs/emoticons/scarfhug.png',
+		':scizor:': 'https://static.pokecommunity.com/bs/emoticons/scizor.png',
+		':seduce:': 'https://static.pokecommunity.com/bs/emoticons/seduce.png',
+		':senpai:': 'https://static.pokecommunity.com/bs/emoticons/senpai.png',
+		':sharpie:': 'https://static.pokecommunity.com/bs/emoticons/sharpie.png',
+		':shift:': 'https://static.pokecommunity.com/bs/emoticons/shift.gif',
+		':shifty:': 'https://static.pokecommunity.com/bs/emoticons/shifty.png',
+		':shinx:': 'https://static.pokecommunity.com/bs/emoticons/shinx.png',
+		':shinyhug:': 'https://static.pokecommunity.com/bs/emoticons/shinyhug.png',
+		':sims:': 'https://static.pokecommunity.com/bs/emoticons/sims.png',
+		':skarmory:': 'https://static.pokecommunity.com/bs/emoticons/skarmory.png',
+		':slowbro:': 'https://static.pokecommunity.com/bs/emoticons/slowbro.png',
+		':slowking:': 'https://static.pokecommunity.com/bs/emoticons/slowking.png',
+		':slowpoke:': 'https://static.pokecommunity.com/bs/emoticons/slowpoke.png',
+		':snivy:': 'https://static.pokecommunity.com/bs/emoticons/snivy.png',
+		':snorlax:': 'https://static.pokecommunity.com/bs/emoticons/snorlax.png',
+		':soldier76:': 'https://static.pokecommunity.com/bs/emoticons/soldier76.png',
+		':sombra:': 'https://static.pokecommunity.com/bs/emoticons/sombra.png',
+		':spasm:': 'https://static.pokecommunity.com/bs/emoticons/spasm.gif',
+		':spheal:': 'https://static.pokecommunity.com/bs/emoticons/spheal.png',
+		':spinda:': 'https://static.pokecommunity.com/bs/emoticons/spinda.png',
+		':squint:': 'https://static.pokecommunity.com/bs/emoticons/squint.png',
+		':squirtle:': 'https://static.pokecommunity.com/bs/emoticons/squirtle.png',
+		':steelix:': 'https://static.pokecommunity.com/bs/emoticons/steelix.png',
+		':stephenking:': 'https://static.pokecommunity.com/bs/emoticons/stephenking.png',
+		':strut:': 'https://static.pokecommunity.com/bs/emoticons/strut.png',
+		':suicune:': 'https://static.pokecommunity.com/bs/emoticons/suicune.png',
+		':superman:': 'https://static.pokecommunity.com/bs/emoticons/superman.png',
+		':sweep:': 'https://static.pokecommunity.com/bs/emoticons/sweep.gif',
+		':swiftrage:': 'https://static.pokecommunity.com/bs/emoticons/swiftrage.png',
+		':symmetra:': 'https://static.pokecommunity.com/bs/emoticons/symmetra.png',
+		':taco:': 'https://static.pokecommunity.com/bs/emoticons/taco.png',
+		':taillow:': 'https://static.pokecommunity.com/bs/emoticons/taillow.png',
+		':thinkeng:': 'https://static.pokecommunity.com/bs/emoticons/thinkeng.png',
+		':thonkeng:': 'https://static.pokecommunity.com/bs/emoticons/thinkeng.png',
+		':thinkform:': 'https://static.pokecommunity.com/bs/emoticons/thinkform.png',
+		':thonk:': 'https://static.pokecommunity.com/bs/emoticons/thonk.png',
+		':thonkang:': 'https://static.pokecommunity.com/bs/emoticons/thonkang.png',
+		':thugga:': 'https://static.pokecommunity.com/bs/emoticons/thugga.png',
+		':torbjorn:': 'https://static.pokecommunity.com/bs/emoticons/torbjorn.png',
+		':toxic:': 'https://static.pokecommunity.com/bs/emoticons/toxic.png',
+		':tracer:': 'https://static.pokecommunity.com/bs/emoticons/tracer.png',
+		':tyranitar:': 'https://static.pokecommunity.com/bs/emoticons/tyranitar.png',
+		':ugh:': 'https://static.pokecommunity.com/bs/emoticons/ugh.gif',
+		':uhhuh:': 'https://static.pokecommunity.com/bs/emoticons/uhhuh.png',
+		':venusaur:': 'https://static.pokecommunity.com/bs/emoticons/venusaur.png',
+		':victini:': 'https://static.pokecommunity.com/bs/emoticons/victini.gif',
+		':viper:': 'https://static.pokecommunity.com/bs/emoticons/viper.png',
+		':voltypride:': 'https://static.pokecommunity.com/bs/emoticons/voltypride.png',
+		':vulpix:': 'https://static.pokecommunity.com/bs/emoticons/vulpix.png',
+		':wailmer:': 'https://static.pokecommunity.com/bs/emoticons/wailmer.png',
+		':wave:': 'https://static.pokecommunity.com/bs/emoticons/wave.gif',
+		':weedle:': 'https://static.pokecommunity.com/bs/emoticons/weedle.png',
+		':what:': 'https://static.pokecommunity.com/bs/emoticons/what.png',
+		':why:': 'https://static.pokecommunity.com/bs/emoticons/why.png',
+		':widowmaker:': 'https://static.pokecommunity.com/bs/emoticons/widowmaker.png',
+		':wigglytuff:': 'https://static.pokecommunity.com/bs/emoticons/wigglytuff.png',
+		':wink:': 'https://static.pokecommunity.com/bs/emoticons/wink.png',
+		':winston:': 'https://static.pokecommunity.com/bs/emoticons/winston.png',
+		':wlink:': 'https://static.pokecommunity.com/bs/emoticons/wlink.gif',
+		':wobbuffet:': 'https://static.pokecommunity.com/bs/emoticons/wobbuffet.png',
+		':wooper:': 'https://static.pokecommunity.com/bs/emoticons/wooper.png',
+		':wutface:': 'https://static.pokecommunity.com/bs/emoticons/wutface.png',
+		':wynaut:': 'https://static.pokecommunity.com/bs/emoticons/wynaut.png',
+		':y:': 'https://static.pokecommunity.com/bs/emoticons/y.png',
+		':yoshi:': 'https://static.pokecommunity.com/bs/emoticons/yoshi.png',
+		':zarya:': 'https://static.pokecommunity.com/bs/emoticons/zarya.png',
+		':zenyatta:': 'https://static.pokecommunity.com/bs/emoticons/zenyatta.png',
+		':zzz:': 'https://static.pokecommunity.com/bs/emoticons/zzz.gif',
+	});
 }
-let patternRegex = new RegExp(patterns.join('|'), 'g');
+
+const emotes = demFeels.getEmotes();
+
+const emotesKeys = Object.keys(emotes).sort();
 
 /**
 * Parse emoticons in message.
@@ -282,141 +288,7 @@ function parseEmoticons(message, room, user, pm) {
 	message = Chat.escapeHTML(message);
 
 	// add emotes
-	message = message.replace(patternRegex, function (match) {
-		var emote = emotes[match];
-		if (match === ':ashhug:') return typeof emote != 'undefined' ?
-			'<img src="' + emote + '" title="' + match + '" width="44" height="42"/>' :
-			match;
-		if (match === ':dab:' || match === ':fatbowie:' || match === ':gav:' || match === ':hamtaro:' || match === ':kermit:' || match === ':nw:' || match === ':superman:' || match === ':sweep:' || match === ':yoshi:') return typeof emote != 'undefined' ?
-			'<img src="' + emote + '" title="' + match + '" width="30" height="30"/>' :
-			match;
-		if (match === ':ana:' || match === ':mercy:' || match === ':pikahug:' || match === ':tracer:') return typeof emote != 'undefined' ?
-			'<img src="' + emote + '" title="' + match + '" width="35" height="33"/>' :
-			match;
-		if (match === ':bastion:' || match === ':dva:' || match === ':hanzo:' || match === ':junkrat:' || match === ':mccree:' || match === ':mei:' || match === ':orisa:' || match === ':pharah:' || match === ':reaper:' || match === ':reinhardt:' || match === ':roadhog:' || match === ':soldier76:' || match === ':sombra:' || match === ':torbjorn:' || match === ':winston:' || match === ':zarya:') return typeof emote != 'undefined' ?
-			'<img src="' + emote + '" title="' + match + '" width="37" height="33"/>' :
-			match;
-		if (match === ':bed:') return typeof emote != 'undefined' ?
-			'<img src="' + emote + '" title="' + match + '" width="39" height="32"/>' :
-			match;
-		if (match === ':bowie:') return typeof emote != 'undefined' ?
-			'<img src="' + emote + '" title="' + match + '" width="22" height="30"/>' :
-			match;
-		if (match === ':bearhug:') return typeof emote != 'undefined' ?
-			'<img src="' + emote + '" title="' + match + '" width="49" height="32"/>' :
-			match;
-		if (match === ':bunny:') return typeof emote != 'undefined' ?
-			'<img src="' + emote + '" title="' + match + '" width="28" height="33"/>' :
-			match;
-		if (match === ':camiss:') return typeof emote != 'undefined' ?
-			'<img src="' + emote + '" title="' + match + '" width="29" height="35"/>' :
-			match;
-		if (match === ':catflip:') return typeof emote != 'undefined' ?
-			'<img src="' + emote + '" title="' + match + '" width="44" height="32"/>' :
-			match;
-		if (match === ':censor:') return typeof emote != 'undefined' ?
-			'<img src="' + emote + '" title="' + match + '" width="83" height="15"/>' :
-			match;
-		if (match === ':christos:') return typeof emote != 'undefined' ?
-			'<img src="' + emote + '" title="' + match + '" width="40" height="30"/>' :
-			match;
-		if (match === ':curry:' || match === ':jack:' || match === ':ok:' || match === ':thinkform:') return typeof emote != 'undefined' ?
-			'<img src="' + emote + '" title="' + match + '" width="23" height="30"/>' :
-			match;
-		if (match === ':delivert:') return typeof emote != 'undefined' ?
-			'<img src="' + emote + '" title="' + match + '" width="28" height="42"/>' :
-			match;
-		if (match === ':drama:') return typeof emote != 'undefined' ?
-			'<img src="' + emote + '" title="' + match + '" width="83" height="55"/>' :
-			match;
-		if (match === ':eyes:') return typeof emote != 'undefined' ?
-			'<img src="' + emote + '" title="' + match + '" width="39" height="30"/>' :
-			match;
-		if (match === ':fish:') return typeof emote != 'undefined' ?
-			'<img src="' + emote + '" title="' + match + '" width="65" height="42"/>' :
-			match;
-		if (match === ':doomfist:' || match === ':genji:') return typeof emote != 'undefined' ?
-			'<img src="' + emote + '" title="' + match + '" width="36" height="33"/>' :
-			match;
-		if (match === ':glare:' || match === ':shifty:' || match === ':squint:' || match === ':uhhuh:') return typeof emote != 'undefined' ?
-			'<img src="' + emote + '" title="' + match + '" width="21" height="32"/>' :
-			match;
-		if (match === ':harambe:') return typeof emote != 'undefined' ?
-			'<img src="' + emote + '" title="' + match + '" width="19" height="30"/>' :
-			match;
-		if (match === ':joanne:') return typeof emote != 'undefined' ?
-			'<img src="' + emote + '" title="' + match + '" width="26" height="32"/>' :
-			match;
-		if (match === ':kanye:' || match === ':papabless:') return typeof emote != 'undefined' ?
-			'<img src="' + emote + '" title="' + match + '" width="21" height="30"/>' :
-			match;
-		if (match === ':khaled:') return typeof emote != 'undefined' ?
-			'<img src="' + emote + '" title="' + match + '" width="40" height="42"/>' :
-			match;
-		if (match === ':lewd:') return typeof emote != 'undefined' ?
-			'<img src="' + emote + '" title="' + match + '" width="54" height="42"/>' :
-			match;
-		if (match === ':lucio:') return typeof emote != 'undefined' ?
-			'<img src="' + emote + '" title="' + match + '" width="33" height="33"/>' :
-			match;
-		if (match === ':carol:' || match === ':lyin:' || match === ':thugga:') return typeof emote != 'undefined' ?
-			'<img src="' + emote + '" title="' + match + '" width="25" height="30"/>' :
-			match;
-		if (match === ':frank:' || match === ':papi:') return typeof emote != 'undefined' ?
-			'<img src="' + emote + '" title="' + match + '" width="20" height="30"/>' :
-			match;
-		if (match === ':petty:') return typeof emote != 'undefined' ?
-			'<img src="' + emote + '" title="' + match + '" width="59" height="55"/>' :
-			match;
-		if (match === ':pikahug:') return typeof emote != 'undefined' ?
-			'<img src="' + emote + '" title="' + match + '" width="40" height="37"/>' :
-			match;
-		if (match === ':raffey:') return typeof emote != 'undefined' ?
-			'<img src="' + emote + '" title="' + match + '" width="28" height="30"/>' :
-			match;
-		if (match === ':respek:') return typeof emote != 'undefined' ?
-			'<img src="' + emote + '" title="' + match + '" width="24" height="30"/>' :
-			match;
-		if (match === ':sharpie:') return typeof emote != 'undefined' ?
-			'<img src="' + emote + '" title="' + match + '" width="111" height="12"/>' :
-			match;
-		if (match === ':stephenking:') return typeof emote != 'undefined' ?
-			'<img src="' + emote + '" title="' + match + '" width="37" height="42"/>' :
-			match;
-		if (match === ':strut:') return typeof emote != 'undefined' ?
-			'<img src="' + emote + '" title="' + match + '" width="23" height="33"/>' :
-			match;
-		if (match === ':symmetra:') return typeof emote != 'undefined' ?
-			'<img src="' + emote + '" title="' + match + '" width="30" height="33"/>' :
-			match;
-		if (match === ':thonk:') return typeof emote != 'undefined' ?
-			'<img src="' + emote + '" title="' + match + '" width="35" height="30"/>' :
-			match;
-		if (match === ':thinkeng:' || match === ':thonkeng:' || match === ':thonkang:') return typeof emote != 'undefined' ?
-			'<img src="' + emote + '" title="' + match + '" width="29" height="30"/>' :
-			match;
-		if (match === ':viper:') return typeof emote != 'undefined' ?
-			'<img src="' + emote + '" title="' + match + '" width="27" height="30"/>' :
-			match;
-		if (match === ':voltypride:') return typeof emote != 'undefined' ?
-			'<img src="' + emote + '" title="' + match + '" width="43" height="42"/>' :
-			match;
-		if (match === ':what:') return typeof emote != 'undefined' ?
-			'<img src="' + emote + '" title="' + match + '" width="77" height="30"/>' :
-			match;
-		if (match === ':choke:' || match === ':widowmaker:') return typeof emote != 'undefined' ?
-			'<img src="' + emote + '" title="' + match + '" width="34" height="33"/>' :
-			match;
-		if (match === ':wink:' || match === ':wlink:') return typeof emote != 'undefined' ?
-			'<img src="' + emote + '" title="' + match + '" width="33" height="30"/>' :
-			match;
-		if (match === ':zenyatta:') return typeof emote != 'undefined' ?
-			'<img src="' + emote + '" title="' + match + '" width="39" height="33"/>' :
-			match;
-		return typeof emote != 'undefined' ?
-			'<img src="' + emote + '" title="' + match + '"/>' :
-			match;
-	});
+	message = demFeels(message);
 
 	// __italics__
 	message = message.replace(/\_\_([^< ](?:[^<]*?[^< ])?)\_\_(?![^<]*?<\/a)/g, '<i>$1</i>');
@@ -474,7 +346,7 @@ exports.commands = {
 	blockemote: 'blockemoticons',
 	blockemotes: 'blockemoticons',
 	blockemoticon: 'blockemoticons',
-	blockemoticons(target, room, user) {
+	blockemoticons: function (target, room, user) {
 		if (user.blockEmoticons === (target || true)) return this.sendReply("You are already blocking emoticons in private messages! To unblock, use /unblockemoticons");
 		user.blockEmoticons = true;
 		return this.sendReply("You are now blocking emoticons in private messages.");
@@ -484,16 +356,15 @@ exports.commands = {
 	unblockemote: 'unblockemoticons',
 	unblockemotes: 'unblockemoticons',
 	unblockemoticon: 'unblockemoticons',
-	unblockemoticons(target, room, user) {
+	unblockemoticons: function (target, room, user) {
 		if (!user.blockEmoticons) return this.sendReply("You are not blocking emoticons in private messages! To block, use /blockemoticons");
 		user.blockEmoticons = false;
 		return this.sendReply("You are no longer blocking emoticons in private messages.");
 	},
 	unblockemoticonshelp: ["/unblockemoticons - Unblocks emoticons in private messages. Block them with /blockemoticons."],
 
-	emote: 'emoticons',
 	emotes: 'emoticons',
-	emoticons(target, room, user) {
+	emoticons: function (target, room, user) {
 		if (!this.runBroadcast()) return;
 		this.sendReply("|raw|" + emotes_table);
 	},
@@ -501,8 +372,8 @@ exports.commands = {
 
 	toggleemote: 'toggleemoticons',
 	toggleemotes: 'toggleemoticons',
-	toggleemoticons(target, room, user) {
-		if (!this.can('warn', null, room)) return false;
+	toggleemoticons: function (target, room, user) {
+		if (!this.can('declare', null, room)) return false;
 		room.disableEmoticons = !room.disableEmoticons;
 		this.sendReply("Disallowing emoticons is set to " + room.disableEmoticons + " in this room.");
 		if (room.disableEmoticons) {
@@ -514,7 +385,7 @@ exports.commands = {
 	toggleemoticonshelp: ["/toggleemoticons - Toggle emoticons on or off."],
 
 	rande: 'randemote',
-	randemote(target, room, user) {
+	randemote: function (target, room, user) {
 		if (!this.runBroadcast()) return;
 		let rng = Math.floor(Math.random() * emotesKeys.length);
 		let randomEmote = emotesKeys[rng];

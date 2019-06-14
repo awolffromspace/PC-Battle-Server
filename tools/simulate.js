@@ -41,7 +41,7 @@ const path = require('path');
 const shell = cmd => child_process.execSync(cmd, {stdio: 'inherit', cwd: path.resolve(__dirname, '..')});
 shell('node build');
 
-const Dex = require('../.sim-dist/dex');
+const Dex = require('../.sim-dist/dex').Dex;
 Dex.includeModData();
 
 const {ExhaustiveRunner} = require('../.sim-dist/tools/exhaustive-runner');
@@ -68,7 +68,7 @@ const RejectionTracker = new class {
 		for (const u of this.unhandled) {
 			const error = (u.reason instanceof Error) ? u.reason :
 				new Error(`Promise rejected with value: ${u.reason}`);
-			console.error(error.stack);
+			console.error(`UNHANDLED PROMISE REJECTION:\n${error.stack}`);
 			i++;
 		}
 		process.exit(code + i);
@@ -136,7 +136,7 @@ case 'exhaustive':
 			do {
 				for (let format of formats) {
 					failures += await new ExhaustiveRunner({
-						format, cycles, prng, maxFailures, log: true,
+						format, cycles, prng, maxFailures, log: true, dual: argv.dual,
 					}).run();
 					process.stdout.write('\n');
 					if (failures >= maxFailures) break;

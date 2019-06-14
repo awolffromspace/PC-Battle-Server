@@ -1,0 +1,11 @@
+[2019-06-14T01:54:01.685Z] (lobby) HTMLDECLARE:  by wolf: test
+[2019-06-14T02:42:40.358Z] (lobby) TOUR CREATE:  by wolf: gen7random
+[2019-06-14T02:44:19.032Z] (lobby) TOUR CREATE:  by wolf: gen7random
+[2019-06-14T02:47:51.390Z] (lobby) TOUR CREATE:  by wolf: gen7random
+[2019-06-14T02:49:14.122Z] (lobby) TOUR CREATE:  by wolf: gen7random
+[2019-06-14T02:52:20.996Z] (lobby) TOUR CREATE:  by wolf: gen7random
+[2019-06-14T03:00:29.622Z] (lobby) TOUR CREATE:  by wolf: gen7random
+[2019-06-14T03:05:06.142Z] (lobby) TOUR CREATE:  by wolf: gen7random
+[2019-06-14T03:09:10.346Z] (lobby) TOUR CREATE:  by wolf: gen7random
+[2019-06-14T03:10:38.622Z] (lobby) TOUR CREATE:  by wolf: gen7random
+[2019-06-14T03:10:42.062Z] (lobby) TOUR END:  by wolf

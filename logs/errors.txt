@@ -1,0 +1,555 @@
+
+Error [ERR_IPC_DISCONNECTED]: IPC channel is already disconnected
+    at ChildProcess.target.disconnect (internal/child_process.js:768:26)
+    at QueryProcessWrapper.destroy (C:\Users\Eric\Documents\battle-server\.lib-dist\process-manager.js:111:16)
+    at ChildProcess.QueryProcessWrapper.process.on (C:\Users\Eric\Documents\battle-server\.lib-dist\process-manager.js:77:9)
+    at ChildProcess.emit (events.js:182:13)
+    at ChildProcess.EventEmitter.emit (domain.js:442:20)
+    at finish (internal/child_process.js:797:14)
+    at process._tickCallback (internal/process/next_tick.js:61:11)
+
+Error: Worker 1 abruptly died with code 3221225786 and signal null
+    at EventEmitter.cluster.on (C:\Users\Eric\Documents\battle-server\server\sockets.js:90:21)
+    at EventEmitter.emit (events.js:182:13)
+    at EventEmitter.emit (domain.js:442:20)
+    at ChildProcess.worker.process.once (internal/cluster/master.js:194:13)
+    at Object.onceWrapper (events.js:273:13)
+    at ChildProcess.emit (events.js:182:13)
+    at ChildProcess.EventEmitter.emit (domain.js:442:20)
+    at Process.ChildProcess._handle.onexit (internal/child_process.js:240:12)
+
+Error [ERR_IPC_DISCONNECTED]: IPC channel is already disconnected
+    at ChildProcess.target.disconnect (internal/child_process.js:768:26)
+    at QueryProcessWrapper.destroy (C:\Users\Eric\Documents\battle-server\.lib-dist\process-manager.js:111:16)
+    at ChildProcess.QueryProcessWrapper.process.on (C:\Users\Eric\Documents\battle-server\.lib-dist\process-manager.js:77:9)
+    at ChildProcess.emit (events.js:182:13)
+    at ChildProcess.EventEmitter.emit (domain.js:442:20)
+    at finish (internal/child_process.js:797:14)
+    at process._tickCallback (internal/process/next_tick.js:61:11)
+
+Error [ERR_IPC_DISCONNECTED]: IPC channel is already disconnected
+    at ChildProcess.target.disconnect (internal/child_process.js:768:26)
+    at QueryProcessWrapper.destroy (C:\Users\Eric\Documents\battle-server\.lib-dist\process-manager.js:111:16)
+    at ChildProcess.QueryProcessWrapper.process.on (C:\Users\Eric\Documents\battle-server\.lib-dist\process-manager.js:77:9)
+    at ChildProcess.emit (events.js:182:13)
+    at ChildProcess.EventEmitter.emit (domain.js:442:20)
+    at finish (internal/child_process.js:797:14)
+    at process._tickCallback (internal/process/next_tick.js:61:11)
+
+Error [ERR_IPC_DISCONNECTED]: IPC channel is already disconnected
+    at ChildProcess.target.disconnect (internal/child_process.js:768:26)
+    at QueryProcessWrapper.destroy (C:\Users\Eric\Documents\battle-server\.lib-dist\process-manager.js:111:16)
+    at ChildProcess.QueryProcessWrapper.process.on (C:\Users\Eric\Documents\battle-server\.lib-dist\process-manager.js:77:9)
+    at ChildProcess.emit (events.js:182:13)
+    at ChildProcess.EventEmitter.emit (domain.js:442:20)
+    at finish (internal/child_process.js:797:14)
+    at process._tickCallback (internal/process/next_tick.js:61:11)
+
+Error [ERR_IPC_DISCONNECTED]: IPC channel is already disconnected
+    at ChildProcess.target.disconnect (internal/child_process.js:768:26)
+    at StreamProcessWrapper.destroy (C:\Users\Eric\Documents\battle-server\.lib-dist\process-manager.js:214:16)
+    at ChildProcess.StreamProcessWrapper.process.on (C:\Users\Eric\Documents\battle-server\.lib-dist\process-manager.js:175:9)
+    at ChildProcess.emit (events.js:182:13)
+    at ChildProcess.EventEmitter.emit (domain.js:442:20)
+    at finish (internal/child_process.js:797:14)
+    at process._tickCallback (internal/process/next_tick.js:61:11)
+
+Error [ERR_IPC_DISCONNECTED]: IPC channel is already disconnected
+    at ChildProcess.target.disconnect (internal/child_process.js:768:26)
+    at QueryProcessWrapper.destroy (C:\Users\Eric\Documents\battle-server\.lib-dist\process-manager.js:111:16)
+    at ChildProcess.QueryProcessWrapper.process.on (C:\Users\Eric\Documents\battle-server\.lib-dist\process-manager.js:77:9)
+    at ChildProcess.emit (events.js:182:13)
+    at ChildProcess.EventEmitter.emit (domain.js:442:20)
+    at finish (internal/child_process.js:797:14)
+    at process._tickCallback (internal/process/next_tick.js:61:11)
+
+ReferenceError: p1 is not defined
+    at GlobalRoom.onCreateBattleRoom (C:\Users\Eric\Documents\battle-server\server\rooms.js:754:41)
+    at RoomBattle.start (C:\Users\Eric\Documents\battle-server\server\room-battle.js:1021:16)
+    at new RoomBattle (C:\Users\Eric\Documents\battle-server\server\room-battle.js:514:8)
+    at Function.createBattle (C:\Users\Eric\Documents\battle-server\server\rooms.js:1678:15)
+    at Function.match (C:\Users\Eric\Documents\battle-server\server\ladders.js:648:9)
+    at Function.acceptChallenge (C:\Users\Eric\Documents\battle-server\server\ladders.js:259:12)
+    at process._tickCallback (internal/process/next_tick.js:68:7)
+
+Error: Battle not started: A player has an empty team.
+    at Battle.start (C:\Users\Eric\Documents\battle-server\.sim-dist\battle.js:1541:10)
+    at Battle.setPlayer (C:\Users\Eric\Documents\battle-server\.sim-dist\battle.js:3004:8)
+    at RoomBattleStream._writeLine (C:\Users\Eric\Documents\battle-server\.sim-dist\battle-stream.js:86:16)
+    at RoomBattleStream._writeLine (C:\Users\Eric\Documents\battle-server\server\room-battle.js:1148:18)
+    at RoomBattleStream._writeLines (C:\Users\Eric\Documents\battle-server\.sim-dist\battle-stream.js:67:10)
+    at RoomBattleStream._write (C:\Users\Eric\Documents\battle-server\server\room-battle.js:1082:9)
+    at RoomBattleStream.write (C:\Users\Eric\Documents\battle-server\.lib-dist\streams.js:735:15)
+    at process.on (C:\Users\Eric\Documents\battle-server\.lib-dist\process-manager.js:421:12)
+    at process.emit (events.js:182:13)
+    at process.EventEmitter.emit (domain.js:442:20)
+
+Additional information:
+  chunk = >player p2 {"name":"wolf","avatar":"wolf.gif","team":""}
+  inputLog = 
+>start {"formatid":"gen7ouuurandombattle","seed":[56728,3010,7459,49982]}
+>player p1 {"name":"gfhfdghdf","avatar":"265","team":"","seed":[50172,6813,17874,60466]}
+>player p2 {"name":"wolf","avatar":"wolf.gif","team":"","seed":[60749,14796,3597,48083]}
+  log = 
+|player|p1|gfhfdghdf|265
+|player|p2|wolf|wolf.gif
+|teamsize|p1|0
+|teamsize|p2|0
+|gametype|singles
+|gen|7
+|tier|[Gen 7] OU/UU Random Battle
+|rule|Sleep Clause Mod: Limit one foe put to sleep
+|rule|HP Percentage Mod: HP is shown in percentages
+|clearpoke
+
+
+Error [ERR_IPC_DISCONNECTED]: IPC channel is already disconnected
+    at ChildProcess.target.disconnect (internal/child_process.js:768:26)
+    at QueryProcessWrapper.destroy (C:\Users\Eric\Documents\battle-server\.lib-dist\process-manager.js:111:16)
+    at ChildProcess.QueryProcessWrapper.process.on (C:\Users\Eric\Documents\battle-server\.lib-dist\process-manager.js:77:9)
+    at ChildProcess.emit (events.js:182:13)
+    at ChildProcess.EventEmitter.emit (domain.js:442:20)
+    at finish (internal/child_process.js:797:14)
+    at process._tickCallback (internal/process/next_tick.js:61:11)
+
+Error: Battle not started: A player has an empty team.
+    at Battle.start (C:\Users\Eric\Documents\battle-server\.sim-dist\battle.js:1541:10)
+    at Battle.setPlayer (C:\Users\Eric\Documents\battle-server\.sim-dist\battle.js:3004:8)
+    at RoomBattleStream._writeLine (C:\Users\Eric\Documents\battle-server\.sim-dist\battle-stream.js:86:16)
+    at RoomBattleStream._writeLine (C:\Users\Eric\Documents\battle-server\server\room-battle.js:1148:18)
+    at RoomBattleStream._writeLines (C:\Users\Eric\Documents\battle-server\.sim-dist\battle-stream.js:67:10)
+    at RoomBattleStream._write (C:\Users\Eric\Documents\battle-server\server\room-battle.js:1082:9)
+    at RoomBattleStream.write (C:\Users\Eric\Documents\battle-server\.lib-dist\streams.js:735:15)
+    at process.on (C:\Users\Eric\Documents\battle-server\.lib-dist\process-manager.js:421:12)
+    at process.emit (events.js:182:13)
+    at process.EventEmitter.emit (domain.js:442:20)
+
+Additional information:
+  chunk = >player p2 {"name":"wolf","avatar":"wolf.gif","team":""}
+  inputLog = 
+>start {"formatid":"gen7ouuurandombattle","seed":[49542,15704,52643,31881]}
+>player p1 {"name":"ghdhgfdhfdhgf","avatar":"1","team":"","seed":[47852,59950,46400,789]}
+>player p2 {"name":"wolf","avatar":"wolf.gif","team":"","seed":[35294,1161,65337,41413]}
+  log = 
+|player|p1|ghdhgfdhfdhgf|1
+|player|p2|wolf|wolf.gif
+|teamsize|p1|0
+|teamsize|p2|0
+|gametype|singles
+|gen|7
+|tier|[Gen 7] OU/UU Random Battle
+|rule|Sleep Clause Mod: Limit one foe put to sleep
+|rule|HP Percentage Mod: HP is shown in percentages
+|clearpoke
+
+
+Error [ERR_IPC_DISCONNECTED]: IPC channel is already disconnected
+    at ChildProcess.target.disconnect (internal/child_process.js:768:26)
+    at QueryProcessWrapper.destroy (C:\Users\Eric\Documents\battle-server\.lib-dist\process-manager.js:111:16)
+    at ChildProcess.QueryProcessWrapper.process.on (C:\Users\Eric\Documents\battle-server\.lib-dist\process-manager.js:77:9)
+    at ChildProcess.emit (events.js:182:13)
+    at ChildProcess.EventEmitter.emit (domain.js:442:20)
+    at finish (internal/child_process.js:797:14)
+    at process._tickCallback (internal/process/next_tick.js:61:11)
+
+ReferenceError: SEARCH_COOLDOWN is not defined
+    at Ladder.searchBattle (C:\Users\Eric\Documents\battle-server\server\ladders.js:484:130)
+    at process._tickCallback (internal/process/next_tick.js:68:7)
+
+Error [ERR_IPC_DISCONNECTED]: IPC channel is already disconnected
+    at ChildProcess.target.disconnect (internal/child_process.js:768:26)
+    at QueryProcessWrapper.destroy (C:\Users\Eric\Documents\battle-server\.lib-dist\process-manager.js:111:16)
+    at ChildProcess.QueryProcessWrapper.process.on (C:\Users\Eric\Documents\battle-server\.lib-dist\process-manager.js:77:9)
+    at ChildProcess.emit (events.js:182:13)
+    at ChildProcess.EventEmitter.emit (domain.js:442:20)
+    at finish (internal/child_process.js:797:14)
+    at process._tickCallback (internal/process/next_tick.js:61:11)
+
+Error [ERR_IPC_DISCONNECTED]: IPC channel is already disconnected
+    at ChildProcess.target.disconnect (internal/child_process.js:768:26)
+    at QueryProcessWrapper.destroy (C:\Users\Eric\Documents\battle-server\.lib-dist\process-manager.js:111:16)
+    at ChildProcess.QueryProcessWrapper.process.on (C:\Users\Eric\Documents\battle-server\.lib-dist\process-manager.js:77:9)
+    at ChildProcess.emit (events.js:182:13)
+    at ChildProcess.EventEmitter.emit (domain.js:442:20)
+    at finish (internal/child_process.js:797:14)
+    at process._tickCallback (internal/process/next_tick.js:61:11)
+
+ReferenceError: toId is not defined
+    at hashColor (C:\Users\Eric\Documents\battle-server\config\color.js:131:2)
+    at parseEmoticons (C:\Users\Eric\Documents\battle-server\server\chat-plugins\emoticons.js:306:176)
+    at CommandContext.parse (C:\Users\Eric\Documents\battle-server\server\chat.js:603:9)
+    at Object.Chat.parse (C:\Users\Eric\Documents\battle-server\server\chat.js:1437:17)
+    at User.chat (C:\Users\Eric\Documents\battle-server\server\users.js:1493:9)
+    at Function.socketReceive (C:\Users\Eric\Documents\battle-server\server\users.js:1712:12)
+    at Worker.worker.on.data (C:\Users\Eric\Documents\battle-server\server\sockets.js:67:11)
+    at Worker.emit (events.js:187:15)
+    at Worker.EventEmitter.emit (domain.js:442:20)
+    at ChildProcess.Worker.process.on (internal/cluster/worker.js:28:12)
+
+Error [ERR_IPC_DISCONNECTED]: IPC channel is already disconnected
+    at ChildProcess.target.disconnect (internal/child_process.js:768:26)
+    at QueryProcessWrapper.destroy (C:\Users\Eric\Documents\battle-server\.lib-dist\process-manager.js:111:16)
+    at ChildProcess.QueryProcessWrapper.process.on (C:\Users\Eric\Documents\battle-server\.lib-dist\process-manager.js:77:9)
+    at ChildProcess.emit (events.js:182:13)
+    at ChildProcess.EventEmitter.emit (domain.js:442:20)
+    at finish (internal/child_process.js:797:14)
+    at process._tickCallback (internal/process/next_tick.js:61:11)
+
+Error: Worker 1 abruptly died with code 3221225786 and signal null
+    at EventEmitter.cluster.on (C:\Users\Eric\Documents\battle-server\server\sockets.js:90:21)
+    at EventEmitter.emit (events.js:182:13)
+    at EventEmitter.emit (domain.js:442:20)
+    at ChildProcess.worker.process.once (internal/cluster/master.js:194:13)
+    at Object.onceWrapper (events.js:273:13)
+    at ChildProcess.emit (events.js:182:13)
+    at ChildProcess.EventEmitter.emit (domain.js:442:20)
+    at Process.ChildProcess._handle.onexit (internal/child_process.js:240:12)
+
+Error [ERR_IPC_DISCONNECTED]: IPC channel is already disconnected
+    at ChildProcess.target.disconnect (internal/child_process.js:768:26)
+    at QueryProcessWrapper.destroy (C:\Users\Eric\Documents\battle-server\.lib-dist\process-manager.js:111:16)
+    at ChildProcess.QueryProcessWrapper.process.on (C:\Users\Eric\Documents\battle-server\.lib-dist\process-manager.js:77:9)
+    at ChildProcess.emit (events.js:182:13)
+    at ChildProcess.EventEmitter.emit (domain.js:442:20)
+    at finish (internal/child_process.js:797:14)
+    at process._tickCallback (internal/process/next_tick.js:61:11)
+
+Error [ERR_IPC_DISCONNECTED]: IPC channel is already disconnected
+    at ChildProcess.target.disconnect (internal/child_process.js:768:26)
+    at QueryProcessWrapper.destroy (C:\Users\Eric\Documents\battle-server\.lib-dist\process-manager.js:111:16)
+    at ChildProcess.QueryProcessWrapper.process.on (C:\Users\Eric\Documents\battle-server\.lib-dist\process-manager.js:77:9)
+    at ChildProcess.emit (events.js:182:13)
+    at ChildProcess.EventEmitter.emit (domain.js:442:20)
+    at finish (internal/child_process.js:797:14)
+    at process._tickCallback (internal/process/next_tick.js:61:11)
+
+Error [ERR_IPC_DISCONNECTED]: IPC channel is already disconnected
+    at ChildProcess.target.disconnect (internal/child_process.js:768:26)
+    at QueryProcessWrapper.destroy (C:\Users\Eric\Documents\battle-server\.lib-dist\process-manager.js:111:16)
+    at ChildProcess.QueryProcessWrapper.process.on (C:\Users\Eric\Documents\battle-server\.lib-dist\process-manager.js:77:9)
+    at ChildProcess.emit (events.js:182:13)
+    at ChildProcess.EventEmitter.emit (domain.js:442:20)
+    at finish (internal/child_process.js:797:14)
+    at process._tickCallback (internal/process/next_tick.js:61:11)
+
+Error: Worker 1 abruptly died with code 3221225786 and signal null
+    at EventEmitter.cluster.on (C:\Users\Eric\Documents\battle-server\server\sockets.js:90:21)
+    at EventEmitter.emit (events.js:182:13)
+    at EventEmitter.emit (domain.js:442:20)
+    at ChildProcess.worker.process.once (internal/cluster/master.js:194:13)
+    at Object.onceWrapper (events.js:273:13)
+    at ChildProcess.emit (events.js:182:13)
+    at ChildProcess.EventEmitter.emit (domain.js:442:20)
+    at Process.ChildProcess._handle.onexit (internal/child_process.js:240:12)
+
+Error [ERR_IPC_DISCONNECTED]: IPC channel is already disconnected
+    at ChildProcess.target.disconnect (internal/child_process.js:768:26)
+    at QueryProcessWrapper.destroy (C:\Users\Eric\Documents\battle-server\.lib-dist\process-manager.js:111:16)
+    at ChildProcess.QueryProcessWrapper.process.on (C:\Users\Eric\Documents\battle-server\.lib-dist\process-manager.js:77:9)
+    at ChildProcess.emit (events.js:182:13)
+    at ChildProcess.EventEmitter.emit (domain.js:442:20)
+    at finish (internal/child_process.js:797:14)
+    at process._tickCallback (internal/process/next_tick.js:61:11)
+
+Error [ERR_IPC_DISCONNECTED]: IPC channel is already disconnected
+    at ChildProcess.target.disconnect (internal/child_process.js:768:26)
+    at QueryProcessWrapper.destroy (C:\Users\Eric\Documents\battle-server\.lib-dist\process-manager.js:111:16)
+    at ChildProcess.QueryProcessWrapper.process.on (C:\Users\Eric\Documents\battle-server\.lib-dist\process-manager.js:77:9)
+    at ChildProcess.emit (events.js:182:13)
+    at ChildProcess.EventEmitter.emit (domain.js:442:20)
+    at finish (internal/child_process.js:797:14)
+    at process._tickCallback (internal/process/next_tick.js:61:11)
+
+Error [ERR_IPC_DISCONNECTED]: IPC channel is already disconnected
+    at ChildProcess.target.disconnect (internal/child_process.js:768:26)
+    at QueryProcessWrapper.destroy (C:\Users\Eric\Documents\battle-server\.lib-dist\process-manager.js:111:16)
+    at ChildProcess.QueryProcessWrapper.process.on (C:\Users\Eric\Documents\battle-server\.lib-dist\process-manager.js:77:9)
+    at ChildProcess.emit (events.js:182:13)
+    at ChildProcess.EventEmitter.emit (domain.js:442:20)
+    at finish (internal/child_process.js:797:14)
+    at process._tickCallback (internal/process/next_tick.js:61:11)
+
+Error [ERR_IPC_DISCONNECTED]: IPC channel is already disconnected
+    at ChildProcess.target.disconnect (internal/child_process.js:768:26)
+    at QueryProcessWrapper.destroy (C:\Users\Eric\Documents\battle-server\.lib-dist\process-manager.js:111:16)
+    at ChildProcess.QueryProcessWrapper.process.on (C:\Users\Eric\Documents\battle-server\.lib-dist\process-manager.js:77:9)
+    at ChildProcess.emit (events.js:182:13)
+    at ChildProcess.EventEmitter.emit (domain.js:442:20)
+    at finish (internal/child_process.js:797:14)
+    at process._tickCallback (internal/process/next_tick.js:61:11)
+
+Error [ERR_IPC_DISCONNECTED]: IPC channel is already disconnected
+    at ChildProcess.target.disconnect (internal/child_process.js:768:26)
+    at QueryProcessWrapper.destroy (C:\Users\Eric\Documents\battle-server\.lib-dist\process-manager.js:111:16)
+    at ChildProcess.QueryProcessWrapper.process.on (C:\Users\Eric\Documents\battle-server\.lib-dist\process-manager.js:77:9)
+    at ChildProcess.emit (events.js:182:13)
+    at ChildProcess.EventEmitter.emit (domain.js:442:20)
+    at finish (internal/child_process.js:797:14)
+    at process._tickCallback (internal/process/next_tick.js:61:11)
+
+Error [ERR_IPC_DISCONNECTED]: IPC channel is already disconnected
+    at ChildProcess.target.disconnect (internal/child_process.js:768:26)
+    at QueryProcessWrapper.destroy (C:\Users\Eric\Documents\battle-server\.lib-dist\process-manager.js:111:16)
+    at ChildProcess.QueryProcessWrapper.process.on (C:\Users\Eric\Documents\battle-server\.lib-dist\process-manager.js:77:9)
+    at ChildProcess.emit (events.js:182:13)
+    at ChildProcess.EventEmitter.emit (domain.js:442:20)
+    at finish (internal/child_process.js:797:14)
+    at process._tickCallback (internal/process/next_tick.js:61:11)
+
+Error [ERR_IPC_DISCONNECTED]: IPC channel is already disconnected
+    at ChildProcess.target.disconnect (internal/child_process.js:768:26)
+    at QueryProcessWrapper.destroy (C:\Users\Eric\Documents\battle-server\.lib-dist\process-manager.js:111:16)
+    at ChildProcess.QueryProcessWrapper.process.on (C:\Users\Eric\Documents\battle-server\.lib-dist\process-manager.js:77:9)
+    at ChildProcess.emit (events.js:182:13)
+    at ChildProcess.EventEmitter.emit (domain.js:442:20)
+    at finish (internal/child_process.js:797:14)
+    at process._tickCallback (internal/process/next_tick.js:61:11)
+
+ReferenceError: toId is not defined
+    at Profile.show (C:\Users\Eric\Documents\battle-server\server\chat-plugins\profile.js:138:15)
+    at CommandContext.profile (C:\Users\Eric\Documents\battle-server\server\chat-plugins\profile.js:159:29)
+    at CommandContext.run (C:\Users\Eric\Documents\battle-server\server\chat.js:744:28)
+    at CommandContext.parse (C:\Users\Eric\Documents\battle-server\server\chat.js:566:19)
+    at Object.Chat.parse (C:\Users\Eric\Documents\battle-server\server\chat.js:1437:17)
+    at User.chat (C:\Users\Eric\Documents\battle-server\server\users.js:1497:9)
+    at Function.socketReceive (C:\Users\Eric\Documents\battle-server\server\users.js:1716:12)
+    at Worker.worker.on.data (C:\Users\Eric\Documents\battle-server\server\sockets.js:67:11)
+    at Worker.emit (events.js:187:15)
+    at Worker.EventEmitter.emit (domain.js:442:20)
+
+Additional information:
+  user = wolf
+  room = lobby
+  pmTarget = undefined
+  message = /profile
+
+
+ReferenceError: tourSize is not defined
+    at RoomBattle.onEnd (C:\Users\Eric\Documents\battle-server\server\room-battle.js:745:4)
+    at process._tickCallback (internal/process/next_tick.js:68:7)
+
+Error [ERR_IPC_DISCONNECTED]: IPC channel is already disconnected
+    at ChildProcess.target.disconnect (internal/child_process.js:768:26)
+    at QueryProcessWrapper.destroy (C:\Users\Eric\Documents\battle-server\.lib-dist\process-manager.js:111:16)
+    at ChildProcess.QueryProcessWrapper.process.on (C:\Users\Eric\Documents\battle-server\.lib-dist\process-manager.js:77:9)
+    at ChildProcess.emit (events.js:182:13)
+    at ChildProcess.EventEmitter.emit (domain.js:442:20)
+    at finish (internal/child_process.js:797:14)
+    at process._tickCallback (internal/process/next_tick.js:61:11)
+
+TypeError: this.generator.getUsers is not a function
+    at Tournament.addUser (C:\Users\Eric\Documents\battle-server\server\tournaments\index.js:370:31)
+    at CommandContext.join (C:\Users\Eric\Documents\battle-server\server\tournaments\index.js:1248:15)
+    at CommandContext.tournament (C:\Users\Eric\Documents\battle-server\server\tournaments\index.js:1799:20)
+    at CommandContext.run (C:\Users\Eric\Documents\battle-server\server\chat.js:744:28)
+    at CommandContext.parse (C:\Users\Eric\Documents\battle-server\server\chat.js:566:19)
+    at Object.Chat.parse (C:\Users\Eric\Documents\battle-server\server\chat.js:1437:17)
+    at User.chat (C:\Users\Eric\Documents\battle-server\server\users.js:1497:9)
+    at Function.socketReceive (C:\Users\Eric\Documents\battle-server\server\users.js:1716:12)
+    at Worker.worker.on.data (C:\Users\Eric\Documents\battle-server\server\sockets.js:67:11)
+    at Worker.emit (events.js:187:15)
+
+Additional information:
+  user = wolf
+  room = lobby
+  pmTarget = undefined
+  message = /tournament join
+
+
+Error [ERR_IPC_DISCONNECTED]: IPC channel is already disconnected
+    at ChildProcess.target.disconnect (internal/child_process.js:768:26)
+    at QueryProcessWrapper.destroy (C:\Users\Eric\Documents\battle-server\.lib-dist\process-manager.js:111:16)
+    at ChildProcess.QueryProcessWrapper.process.on (C:\Users\Eric\Documents\battle-server\.lib-dist\process-manager.js:77:9)
+    at ChildProcess.emit (events.js:182:13)
+    at ChildProcess.EventEmitter.emit (domain.js:442:20)
+    at finish (internal/child_process.js:797:14)
+    at process._tickCallback (internal/process/next_tick.js:61:11)
+
+TypeError: this.generator.getusers is not a function
+    at Tournament.addUser (C:\Users\Eric\Documents\battle-server\server\tournaments\index.js:370:31)
+    at CommandContext.join (C:\Users\Eric\Documents\battle-server\server\tournaments\index.js:1248:15)
+    at CommandContext.tournament (C:\Users\Eric\Documents\battle-server\server\tournaments\index.js:1799:20)
+    at CommandContext.run (C:\Users\Eric\Documents\battle-server\server\chat.js:744:28)
+    at CommandContext.parse (C:\Users\Eric\Documents\battle-server\server\chat.js:566:19)
+    at Object.Chat.parse (C:\Users\Eric\Documents\battle-server\server\chat.js:1437:17)
+    at User.chat (C:\Users\Eric\Documents\battle-server\server\users.js:1497:9)
+    at Function.socketReceive (C:\Users\Eric\Documents\battle-server\server\users.js:1716:12)
+    at Worker.worker.on.data (C:\Users\Eric\Documents\battle-server\server\sockets.js:67:11)
+    at Worker.emit (events.js:187:15)
+
+Additional information:
+  user = wolf
+  room = lobby
+  pmTarget = undefined
+  message = /tournament join
+
+
+Error [ERR_IPC_DISCONNECTED]: IPC channel is already disconnected
+    at ChildProcess.target.disconnect (internal/child_process.js:768:26)
+    at QueryProcessWrapper.destroy (C:\Users\Eric\Documents\battle-server\.lib-dist\process-manager.js:111:16)
+    at ChildProcess.QueryProcessWrapper.process.on (C:\Users\Eric\Documents\battle-server\.lib-dist\process-manager.js:77:9)
+    at ChildProcess.emit (events.js:182:13)
+    at ChildProcess.EventEmitter.emit (domain.js:442:20)
+    at finish (internal/child_process.js:797:14)
+    at process._tickCallback (internal/process/next_tick.js:61:11)
+
+TypeError: this.players is not a function
+    at Tournament.addUser (C:\Users\Eric\Documents\battle-server\server\tournaments\index.js:370:21)
+    at CommandContext.join (C:\Users\Eric\Documents\battle-server\server\tournaments\index.js:1248:15)
+    at CommandContext.tournament (C:\Users\Eric\Documents\battle-server\server\tournaments\index.js:1799:20)
+    at CommandContext.run (C:\Users\Eric\Documents\battle-server\server\chat.js:744:28)
+    at CommandContext.parse (C:\Users\Eric\Documents\battle-server\server\chat.js:566:19)
+    at Object.Chat.parse (C:\Users\Eric\Documents\battle-server\server\chat.js:1437:17)
+    at User.chat (C:\Users\Eric\Documents\battle-server\server\users.js:1497:9)
+    at Function.socketReceive (C:\Users\Eric\Documents\battle-server\server\users.js:1716:12)
+    at Worker.worker.on.data (C:\Users\Eric\Documents\battle-server\server\sockets.js:67:11)
+    at Worker.emit (events.js:187:15)
+
+Additional information:
+  user = wolf
+  room = lobby
+  pmTarget = undefined
+  message = /tournament join
+
+
+Error [ERR_IPC_DISCONNECTED]: IPC channel is already disconnected
+    at ChildProcess.target.disconnect (internal/child_process.js:768:26)
+    at QueryProcessWrapper.destroy (C:\Users\Eric\Documents\battle-server\.lib-dist\process-manager.js:111:16)
+    at ChildProcess.QueryProcessWrapper.process.on (C:\Users\Eric\Documents\battle-server\.lib-dist\process-manager.js:77:9)
+    at ChildProcess.emit (events.js:182:13)
+    at ChildProcess.EventEmitter.emit (domain.js:442:20)
+    at finish (internal/child_process.js:797:14)
+    at process._tickCallback (internal/process/next_tick.js:61:11)
+
+TypeError: Cannot read property 'size' of undefined
+    at Tournament.onBattleWin (C:\Users\Eric\Documents\battle-server\server\tournaments\index.js:1036:39)
+    at RoomBattle.onEnd (C:\Users\Eric\Documents\battle-server\server\room-battle.js:769:15)
+    at RoomBattle.receive (C:\Users\Eric\Documents\battle-server\server\room-battle.js:707:10)
+    at RoomBattle.listen (C:\Users\Eric\Documents\battle-server\server\room-battle.js:649:9)
+    at process._tickCallback (internal/process/next_tick.js:68:7)
+
+Error [ERR_IPC_DISCONNECTED]: IPC channel is already disconnected
+    at ChildProcess.target.disconnect (internal/child_process.js:768:26)
+    at QueryProcessWrapper.destroy (C:\Users\Eric\Documents\battle-server\.lib-dist\process-manager.js:111:16)
+    at ChildProcess.QueryProcessWrapper.process.on (C:\Users\Eric\Documents\battle-server\.lib-dist\process-manager.js:77:9)
+    at ChildProcess.emit (events.js:182:13)
+    at ChildProcess.EventEmitter.emit (domain.js:442:20)
+    at finish (internal/child_process.js:797:14)
+    at process._tickCallback (internal/process/next_tick.js:61:11)
+
+Error [ERR_IPC_DISCONNECTED]: IPC channel is already disconnected
+    at ChildProcess.target.disconnect (internal/child_process.js:768:26)
+    at QueryProcessWrapper.destroy (C:\Users\Eric\Documents\battle-server\.lib-dist\process-manager.js:111:16)
+    at ChildProcess.QueryProcessWrapper.process.on (C:\Users\Eric\Documents\battle-server\.lib-dist\process-manager.js:77:9)
+    at ChildProcess.emit (events.js:182:13)
+    at ChildProcess.EventEmitter.emit (domain.js:442:20)
+    at finish (internal/child_process.js:797:14)
+    at process._tickCallback (internal/process/next_tick.js:61:11)
+
+Error [ERR_IPC_DISCONNECTED]: IPC channel is already disconnected
+    at ChildProcess.target.disconnect (internal/child_process.js:768:26)
+    at QueryProcessWrapper.destroy (C:\Users\Eric\Documents\battle-server\.lib-dist\process-manager.js:111:16)
+    at ChildProcess.QueryProcessWrapper.process.on (C:\Users\Eric\Documents\battle-server\.lib-dist\process-manager.js:77:9)
+    at ChildProcess.emit (events.js:182:13)
+    at ChildProcess.EventEmitter.emit (domain.js:442:20)
+    at finish (internal/child_process.js:797:14)
+    at process._tickCallback (internal/process/next_tick.js:61:11)
+
+Error [ERR_IPC_DISCONNECTED]: IPC channel is already disconnected
+    at ChildProcess.target.disconnect (internal/child_process.js:768:26)
+    at QueryProcessWrapper.destroy (C:\Users\Eric\Documents\battle-server\.lib-dist\process-manager.js:111:16)
+    at ChildProcess.QueryProcessWrapper.process.on (C:\Users\Eric\Documents\battle-server\.lib-dist\process-manager.js:77:9)
+    at ChildProcess.emit (events.js:182:13)
+    at ChildProcess.EventEmitter.emit (domain.js:442:20)
+    at finish (internal/child_process.js:797:14)
+    at process._tickCallback (internal/process/next_tick.js:61:11)
+
+Error [ERR_IPC_DISCONNECTED]: IPC channel is already disconnected
+    at ChildProcess.target.disconnect (internal/child_process.js:768:26)
+    at QueryProcessWrapper.destroy (C:\Users\Eric\Documents\battle-server\.lib-dist\process-manager.js:111:16)
+    at ChildProcess.QueryProcessWrapper.process.on (C:\Users\Eric\Documents\battle-server\.lib-dist\process-manager.js:77:9)
+    at ChildProcess.emit (events.js:182:13)
+    at ChildProcess.EventEmitter.emit (domain.js:442:20)
+    at finish (internal/child_process.js:797:14)
+    at process._tickCallback (internal/process/next_tick.js:61:11)
+
+TypeError: players.getUser is not a function
+    at GlobalRoom.onCreateBattleRoom (C:\Users\Eric\Documents\battle-server\server\rooms.js:754:50)
+    at RoomBattle.start (C:\Users\Eric\Documents\battle-server\server\room-battle.js:1025:16)
+    at new RoomBattle (C:\Users\Eric\Documents\battle-server\server\room-battle.js:517:8)
+    at Function.createBattle (C:\Users\Eric\Documents\battle-server\server\rooms.js:1678:15)
+    at Function.match (C:\Users\Eric\Documents\battle-server\server\ladders.js:637:9)
+    at Function.acceptChallenge (C:\Users\Eric\Documents\battle-server\server\ladders.js:261:12)
+    at process._tickCallback (internal/process/next_tick.js:68:7)
+
+TypeError: this.players is not iterable
+    at GlobalRoom.onCreateBattleRoom (C:\Users\Eric\Documents\battle-server\server\rooms.js:755:30)
+    at RoomBattle.start (C:\Users\Eric\Documents\battle-server\server\room-battle.js:1025:16)
+    at new RoomBattle (C:\Users\Eric\Documents\battle-server\server\room-battle.js:517:8)
+    at Function.createBattle (C:\Users\Eric\Documents\battle-server\server\rooms.js:1684:15)
+    at Function.match (C:\Users\Eric\Documents\battle-server\server\ladders.js:637:9)
+    at Function.acceptChallenge (C:\Users\Eric\Documents\battle-server\server\ladders.js:261:12)
+    at process._tickCallback (internal/process/next_tick.js:68:7)
+
+Error [ERR_IPC_DISCONNECTED]: IPC channel is already disconnected
+    at ChildProcess.target.disconnect (internal/child_process.js:768:26)
+    at QueryProcessWrapper.destroy (C:\Users\Eric\Documents\battle-server\.lib-dist\process-manager.js:111:16)
+    at ChildProcess.QueryProcessWrapper.process.on (C:\Users\Eric\Documents\battle-server\.lib-dist\process-manager.js:77:9)
+    at ChildProcess.emit (events.js:182:13)
+    at ChildProcess.EventEmitter.emit (domain.js:442:20)
+    at finish (internal/child_process.js:797:14)
+    at process._tickCallback (internal/process/next_tick.js:61:11)
+
+TypeError: player.getUser is not a function
+    at GlobalRoom.onCreateBattleRoom (C:\Users\Eric\Documents\battle-server\server\rooms.js:756:16)
+    at RoomBattle.start (C:\Users\Eric\Documents\battle-server\server\room-battle.js:1025:16)
+    at new RoomBattle (C:\Users\Eric\Documents\battle-server\server\room-battle.js:517:8)
+    at Function.createBattle (C:\Users\Eric\Documents\battle-server\server\rooms.js:1684:15)
+    at Function.match (C:\Users\Eric\Documents\battle-server\server\ladders.js:637:9)
+    at Function.acceptChallenge (C:\Users\Eric\Documents\battle-server\server\ladders.js:261:12)
+    at process._tickCallback (internal/process/next_tick.js:68:7)
+
+TypeError: player.getUser is not a function
+    at GlobalRoom.onCreateBattleRoom (C:\Users\Eric\Documents\battle-server\server\rooms.js:759:16)
+    at RoomBattle.start (C:\Users\Eric\Documents\battle-server\server\room-battle.js:1025:16)
+    at new RoomBattle (C:\Users\Eric\Documents\battle-server\server\room-battle.js:517:8)
+    at Function.createBattle (C:\Users\Eric\Documents\battle-server\server\rooms.js:1687:15)
+    at Function.match (C:\Users\Eric\Documents\battle-server\server\ladders.js:637:9)
+    at Function.acceptChallenge (C:\Users\Eric\Documents\battle-server\server\ladders.js:261:12)
+    at process._tickCallback (internal/process/next_tick.js:68:7)
+
+TypeError: player.getUser is not a function
+    at GlobalRoom.onCreateBattleRoom (C:\Users\Eric\Documents\battle-server\server\rooms.js:756:16)
+    at RoomBattle.start (C:\Users\Eric\Documents\battle-server\server\room-battle.js:1025:16)
+    at new RoomBattle (C:\Users\Eric\Documents\battle-server\server\room-battle.js:517:8)
+    at Function.createBattle (C:\Users\Eric\Documents\battle-server\server\rooms.js:1684:15)
+    at Function.match (C:\Users\Eric\Documents\battle-server\server\ladders.js:637:9)
+    at Function.acceptChallenge (C:\Users\Eric\Documents\battle-server\server\ladders.js:261:12)
+    at process._tickCallback (internal/process/next_tick.js:68:7)
+
+Error [ERR_IPC_DISCONNECTED]: IPC channel is already disconnected
+    at ChildProcess.target.disconnect (internal/child_process.js:768:26)
+    at QueryProcessWrapper.destroy (C:\Users\Eric\Documents\battle-server\.lib-dist\process-manager.js:111:16)
+    at ChildProcess.QueryProcessWrapper.process.on (C:\Users\Eric\Documents\battle-server\.lib-dist\process-manager.js:77:9)
+    at ChildProcess.emit (events.js:182:13)
+    at ChildProcess.EventEmitter.emit (domain.js:442:20)
+    at finish (internal/child_process.js:797:14)
+    at process._tickCallback (internal/process/next_tick.js:61:11)
+
+Error [ERR_IPC_DISCONNECTED]: IPC channel is already disconnected
+    at ChildProcess.target.disconnect (internal/child_process.js:768:26)
+    at QueryProcessWrapper.destroy (C:\Users\Eric\Documents\battle-server\.lib-dist\process-manager.js:111:16)
+    at ChildProcess.QueryProcessWrapper.process.on (C:\Users\Eric\Documents\battle-server\.lib-dist\process-manager.js:77:9)
+    at ChildProcess.emit (events.js:182:13)
+    at ChildProcess.EventEmitter.emit (domain.js:442:20)
+    at finish (internal/child_process.js:797:14)
+    at process._tickCallback (internal/process/next_tick.js:61:11)
+
+Error [ERR_IPC_DISCONNECTED]: IPC channel is already disconnected
+    at ChildProcess.target.disconnect (internal/child_process.js:768:26)
+    at QueryProcessWrapper.destroy (C:\Users\Eric\Documents\battle-server\.lib-dist\process-manager.js:111:16)
+    at ChildProcess.QueryProcessWrapper.process.on (C:\Users\Eric\Documents\battle-server\.lib-dist\process-manager.js:77:9)
+    at ChildProcess.emit (events.js:182:13)
+    at ChildProcess.EventEmitter.emit (domain.js:442:20)
+    at finish (internal/child_process.js:797:14)
+    at process._tickCallback (internal/process/next_tick.js:61:11)

@@ -40,6 +40,7 @@ To reload chat commands:
  * @typedef {(this: CommandContext, message: string, user: User, room: ChatRoom | GameRoom?, connection: Connection, targetUser: User?, originalMessage: string) => (string | false | null | undefined)} ChatFilter
  */
 /** @typedef {(name: string, user: User) => (string)} NameFilter */
+/** @typedef {(user: User, oldUser: User?, userType: string) => void} LoginFilter */
 
 const LINK_WHITELIST = ['*.pokemonshowdown.com', 'psim.us', 'smogtours.psim.us', '*.smogon.com', '*.pastebin.com', '*.hastebin.com'];
 
@@ -58,8 +59,6 @@ const TRANSLATION_DIRECTORY = 'translations/';
 /** @type {typeof import('../lib/fs').FS} */
 const FS = require(/** @type {any} */('../.lib-dist/fs')).FS;
 
-const parseEmoticons = require('./chat-plugins/emoticons').parseEmoticons;
-
 /** @type {(url: string) => Promise<{width: number, height: number}>} */
 // @ts-ignore ignoring until there is a ts typedef available for this module.
 const probe = require('probe-image-size');
@@ -67,6 +66,8 @@ const probe = require('probe-image-size');
 let Chat = module.exports;
 
 const emojiRegex = /[\p{Emoji_Modifier_Base}\p{Emoji_Presentation}\uFE0F]/u;
+
+const parseEmoticons = require('./chat-plugins/emoticons').parseEmoticons; // Boilerplate
 
 class PatternTester {
 	// This class sounds like a RegExp
@@ -250,7 +251,7 @@ Chat.hostfilter = function (host, user, connection) {
 		filter(host, user, connection);
 	}
 };
-/**@type {((user: User, oldUser: User | null, usertype: string) => void)[]} */
+/**@type {LoginFilter[]} */
 Chat.loginfilters = [];
 /**
  * @param {User} user
@@ -324,7 +325,7 @@ FS(TRANSLATION_DIRECTORY).readdir().then(files => {
  */
 Chat.tr = function (language, strings, ...keys) {
 	if (!language) language = 'english';
-	language = toId(language);
+	language = toID(language);
 	if (!Chat.translations.has(language)) throw new Error(`Trying to translate to a nonexistent language: ${language}`);
 	if (!strings.length) {
 		// @ts-ignore no this isn't any type
@@ -388,7 +389,7 @@ class MessageContext {
 		if (commaIndex < 0) {
 			return [target.trim(), ''];
 		}
-		return [target.substr(0, commaIndex).trim(), target.substr(commaIndex + 1).trim()];
+		return [target.slice(0, commaIndex).trim(), target.slice(commaIndex + 1).trim()];
 	}
 	/**
 	 * @param {string} text
@@ -595,11 +596,11 @@ class CommandContext extends MessageContext {
 
 		if (message && message !== true && typeof message.then !== 'function') {
 			if (this.pmTarget) {
-				const parsedMsg = parseEmoticons(message, this.room, this.user, true);
-				if (parsedMsg) message = '/html ' + parsedMsg;
+				const parsedMsg = parseEmoticons(message, this.room, this.user, true); // Boilerplate start
+				if (parsedMsg) message = '/html ' + parsedMsg; // Boilerplate end
 				Chat.sendPM(message, this.user, this.pmTarget);
 			} else {
-				if (parseEmoticons(message, this.room, this.user)) return;
+				if (parseEmoticons(message, this.room, this.user)) return; // Boilerplate
 				this.room.add(`|c|${this.user.getIdentity(this.room.id)}|${message}`);
 				if (this.room && this.room.game && this.room.game.onLogMessage) {
 					this.room.game.onLogMessage(message, this.user);
@@ -967,7 +968,7 @@ class CommandContext extends MessageContext {
 		let buf = `(${this.room.id}) ${action}: `;
 		if (user) {
 			if (typeof user === 'string') {
-				buf += `[${toId(user)}]`;
+				buf += `[${toID(user)}]`;
 			} else {
 				let userid = user.getLastId();
 				buf += `[${userid}]`;
@@ -1149,6 +1150,7 @@ class CommandContext extends MessageContext {
 					return this.errorReply(`On this server, you must be of rank ${groupName} or higher to PM users.`);
 				}
 				if (targetUser.blockPMs && targetUser.blockPMs !== user.group && !user.can('lock')) {
+					Chat.maybeNotifyBlocked('pm', targetUser, user);
 					if (!targetUser.can('lock')) {
 						return this.errorReply(`This user is blocking private messages right now.`);
 					} else {
@@ -1237,7 +1239,7 @@ class CommandContext extends MessageContext {
 			user.lastMessageTime = Date.now();
 		}
 
-		if (room && room.highTraffic && toId(message).replace(/[^a-z]+/, '').length < 2 && !user.can('broadcast', null, room)) {
+		if (room && room.highTraffic && toID(message).replace(/[^a-z]+/, '').length < 2 && !user.can('broadcast', null, room)) {
 			this.errorReply('Due to this room being a high traffic room, your message must contain at least two letters.');
 			return false;
 		}
@@ -1896,8 +1898,10 @@ Chat.stringify = function (value, depth = 0) {
 	return `${constructor}{${buf}}`;
 };
 
-Chat.formatText = require('./chat-formatter').formatText;
-Chat.linkRegex = require('./chat-formatter').linkRegex;
+/** @type {typeof import('./chat-formatter').formatText} */
+Chat.formatText = require(/** @type {any} */('../.server-dist/chat-formatter')).formatText;
+/** @type {typeof import('./chat-formatter').linkRegex} */
+Chat.linkRegex = require(/** @type {any} */('../.server-dist/chat-formatter')).linkRegex;
 Chat.updateServerLock = false;
 
 /**
@@ -1935,6 +1939,28 @@ Chat.fitImage = async function (url, maxHeight = 300, maxWidth = 300) {
 };
 
 /**
+ * Notifies a targetUser that a user was blocked from reaching them due to a setting they have enabled.
+ * @param {'pm'|'challenge'} blocked
+ * @param {User} targetUser
+ * @param {User} user
+ */
+Chat.maybeNotifyBlocked = function (blocked, targetUser, user) {
+	const prefix = `|pm|~|${targetUser.getIdentity()}|/nonotify `;
+	const options = 'or change it in the <button name="openOptions" class="subtle">Options</button> menu in the upper right.';
+	if (blocked === 'pm') {
+		if (!targetUser.blockPMsNotified) {
+			targetUser.send(`${prefix}The user '${user.name}' attempted to PM you but was blocked. To enable PMs, use /unblockpms ${options}`);
+			targetUser.blockPMsNotified = true;
+		}
+	} else if (blocked === 'challenge') {
+		if (!targetUser.blockChallengesNotified) {
+			targetUser.send(`${prefix}The user '${user.name}' attempted to challenge you to a battle but was blocked. To enable challenges, use /unblockchallenges ${options}`);
+			targetUser.blockChallengesNotified = true;
+		}
+	}
+};
+
+/**
  * Used by ChatMonitor.
  * @typedef {[(string | RegExp), string, string?, number]} FilterWord
  * @typedef {(this: CommandContext, line: FilterWord, room: ChatRoom | GameRoom?, user: User, message: string, lcMessage: string, isStaff: boolean) => (string | false | undefined)} MonitorHandler
@@ -1947,6 +1973,11 @@ Chat.filterWords = {};
 Chat.monitors = {};
 /** @type {Map<string, string>} */
 Chat.namefilterwhitelist = new Map();
+/**
+ * Inappropriate userid : forcerenaming staff member's userid
+ * @type {Map<string, string>}
+ */
+Chat.forceRenames = new Map();
 
 /**
  * @param {string} id

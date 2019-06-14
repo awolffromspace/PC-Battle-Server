@@ -55,8 +55,8 @@ if (('Config' in global) &&
 	Config.loglevel = 2;
 }
 
-/** @type {typeof import('../lib/crashlogger')} */
-let crashlogger = require(/** @type {any} */('../.lib-dist/crashlogger'));
+/** @type {typeof import('../lib/crashlogger').crashlogger} */
+let crashlogger = require(/** @type {any} */('../.lib-dist/crashlogger')).crashlogger;
 
 const Monitor = module.exports = {
 	/*********************************************************
@@ -144,7 +144,7 @@ const Monitor = module.exports = {
 		this.battlePreps.clear();
 		this.battles.clear();
 		this.connections.clear();
-		Dnsbl.cache.clear();
+		IPTools.dnsblCache.clear();
 	},
 
 	connections: new TimedCounter(),
@@ -221,9 +221,9 @@ const Monitor = module.exports = {
 	 */
 	countPrepBattle(ip, connection) {
 		let count = this.battlePreps.increment(ip, 3 * 60 * 1000)[0];
-		if (count <= 25) return false;
+		if (count <= 12) return false;
 		if (count < 120 && Punishments.sharedIps.has(ip)) return false;
-		connection.popup('Due to high load, you are limited to 25 battles and team validations every 3 minutes.');
+		connection.popup('Due to high load, you are limited to 12 battles and team validations every 3 minutes.');
 		return true;
 	},
 
