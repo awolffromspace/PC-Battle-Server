@@ -111,7 +111,7 @@ class BasicRoom {
 		this.filterStretching = false;
 		this.filterEmojis = false;
 		this.filterCaps = false;
-		this.mafiaEnabled = false;
+		this.mafiaEnabled = true;
 		this.unoDisabled = false;
 		/** @type {'%' | boolean} */
 		this.toursEnabled = false;
@@ -228,7 +228,7 @@ class BasicRoom {
 				continue;
 			}
 			counter++;
-			buffer += ',' + this.users[i].getIdentity(this.id);
+			buffer += ',' + this.users[i].getIdentityWithStatus(this.id);
 		}
 		let msg = '|users|' + counter + buffer;
 		return msg;
@@ -749,6 +749,11 @@ class GlobalRoom extends BasicRoom {
 	 * @param {AnyObject} options
 	 */
 	onCreateBattleRoom(players, room, options) {
+		players.forEach(player => {
+			if (player.isAway()) {
+				player.clearStatus();
+			}
+		});
 		if (Config.reportbattles) {
 			let reportRoom = Rooms(Config.reportbattles === true ? 'lobby' : Config.reportbattles);
 			if (reportRoom && !room.lobbyTour) {
@@ -1063,6 +1068,10 @@ class BasicChatRoom extends BasicRoom {
 		/** @type {string[]} */
 		this.banwords = [];
 
+		/** @type {number?} */
+		// Only available in groupchats
+		this.uptime = null;
+
 		this.chatRoomData = (options.isPersonal ? null : options);
 		Object.assign(this, options);
 		if (this.auth) Object.setPrototypeOf(this.auth, null);
@@ -1324,7 +1333,7 @@ class BasicChatRoom extends BasicRoom {
 		if (user && user.connected) {
 			if (!this.users[user.userid]) return false;
 			if (user.named) {
-				this.reportJoin('n', user.getIdentity(this.id) + '|' + user.userid);
+				this.reportJoin('n', user.getIdentityWithStatus(this.id) + '|' + user.userid);
 			} else {
 				this.reportJoin('l', user.userid);
 			}
@@ -1686,10 +1695,10 @@ let Rooms = Object.assign(getRoom, {
 		}
 		if (options.tour && !room.tour.modjoin) inviteOnly = [];
 		if (inviteOnly.length) {
-			room.modjoin = '+';
+			room.modjoin = '%';
 			room.isPrivate = 'hidden';
 			room.privacySetter = new Set(inviteOnly);
-			room.add(`|raw|<div class="broadcast-red"><strong>This battle is invite-only!</strong><br />Users must be rank + or invited with <code>/invite</code> to join</div>`);
+			room.add(`|raw|<div class="broadcast-red"><strong>This battle is invite-only!</strong><br />Users must be invited with <code>/invite</code> (or be staff) to join</div>`);
 		}
 
 		for (const p of players) {

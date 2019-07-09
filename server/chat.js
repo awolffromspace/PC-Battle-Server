@@ -39,7 +39,7 @@ To reload chat commands:
  * 3. return undefined to send the original message through
  * @typedef {(this: CommandContext, message: string, user: User, room: ChatRoom | GameRoom?, connection: Connection, targetUser: User?, originalMessage: string) => (string | false | null | undefined)} ChatFilter
  */
-/** @typedef {(name: string, user: User) => (string)} NameFilter */
+/** @typedef {(name: string, user: User, forStatus?: boolean) => (string)} NameFilter */
 /** @typedef {(user: User, oldUser: User?, userType: string) => void} LoginFilter */
 
 const LINK_WHITELIST = ['*.pokemonshowdown.com', 'psim.us', 'smogtours.psim.us', '*.smogon.com', '*.pastebin.com', '*.hastebin.com'];
@@ -216,7 +216,7 @@ Chat.namefilter = function (name, user) {
 		if (name.includes('@') && name.includes('.')) return '';
 
 		// url
-		if (/[a-z0-9]\.(com|net|org)/.test(name)) name = name.replace(/\./g, '');
+		if (/[a-z0-9]\.(com|net|org|us|uk|co|gg|tk|ml|gq|ga|xxx|download|stream|)\b/.test(name)) name = name.replace(/\./g, '');
 
 		// Limit the amount of symbols allowed in usernames to 4 maximum, and disallow (R) and (C) from being used in the middle of names.
 		let nameSymbols = name.replace(/[^\u00A1-\u00BF\u00D7\u00F7\u02B9-\u0362\u2012-\u2027\u2030-\u205E\u2050-\u205F\u2090-\u23FA\u2500-\u2BD1]+/g, '');
@@ -224,6 +224,7 @@ Chat.namefilter = function (name, user) {
 		if (nameSymbols.length > 4 || /[^a-z0-9][a-z0-9][^a-z0-9]/.test(name.toLowerCase() + ' ') || /[\u00ae\u00a9].*[a-zA-Z0-9]/.test(name)) name = name.replace(/[\u00A1-\u00BF\u00D7\u00F7\u02B9-\u0362\u2012-\u2027\u2030-\u205E\u2050-\u205F\u2190-\u23FA\u2500-\u2BD1\u2E80-\u32FF\u3400-\u9FFF\uF900-\uFAFF\uFE00-\uFE6F]+/g, '').replace(/[^A-Za-z0-9]{2,}/g, ' ').trim();
 	}
 	name = name.replace(/^[^A-Za-z0-9]+/, ""); // remove symbols from start
+	name = name.replace(/@/g, ""); // Remove @ as this is used to indicate status messages
 
 	// cut name length down to 18 chars
 	if (/[A-Za-z0-9]/.test(name.slice(18))) {
@@ -234,21 +235,22 @@ Chat.namefilter = function (name, user) {
 
 	name = Dex.getName(name);
 	for (const filter of Chat.namefilters) {
-		name = filter(name, user);
+		name = filter(name, user, false);
 		if (!name) return '';
 	}
 	return name;
 };
-/**@type {((host: string, user: User, connection: Connection) => void)[]} */
+/**@type {((host: string, user: User, connection: Connection, hostType: string) => void)[]} */
 Chat.hostfilters = [];
 /**
  * @param {string} host
  * @param {User} user
  * @param {Connection} connection
+ * @param {string} hostType
  */
-Chat.hostfilter = function (host, user, connection) {
+Chat.hostfilter = function (host, user, connection, hostType) {
 	for (const filter of Chat.hostfilters) {
-		filter(host, user, connection);
+		filter(host, user, connection, hostType);
 	}
 };
 /**@type {LoginFilter[]} */
@@ -269,10 +271,12 @@ Chat.nicknamefilters = [];
 /**
  * @param {string} nickname
  * @param {User} user
+ * @param {boolean} [forStatus]
  */
-Chat.nicknamefilter = function (nickname, user) {
+Chat.nicknamefilter = function (nickname, user, forStatus = false) {
+	if (forStatus) nickname = nickname.replace(/\|/g, '');
 	for (const filter of Chat.nicknamefilters) {
-		nickname = filter(nickname, user);
+		nickname = filter(nickname, user, forStatus);
 		if (!nickname) return '';
 	}
 	return nickname;
@@ -562,6 +566,8 @@ class CommandContext extends MessageContext {
 
 		let commandHandler = this.splitCommand(message);
 
+		if (this.user.isAway() && toID(this.user.status) === 'idle') this.user.clearStatus();
+
 		if (typeof commandHandler === 'function') {
 			message = this.run(commandHandler);
 		} else {
@@ -601,6 +607,7 @@ class CommandContext extends MessageContext {
 				Chat.sendPM(message, this.user, this.pmTarget);
 			} else {
 				if (parseEmoticons(message, this.room, this.user)) return; // Boilerplate
+				if (this.user.isAway()) this.user.clearStatus();
 				this.room.add(`|c|${this.user.getIdentity(this.room.id)}|${message}`);
 				if (this.room && this.room.game && this.room.game.onLogMessage) {
 					this.room.game.onLogMessage(message, this.user);
@@ -1070,6 +1077,7 @@ class CommandContext extends MessageContext {
 		if (this.pmTarget) {
 			this.sendReply('|c~|' + (suppressMessage || this.message));
 		} else {
+			if (this.user.isAway()) this.user.clearStatus();
 			this.sendReply('|c|' + this.user.getIdentity(this.room.id) + '|' + (suppressMessage || this.message));
 		}
 		if (!ignoreCooldown && !this.pmTarget) {
@@ -1215,6 +1223,10 @@ class CommandContext extends MessageContext {
 
 		if (!this.checkBanwords(room, user.name) && !user.can('bypassall')) {
 			this.errorReply(`Your username contains a phrase banned by this room.`);
+			return false;
+		}
+		if (user.status && (!this.checkBanwords(room, user.status) && !user.can('bypassall'))) {
+			this.errorReply(`Your status message contains a phrase banned by this room.`);
 			return false;
 		}
 		if (!this.checkBanwords(room, message) && !user.can('mute', null, room)) {
@@ -1750,11 +1762,11 @@ Chat.getDataPokemonHTML = function (template, gen = 7, tier = '') {
 	let buf = '<li class="result">';
 	buf += '<span class="col numcol">' + (tier || template.tier) + '</span> ';
 	buf += `<span class="col iconcol"><psicon pokemon="${template.id}"/></span> `;
-	buf += '<span class="col pokemonnamecol" style="white-space:nowrap"><a href="https://pokemonshowdown.com/dex/pokemon/' + template.id + '" target="_blank">' + template.species + '</a></span> ';
+	buf += `<span class="col pokemonnamecol" style="white-space:nowrap"><a href="https://${Config.routes.dex}/pokemon/${template.id}" target="_blank">${template.species}</a></span> `;
 	buf += '<span class="col typecol">';
 	if (template.types) {
 		for (const type of template.types) {
-			buf += `<img src="https://play.pokemonshowdown.com/sprites/types/${type}.png" alt="${type}" height="14" width="32">`;
+			buf += `<img src="https://${Config.routes.client}/sprites/types/${type}.png" alt="${type}" height="14" width="32">`;
 		}
 	}
 	buf += '</span> ';
@@ -1805,11 +1817,11 @@ Chat.getDataPokemonHTML = function (template, gen = 7, tier = '') {
 Chat.getDataMoveHTML = function (move) {
 	if (typeof move === 'string') move = Object.assign({}, Dex.getMove(move));
 	let buf = `<ul class="utilichart"><li class="result">`;
-	buf += `<span class="col movenamecol"><a href="https://pokemonshowdown.com/dex/moves/${move.id}">${move.name}</a></span> `;
+	buf += `<span class="col movenamecol"><a href="https://${Config.routes.dex}/moves/${move.id}">${move.name}</a></span> `;
 	// encoding is important for the ??? type icon
 	const encodedMoveType = encodeURIComponent(move.type);
-	buf += `<span class="col typecol"><img src="//play.pokemonshowdown.com/sprites/types/${encodedMoveType}.png" alt="${move.type}" width="32" height="14">`;
-	buf += `<img src="//play.pokemonshowdown.com/sprites/categories/${move.category}.png" alt="${move.category}" width="32" height="14"></span> `;
+	buf += `<span class="col typecol"><img src="//${Config.routes.client}/sprites/types/${encodedMoveType}.png" alt="${move.type}" width="32" height="14">`;
+	buf += `<img src="//${Config.routes.client}/sprites/categories/${move.category}.png" alt="${move.category}" width="32" height="14"></span> `;
 	if (move.basePower) buf += `<span class="col labelcol"><em>Power</em><br>${typeof move.basePower === 'number' ? move.basePower : '—'}</span> `;
 	buf += `<span class="col widelabelcol"><em>Accuracy</em><br>${typeof move.accuracy === 'number' ? (move.accuracy + '%') : '—'}</span> `;
 	const basePP = move.pp || 1;
@@ -1825,7 +1837,7 @@ Chat.getDataMoveHTML = function (move) {
 Chat.getDataAbilityHTML = function (ability) {
 	if (typeof ability === 'string') ability = Object.assign({}, Dex.getAbility(ability));
 	let buf = `<ul class="utilichart"><li class="result">`;
-	buf += `<span class="col namecol"><a href="https://pokemonshowdown.com/dex/abilities/${ability.id}">${ability.name}</a></span> `;
+	buf += `<span class="col namecol"><a href="https://${Config.routes.dex}/abilities/${ability.id}">${ability.name}</a></span> `;
 	buf += `<span class="col abilitydesccol">${ability.shortDesc || ability.desc}</span> `;
 	buf += `</li><li style="clear:both"></li></ul>`;
 	return buf;
@@ -1836,7 +1848,7 @@ Chat.getDataAbilityHTML = function (ability) {
 Chat.getDataItemHTML = function (item) {
 	if (typeof item === 'string') item = Object.assign({}, Dex.getItem(item));
 	let buf = `<ul class="utilichart"><li class="result">`;
-	buf += `<span class="col itemiconcol"><psicon item="${item.id}"></span> <span class="col namecol"><a href="https://pokemonshowdown.com/dex/items/${item.id}">${item.name}</a></span> `;
+	buf += `<span class="col itemiconcol"><psicon item="${item.id}"></span> <span class="col namecol"><a href="https://${Config.routes.dex}/items/${item.id}">${item.name}</a></span> `;
 	buf += `<span class="col itemdesccol">${item.shortDesc || item.desc}</span> `;
 	buf += `</li><li style="clear:both"></li></ul>`;
 	return buf;

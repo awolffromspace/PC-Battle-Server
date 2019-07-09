@@ -248,8 +248,6 @@ let namefilter = function (name, user) {
 			if (matched) {
 				if (Chat.monitors[list].punishment === 'AUTOLOCK') {
 					Punishments.autolock(user, Rooms('staff'), `NameMonitor`, `inappropriate name: ${name}`, `using an inappropriate name: ${name} (from ${user.name})`, false, name);
-				} else {
-					user.trackRename = name;
 				}
 				line[3]++;
 				saveFilters();
@@ -269,10 +267,12 @@ let namefilter = function (name, user) {
 let loginfilter = function (user) {
 	if (user.namelocked) return;
 	const forceRenamer = Chat.forceRenames.get(user.userid);
+	if (Chat.namefilterwhitelist.has(user.userid)) return;
 	if (forceRenamer) Monitor.log(`[NameMonitor] Forcerenamed name being reused: ${user.name}`);
 };
 /** @type {NameFilter} */
-let nicknamefilter = function (name, user) {
+let nicknamefilter = function (name, user, forStatus) {
+	const nameType = forStatus ? 'status message' : 'Pokémon nickname';
 	let lcName = name.replace(/\u039d/g, 'N').toLowerCase().replace(/[\u200b\u007F\u00AD]/g, '').replace(/\u03bf/g, 'o').replace(/\u043e/g, 'o').replace(/\u0430/g, 'a').replace(/\u0435/g, 'e').replace(/\u039d/g, 'e');
 	// Remove false positives.
 	lcName = lcName.replace('herapist', '').replace('grape', '').replace('scrape', '');
@@ -291,7 +291,7 @@ let nicknamefilter = function (name, user) {
 			}
 			if (matched) {
 				if (Chat.monitors[list].punishment === 'AUTOLOCK') {
-					Punishments.autolock(user, Rooms('staff'), `NameMonitor`, `inappropriate Pokémon nickname: ${name}`, `${user.name} - using an inappropriate Pokémon nickname: ${name}`, true);
+					Punishments.autolock(user, Rooms('staff'), `NameMonitor`, `inappropriate ${nameType}: ${name}`, `${user.name} - using an inappropriate ${nameType}: ${name}`, true);
 				}
 				line[3]++;
 				saveFilters();

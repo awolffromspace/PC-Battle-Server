@@ -73,7 +73,6 @@ exports.ssl = null;
 
 /*
 // example:
-const fs = require('fs');
 exports.ssl = {
 	port: 443,
 	options: {
@@ -147,6 +146,17 @@ Ko0LaPAMhcfETxlFQFutoWBRcH415A/EMXJa4FqYa9oeXWABNtKkUW0zrQ194btg
 Y929lRybWEiKUr+4Yw2O1W0CAwEAAQ==
 -----END PUBLIC KEY-----
 `;
+
+/**
+ * routes - where Pokemon Showdown is hosted.
+ *   Don't change this setting - there aren't any other options right now
+ */
+exports.routes = {
+	root: 'pokemonshowdown.com',
+	client: 'play.pokemonshowdown.com',
+	dex: 'dex.pokemonshowdown.com',
+	replays: 'replay.pokemonshowdown.com',
+};
 
 /**
  * crashguardemail - if the server has been running for more than an hour
@@ -997,6 +1007,7 @@ exports.grouplist = [
 		jurisdiction: 'u',
 		declare: true,
 		addhtml: true,
+		bypassafktimer: true,
 	},
 	{
 		symbol: '@',

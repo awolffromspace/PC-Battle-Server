@@ -41,6 +41,10 @@ const DEFAULT_TRAINER_SPRITES = [1, 2, 101, 102, 169, 170, 265, 266];
 /** @type {typeof import('../lib/fs').FS} */
 const FS = require(/** @type {any} */('../.lib-dist/fs')).FS;
 
+const MINUTES = 60 * 1000;
+const IDLE_TIMER = 60 * MINUTES;
+const STAFF_IDLE_TIMER = 30 * MINUTES;
+
 /*********************************************************
  * Utility functions
  *********************************************************/
@@ -373,6 +377,7 @@ class Connection {
 
 		this.challenge = '';
 		this.autojoins = '';
+		this.lastActiveTime = Date.now();
 	}
 	/**
  	* @param {string | BasicRoom?} roomid
@@ -461,6 +466,8 @@ class User extends Chat.MessageContext {
 		this.connections = [connection];
 		/**@type {string} */
 		this.latestHost = '';
+		/**@type {string} */
+		this.latestHostType = '';
 		this.ips = Object.create(null);
 		this.ips[connection.ip] = 1;
 		// Note: Using the user's latest IP for anything will usually be
@@ -535,6 +542,11 @@ class User extends Chat.MessageContext {
 		// Used in punishments
 		/** @type {string} */
 		this.trackRename = '';
+		/** @type {string} */
+		this.status = '';
+		/** @type {number} */
+		this.lastWarnedAt = 0;
+
 		// initialize
 		Users.add(this);
 	}
@@ -597,6 +609,14 @@ class User extends Chat.MessageContext {
 		}
 		// Boilerplate end
 		return this.group + this.name;
+	}
+	/**
+	 * @param {string} roomid
+	 */
+	getIdentityWithStatus(roomid = '') {
+		const identity = this.getIdentity(roomid);
+		if (!this.status) return identity;
+		return `${identity}@${this.status}`;
 	}
 	/**
 	 * @param {string} minAuth
@@ -900,7 +920,8 @@ class User extends Chat.MessageContext {
 				this.permalocked = userid;
 				Punishments.lock(this, Date.now() + PERMALOCK_CACHE_TIME, userid, `Permalocked as ${name}`);
 			} else if (userType === '6') {
-				Punishments.ban(this, Date.now() + PERMALOCK_CACHE_TIME, userid, `Permabanned as ${name}`);
+				Punishments.lock(this, Date.now() + PERMALOCK_CACHE_TIME, userid, `Permabanned as ${name}`);
+				this.disconnectAll();
 			}
 		}
 		if (Users.isTrusted(userid)) {
@@ -987,6 +1008,8 @@ class User extends Chat.MessageContext {
 		let joining = !this.named;
 		this.named = !userid.startsWith('guest') || !!this.namelocked;
 
+		if (isForceRenamed) this.status = '';
+
 		for (const connection of this.connections) {
 			//console.log('' + name + ' renaming: socket ' + i + ' of ' + this.connections.length);
 			connection.send(this.getUpdateuserText());
@@ -1018,7 +1041,7 @@ class User extends Chat.MessageContext {
 			// @ts-ignore - dynamic lookup
 			diff[setting] = this[setting];
 		}
-		return `|updateuser|${this.name}|${named}|${this.avatar}|${JSON.stringify(diff)}`;
+		return `|updateuser|${this.getIdentityWithStatus()}|${named}|${this.avatar}|${JSON.stringify(diff)}`;
 	}
 	/**
 	 * @param {string[]} updated the settings which have been updated or none for all settings.
@@ -1076,6 +1099,8 @@ class User extends Chat.MessageContext {
 		oldUser.ips = {};
 		this.latestIp = oldUser.latestIp;
 		this.latestHost = oldUser.latestHost;
+		this.latestHostType = oldUser.latestHostType;
+		this.clearStatus();
 
 		oldUser.markDisconnected();
 	}
@@ -1368,6 +1393,7 @@ class User extends Chat.MessageContext {
 	joinRoom(roomid, connection = null) {
 		const room = Rooms(roomid);
 		if (!room) throw new Error(`Room not found: ${roomid}`);
+		if (this.isAway()) this.clearStatus();
 		if (!connection) {
 			for (const curConnection of this.connections) {
 				// only join full clients, not pop-out single-room
@@ -1403,6 +1429,7 @@ class User extends Chat.MessageContext {
 		if (!this.inRooms.has(room.id)) {
 			return false;
 		}
+		if (this.isAway()) this.clearStatus();
 		for (const curConnection of this.connections) {
 			if (connection && curConnection !== connection) continue;
 			if (curConnection.inRooms.has(room.id)) {
@@ -1553,6 +1580,28 @@ class User extends Chat.MessageContext {
 			this.chatQueue = null;
 		}
 	}
+	isAway() {
+		return this.status && this.status.charAt(0) === '!';
+	}
+	/**
+	 * @param {string} message
+	 */
+	setStatus(message) {
+		if (message === this.status) return;
+		this.status = message;
+		this.updateIdentity();
+	}
+	/**
+	 * @param {string} message
+	 */
+	setAway(message) {
+		this.setStatus(`!${message}`);
+	}
+	clearStatus() {
+		if (!this.status) return;
+		this.status = '';
+		this.updateIdentity();
+	}
 	destroy() {
 		// deallocate user
 		for (const roomid of this.games) {
@@ -1590,6 +1639,12 @@ class User extends Chat.MessageContext {
 function pruneInactive(threshold) {
 	let now = Date.now();
 	for (const user of users.values()) {
+		const awayTimer = user.can('lock') ? STAFF_IDLE_TIMER : IDLE_TIMER;
+		let bypass = user.isAway() || (!user.can('bypassall') && (user.can('bypassafktimer') || Array.from(user.inRooms).some(room => user.can('bypassafktimer', null, /** @type {ChatRoom} */ (Rooms(room))))));
+		if (!bypass && !user.connections.some(connection => now - connection.lastActiveTime < awayTimer)) {
+			user.popup(`You have been inactive for over ${awayTimer / MINUTES} minutes, and have been marked as idle as a result. To mark yourself as back, send a message in chat, or use the /back command.`);
+			user.setAway('(Idle)');
+		}
 		if (user.connected) continue;
 		if ((now - user.lastConnected) > threshold) {
 			user.destroy();
@@ -1667,6 +1722,7 @@ function socketReceive(worker, workerid, socketid, message) {
 
 	let connection = connections.get(id);
 	if (!connection) return;
+	connection.lastActiveTime = Date.now();
 
 	// Due to a bug in SockJS or Faye, if an exception propagates out of
 	// the `data` event handler, the user will be disconnected on the next
@@ -1747,8 +1803,8 @@ let Users = Object.assign(getUser, {
 	socketReceive: socketReceive,
 	pruneInactive: pruneInactive,
 	pruneInactiveTimer: setInterval(() => {
-		pruneInactive(Config.inactiveuserthreshold || 1000 * 60 * 60);
-	}, 1000 * 60 * 30),
+		pruneInactive(Config.inactiveuserthreshold || 60 * MINUTES);
+	}, 30 * MINUTES),
 	socketConnect: socketConnect,
 });
 // @ts-ignore

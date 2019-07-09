@@ -9019,7 +9019,7 @@ let BattleMovedex = {
 		flags: {contact: 1, protect: 1, mirror: 1},
 		onBasePower(basePower, source, target, move) {
 			let item = target.getItem();
-			if (!this.singleEvent('TakeItem', item, target.itemData, target, source, move, item)) return;
+			if (!this.singleEvent('TakeItem', item, target.itemData, target, target, move, item)) return;
 			if (item.id) {
 				return this.chainModify(1.5);
 			}
@@ -13281,9 +13281,10 @@ let BattleMovedex = {
 		flags: {snatch: 1},
 		onHit(pokemon) {
 			if (pokemon.item || !pokemon.lastItem) return false;
-			pokemon.setItem(pokemon.lastItem);
+			let item = pokemon.lastItem;
 			pokemon.lastItem = '';
-			this.add('-item', pokemon, pokemon.getItem(), '[from] move: Recycle');
+			this.add('-item', pokemon, this.getItem(item), '[from] move: Recycle');
+			pokemon.setItem(item);
 		},
 		secondary: null,
 		target: "self",
