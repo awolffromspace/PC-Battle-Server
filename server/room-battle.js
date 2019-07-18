@@ -180,7 +180,8 @@ class RoomBattleTimer {
 
 		const hasLongTurns = Dex.getFormat(battle.format, true).gameType !== 'singles';
 		const isChallenge = (!battle.rated && !battle.room.tour);
-		const timerSettings = Dex.getFormat(battle.format, true).timer;
+		const timerEntry = Dex.getRuleTable(Dex.getFormat(battle.format, true)).timer;
+		const timerSettings = timerEntry && timerEntry[0];
 
 		// so that Object.assign doesn't overwrite anything with `undefined`
 		for (const k in timerSettings) {
@@ -242,10 +243,17 @@ class RoomBattleTimer {
 			this.battle.room.add(`|inactive|${requester.name} no longer wants the timer on, but the timer is staying on because ${[...this.timerRequesters].join(', ')} still does.`).update();
 			return false;
 		}
+		if (this.end()) {
+			this.battle.room.add(`|inactiveoff|Battle timer is now OFF.`).update();
+			return true;
+		}
+		return false;
+	}
+	end() {
+		this.timerRequesters.clear();
 		if (!this.timer) return false;
 		clearTimeout(this.timer);
 		this.timer = null;
-		this.battle.room.add(`|inactiveoff|Battle timer is now OFF.`).update();
 		return true;
 	}
 	waitingForChoice(/** @type {SideID} */ slot) {
@@ -261,7 +269,7 @@ class RoomBattleTimer {
 		let addPerTurn = isFirst ? 0 : this.settings.addPerTurn;
 		if (this.settings.accelerate && addPerTurn) {
 			// after turn 100ish: 15s/turn -> 10s/turn
-			if (this.battle.requestCount > 200) {
+			if (this.battle.requestCount > 200 && addPerTurn > TICK_TIME) {
 				addPerTurn -= TICK_TIME;
 			}
 			// after turn 200ish: 10s/turn -> 7s/turn
@@ -508,11 +516,11 @@ class RoomBattle extends RoomGames.RoomGame {
 
 		this.listen();
 
-		this.addPlayer(options.p1, options.p1team || '');
-		this.addPlayer(options.p2, options.p2team || '');
+		this.addPlayer(options.p1, options.p1team || '', options.p1rating);
+		this.addPlayer(options.p2, options.p2team || '', options.p2rating);
 		if (this.playerCap > 2) {
-			this.addPlayer(options.p3, options.p3team || '');
-			this.addPlayer(options.p4, options.p4team || '');
+			this.addPlayer(options.p3, options.p3team || '', options.p3rating);
+			this.addPlayer(options.p4, options.p4team || '', options.p4rating);
 		}
 		this.timer = new RoomBattleTimer(this);
 		if (Config.forcetimer) this.timer.start();
@@ -547,7 +555,6 @@ class RoomBattle extends RoomGames.RoomGame {
 		const player = this.playerTable[user.userid];
 		const [choice, rqid] = data.split('|', 2);
 		if (!player) return;
-		if (user.isAway()) user.clearStatus();
 		let request = player.request;
 		if (request.isWait !== false && request.isWait !== true) {
 			player.sendRoom(`|error|[Invalid choice] There's nothing to choose`);
@@ -595,6 +602,11 @@ class RoomBattle extends RoomGames.RoomGame {
 	joinGame(user, slot) {
 		if (!user.can('joinbattle', null, this.room)) {
 			user.popup(`You must be a set as a player to join a battle you didn't start. Ask a player to use /addplayer on you to join this battle.`);
+			return false;
+		}
+
+		if (user.userid in this.playerTable) {
+			user.popup(`You have already joined this battle.`);
 			return false;
 		}
 
@@ -728,6 +740,7 @@ class RoomBattle extends RoomGames.RoomGame {
 	 * @param {any} winner
 	 */
 	async onEnd(winner) {
+		this.timer.end();
 		// Declare variables here in case we need them for non-rated battles logging.
 		let p1score = 0.5;
 		const winnerid = toID(winner);
@@ -974,8 +987,9 @@ class RoomBattle extends RoomGames.RoomGame {
 	 *
 	 * @param {User | null} user
 	 * @param {string?} team
+	 * @param {number} rating
 	 */
-	addPlayer(user, team) {
+	addPlayer(user, team, rating = 0) {
 		// TypeScript bug: no `T extends RoomGamePlayer`
 		const player = /** @type {RoomBattlePlayer} */ (super.addPlayer(user));
 		if (!player) return null;
@@ -987,8 +1001,9 @@ class RoomBattle extends RoomGames.RoomGame {
 				name: player.name,
 				avatar: user ? '' + user.avatar : '',
 				team: team,
+				rating: Math.round(rating),
 			};
-			this.stream.write(`>player ${slot} ` + JSON.stringify(options));
+			this.stream.write(`>player ${slot} ${JSON.stringify(options)}`);
 		}
 
 		if (user) this.room.auth[user.userid] = Users.PLAYER_SYMBOL;

@@ -295,6 +295,9 @@ class BasicRoom {
 		if (this.auth && this.isPrivate === true) {
 			return ' ';
 		}
+		if ((this.isPersonal || this.battle) && Config.groups[user.group].globalGroupInPersonalRoom) {
+			return Config.groups[user.group].globalGroupInPersonalRoom;
+		}
 		return user.group;
 	}
 	/**
@@ -750,8 +753,8 @@ class GlobalRoom extends BasicRoom {
 	 */
 	onCreateBattleRoom(players, room, options) {
 		players.forEach(player => {
-			if (player.isAway()) {
-				player.clearStatus();
+			if (player.statusType === 'idle') {
+				player.setStatusType('online');
 			}
 		});
 		if (Config.reportbattles) {
@@ -1287,7 +1290,7 @@ class BasicChatRoom extends BasicRoom {
 		if (this.users[user.userid]) return false;
 
 		if (user.named) {
-			this.reportJoin('j', user.getIdentity(this.id));
+			this.reportJoin('j', user.getIdentityWithStatus(this.id));
 		}
 
 		this.users[user.userid] = user;
@@ -1315,12 +1318,12 @@ class BasicChatRoom extends BasicRoom {
 		delete this.users[oldid];
 		this.users[user.userid] = user;
 		if (joining) {
-			this.reportJoin('j', user.getIdentity(this.id));
+			this.reportJoin('j', user.getIdentityWithStatus(this.id));
 			if (this.staffMessage && user.can('mute', null, this)) this.sendUser(user, '|raw|<div class="infobox">(Staff intro:)<br /><div>' + this.staffMessage.replace(/\n/g, '') + '</div></div>');
 		} else if (!user.named) {
 			this.reportJoin('l', oldid);
 		} else {
-			this.reportJoin('n', user.getIdentity(this.id) + '|' + oldid);
+			this.reportJoin('n', user.getIdentityWithStatus(this.id) + '|' + oldid);
 		}
 		if (this.poll && user.userid in this.poll.voters) this.poll.updateFor(user);
 		return true;
@@ -1749,3 +1752,10 @@ Rooms.rooms.set('global', Rooms.global);
 
 // @ts-ignore
 module.exports = Rooms;
+
+// For accessing types in full typescript files
+/** @typedef {GlobalRoom} GlobalRoomType */
+/** @typedef {ChatRoom} ChatRoomType */
+/** @typedef {GameRoom} GameRoomType */
+/** @typedef {BasicRoom} BasicRoomType */
+/** @typedef {BasicChatRoom} BasicChatRoomType */

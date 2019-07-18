@@ -39,7 +39,8 @@ To reload chat commands:
  * 3. return undefined to send the original message through
  * @typedef {(this: CommandContext, message: string, user: User, room: ChatRoom | GameRoom?, connection: Connection, targetUser: User?, originalMessage: string) => (string | false | null | undefined)} ChatFilter
  */
-/** @typedef {(name: string, user: User, forStatus?: boolean) => (string)} NameFilter */
+/** @typedef {(name: string, user: User) => (string)} NameFilter */
+/** @typedef {(status: string, user: User) => (string)} StatusFilter */
 /** @typedef {(user: User, oldUser: User?, userType: string) => void} LoginFilter */
 
 const LINK_WHITELIST = ['*.pokemonshowdown.com', 'psim.us', 'smogtours.psim.us', '*.smogon.com', '*.pastebin.com', '*.hastebin.com'];
@@ -235,7 +236,7 @@ Chat.namefilter = function (name, user) {
 
 	name = Dex.getName(name);
 	for (const filter of Chat.namefilters) {
-		name = filter(name, user, false);
+		name = filter(name, user);
 		if (!name) return '';
 	}
 	return name;
@@ -271,16 +272,30 @@ Chat.nicknamefilters = [];
 /**
  * @param {string} nickname
  * @param {User} user
- * @param {boolean} [forStatus]
  */
-Chat.nicknamefilter = function (nickname, user, forStatus = false) {
-	if (forStatus) nickname = nickname.replace(/\|/g, '');
+Chat.nicknamefilter = function (nickname, user) {
 	for (const filter of Chat.nicknamefilters) {
-		nickname = filter(nickname, user, forStatus);
+		nickname = filter(nickname, user);
 		if (!nickname) return '';
 	}
 	return nickname;
 };
+
+/**@type {StatusFilter[]} */
+Chat.statusfilters = [];
+/**
+ * @param {string} status
+ * @param {User} user
+ */
+Chat.statusfilter = function (status, user) {
+	status = status.replace(/\|/g, '');
+	for (const filter of Chat.statusfilters) {
+		status = filter(status, user);
+		if (!status) return '';
+	}
+	return status;
+};
+
 
 /*********************************************************
  * Translations
@@ -566,7 +581,7 @@ class CommandContext extends MessageContext {
 
 		let commandHandler = this.splitCommand(message);
 
-		if (this.user.isAway() && toID(this.user.status) === 'idle') this.user.clearStatus();
+		if (this.user.statusType === 'idle') this.user.setStatusType('online');
 
 		if (typeof commandHandler === 'function') {
 			message = this.run(commandHandler);
@@ -606,7 +621,6 @@ class CommandContext extends MessageContext {
 				if (parsedMsg) message = '/html ' + parsedMsg; // Boilerplate end
 				Chat.sendPM(message, this.user, this.pmTarget);
 			} else {
-				if (this.user.isAway()) this.user.clearStatus();
 				if (parseEmoticons(message, this.room, this.user)) return; // Boilerplate
 				this.room.add(`|c|${this.user.getIdentity(this.room.id)}|${message}`);
 				if (this.room && this.room.game && this.room.game.onLogMessage) {
@@ -960,7 +974,7 @@ class CommandContext extends MessageContext {
 				buf += ` [${user.latestIp}]`;
 			}
 		}
-		buf += note;
+		buf += note.replace(/\n/gm, ' ');
 
 		Rooms.global.modlog(buf);
 		this.room.modlog(buf);
@@ -988,7 +1002,7 @@ class CommandContext extends MessageContext {
 			}
 		}
 		buf += ` by ${this.user.userid}`;
-		if (note) buf += `: ${note}`;
+		if (note) buf += `: ${note.replace(/\n/gm, ' ')}`;
 
 		this.room.modlog(buf);
 	}
@@ -1077,7 +1091,6 @@ class CommandContext extends MessageContext {
 		if (this.pmTarget) {
 			this.sendReply('|c~|' + (suppressMessage || this.message));
 		} else {
-			if (this.user.isAway()) this.user.clearStatus();
 			this.sendReply('|c|' + this.user.getIdentity(this.room.id) + '|' + (suppressMessage || this.message));
 		}
 		if (!ignoreCooldown && !this.pmTarget) {
@@ -1225,7 +1238,7 @@ class CommandContext extends MessageContext {
 			this.errorReply(`Your username contains a phrase banned by this room.`);
 			return false;
 		}
-		if (user.status && (!this.checkBanwords(room, user.status) && !user.can('bypassall'))) {
+		if (user.userMessage && (!this.checkBanwords(room, user.userMessage) && !user.can('bypassall'))) {
 			this.errorReply(`Your status message contains a phrase banned by this room.`);
 			return false;
 		}
@@ -1345,7 +1358,7 @@ class CommandContext extends MessageContext {
 		}
 
 		// check for mismatched tags
-		let tags = html.toLowerCase().match(/<\/?(div|a|button|b|strong|em|i|u|center|font|marquee|blink|details|summary|code|table|td|tr)\b/g);
+		let tags = html.toLowerCase().match(/<\/?(div|a|button|b|strong|em|i|u|center|font|marquee|blink|details|summary|code|table|td|tr|style|script)\b/g);
 		if (tags) {
 			let stack = [];
 			for (const tag of tags) {
@@ -1528,6 +1541,7 @@ Chat.loadPlugins = function () {
 	if (Config.hostfilter) Chat.hostfilters.push(Config.hostfilter);
 	if (Config.loginfilter) Chat.loginfilters.push(Config.loginfilter);
 	if (Config.nicknamefilter) Chat.nicknamefilters.push(Config.nicknamefilter);
+	if (Config.statusfilter) Chat.statusfilters.push(Config.statusfilter);
 
 	// Install plug-in commands and chat filters
 
@@ -1550,6 +1564,7 @@ Chat.loadPlugins = function () {
 		if (plugin.hostfilter) Chat.hostfilters.push(plugin.hostfilter);
 		if (plugin.loginfilter) Chat.loginfilters.push(plugin.loginfilter);
 		if (plugin.nicknamefilter) Chat.nicknamefilters.push(plugin.nicknamefilter);
+		if (plugin.statusfilter) Chat.statusfilters.push(plugin.statusfilter);
 	}
 };
 
