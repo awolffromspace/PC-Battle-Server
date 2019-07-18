@@ -1735,7 +1735,7 @@ class RandomTeams extends Dex.ModdedDex {
 				let colors = template.color;
 				if (colors.indexOf(teamColor) < 0) continue;
 			}
-			if (template.gen <= this.gen && && !template.isMega && !template.isPrimal && !template.isNonstandard && template.randomBattleMoves) {
+			if (template.gen <= this.gen && !template.isMega && !template.isPrimal && !template.isNonstandard && template.randomBattleMoves) {
 				pokemonPool.push(id);
 			}
 		}
@@ -1797,7 +1797,7 @@ class RandomTeams extends Dex.ModdedDex {
 		// result in a team of six Pokemon we perform a second iteration relaxing as many restrictions as possible.
 		for (const restrict of [true, false]) {
 			if (pokemon.length >= 6) break;
-			const pokemonPool = this.getPokemonPool(type, pokemon, isMonotype, teamGeneration, teamColor);
+			const pokemonPool = this.getPokemonPool(type, pokemon, isMonotype, formatID, teamGeneration, teamColor);
 			while (pokemonPool.length && pokemon.length < 6) {
 				let template = this.getTemplate(this.sampleNoReplace(pokemonPool));
 				if (!template.exists) continue;

@@ -606,8 +606,8 @@ class CommandContext extends MessageContext {
 				if (parsedMsg) message = '/html ' + parsedMsg; // Boilerplate end
 				Chat.sendPM(message, this.user, this.pmTarget);
 			} else {
-				if (parseEmoticons(message, this.room, this.user)) return; // Boilerplate
 				if (this.user.isAway()) this.user.clearStatus();
+				if (parseEmoticons(message, this.room, this.user)) return; // Boilerplate
 				this.room.add(`|c|${this.user.getIdentity(this.room.id)}|${message}`);
 				if (this.room && this.room.game && this.room.game.onLogMessage) {
 					this.room.game.onLogMessage(message, this.user);
