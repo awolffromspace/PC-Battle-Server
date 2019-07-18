@@ -6,7 +6,7 @@ const AUTO_START_MINIMUM_TIMEOUT = 30 * 1000;
 const MAX_REASON_LENGTH = 300;
 const MAX_CUSTOM_NAME_LENGTH = 100;
 const TOURBAN_DURATION = 14 * 24 * 60 * 60 * 1000;
-const ALLOW_ALTS = false;
+let allowAlts = false;
 const COLOR = '#36bbd9'; // Color the messages for battle point winnings
 Punishments.roomPunishmentTypes.set('TOURBAN', 'banned from tournaments');
 
@@ -368,7 +368,7 @@ class Tournament extends Rooms.RoomGame {
 			return;
 		}
 
-		if (!ALLOW_ALTS) {
+		if (!allowAlts) {
 			for (let otherPlayer of this.players) {
 				if (!otherPlayer) continue;
 				const otherUser = Users(otherPlayer.userid);
@@ -460,7 +460,7 @@ class Tournament extends Rooms.RoomGame {
 			output.errorReply(`${replacementUser.name} is banned from joining tournaments.`);
 			return;
 		}
-		if (!ALLOW_ALTS) {
+		if (!allowAlts) {
 			for (let otherPlayer of this.players) {
 				if (!otherPlayer) continue;
 				const otherUser = Users(otherPlayer.userid);
@@ -1711,6 +1711,17 @@ const commands = {
 			this.privateModAction(`${typeof targetUser !== 'string' ? targetUser.name : targetUserid} was unbanned from joining tournaments by ${user.name}.`);
 			this.modlog('TOUR UNBAN', targetUser, null, {noip: 1, noalts: 1});
 		},
+		allowalts: 'togglealts',
+		disallowalts: 'togglealts',
+		togglealts(tournament, user) {
+			if (allowAlts === false) {
+				allowAlts = true;
+				return this.sendReply(`Alts are allowed now.`);
+			} else {
+				allowAlts = false;
+				return this.sendReply(`Alts are not allowed now.`);
+			}
+		},
 	},
 };
 
@@ -1892,6 +1903,7 @@ const chatCommands = {
 			`- announce/announcements &lt;on|off>: Enables/disables tournament announcements for the current room.<br />` +
 			`- banuser/unbanuser &lt;user>: Bans/unbans a user from joining tournaments in this room. Lasts 2 weeks.<br />` +
 			`- sub/replace &lt;olduser>, &lt;newuser>: Substitutes a new user for an old one<br />` +
+			`- togglealts: Allows/disallows alternate accounts.<br />` +
 			`More detailed help can be found <a href="https://www.smogon.com/forums/threads/3570628/#post-6777489">here</a>`
 		);
 	},
