@@ -20,7 +20,7 @@ let BattleScripts = {
 		let target = this.getTarget(pokemon, zMove || moveOrMoveName, targetLoc);
 		let baseMove = this.getActiveMove(moveOrMoveName);
 		const pranksterBoosted = baseMove.pranksterBoosted;
-		if (!sourceEffect && baseMove.id !== 'struggle' && !zMove) {
+		if (baseMove.id !== 'struggle' && !zMove && !externalMove) {
 			let changedMove = this.runEvent('OverrideAction', pokemon, target, baseMove);
 			if (changedMove && changedMove !== true) {
 				baseMove = this.getActiveMove(changedMove);
@@ -153,7 +153,7 @@ let BattleScripts = {
 			this.singleEvent('ModifyMove', move, null, pokemon, target, move, move);
 			if (move.type !== 'Normal') sourceEffect = move;
 		}
-		if (zMove || (move.category !== 'Status' && sourceEffect && sourceEffect.isZ)) {
+		if (zMove || (move.category !== 'Status' && sourceEffect && /** @type {ActiveMove} */(sourceEffect).isZ)) {
 			move = this.getActiveZMove(move, pokemon);
 		}
 
@@ -352,7 +352,7 @@ let BattleScripts = {
 
 		const moveResult = !!targets.length;
 		if (!moveResult && !atLeastOneFailure) pokemon.moveThisTurnResult = null;
-		const hitSlot = targets.map(pokemon => `${pokemon}`.slice(0, 3));
+		const hitSlot = targets.map(pokemon => pokemon.getSlot());
 		if (move.spreadHit) this.attrLastMove('[spread] ' + hitSlot.join(','));
 		return moveResult;
 	},
@@ -699,7 +699,7 @@ let BattleScripts = {
 			}
 		}
 
-		if (move.ohko) this.add('-ohko');
+		if (move.ohko && !targets[0].hp) this.add('-ohko');
 
 		if (!damage.some(val => !!val || val === 0)) return damage;
 

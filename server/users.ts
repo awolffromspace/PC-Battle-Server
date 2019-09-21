@@ -20,16 +20,8 @@
  * Get a user by username with Users.get
  * (scroll down to its definition for details)
  *
- * @license MIT license
+ * @license MIT
  */
-
-'use strict';
-
-type GameRoom = import('./rooms').GameRoomType;
-type BasicRoom = import('./rooms').BasicRoomType;
-type BasicChatRoom = import('./rooms').BasicChatRoomType;
-
-type Room = import('./rooms').Room;
 
 type StatusType = 'online' | 'busy' | 'idle';
 
@@ -72,6 +64,16 @@ function move(user: User, newUserid: ID) {
 	user.userid = newUserid;
 	users.set(newUserid, user);
 
+	user.forcedPublic = null;
+	if (Config.forcedpublicprefixes) {
+		for (const prefix of Config.forcedpublicprefixes) {
+			if (user.userid.startsWith(toID(prefix))) {
+				user.forcedPublic = prefix;
+				break;
+			}
+		}
+	}
+
 	return true;
 }
 function add(user: User) {
@@ -89,9 +91,9 @@ function deleteUser(user: User) {
 	prevUsers.delete('guest' + user.guestNum as ID);
 	users.delete(user.userid);
 }
-function merge(user1: User, user2: User) {
-	prevUsers.delete(user2.userid);
-	prevUsers.set(user1.userid, user2.userid);
+function merge(toRemain: User, toDestroy: User) {
+	prevUsers.delete(toRemain.userid);
+	prevUsers.set(toDestroy.userid, toRemain.userid);
 }
 
 /**
@@ -318,17 +320,24 @@ function isTrusted(name: string | User) {
 
 const connections = new Map();
 
-class Connection {
+export class Connection {
 	id: string;
 	socketid: string;
 	worker: Worker;
-	inRooms: Set<string>;
+	inRooms: Set<RoomID>;
+	/**
+	 * This can be null during initialization and after disconnecting,
+	 * but we're asserting it non-null for ease of use. The main risk
+	 * is async code, where you need to re-check that it's not null
+	 * before using it.
+	 */
 	user: User;
 	ip: string;
 	protocol: string;
 	challenge: string;
 	autojoins: string;
 	lastActiveTime: number;
+	connectedAt: number;
 	constructor(
 		id: string,
 		worker: Worker,
@@ -337,17 +346,13 @@ class Connection {
 		ip: string | null,
 		protocol: string | null
 	) {
+		const now = Date.now();
+
 		this.id = id;
 		this.socketid = socketid;
 		this.worker = worker;
 		this.inRooms = new Set();
 
-		/**
-		 * This can be null during initialization and after disconnecting,
-		 * but we're asserting it non-null for ease of use. The main risk
-		 * is async code, where you need to re-check that it's not null
-		 * before using it.
-		 */
 		this.user = user!;
 
 		this.ip = ip || '';
@@ -355,10 +360,11 @@ class Connection {
 
 		this.challenge = '';
 		this.autojoins = '';
-		this.lastActiveTime = Date.now();
+		this.lastActiveTime = now;
+		this.connectedAt = now;
 	}
-	sendTo(roomid: string | BasicRoom | null, data: string) {
-		if (roomid && (roomid as BasicRoom).id) roomid = (roomid as BasicRoom).id;
+	sendTo(roomid: RoomID | BasicRoom | null, data: string) {
+		if (roomid && typeof roomid !== 'string') roomid = (roomid as BasicRoom).id;
 		if (roomid && roomid !== 'lobby') data = `>${roomid}\n${data}`;
 		Sockets.socketSend(this.worker, this.socketid, data);
 		Monitor.countNetworkUse(data.length);
@@ -402,15 +408,16 @@ class Connection {
 	}
 }
 
-type ChatQueueEntry = [string, string, Connection];
+type ChatQueueEntry = [string, RoomID, Connection];
 
 const SETTINGS = [
 	'isSysop', 'isStaff', 'blockChallenges', 'blockPMs',
-	'ignoreTickets', 'lastConnected', 'inviteOnlyNextBattle',
+	'ignoreTickets', 'lastConnected', 'lastDisconnected',
+	'inviteOnlyNextBattle',
 ];
 
 // User
-class User extends Chat.MessageContext {
+export class User extends Chat.MessageContext {
 	user: User;
 	mmrCache: {[format: string]: number};
 	guestNum: number;
@@ -420,6 +427,7 @@ class User extends Chat.MessageContext {
 	userid: ID;
 	group: string;
 	avatar: string | number;
+	language: string | null;
 
 	connected: boolean;
 	connections: Connection[];
@@ -433,19 +441,25 @@ class User extends Chat.MessageContext {
 	permalocked: string | ID | null;
 	prevNames: {[id: /** ID */ string]: string};
 
-	inRooms: Set<string>;
-	games: Set<string>;
+	inRooms: Set<RoomID>;
+	/**
+	 * Set of room IDs
+	 */
+	games: Set<RoomID>;
+	/** Millisecond timestamp for last battle decision */
 	lastDecision: number;
 	lastChallenge: number;
 	lastPM: string;
 	team: string;
 	lastMatch: string;
+	forcedPublic: string | null;
 
 	isSysop: boolean;
 	isStaff: boolean;
 	blockChallenges: boolean;
 	blockPMs: boolean | string;
 	ignoreTickets: boolean;
+	lastDisconnected: number;
 	lastConnected: number;
 	inviteOnlyNextBattle: boolean;
 
@@ -481,6 +495,7 @@ class User extends Chat.MessageContext {
 		this.registered = false;
 		this.userid = '';
 		this.group = Config.groupsranking[0];
+		this.language = null;
 
 		this.avatar = DEFAULT_TRAINER_SPRITES[Math.floor(Math.random() * DEFAULT_TRAINER_SPRITES.length)];
 
@@ -503,11 +518,7 @@ class User extends Chat.MessageContext {
 		this.prevNames = Object.create(null);
 		this.inRooms = new Set();
 
-		/**
-		 * Set of room IDs
-		 */
 		this.games = new Set();
-		/** Millisecond timestamp for last battle decision */
 		this.lastDecision = 0;
 
 		// misc state
@@ -515,6 +526,7 @@ class User extends Chat.MessageContext {
 		this.lastPM = '';
 		this.team = '';
 		this.lastMatch = '';
+		this.forcedPublic = null;
 
 		// settings
 		this.isSysop = false;
@@ -522,7 +534,8 @@ class User extends Chat.MessageContext {
 		this.blockChallenges = false;
 		this.blockPMs = false;
 		this.ignoreTickets = false;
-		this.lastConnected = 0;
+		this.lastDisconnected = 0;
+		this.lastConnected = connection.connectedAt;
 		this.inviteOnlyNextBattle = false;
 
 		// chat queue
@@ -560,8 +573,8 @@ class User extends Chat.MessageContext {
 		Users.add(this);
 	}
 
-	sendTo(roomid: string | BasicRoom | null, data: string) {
-		if (roomid && typeof roomid !== 'string') roomid = roomid.id;
+	sendTo(roomid: RoomID | BasicRoom | null, data: string) {
+		if (roomid && typeof roomid !== 'string') roomid = (roomid as BasicRoom).id;
 		if (roomid && roomid !== 'global' && roomid !== 'lobby') data = `>${roomid}\n${data}`;
 		for (const connection of this.connections) {
 			if (roomid && !connection.inRooms.has(roomid)) continue;
@@ -578,14 +591,14 @@ class User extends Chat.MessageContext {
 	popup(message: string) {
 		this.send(`|popup|` + message.replace(/\n/g, '||'));
 	}
-	getIdentity(roomid: string = '') {
+	getIdentity(roomid = '' as RoomID) {
 		if (this.locked || this.namelocked) {
 			const lockedSymbol = (Config.punishgroups && Config.punishgroups.locked ? Config.punishgroups.locked.symbol
 				: '\u203d');
 			return lockedSymbol + this.name;
 		}
 		if (roomid && roomid !== 'global') {
-			const room = Rooms(roomid);
+			const room = Rooms.get(roomid);
 			if (!room) {
 				throw new Error(`Room doesn't exist: ${roomid}`);
 			}
@@ -606,7 +619,7 @@ class User extends Chat.MessageContext {
 		// Boilerplate end
 		return this.group + this.name;
 	}
-	getIdentityWithStatus(roomid: string = '') {
+	getIdentityWithStatus(roomid = '' as RoomID) {
 		const identity = this.getIdentity(roomid);
 		const status = this.statusType === 'online' ? '' : '@!';
 		return `${identity}${status}`;
@@ -656,6 +669,14 @@ class User extends Chat.MessageContext {
 		}
 
 		groupData = Config.groups[group];
+
+		const roomIsTemporary = room && (room.isPersonal || room.battle);
+		if (roomIsTemporary && group === this.group && groupData.globalGroupInPersonalRoom) {
+			const newGroup = groupData.globalGroupInPersonalRoom;
+			if (Config.groups[newGroup].rank > groupData.rank) {
+				groupData = Config.groups[newGroup];
+			}
+		}
 
 		if (groupData && groupData[permission]) {
 			const jurisdiction = groupData[permission];
@@ -727,12 +748,12 @@ class User extends Chat.MessageContext {
 	resetName(isForceRenamed = false) {
 		return this.forceRename('Guest ' + this.guestNum, false, isForceRenamed);
 	}
-	updateIdentity(roomid: string | null = null) {
+	updateIdentity(roomid: RoomID | null = null) {
 		if (roomid) {
-			return Rooms(roomid).onUpdateIdentity(this);
+			return Rooms.get(roomid).onUpdateIdentity(this);
 		}
 		for (const inRoomID of this.inRooms) {
-			Rooms(inRoomID).onUpdateIdentity(this);
+			Rooms.get(inRoomID).onUpdateIdentity(this);
 		}
 	}
 	/**
@@ -747,7 +768,7 @@ class User extends Chat.MessageContext {
 		let userid = toID(name);
 		if (userid !== this.userid) {
 			for (const roomid of this.games) {
-				const room = Rooms(roomid);
+				const room = Rooms.get(roomid);
 				if (!room || !room.game || room.game.ended) {
 					this.games.delete(roomid);
 					console.log(`desynced roomgame ${roomid} renaming ${this.userid} -> ${userid}`);
@@ -885,6 +906,7 @@ class User extends Chat.MessageContext {
 
 			if (userType === '3') {
 				this.isSysop = true;
+				this.isStaff = true;
 				this.trusted = userid;
 				this.autoconfirmed = userid;
 			} else if (userType === '4') {
@@ -983,7 +1005,7 @@ class User extends Chat.MessageContext {
 			connection.send(this.getUpdateuserText());
 		}
 		for (const roomid of this.games) {
-			const room = Rooms(roomid);
+			const room = Rooms.get(roomid);
 			if (!room) {
 				Monitor.warn(`while renaming, room ${roomid} expired for user ${this.userid} in rooms ${[...this.inRooms]} and games ${[...this.games]}`);
 				this.games.delete(roomid);
@@ -997,7 +1019,7 @@ class User extends Chat.MessageContext {
 			room.game.onRename(this, oldid, joining, isForceRenamed);
 		}
 		for (const roomid of this.inRooms) {
-			Rooms(roomid).onRename(this, oldid, joining);
+			Rooms.get(roomid).onRename(this, oldid, joining);
 		}
 		if (isForceRenamed) this.trackRename = oldname;
 		return true;
@@ -1024,7 +1046,7 @@ class User extends Chat.MessageContext {
 	merge(oldUser: User) {
 		oldUser.cancelReady();
 		for (const roomid of oldUser.inRooms) {
-			Rooms(roomid).onLeave(oldUser);
+			Rooms.get(roomid).onLeave(oldUser);
 		}
 
 		if (this.locked === '#dnsbl' && !oldUser.locked) this.locked = null;
@@ -1033,6 +1055,11 @@ class User extends Chat.MessageContext {
 		if (oldUser.autoconfirmed) this.autoconfirmed = oldUser.autoconfirmed;
 
 		this.updateGroup(this.registered);
+		// We only propagate the 'busy' statusType through merging - merging is
+		// active enough that the user should no longer be in the 'idle' state.
+		// Doing this before merging connections ensures the updateuser message
+		// shows the correct idle state.
+		this.setStatusType((this.statusType === 'busy' || oldUser.statusType === 'busy') ? 'busy' : 'online');
 
 		for (const connection of oldUser.connections) {
 			this.mergeConnection(connection);
@@ -1070,7 +1097,6 @@ class User extends Chat.MessageContext {
 		this.latestHost = oldUser.latestHost;
 		this.latestHostType = oldUser.latestHostType;
 		this.userMessage = oldUser.userMessage || this.userMessage || '';
-		this.statusType = oldUser.statusType !== 'online' ? oldUser.statusType : this.statusType;
 
 		oldUser.markDisconnected();
 	}
@@ -1078,12 +1104,16 @@ class User extends Chat.MessageContext {
 		// the connection has changed name to this user's username, and so is
 		// being merged into this account
 		this.connected = true;
+		if (connection.connectedAt > this.lastConnected) {
+			this.lastConnected = connection.connectedAt;
+		}
 		this.connections.push(connection);
+
 		// console.log('' + this.name + ' merging: connection ' + connection.socket.id);
 		connection.send(this.getUpdateuserText());
 		connection.user = this;
 		for (const roomid of connection.inRooms) {
-			const room = Rooms(roomid);
+			const room = Rooms.get(roomid);
 			if (!this.inRooms.has(roomid)) {
 				if (Punishments.checkNameInRoom(this, room.id)) {
 					// the connection was in a room that this user is banned from
@@ -1140,8 +1170,8 @@ class User extends Chat.MessageContext {
 
 		this.isStaff = Config.groups[this.group] && (Config.groups[this.group].lock || Config.groups[this.group].root);
 		if (!this.isStaff) {
-			const staffRoom = Rooms('staff');
-			this.isStaff = (staffRoom && staffRoom.auth && staffRoom.auth[this.userid]);
+			const staffRoom = Rooms.get('staff');
+			this.isStaff = !!(staffRoom && staffRoom.auth && staffRoom.auth[this.userid]);
 		}
 		if (this.trusted) {
 			if (this.locked && this.permalocked) {
@@ -1171,8 +1201,8 @@ class User extends Chat.MessageContext {
 		const wasStaff = this.isStaff;
 		this.isStaff = Config.groups[this.group] && (Config.groups[this.group].lock || Config.groups[this.group].root);
 		if (!this.isStaff) {
-			const staffRoom = Rooms('staff');
-			this.isStaff = (staffRoom && staffRoom.auth && staffRoom.auth[this.userid]);
+			const staffRoom = Rooms.get('staff');
+			this.isStaff = !!(staffRoom && staffRoom.auth && staffRoom.auth[this.userid]);
 		}
 		if (wasStaff !== this.isStaff) this.update('isStaff');
 		Rooms.global.checkAutojoin(this);
@@ -1183,6 +1213,7 @@ class User extends Chat.MessageContext {
 				this.autoconfirmed = this.userid;
 			} else {
 				delete usergroups[this.userid];
+				this.trusted = '';
 			}
 			// tslint:disable-next-line:no-floating-promises
 			exportUsergroups();
@@ -1211,7 +1242,7 @@ class User extends Chat.MessageContext {
 	}
 	markDisconnected() {
 		this.connected = false;
-		this.lastConnected = Date.now();
+		this.lastDisconnected = Date.now();
 		if (!this.registered) {
 			// for "safety"
 			this.group = Config.groupsranking[0];
@@ -1233,7 +1264,7 @@ class User extends Chat.MessageContext {
 					this.markDisconnected();
 				}
 				for (const roomid of connection.inRooms) {
-					this.leaveRoom(Rooms(roomid), connection, true);
+					this.leaveRoom(Rooms.get(roomid), connection, true);
 				}
 				--this.ips[connection.ip];
 				this.connections.splice(i, 1);
@@ -1244,7 +1275,7 @@ class User extends Chat.MessageContext {
 			for (const roomid of this.inRooms) {
 				// should never happen.
 				Monitor.debug(`!! room miscount: ${roomid} not left`);
-				Rooms(roomid).onLeave(this);
+				Rooms.get(roomid).onLeave(this);
 			}
 			// cleanup
 			this.inRooms.clear();
@@ -1267,7 +1298,7 @@ class User extends Chat.MessageContext {
 			// console.log('DESTROY: ' + this.userid);
 			connection = this.connections[i];
 			for (const roomid of connection.inRooms) {
-				this.leaveRoom(Rooms(roomid), connection, true);
+				this.leaveRoom(Rooms.get(roomid), connection, true);
 			}
 			connection.destroy();
 		}
@@ -1301,8 +1332,8 @@ class User extends Chat.MessageContext {
 		const prevNames = Object.keys(this.prevNames);
 		return (prevNames.length ? prevNames[prevNames.length - 1] : this.userid) as ID;
 	}
-	async tryJoinRoom(roomid: string | Room, connection: Connection) {
-		roomid = roomid && (roomid as Room).id ? (roomid as Room).id : roomid as string;
+	async tryJoinRoom(roomid: RoomID | Room, connection: Connection) {
+		roomid = roomid && (roomid as Room).id ? (roomid as Room).id : roomid as RoomID;
 		const room = Rooms.search(roomid);
 		if (!room && roomid.startsWith('view-')) {
 			return Chat.resolvePage(roomid, this, connection);
@@ -1311,12 +1342,16 @@ class User extends Chat.MessageContext {
 			if (!this.named) {
 				return Rooms.RETRY_AFTER_LOGIN;
 			} else {
-				connection.sendTo(roomid, `|noinit|nonexistent|The room "${roomid}" does not exist.`);
+				if (room) {
+					connection.sendTo(roomid, `|noinit|joinfailed|The room "${roomid}" is invite-only, and you haven't been invited.`);
+				} else {
+					connection.sendTo(roomid, `|noinit|nonexistent|The room "${roomid}" does not exist.`);
+				}
 				return false;
 			}
 		}
 		if ((room as GameRoom).tour) {
-			const errorMessage = (room as GameRoom).tour.onBattleJoin(room, this);
+			const errorMessage = (room as GameRoom).tour!.onBattleJoin(room as GameRoom, this);
 			if (errorMessage) {
 				connection.sendTo(roomid, `|noinit|joinfailed|${errorMessage}`);
 				return false;
@@ -1340,15 +1375,15 @@ class User extends Chat.MessageContext {
 		this.joinRoom(room, connection);
 		return true;
 	}
-	joinRoom(roomid: string | Room, connection: Connection | null = null) {
-		const room = Rooms(roomid);
+	joinRoom(roomid: RoomID | Room, connection: Connection | null = null) {
+		const room = Rooms.get(roomid);
 		if (!room) throw new Error(`Room not found: ${roomid}`);
 		if (!connection) {
 			for (const curConnection of this.connections) {
 				// only join full clients, not pop-out single-room
 				// clients
 				// (...no, pop-out rooms haven't been implemented yet)
-				if (curConnection.inRooms.has('global')) {
+				if (curConnection.inRooms.has('global' as RoomID)) {
 					this.joinRoom(room, curConnection);
 				}
 			}
@@ -1368,7 +1403,7 @@ class User extends Chat.MessageContext {
 		connection: Connection | null = null,
 		force: boolean = false
 	) {
-		room = Rooms(room);
+		room = Rooms.get(room);
 		if (room.id === 'global') {
 			// you can't leave the global room except while disconnecting
 			if (!force) return false;
@@ -1493,7 +1528,7 @@ class User extends Chat.MessageContext {
 
 		this.lastChatMessage = new Date().getTime();
 
-		const room = Rooms(roomid);
+		const room = Rooms.get(roomid);
 		if (room) {
 			Monitor.activeIp = connection.ip;
 			Chat.parse(message, room, this, connection);
@@ -1516,6 +1551,7 @@ class User extends Chat.MessageContext {
 		if (type === this.statusType) return;
 		this.statusType = type;
 		this.updateIdentity();
+		this.update('statusType');
 	}
 	setUserMessage(message: string) {
 		if (message === this.userMessage) return;
@@ -1527,10 +1563,16 @@ class User extends Chat.MessageContext {
 		this.userMessage = '';
 		this.updateIdentity();
 	}
+	getAccountStatusString() {
+		return this.trusted === this.userid ? `[trusted]`
+			: this.autoconfirmed === this.userid ? `[ac]`
+			: this.registered ? `[registered]`
+			: `[unregistered]`;
+	}
 	destroy() {
 		// deallocate user
 		for (const roomid of this.games) {
-			const room = Rooms(roomid);
+			const room = Rooms.get(roomid);
 			if (!room) {
 				Monitor.warn(`while deallocating, room ${roomid} did not exist for ${this.userid} in rooms ${[...this.inRooms]} and games ${[...this.games]}`);
 				this.games.delete(roomid);
@@ -1565,22 +1607,46 @@ function pruneInactive(threshold: number) {
 		const bypass = user.statusType !== 'online' ||
 			(!user.can('bypassall') &&
 				(user.can('bypassafktimer') ||
-				Array.from(user.inRooms).some(room => user.can('bypassafktimer', null, Rooms(room) as BasicChatRoom))));
+				Array.from(user.inRooms).some(room => user.can('bypassafktimer', null, Rooms.get(room) as BasicChatRoom))));
 		if (!bypass && !user.connections.some(connection => now - connection.lastActiveTime < awayTimer)) {
 			user.setStatusType('idle');
 		}
 		if (user.connected) continue;
-		if ((now - user.lastConnected) > threshold) {
+		if ((now - user.lastDisconnected) > threshold) {
 			user.destroy();
 		}
 	}
+}
+
+function logGhostConnections(threshold: number): Promise<unknown> {
+	const buffer = [];
+	for (const connection of connections.values()) {
+		// If the connection's been around for at least a week and it doesn't
+		// use raw WebSockets (which doesn't have any kind of keepalive or
+		// timeouts on it), log it.
+		if (connection.protocol !== 'websocket-raw' && connection.connectedAt <= Date.now() - threshold) {
+			const timestamp = Chat.toTimestamp(new Date(connection.connectedAt));
+			const now = Chat.toTimestamp(new Date());
+			const log = `Connection ${connection.id} from ${connection.ip} with protocol "${connection.protocol}" has been around since ${timestamp} (currently ${now}).`;
+			buffer.push(log);
+		}
+	}
+	return buffer.length
+		? FS(`logs/ghosts-${process.pid}.log`).append(buffer.join('\r\n') + '\r\n')
+		: Promise.resolve();
 }
 
 /*********************************************************
  * Routing
  *********************************************************/
 
-function socketConnect(worker: Worker, workerid: number, socketid: string, ip: string, protocol: string) {
+function socketConnect(
+	worker: Worker,
+	workerid: number,
+	socketid: string,
+	ip: string,
+	protocol: string
+) {
 	const id = '' + workerid + '-' + socketid;
 	const connection = new Connection(id, worker, socketid, null, ip, protocol);
 	connections.set(id, connection);
@@ -1597,6 +1663,7 @@ function socketConnect(worker: Worker, workerid: number, socketid: string, ip: s
 
 	const user = new User(connection);
 	connection.user = user;
+	// tslint:disable-next-line: no-floating-promises
 	Punishments.checkIp(user, connection);
 	// Generate 1024-bit challenge string.
 	require('crypto').randomBytes(128, (err: Error | null, buffer: Buffer) => {
@@ -1615,7 +1682,7 @@ function socketConnect(worker: Worker, workerid: number, socketid: string, ip: s
 		}
 	});
 
-	user.joinRoom('global', connection);
+	user.joinRoom('global' as RoomID, connection);
 }
 function socketDisconnect(worker: Worker, workerid: number, socketid: string) {
 	const id = '' + workerid + '-' + socketid;
@@ -1650,7 +1717,7 @@ function socketReceive(worker: Worker, workerid: number, socketid: string, messa
 	const roomId = message.substr(0, pipeIndex) || (Rooms.lobby || Rooms.global).id;
 	message = message.slice(pipeIndex + 1);
 
-	const room = Rooms(roomId);
+	const room = Rooms.get(roomId);
 	if (!room) return;
 	const multilineMessage = Chat.multiLinePattern.test(message);
 	if (multilineMessage) {
@@ -1682,11 +1749,11 @@ function socketReceive(worker: Worker, workerid: number, socketid: string, messa
 	}
 }
 
-const users: Map<ID, User> = new Map();
-const prevUsers: Map<ID, ID> = new Map();
+const users = new Map<ID, User>();
+const prevUsers = new Map<ID, ID>();
 let numUsers = 0;
 
-export const Users = Object.assign(getUser, {
+export const Users = {
 	delete: deleteUser,
 	move,
 	add,
@@ -1713,5 +1780,9 @@ export const Users = Object.assign(getUser, {
 	pruneInactiveTimer: setInterval(() => {
 		pruneInactive(Config.inactiveuserthreshold || 60 * MINUTES);
 	}, 30 * MINUTES),
+	logGhostConnections,
+	logGhostConnectionsTimer: setInterval(async () => {
+		await logGhostConnections(7 * 24 * 60 * MINUTES);
+	}, 7 * 24 * 60 * MINUTES),
 	socketConnect,
-});
+};

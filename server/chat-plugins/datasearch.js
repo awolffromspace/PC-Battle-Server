@@ -195,7 +195,7 @@ exports.commands = {
 		`Inequality ranges use the characters '>' and '<' though they behave as '≥' and '≤', e.g., 'bp > 100' searches for all moves equal to and greater than 100 base power.`,
 		`Parameters can be excluded through the use of '!', e.g., !water type' excludes all Water-type moves.`,
 		`'asc' or 'desc' following a move property will arrange the names in ascending or descending order of that property respectively, e.g., basepower asc will arrange moves in ascending order of their basepowers.`,
-		`Valid flags are: authentic (bypasses substitute), bite, bullet, contact, dance, defrost, ohko, powder, priority, protect, pulse, punch, recovery, secondary, snatch, sound, and zmove.`,
+		`Valid flags are: authentic (bypasses substitute), bite, bullet, charge, contact, dance, defrost, gravity, mirror (reflected by mirror move), ohko, powder, priority, protect, pulse, punch, recharge, recovery, reflectable, secondary, snatch, sound, and zmove.`,
 		`A search that includes '!protect' will show all moves that bypass protection.`,
 		`Parameters separated with '|' will be searched as alternatives for each other, e.g., 'fire | water' searches for all moves that are either Fire type or Water type.`,
 		`If a Pok\u00e9mon is included as a parameter, moves will be searched from its movepool.`,
@@ -227,7 +227,7 @@ exports.commands = {
 		});
 	},
 	itemsearchhelp: [
-		`/itemsearch [move description] - finds items that match the given key words.`,
+		`/itemsearch [item description] - finds items that match the given key words.`,
 		`Command accepts natural language. (tip: fewer words tend to work better)`,
 		`Searches with "fling" in them will find items with the specified Fling behavior.`,
 		`Searches with "natural gift" in them will find items with the specified Natural Gift behavior.`,
@@ -655,8 +655,8 @@ function runDexsearch(target, cmd, canAll, message) {
 
 			for (let type in alts.resists) {
 				let effectiveness = 0;
-				let notImmune = Dex.getImmunity(type, dex[mon]);
-				if (notImmune) effectiveness = Dex.getEffectiveness(type, dex[mon]);
+				let notImmune = mod.getImmunity(type, dex[mon]);
+				if (notImmune) effectiveness = mod.getEffectiveness(type, dex[mon]);
 				if (!alts.resists[type]) {
 					if (notImmune && effectiveness >= 0) matched = true;
 				} else {
@@ -667,8 +667,8 @@ function runDexsearch(target, cmd, canAll, message) {
 
 			for (let type in alts.weak) {
 				let effectiveness = 0;
-				let notImmune = Dex.getImmunity(type, dex[mon]);
-				if (notImmune) effectiveness = Dex.getEffectiveness(type, dex[mon]);
+				let notImmune = mod.getImmunity(type, dex[mon]);
+				if (notImmune) effectiveness = mod.getEffectiveness(type, dex[mon]);
 				if (alts.weak[type]) {
 					if (notImmune && effectiveness >= 1) matched = true;
 				} else {
@@ -689,6 +689,8 @@ function runDexsearch(target, cmd, canAll, message) {
 				let monStat = 0;
 				if (stat === 'bst') {
 					for (let monStats in dex[mon].baseStats) {
+						// account for merged Special stat in gen 1, don't count it twice
+						if (maxGen === 1 && monStats === 'spd') continue;
 						monStat += dex[mon].baseStats[monStats];
 					}
 				} else if (stat === 'weight') {
@@ -796,7 +798,7 @@ function runMovesearch(target, cmd, canAll, message) {
 	let allCategories = ['physical', 'special', 'status'];
 	let allContestTypes = ['beautiful', 'clever', 'cool', 'cute', 'tough'];
 	let allProperties = ['basePower', 'accuracy', 'priority', 'pp'];
-	let allFlags = ['authentic', 'bite', 'bullet', 'contact', 'dance', 'defrost', 'ohko', 'powder', 'protect', 'pulse', 'punch', 'secondary', 'snatch', 'sound', 'zmove'];
+	let allFlags = ['authentic', 'bite', 'bullet', 'charge', 'contact', 'dance', 'defrost', 'gravity', 'mirror', 'ohko', 'powder', 'protect', 'pulse', 'punch', 'recharge', 'reflectable', 'secondary', 'snatch', 'sound', 'zmove'];
 	let allStatus = ['psn', 'tox', 'brn', 'par', 'frz', 'slp'];
 	let allVolatileStatus = ['flinch', 'confusion', 'partiallytrapped'];
 	let allBoosts = ['hp', 'atk', 'def', 'spa', 'spd', 'spe', 'accuracy', 'evasion'];

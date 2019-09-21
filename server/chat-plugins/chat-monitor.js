@@ -247,7 +247,7 @@ let namefilter = function (name, user) {
 			}
 			if (matched) {
 				if (Chat.monitors[list].punishment === 'AUTOLOCK') {
-					Punishments.autolock(user, Rooms('staff'), `NameMonitor`, `inappropriate name: ${name}`, `using an inappropriate name: ${name} (from ${user.name})`, false, name);
+					Punishments.autolock(user, Rooms.get('staff'), `NameMonitor`, `inappropriate name: ${name}`, `using an inappropriate name: ${name} (from ${user.name})`, false, name);
 				}
 				line[3]++;
 				saveFilters();
@@ -261,13 +261,16 @@ let namefilter = function (name, user) {
 let loginfilter = function (user) {
 	if (user.namelocked) return;
 
-	const forceRenamed = Chat.forceRenames.has(user.userid);
+	const forceRenamed = Chat.forceRenames.get(user.userid);
 	if (user.trackRename) {
-		Monitor.log(`[NameMonitor] Username used: ${user.name} (${forceRenamed ? 'automatically ' : ''}forcerenamed from ${user.trackRename})`);
+		Rooms.global.notifyRooms([/** @type {RoomID} */('staff')], `|html|[NameMonitor] Username used: <span class="username">${user.name}</span> ${user.getAccountStatusString()} (${forceRenamed ? 'automatically ' : ''}forcerenamed from <span class="username">${user.trackRename}</span>)`);
 		user.trackRename = '';
 	}
 	if (Chat.namefilterwhitelist.has(user.userid)) return;
-	if (forceRenamed) Monitor.log(`[NameMonitor] Forcerenamed name being reused: ${user.name}`);
+	if (typeof forceRenamed === 'number') {
+		const count = forceRenamed ? ` (forcerenamed ${forceRenamed} time${Chat.plural(forceRenamed)})` : '';
+		Rooms.global.notifyRooms([/** @type {RoomID} */('staff')], Chat.html`|html|[NameMonitor] Forcerenamed name being reused${count}: <span class="username">${user.name}</span> ${user.getAccountStatusString()}`);
+	}
 };
 /** @type {NameFilter} */
 let nicknamefilter = function (name, user) {
@@ -289,7 +292,7 @@ let nicknamefilter = function (name, user) {
 			}
 			if (matched) {
 				if (Chat.monitors[list].punishment === 'AUTOLOCK') {
-					Punishments.autolock(user, Rooms('staff'), `NameMonitor`, `inappropriate Pokémon nickname: ${name}`, `${user.name} - using an inappropriate Pokémon nickname: ${name}`, true);
+					Punishments.autolock(user, Rooms.get('staff'), `NameMonitor`, `inappropriate Pokémon nickname: ${name}`, `${user.name} - using an inappropriate Pokémon nickname: ${name}`, true);
 				}
 				line[3]++;
 				saveFilters();
@@ -325,7 +328,7 @@ let statusfilter = function (status, user) {
 			}
 			if (matched) {
 				if (Chat.monitors[list].punishment === 'AUTOLOCK') {
-					Punishments.autolock(user, Rooms('staff'), `NameMonitor`, `inappropriate status message: ${status}`, `${user.name} - using an inappropriate status: ${status}`, true);
+					Punishments.autolock(user, Rooms.get('staff'), `NameMonitor`, `inappropriate status message: ${status}`, `${user.name} - using an inappropriate status: ${status}`, true);
 				}
 				line[3]++;
 				saveFilters();
@@ -441,17 +444,18 @@ let commands = {
 				const notFound = words.filter(val => !filterWords[list].filter(entry => String(entry[0]).slice(1, -3) === val).length);
 				if (notFound.length) return this.errorReply(`${notFound.join(', ')} ${Chat.plural(notFound, "are", "is")} not on the ${list} list.`);
 				filterWords[list] = filterWords[list].filter(entry => !words.includes(String(entry[0]).slice(1, -3)));
-				this.globalModlog(`REMOVEFILTER`, null, `'${words.join(', ')}' from ${list} list by ${user.name}`);
-				saveFilters(true);
-				return this.sendReply(`'${words.join(', ')}' ${Chat.plural(words, "were", "was")} removed from the ${list} list.`);
+			} else if (Chat.monitors[list].punishment === 'SHORTENER') {
+				const notFound = words.filter(val => !filterWords[list].filter(entry => String(entry[0]).slice(3, -3).replace(/\\./g, '.') === val).length);
+				if (notFound.length) return this.errorReply(`${notFound.join(', ')} ${Chat.plural(notFound, "are", "is")} not on the ${list} list.`);
+				filterWords[list] = filterWords[list].filter(entry => !words.includes(String(entry[0]).slice(3, -3).replace(/\\./g, '.')));
 			} else {
 				const notFound = words.filter(val => !filterWords[list].filter(entry => entry[0] === val).length);
 				if (notFound.length) return this.errorReply(`${notFound.join(', ')} ${Chat.plural(notFound, "are", "is")} not on the ${list} list.`);
 				filterWords[list] = filterWords[list].filter(entry => !words.includes(String(entry[0]))); // This feels wrong
-				this.globalModlog(`REMOVEFILTER`, null, `'${words.join(', ')}' from ${list} list by ${user.name}`);
-				saveFilters(true);
-				return this.sendReply(`'${words.join(', ')}' ${Chat.plural(words, "were", "was")} removed from the ${list} list.`);
 			}
+			this.globalModlog(`REMOVEFILTER`, null, `'${words.join(', ')}' from ${list} list by ${user.name}`);
+			saveFilters(true);
+			return this.sendReply(`'${words.join(', ')}' ${Chat.plural(words, "were", "was")} removed from the ${list} list.`);
 		},
 		'': 'view',
 		list: 'view',
@@ -474,10 +478,11 @@ let commands = {
 		Chat.namefilterwhitelist.set(target, user.name);
 
 		const msg = `${target} was allowed as a username by ${user.name}.`;
-		const staffRoom = Rooms('staff');
-		const upperStaffRoom = Rooms('upperstaff');
+		const staffRoom = Rooms.get('staff');
+		const upperStaffRoom = Rooms.get('upperstaff');
 		if (staffRoom) staffRoom.add(msg).update();
 		if (upperStaffRoom) upperStaffRoom.add(msg).update();
+		this.globalModlog(`ALLOWNAME`, null, `${target} by ${user.name}`);
 	},
 };
 

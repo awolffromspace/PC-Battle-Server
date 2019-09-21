@@ -37,9 +37,6 @@ export class TeamValidator {
 			return null;
 		}
 		if (!team || !Array.isArray(team)) {
-			if (format.canUseRandomTeam) {
-				return null;
-			}
 			return [`You sent invalid team data. If you're not using a custom client, please report this as a bug.`];
 		}
 
@@ -67,7 +64,14 @@ export class TeamValidator {
 			if (setProblems) {
 				problems = problems.concat(setProblems);
 			}
-			if (removeNicknames) set.name = dex.getTemplate(set.species).baseSpecies;
+			if (removeNicknames) {
+				let crossTemplate: Template;
+				if (format.name === '[Gen 7] Cross Evolution' && (crossTemplate = dex.getTemplate(set.name)).exists) {
+					set.name = crossTemplate.species;
+				} else {
+					set.name = dex.getTemplate(set.species).baseSpecies;
+				}
+			}
 		}
 
 		for (const [rule, source, limit, bans] of ruleTable.complexTeamBans) {
@@ -235,6 +239,8 @@ export class TeamValidator {
 		if (!templateOverride) {
 			if (ruleTable.has('-unreleased') && postMegaTemplate.isUnreleased) {
 				problems.push(`${name} (${postMegaTemplate.species}) is unreleased.`);
+			} else if (ruleTable.has('-illegal') && postMegaTemplate.tier === 'Illegal') {
+				problems.push(`${name} (${postMegaTemplate.species}) is not obtainable in this game.`);
 			} else if (postMegaTemplate.tier) {
 				let tag = postMegaTemplate.tier === '(PU)' ? 'ZU' : postMegaTemplate.tier;
 				banReason = ruleTable.check('pokemontag:' + toID(tag), setHas);
@@ -279,7 +285,8 @@ export class TeamValidator {
 
 					if (template.unreleasedHidden && ruleTable.has('-unreleased')) {
 						problems.push(`${name}'s Hidden Ability is unreleased.`);
-					} else if (['entei', 'suicune', 'raikou'].includes(template.id) && format.requirePlus) {
+					} else if (['entei', 'suicune', 'raikou'].includes(template.id) &&
+						(format.requirePlus || format.requirePentagon)) {
 						problems.push(`${name}'s Hidden Ability is only available from Virtual Console, which is not allowed in this format.`);
 					} else if (dex.gen === 6 && ability.name === 'Symbiosis' &&
 						(set.species.endsWith('Orange') || set.species.endsWith('White'))) {

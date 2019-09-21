@@ -34,10 +34,11 @@ const LOG_PATH = 'logs/modlog/';
 const PUNISHMENTS = [
 	'ROOMBAN', 'UNROOMBAN', 'WARN', 'MUTE', 'HOURMUTE', 'UNMUTE', 'CRISISDEMOTE',
 	'WEEKLOCK', 'LOCK', 'UNLOCK', 'UNLOCKNAME', 'UNLOCKRANGE', 'UNLOCKIP', 'BAN',
-	'UNBAN', 'UNBANALL', 'DEROOMVOICEALL', 'RANGEBAN', 'UNRANGEBAN', 'RANGELOCK',
-	'TRUSTUSER', 'FORCRERENAME', 'BLACKLIST', 'BATTLEBAN', 'UNBATTLEBAN',
-	'NAMEBLACKLIST', 'UNBLACKLISTALL', 'KICKBATTLE', 'TICKETBAN', 'UNTICKETBAN',
-	'HIDETEXT', 'HIDEALTSTEXT', 'REDIRECT', 'NOTE',
+	'UNBAN', 'RANGEBAN', 'UNRANGEBAN', 'RANGELOCK', 'TRUSTUSER', 'UNTRUSTUSER',
+	'FORCRERENAME', 'BLACKLIST', 'BATTLEBAN', 'UNBATTLEBAN', 'NAMEBLACKLIST',
+	'KICKBATTLE', 'TICKETBAN', 'UNTICKETBAN', 'HIDETEXT', 'HIDEALTSTEXT', 'REDIRECT',
+	'NOTE', 'MAFIAHOSTBAN', 'MAFIAUNHOSTBAN', 'GIVEAWAYBAN', 'GIVEAWAYUNBAN',
+	'TOURBAN', 'TOUR UNBAN', 'AUTOLOCK', 'AUTONAMELOCK', 'NAMELOCK', 'UNNAMELOCK',
 ];
 const PUNISHMENTS_REGEX_STRING = `\\b(${PUNISHMENTS.join('|')}):.*`;
 
@@ -509,7 +510,7 @@ exports.commands = {
 	punishlog: 'modlog',
 	timedmodlog: 'modlog',
 	modlog(target, room, user, connection, cmd) {
-		if (!room) room = Rooms('global');
+		if (!room) room = Rooms.get('global');
 		let roomid = (room.id === 'staff' ? 'global' : room.id);
 
 		if (target.includes(',')) {

@@ -23,7 +23,7 @@ import {FS} from '../lib/fs';
 
 export const IPTools = new class {
 	dnsblCache = new Map<string, string | null>([
-		['127.0.0.01', null],
+		['127.0.0.1', null],
 	]);
 
 	proxyHosts = new Set([
@@ -125,6 +125,7 @@ export const IPTools = new class {
 		'vultr.com',
 		'worldstream.nl',
 		'your-server.de',
+		'zare.com',
 		'zenmate.com',
 	]);
 	residentialHosts = new Set([
@@ -521,7 +522,7 @@ export const IPTools = new class {
 	testConnection(ip: string, callback: (result: boolean) => void) {
 		const cachedValue = this.connectionTestCache.get(ip);
 		if (cachedValue !== undefined) {
-			return cachedValue;
+			return callback(cachedValue);
 		}
 
 		// Node.js's documentation does not make this easy to write. I discovered
@@ -617,7 +618,13 @@ export const IPTools = new class {
 			'109.122.80.234', '115.85.65.146', '118.97.55.65', '185.217.160.184', '200.35.43.89', '202.62.61.119',
 			'203.83.183.11', '84.245.104.164', '158.195.148.169', '31.168.162.22', '62.12.114.142', '157.157.87.135',
 			'40.71.227.101', '119.42.118.73', '202.40.183.234', '113.11.136.28', '222.72.38.46', '185.141.10.67',
-			'24.52.170.119', '62.140.252.72', '94.236.198.160', '182.52.51.41',
+			'24.52.170.119', '62.140.252.72', '94.236.198.160', '182.52.51.41', '187.38.170.94', '109.185.143.169',
+			'84.41.29.225', '101.255.64.194', '210.16.84.182', '203.192.208.72', '201.182.146.14', '189.45.42.149',
+			'89.135.51.39', '82.117.234.189', '109.105.195.250', '61.9.48.99', '91.103.31.45', '213.5.194.3',
+			'185.121.202.51', '175.195.33.102', '59.120.229.102', '79.106.165.238', '217.210.157.135', '101.108.175.93',
+			'181.210.16.130', '81.91.144.53', '200.89.174.102', '85.114.96.94', '85.10.56.233', '81.162.199.249',
+			'91.210.59.145', '88.87.231.132', '109.238.220.130', '167.86.94.107', '104.244.78.55', '92.62.139.103',
+			'89.28.31.85',
 		].includes(ip)) {
 			// single-IP open proxies
 			return 'proxy';
