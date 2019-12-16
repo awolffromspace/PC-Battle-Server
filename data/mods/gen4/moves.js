@@ -152,7 +152,7 @@ let BattleMovedex = {
 						return false;
 					}
 					if (!target.isActive) {
-						const possibleTarget = this.resolveTarget(pokemon, this.getMove('pound'));
+						const possibleTarget = this.resolveTarget(pokemon, this.dex.getMove('pound'));
 						if (!possibleTarget) {
 							this.add('-miss', pokemon);
 							return false;
@@ -264,7 +264,7 @@ let BattleMovedex = {
 		flags: {},
 		onHit(target) {
 			let possibleTypes = target.moveSlots.map(moveSlot => {
-				let move = this.getMove(moveSlot.id);
+				let move = this.dex.getMove(moveSlot.id);
 				if (move.id !== 'conversion' && move.id !== 'curse' && !target.hasType(move.type)) {
 					return move.type;
 				}
@@ -488,11 +488,8 @@ let BattleMovedex = {
 	dreameater: {
 		inherit: true,
 		desc: "The target is unaffected by this move unless it is asleep and does not have a substitute. The user recovers 1/2 the HP lost by the target, rounded down, but not less than 1 HP. If Big Root is held by the user, the HP recovered is 1.3x normal, rounded down.",
-		onTryHit(target) {
-			if (target.status !== 'slp' || target.volatiles['substitute']) {
-				this.add('-immune', target);
-				return null;
-			}
+		onTryImmunity(target) {
+			return target.status === 'slp' && !target.volatiles['substitute'];
 		},
 	},
 	earthquake: {
@@ -736,7 +733,7 @@ let BattleMovedex = {
 		inherit: true,
 		desc: "Raises the user's Special Attack by 1 stage.",
 		shortDesc: "Raises the user's Sp. Atk by 1.",
-		onModifyMove() { },
+		onModifyMove() {},
 		boosts: {
 			spa: 1,
 		},
@@ -782,7 +779,7 @@ let BattleMovedex = {
 			},
 			onDisableMove(pokemon) {
 				for (const moveSlot of pokemon.moveSlots) {
-					if (this.getMove(moveSlot.id).flags['heal']) {
+					if (this.dex.getMove(moveSlot.id).flags['heal']) {
 						pokemon.disableMove(moveSlot.id);
 					}
 				}
@@ -842,7 +839,7 @@ let BattleMovedex = {
 			move.causedCrashDamage = true;
 			let damage = this.getDamage(source, target, move, true);
 			if (!damage) damage = target.maxhp;
-			this.damage(this.clampIntRange(damage / 2, 1, Math.floor(target.maxhp / 2)), source, source, move);
+			this.damage(this.dex.clampIntRange(damage / 2, 1, Math.floor(target.maxhp / 2)), source, source, move);
 		},
 	},
 	iciclespear: {
@@ -878,7 +875,7 @@ let BattleMovedex = {
 			move.causedCrashDamage = true;
 			let damage = this.getDamage(source, target, move, true);
 			if (!damage) damage = target.maxhp;
-			this.damage(this.clampIntRange(damage / 2, 1, Math.floor(target.maxhp / 2)), source, source, move);
+			this.damage(this.dex.clampIntRange(damage / 2, 1, Math.floor(target.maxhp / 2)), source, source, move);
 		},
 	},
 	knockoff: {
@@ -932,6 +929,16 @@ let BattleMovedex = {
 	lockon: {
 		inherit: true,
 		desc: "Until the end of the next turn, the target cannot avoid the user's moves, even if the target is in the middle of a two-turn move. When this effect is started against the target, this and Mind Reader's effects end for every other Pokemon against that target. If the target leaves the field using Baton Pass, the replacement remains under this effect. If the user leaves the field using Baton Pass, this effect is restarted against the same target for the replacement. The effect ends if either the user or the target leaves the field.",
+		effect: {
+			duration: 2,
+			onSourceInvulnerabilityPriority: 1,
+			onSourceInvulnerability(target, source, move) {
+				if (move && source === this.effectData.target && target === this.effectData.source) return 0;
+			},
+			onSourceAccuracy(accuracy, target, source, move) {
+				if (move && source === this.effectData.target && target === this.effectData.source) return true;
+			},
+		},
 	},
 	luckychant: {
 		inherit: true,
@@ -980,7 +987,7 @@ let BattleMovedex = {
 					return;
 				}
 				target.removeVolatile('magiccoat');
-				let newMove = this.getActiveMove(move.id);
+				let newMove = this.dex.getActiveMove(move.id);
 				newMove.hasBounced = true;
 				this.useMove(newMove, target, source);
 				return null;
@@ -1061,7 +1068,7 @@ let BattleMovedex = {
 			if (source.transformed || !target.lastMove || disallowedMoves.includes(target.lastMove.id) || source.moves.indexOf(target.lastMove.id) !== -1 || target.volatiles['substitute']) return false;
 			let mimicIndex = source.moves.indexOf('mimic');
 			if (mimicIndex < 0) return false;
-			let move = this.getMove(target.lastMove.id);
+			let move = this.dex.getMove(target.lastMove.id);
 			source.moveSlots[mimicIndex] = {
 				move: move.name,
 				id: move.id,
@@ -1116,9 +1123,9 @@ let BattleMovedex = {
 			if (this.field.isWeather(['sunnyday', 'desolateland'])) {
 				this.heal(pokemon.maxhp * 2 / 3);
 			} else if (this.field.isWeather(['raindance', 'primordialsea', 'sandstorm', 'hail'])) {
-				this.heal(pokemon.maxhp / 4);
+				this.heal(pokemon.baseMaxhp / 4);
 			} else {
-				this.heal(pokemon.maxhp / 2);
+				this.heal(pokemon.baseMaxhp / 2);
 			}
 		},
 	},
@@ -1129,9 +1136,9 @@ let BattleMovedex = {
 			if (this.field.isWeather(['sunnyday', 'desolateland'])) {
 				this.heal(pokemon.maxhp * 2 / 3);
 			} else if (this.field.isWeather(['raindance', 'primordialsea', 'sandstorm', 'hail'])) {
-				this.heal(pokemon.maxhp / 4);
+				this.heal(pokemon.baseMaxhp / 4);
 			} else {
-				this.heal(pokemon.maxhp / 2);
+				this.heal(pokemon.baseMaxhp / 2);
 			}
 		},
 	},
@@ -1254,7 +1261,7 @@ let BattleMovedex = {
 				let sideConditions = ['spikes', 'toxicspikes', 'stealthrock', 'stickyweb'];
 				for (const condition of sideConditions) {
 					if (pokemon.side.removeSideCondition(condition)) {
-						this.add('-sideend', pokemon.side, this.getEffect(condition).name, '[from] move: Rapid Spin', '[of] ' + pokemon);
+						this.add('-sideend', pokemon.side, this.dex.getEffect(condition).name, '[from] move: Rapid Spin', '[of] ' + pokemon);
 					}
 				}
 				if (pokemon.volatiles['partiallytrapped']) {
@@ -1382,7 +1389,7 @@ let BattleMovedex = {
 			if (source.transformed || !target.lastMove || disallowedMoves.includes(target.lastMove.id) || source.moves.includes(target.lastMove.id) || target.volatiles['substitute']) return false;
 			let sketchIndex = source.moves.indexOf('sketch');
 			if (sketchIndex < 0) return false;
-			let move = this.getMove(target.lastMove.id);
+			let move = this.dex.getMove(target.lastMove.id);
 			let sketchedMove = {
 				move: move.name,
 				id: move.id,
@@ -1565,9 +1572,9 @@ let BattleMovedex = {
 			if (this.field.isWeather(['sunnyday', 'desolateland'])) {
 				this.heal(pokemon.maxhp * 2 / 3);
 			} else if (this.field.isWeather(['raindance', 'primordialsea', 'sandstorm', 'hail'])) {
-				this.heal(pokemon.maxhp / 4);
+				this.heal(pokemon.baseMaxhp / 4);
 			} else {
-				this.heal(pokemon.maxhp / 2);
+				this.heal(pokemon.baseMaxhp / 2);
 			}
 		},
 	},
@@ -1632,7 +1639,7 @@ let BattleMovedex = {
 			},
 			onDisableMove(pokemon) {
 				for (const moveSlot of pokemon.moveSlots) {
-					if (this.getMove(moveSlot.id).category === 'Status') {
+					if (this.dex.getMove(moveSlot.id).category === 'Status') {
 						pokemon.disableMove(moveSlot.id);
 					}
 				}
@@ -1783,7 +1790,7 @@ let BattleMovedex = {
 			onEnd(target) {
 				if (!target.fainted) {
 					let source = this.effectData.source;
-					let damage = this.heal(target.maxhp / 2, target, target);
+					let damage = this.heal(target.baseMaxhp / 2, target, target);
 					if (damage) this.add('-heal', target, target.getHealth, '[from] move: Wish', '[wisher] ' + source.name);
 				}
 			},

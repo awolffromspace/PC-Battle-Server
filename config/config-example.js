@@ -95,7 +95,8 @@ Main's SSL deploy script from Let's Encrypt looks like:
  *   This can be either false (meaning not to trust any proxies) or an array
  *   of strings. Each string should be either an IP address or a subnet given
  *   in CIDR notation. You should usually leave this as `false` unless you
- *   know what you are doing.
+ *   know what you are doing
+ * @type {false | string[]}.
  */
 exports.proxyip = false;
 
@@ -272,14 +273,17 @@ exports.restrictLinks = false;
 
 /**
   * chat modchat - default minimum group for speaking in chatrooms; changeable with /modchat
+  * @type {false | string}
  */
 exports.chatmodchat = false;
 /**
  * battle modchat - default minimum group for speaking in battles; changeable with /modchat
+ * @type {false | string}
  */
 exports.battlemodchat = false;
 /**
  * pm modchat - minimum group for PMing other users, challenging other users
+ * @type {false | string}
  */
 exports.pmmodchat = false;
 /**
@@ -882,7 +886,7 @@ exports.forcedpublicprefixes = [];
 
 /**
  * permissions and groups:
- *   Each entry in `grouplist' is a seperate group. Some of the members are "special"
+ *   Each entry in `grouplist` is a seperate group. Some of the members are "special"
  *     while the rest is just a normal permission.
  *   The order of the groups determines their ranking.
  *   The special members are as follows:
@@ -1009,7 +1013,6 @@ exports.grouplist = [
 		inherit: '%',
 		jurisdiction: 'u',
 		ban: true,
-		modchat: true,
 		modchatall: true,
 		roomvoice: true,
 		forcerename: true,
@@ -1044,6 +1047,7 @@ exports.grouplist = [
 		jeopardy: true,
 		joinbattle: true,
 		minigame: true,
+		modchat: true,
 	},
 	{
 		symbol: '\u2606',

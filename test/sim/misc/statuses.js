@@ -72,7 +72,7 @@ describe('Paralysis', function () {
 	});
 
 	it('should reduce speed to 25% of its original value in Stadium', function () {
-		battle = common.mod('stadium').createBattle([
+		battle = common.createBattle({formatid: 'gen1stadiumou@@@!teampreview'}, [
 			[{species: 'Vaporeon', moves: ['growl']}],
 			[{species: 'Jolteon', moves: ['thunderwave']}],
 		]);
@@ -150,7 +150,7 @@ describe('Freeze', function () {
 			[{species: 'Shaymin-Sky', ability: 'sturdy', moves: ['sleeptalk']}],
 		]);
 		// I didn't feel like manually testing seed after seed. Sue me.
-		battle.onEvent('ModifyMove', battle.getFormat(), function (move) {
+		battle.onEvent('ModifyMove', battle.format, function (move) {
 			if (move.secondaries) {
 				this.debug('Freeze test: Guaranteeing secondary');
 				for (const secondary of move.secondaries) {
@@ -168,7 +168,7 @@ describe('Freeze', function () {
 			[{species: 'Ditto', ability: 'imposter', moves: ['transform']}],
 			[{species: 'Shaymin-Sky', ability: 'sturdy', moves: ['icebeam', 'sleeptalk']}],
 		]);
-		battle.onEvent('ModifyMove', battle.getFormat(), function (move) {
+		battle.onEvent('ModifyMove', battle.format, function (move) {
 			if (move.secondaries) {
 				this.debug('Freeze test: Guaranteeing secondary');
 				for (const secondary of move.secondaries) {

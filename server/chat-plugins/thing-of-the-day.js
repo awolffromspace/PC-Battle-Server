@@ -10,6 +10,9 @@ const ROOMIDS = ['thestudio', 'jubilifetvfilms', 'youtube', 'thelibrary', 'prowr
 /** @type {{[k: string]: ChatRoom}} */
 const rooms = {};
 
+/** @type {Map<string, OtdHandler>} */
+const otds = new Map();
+
 for (const roomid of ROOMIDS) {
 	rooms[roomid] = /** @type {ChatRoom} */ (Rooms.get(roomid));
 }
@@ -21,7 +24,7 @@ const COTDS_FILE = 'config/chat-plugins/youtube-channels.tsv';
 const BOTWS_FILE = 'config/chat-plugins/thelibrary.tsv';
 const MOTWS_FILE = 'config/chat-plugins/prowrestling-matches.tsv';
 const ANOTDS_FILE = 'config/chat-plugins/animeandmanga-shows.tsv';
-const ATLOTDS_FILE = 'config/chat-plugins/sports-athletes.tsv';
+const athotdS_FILE = 'config/chat-plugins/sports-athletes.tsv';
 const PRENOMS_FILE = 'config/chat-plugins/otd-prenoms.json';
 
 /** @type {{[k: string]: [string, AnyObject][]}} */
@@ -149,7 +152,7 @@ class OtdHandler {
 
 		/** @type {{[k: string]: string}} */
 		let obj = {};
-		obj[user.userid] = user.name;
+		obj[user.id] = user.name;
 
 		let nomObj = {nomination: nomination, name: user.name, userids: Object.assign(obj, user.prevNames), ips: Object.assign({}, user.ips)};
 
@@ -412,40 +415,23 @@ class OtdHandler {
 	}
 }
 
-const aotd = new OtdHandler('aotd', 'Artist', rooms.thestudio, AOTDS_FILE, ['artist', 'nominator', 'quote', 'song', 'link', 'image', 'time'], ['Artist', 'Nominator', 'Quote', 'Song', 'Link', 'Image', 'Timestamp']);
-const fotd = new OtdHandler('fotd', 'Film', rooms.jubilifetvfilms, FOTDS_FILE, ['film', 'nominator', 'quote', 'link', 'image', 'time'], ['Film', 'Nominator', 'Quote', 'Link', 'Image', 'Timestamp']);
-const sotd = new OtdHandler('sotd', 'Show', rooms.jubilifetvfilms, SOTDS_FILE, ['show', 'nominator', 'quote', 'link', 'image', 'time'], ['Show', 'Nominator', 'Quote', 'Link', 'Image', 'Timestamp']);
-const cotd = new OtdHandler('cotd', 'Channel', rooms.youtube, COTDS_FILE, ['channel', 'nominator', 'link', 'tagline', 'image', 'time'], ['Show', 'Nominator', 'Link', 'Tagline', 'Image', 'Timestamp']);
-const botw = new OtdHandler('botw', 'Book', rooms.thelibrary, BOTWS_FILE, ['book', 'nominator', 'link', 'quote', 'author', 'image', 'time'], ['Book', 'Nominator', 'Link', 'Quote', 'Author', 'Image', 'Timestamp'], true);
-const motw = new OtdHandler('motw', 'Match', rooms.prowrestling, MOTWS_FILE, ['match', 'nominator', 'link', 'tagline', 'event', 'image', 'time'], ['Match', 'Nominator', 'Link', 'Tagline', 'Event', 'Image', 'Timestamp'], true);
-const anotd = new OtdHandler('anotd', 'Animanga', rooms.animeandmanga, ANOTDS_FILE, ['show', 'nominator', 'link', 'tagline', 'image', 'time'], ['Show', 'Nominator', 'Link', 'Tagline', 'Image', 'Timestamp']);
-const atlotd = new OtdHandler('atlotd', 'Athlete', rooms.sports, ATLOTDS_FILE, ['athlete', 'nominator', 'image', 'sport', 'team', 'country', 'age', 'quote', 'time'], ['Athlete', 'Nominator', 'Image', 'Sport', 'Team', 'Country', 'Age', 'Quote', 'Timestamp']);
+otds.set('aotd', new OtdHandler('aotd', 'Artist', rooms.thestudio, AOTDS_FILE, ['artist', 'nominator', 'quote', 'song', 'link', 'image', 'time'], ['Artist', 'Nominator', 'Quote', 'Song', 'Link', 'Image', 'Timestamp']));
+otds.set('fotd', new OtdHandler('fotd', 'Film', rooms.jubilifetvfilms, FOTDS_FILE, ['film', 'nominator', 'quote', 'link', 'image', 'time'], ['Film', 'Nominator', 'Quote', 'Link', 'Image', 'Timestamp']));
+otds.set('sotd', new OtdHandler('sotd', 'Show', rooms.jubilifetvfilms, SOTDS_FILE, ['show', 'nominator', 'quote', 'link', 'image', 'time'], ['Show', 'Nominator', 'Quote', 'Link', 'Image', 'Timestamp']));
+otds.set('cotd', new OtdHandler('cotd', 'Channel', rooms.youtube, COTDS_FILE, ['channel', 'nominator', 'link', 'tagline', 'image', 'time'], ['Show', 'Nominator', 'Link', 'Tagline', 'Image', 'Timestamp']));
+otds.set('botw', new OtdHandler('botw', 'Book', rooms.thelibrary, BOTWS_FILE, ['book', 'nominator', 'link', 'quote', 'author', 'image', 'time'], ['Book', 'Nominator', 'Link', 'Quote', 'Author', 'Image', 'Timestamp'], true));
+otds.set('motw', new OtdHandler('motw', 'Match', rooms.prowrestling, MOTWS_FILE, ['match', 'nominator', 'link', 'tagline', 'event', 'image', 'time'], ['Match', 'Nominator', 'Link', 'Tagline', 'Event', 'Image', 'Timestamp'], true));
+otds.set('anotd', new OtdHandler('anotd', 'Animanga', rooms.animeandmanga, ANOTDS_FILE, ['show', 'nominator', 'link', 'tagline', 'image', 'time'], ['Show', 'Nominator', 'Link', 'Tagline', 'Image', 'Timestamp']));
+otds.set('athotd', new OtdHandler('athotd', 'Athlete', rooms.sports, athotdS_FILE, ['athlete', 'nominator', 'image', 'sport', 'team', 'country', 'age', 'quote', 'time'], ['Athlete', 'Nominator', 'Image', 'Sport', 'Team', 'Country', 'Age', 'Quote', 'Timestamp']));
 
 /**
  * @param {string} message
  */
 function selectHandler(message) {
 	let id = toID(message.substring(1).split(' ')[0]);
-	switch (id) {
-	case 'aotd':
-		return aotd;
-	case 'fotd':
-		return fotd;
-	case 'sotd':
-		return sotd;
-	case 'cotd':
-		return cotd;
-	case 'botw':
-		return botw;
-	case 'motw':
-		return motw;
-	case 'anotd':
-		return anotd;
-	case 'atlotd':
-		return atlotd;
-	default:
-		throw new Error("Invalid type for otd handler.");
-	}
+	const handler = otds.get(id);
+	if (!handler) throw new Error("Invalid type for otd handler.");
+	return handler;
 }
 
 /** @type {ChatCommands} */
@@ -678,35 +664,6 @@ let commands = {
 	},
 };
 
-/** @type {PageTable} */
-const pages = {
-	aotd() {
-		return aotd.generateWinnerList(this);
-	},
-	fotd() {
-		return fotd.generateWinnerList(this);
-	},
-	sotd() {
-		return sotd.generateWinnerList(this);
-	},
-	cotd() {
-		return cotd.generateWinnerList(this);
-	},
-	botw() {
-		return botw.generateWinnerList(this);
-	},
-	motw() {
-		return motw.generateWinnerList(this);
-	},
-	anotd() {
-		return anotd.generateWinnerList(this);
-	},
-	atlotd() {
-		return atlotd.generateWinnerList(this);
-	},
-};
-exports.pages = pages;
-
 const help = [
 	`Thing of the Day plugin commands (aotd, fotd, sotd, cotd, botw, motw, anotd):`,
 	`- /-otd - View the current Thing of the Day.`,
@@ -720,15 +677,13 @@ const help = [
 	`- /-otd winners - Displays a list of previous things of the day.`,
 ];
 
-exports.commands = {
-	aotd: commands,
-	fotd: commands,
-	sotd: commands,
-	cotd: commands,
-	botw: commands,
-	motw: commands,
-	anotd: commands,
-	atlotd: commands,
-	aotdhelp: help,
-	otdhelp: help,
-};
+/** @type {PageTable} */
+exports.pages = {};
+/** @type {ChatCommands} */
+exports.commands = {};
+
+for (let [k, v] of otds) {
+	exports.pages[k] = function () { return v.generateWinnerList(this); };
+	exports.commands[k] = commands;
+	exports.commands[`${k}help`] = help;
+}

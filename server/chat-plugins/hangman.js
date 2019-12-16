@@ -21,7 +21,7 @@ class Hangman extends Rooms.RoomGame {
 
 		this.gameid = /** @type {ID} */ ('hangman');
 		this.title = 'Hangman';
-		this.creator = user.userid;
+		this.creator = user.id;
 		this.word = word;
 		this.hint = hint;
 		this.incorrectGuesses = 0;
@@ -48,7 +48,7 @@ class Hangman extends Rooms.RoomGame {
 	 * @param {User} user
 	 */
 	guess(word, user) {
-		if (user.userid === this.creator) return user.sendTo(this.room, "You can't guess in your own hangman game.");
+		if (user.id === this.creator) return user.sendTo(this.room, "You can't guess in your own hangman game.");
 
 		let sanitized = word.replace(/[^A-Za-z ]/g, '');
 		let normalized = toID(sanitized);
@@ -352,5 +352,17 @@ const commands = {
 		`/hangman guess [word] - Same as a letter, but guesses an entire word.`,
 	],
 };
+/** @type {SettingsHandler} */
+const roomSettings = room => ({
+	label: "Hangman",
+	permission: 'editroom',
+	options: [
+		[`disabled`, room.hangmanDisabled || 'hangman disable'],
+		[`enabled`, !room.hangmanDisabled || 'hangman enable'],
+	],
+});
 
-exports.commands = commands;
+module.exports = {
+	commands,
+	roomSettings,
+};
