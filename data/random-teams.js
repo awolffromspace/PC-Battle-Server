@@ -1431,33 +1431,35 @@ class RandomTeams {
 				let types = template.types;
 				if (template.battleOnly) types = this.dex.getTemplate(template.baseSpecies).types;
 				if (types.indexOf(type) < 0) continue;
-			} else if (formatID === 'gen7uberrandom') {
+			} else if (formatID === 'gen8uberrandom') {
 				if (template.tier !== 'Uber') continue;
-			} else if (formatID === 'gen7ouuurandom') {
+			} else if (formatID === 'gen8ouuurandom') {
 				if (template.tier !== 'OU' && template.tier !== 'BL' && template.tier !== 'UU' && template.tier !== 'BL2') continue;
 			} else if (formatID === 'gen7runurandom') {
 				if (template.tier !== 'RU' && template.tier !== 'BL3' && template.tier !== 'NU' && template.tier !== 'BL4') continue;
 			} else if (formatID === 'gen7purandom') {
 				if (template.tier !== 'PU') continue;
-			} else if (formatID === 'gen7lcrandom') {
+			} else if (formatID === 'gen8lcrandom') {
 				if (template.tier !== 'LC') continue;
-			} else if (formatID === 'gen7generationalrandom') {
+			} else if (formatID === 'gen8generationalrandom') {
 				if (template.gen !== teamGeneration) continue;
-			} else if (formatID === 'gen7kantorandom') {
+			} else if (formatID === 'gen8kantorandom') {
 				if (template.gen !== 1) continue;
-			} else if (formatID === 'gen7johtorandom') {
+			} else if (formatID === 'gen8johtorandom') {
 				if (template.gen !== 2) continue;
-			} else if (formatID === 'gen7hoennrandom') {
+			} else if (formatID === 'gen8hoennrandom') {
 				if (template.gen !== 3) continue;
-			} else if (formatID === 'gen7sinnohrandom') {
+			} else if (formatID === 'gen8sinnohrandom') {
 				if (template.gen !== 4) continue;
-			} else if (formatID === 'gen7unovarandom') {
+			} else if (formatID === 'gen8unovarandom') {
 				if (template.gen !== 5) continue;
-			} else if (formatID === 'gen7kalosrandom') {
+			} else if (formatID === 'gen8kalosrandom') {
 				if (template.gen !== 6) continue;
-			} else if (formatID === 'gen7alolarandom') {
+			} else if (formatID === 'gen8alolarandom') {
 				if (template.gen !== 7) continue;
-			} else if (formatID === 'gen7colorrandom') {
+			} else if (formatID === 'gen8galarrandom') {
+				if (template.gen !== 7) continue;
+			} else if (formatID === 'gen8colorrandom') {
 				let colors = template.color;
 				if (colors.indexOf(teamColor) < 0) continue;
 			}
@@ -1466,7 +1468,7 @@ class RandomTeams {
 			}
 		}
 
-		if (formatID === 'gen7orbrandom') {
+		if (formatID === 'gen8orbrandom') {
 			pokemonPool = ['shellder', 'cloyster', 'gastly', 'voltorb', 'electrode', 'koffing', 'ditto', 'sunkern', 'unown', 'pineco', 'forretress', 'silcoon', 'cascoon', 'lunatone', 'solrock', 'castformsunny', 'castformrainy', 'shuppet', 'glalie', 'clamperl', 'bronzor', 'rotom',
 			'whirlipede', 'cottonee', 'solosis', 'duosion', 'ferroseed', 'cryogonal', 'shelmet', 'carbink', 'klefki', 'pumpkaboo', 'pumpkaboolarge', 'pumpkaboosmall', 'pumpkaboosuper', 'hoopa', 'goomy', 'chinchou', 'qwilfish', 'wailmer', 'spheal', 'tympole', 'geodude', 'magnemite',
 			'gulpin', 'spoink', 'chimecho', 'metang', 'drifloon', 'drifblim', 'magnezone', 'phione', 'swadloon', 'yamask', 'foongus', 'amoonguss', 'lampent', 'chandelure', 'spritzee', 'phantump', 'burmy', 'spiritomb', 'petilil', 'vanillite', 'litwick', 'spewpa', 'clefairy', 'mankey',
@@ -1495,7 +1497,7 @@ class RandomTeams {
 		}
 
 		// For Metronome
-		if (formatID === 'gen7metronome3v3random' || formatID === 'gen7metronome6v6random') {
+		if (formatID === 'gen8metronome3v3random' || formatID === 'gen8metronome6v6random') {
 			let metronome = this.getMove('Metronome');
 			metronome.pp = 624.375;
 			metronome.noMetronome.push('imprison', 'taunt', 'torment');
@@ -1556,14 +1558,18 @@ class RandomTeams {
 				case 'Persian': case 'Meowth': case 'Raichu': case 'Sandslash': case 'Sandshrew': case 'Zygarde':
 					if (this.gen >= 7 && this.randomChance(1, 2)) continue;
 					break;
-				case 'Darmanitan': case 'Darumaka': case 'Indeedee': case 'Linoone': case 'Zigzagoon': case 'Rapidash': case 'Ponyta': case 'Stunfisk': case 'Weezing':
+				case 'Corsola': case 'Darmanitan': case 'Darumaka': case 'Farfetch\'d': case 'Indeedee': case 'Linoone': case 'Zigzagoon': case 'Mr. Mime': case 'Rapidash': case 'Ponyta': case 'Stunfisk':
+				case 'Weezing': case 'Yamask':
 					if (this.gen >= 8 && this.randomChance(1, 2)) continue;
+					break;
+				case 'Meowth':
+					if (this.gen >= 8 && this.randomChance(2, 3)) continue;
 					break;
 				}
 
 				if (restrict) {
 					// Limit two Pokemon per tier, three for Monotype
-					if (formatID !== 'gen7uberrandom' && formatID !== 'gen7ouuurandom' && formatID !== 'gen7runurandom' && formatID !== 'gen7purandom' && formatID !== 'gen7lcrandom') {
+					if (formatID !== 'gen8uberrandom' && formatID !== 'gen8ouuurandom' && formatID !== 'gen7runurandom' && formatID !== 'gen7purandom' && formatID !== 'gen8lcrandom') {
 						if (!tierCount[tier]) {
 							if (tier === 'LC' || tier === 'LC Uber' || tier === 'NFE') {
 								tierCount['LC'] = 2;
@@ -1596,9 +1602,9 @@ class RandomTeams {
 
 				let set = this.randomSet(template, teamDetails, pokemon.length === 5, this.format.gameType !== 'singles');
 
-				if (formatID === 'gen7lcrandom') {
+				if (formatID === 'gen8lcrandom') {
 					set.level = 5;
-				} else if (formatID === 'gen7metronome3v3random' || formatID === 'gen7metronome6v6random') {
+				} else if (formatID === 'gen8metronome3v3random' || formatID === 'gen8metronome6v6random') {
 					set.moves = ['Metronome'];
 					if (['Assault Vest'].indexOf(set.item) > -1) {
 						set.item = 'Leftovers';

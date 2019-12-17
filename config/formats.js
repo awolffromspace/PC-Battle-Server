@@ -13,7 +13,7 @@ let Formats = [
 		section: "Sw/Sh Singles",
 	},
 	{
-		name: "[Gen 8] Random Battle",
+		name: "[Gen 8] Random",
 		desc: `Randomized teams of level-balanced Pok&eacute;mon with sets that are generated to be competitively viable.`,
 
 		mod: 'gen8',
@@ -21,7 +21,7 @@ let Formats = [
 		ruleset: ['PotD', 'Obtainable', 'HP Percentage Mod', 'Cancel Mod', 'Sleep Clause Mod'],
 	},
 	{
-		name: "[Gen 8] Unrated Random Battle",
+		name: "[Gen 8] Unrated Random",
 
 		mod: 'gen8',
 		team: 'random',
@@ -30,7 +30,7 @@ let Formats = [
 		ruleset: ['Obtainable', 'HP Percentage Mod', 'Cancel Mod', 'Sleep Clause Mod'],
 	},
 	{
-		name: "[Gen 8] Random Battle (no PotD)",
+		name: "[Gen 8] Random (no PotD)",
 		desc: `Randomized teams of level-balanced Pok&eacute;mon with sets that are generated to be competitively viable.`,
 
 		mod: 'gen8',
@@ -47,7 +47,7 @@ let Formats = [
 		],
 
 		mod: 'gen8',
-		ruleset: ['Obtainable', 'Standard', 'Team Preview'],
+		ruleset: ['Obtainable', 'Standard', 'Team Preview', 'Dynamax Clause'],
 		banlist: ['Uber', 'Moody', 'Shadow Tag', 'Baton Pass'],
 		minSourceGen: 8,
 	},
@@ -105,7 +105,7 @@ let Formats = [
 		],
 
 		mod: 'gen8',
-		ruleset: ['Dynamax Clause', 'Obtainable', 'Same Type Clause', 'Standard', 'Team Preview'],
+		ruleset: ['Obtainable', 'Same Type Clause', 'Standard', 'Team Preview', 'Dynamax Clause'],
 		banlist: ['Eternatus', 'Zacian', 'Zamazenta', 'Damp Rock', 'Smooth Rock', 'Moody', 'Shadow Tag', 'Baton Pass'],
 		minSourceGen: 8,
 	},
@@ -269,7 +269,7 @@ let Formats = [
 			validate: [2, 4],
 			battle: 2,
 		},
-		ruleset: ['Obtainable', 'Standard Doubles', 'Accuracy Moves Clause', 'Team Preview', 'Sleep Clause Mod'],
+		ruleset: ['Obtainable', 'Standard Doubles', 'Accuracy Moves Clause', 'Team Preview', 'Dynamax Clause', 'Sleep Clause Mod'],
 		banlist: ['DUber', 'Focus Sash', 'Perish Song', 'Swagger'],
 		minSourceGen: 8,
 	},
@@ -473,7 +473,7 @@ let Formats = [
 		],
 
 		mod: 'gen8',
-		ruleset: ['Obtainable', '!Obtainable Abilities', 'Species Clause', 'Nickname Clause', '2 Ability Clause', 'OHKO Clause', 'Evasion Moves Clause', 'Team Preview', 'HP Percentage Mod', 'Cancel Mod', 'Sleep Clause Mod', 'Endless Battle Clause'],
+		ruleset: ['Obtainable', '!Obtainable Abilities', 'Species Clause', 'Nickname Clause', '2 Ability Clause', 'OHKO Clause', 'Evasion Moves Clause', 'Team Preview', 'HP Percentage Mod', 'Cancel Mod', 'Dynamax Clause', 'Sleep Clause Mod', 'Endless Battle Clause'],
 		banlist: [
 			'Eternatus', 'Shedinja', 'Zacian', 'Zamazenta', 'Baton Pass',
 			'Arena Trap', 'Comatose', 'Contrary', 'Fluffy', 'Fur Coat', 'Huge Power', 'Ice Scales', 'Illusion', 'Imposter', 'Innards Out', 'Libero', 'Moody', 'Parental Bond', 'Protean', 'Pure Power', 'Shadow Tag', 'Simple', 'Stakeout', 'Speed Boost', 'Water Bubble', 'Wonder Guard',
@@ -666,7 +666,7 @@ let Formats = [
 		ruleset: ['Obtainable', 'HP Percentage Mod', 'Cancel Mod'],
 	},
 	{
-		name: "[Gen 7] Random Battle",
+		name: "[Gen 7] Random",
 		desc: `Randomized teams of level-balanced Pok&eacute;mon with sets that are generated to be competitively viable.`,
 		threads: [
 			`&bullet; <a href="https://www.smogon.com/forums/threads/3591157/">Sets and Suggestions</a>`,
@@ -756,7 +756,7 @@ let Formats = [
 		},
 	},
 	{
-		name: "[Gen 7 Let's Go] Random Battle",
+		name: "[Gen 7 Let's Go] Random",
 
 		mod: 'letsgo',
 		team: 'random',
@@ -824,9 +824,9 @@ let Formats = [
 		ruleset: ['Obtainable', 'HP Percentage Mod', 'Cancel Mod'],
 	},
 	{
-		name: "[Gen 7] 1v1 Random",
+		name: "[Gen 8] 1v1 Random",
 
-		mod: 'gen7',
+		mod: 'gen8',
 		teamLength: {
 			battle: 1
 		},
@@ -834,16 +834,16 @@ let Formats = [
 		ruleset: ['[Gen 8] Random (no PotD)'],
 	},
 	{
-		name: "[Gen 7] Uber Random",
+		name: "[Gen 8] Uber Random",
 
-		mod: 'gen7',
+		mod: 'gen8',
 		team: 'random',
 		ruleset: ['[Gen 8] Random (no PotD)'],
 	},
 	{
-		name: "[Gen 7] OU/UU Random",
+		name: "[Gen 8] OU/UU Random",
 
-		mod: 'gen7',
+		mod: 'gen8',
 		team: 'random',
 		ruleset: ['[Gen 8] Random (no PotD)'],
 	},
@@ -862,79 +862,86 @@ let Formats = [
 		ruleset: ['[Gen 8] Random (no PotD)'],
 	},
 	{
-		name: "[Gen 7] LC Random",
+		name: "[Gen 8] LC Random",
 
-		mod: 'gen7',
+		mod: 'gen8',
 		team: 'random',
 		ruleset: ['[Gen 8] Random (no PotD)'],
 	},
 	{
-		name: "[Gen 7] Generational Random",
+		name: "[Gen 8] Generational Random",
 
-		mod: 'gen7',
+		mod: 'gen8',
 		team: 'random',
 		ruleset: ['[Gen 8] Random (no PotD)'],
 	},
 	{
-		name: "[Gen 7] Kanto Random",
+		name: "[Gen 8] Kanto Random",
 
-		mod: 'gen7',
+		mod: 'gen8',
 		team: 'random',
 		ruleset: ['[Gen 8] Random (no PotD)'],
 	},
 	{
-		name: "[Gen 7] Johto Random",
+		name: "[Gen 8] Johto Random",
 
-		mod: 'gen7',
+		mod: 'gen8',
 		team: 'random',
 		ruleset: ['[Gen 8] Random (no PotD)'],
 	},
 	{
-		name: "[Gen 7] Hoenn Random",
+		name: "[Gen 8] Hoenn Random",
 
-		mod: 'gen7',
+		mod: 'gen8',
 		team: 'random',
 		ruleset: ['[Gen 8] Random (no PotD)'],
 	},
 	{
-		name: "[Gen 7] Sinnoh Random",
+		name: "[Gen 8] Sinnoh Random",
 
-		mod: 'gen7',
+		mod: 'gen8',
 		team: 'random',
 		ruleset: ['[Gen 8] Random (no PotD)'],
 	},
 	{
-		name: "[Gen 7] Unova Random",
+		name: "[Gen 8] Unova Random",
 
-		mod: 'gen7',
+		mod: 'gen8',
 		team: 'random',
 		ruleset: ['[Gen 8] Random (no PotD)'],
 	},
 	{
-		name: "[Gen 7] Kalos Random",
+		name: "[Gen 8] Kalos Random",
 
-		mod: 'gen7',
+		mod: 'gen8',
 		team: 'random',
 		ruleset: ['[Gen 8] Random (no PotD)'],
 	},
 	{
-		name: "[Gen 7] Alola Random",
+		name: "[Gen 8] Alola Random",
 
-		mod: 'gen7',
+		mod: 'gen8',
 		team: 'random',
 		ruleset: ['[Gen 8] Random (no PotD)'],
 	},
 	{
-		name: "[Gen 7] Color Random",
+		name: "[Gen 8] Galar Random",
 
-		mod: 'gen7',
+		mod: 'gen8',
 		team: 'random',
 		ruleset: ['[Gen 8] Random (no PotD)'],
 	},
 	{
-		name: "[Gen 7] Inverse Random",
+		name: "[Gen 8] Color Random",
 
-		mod: 'gen7',
+		mod: 'gen8',
+		team: 'random',
+		ruleset: ['[Gen 8] Random (no PotD)'],
+	},
+	{
+		name: "[Gen 8] Inverse Random",
+
+		mod: 'gen8',
 		team: 'random',
 		ruleset: ['[Gen 8] Random (no PotD)'],
 		onNegateImmunity: false,
@@ -946,9 +953,9 @@ let Formats = [
 		},
 	},
 	{
-		name: "[Gen 7] Metronome 3v3 Random",
+		name: "[Gen 8] Metronome 3v3 Random",
 
-		mod: 'gen7',
+		mod: 'gen8',
 		teamLength: {
 			validate: [3, 6],
 			battle: 3
@@ -957,16 +964,16 @@ let Formats = [
 		ruleset: ['[Gen 8] Random (no PotD)'],
 	},
 	{
-		name: "[Gen 7] Metronome 6v6 Random",
+		name: "[Gen 8] Metronome 6v6 Random",
 
-		mod: 'gen7',
+		mod: 'gen8',
 		team: 'random',
 		ruleset: ['[Gen 8] Random (no PotD)'],
 	},
 	{
-		name: "[Gen 7] Orb Random",
+		name: "[Gen 8] Orb Random",
 
-		mod: 'gen7',
+		mod: 'gen8',
 		team: 'random',
 		ruleset: ['[Gen 8] Random (no PotD)'],
 	},
