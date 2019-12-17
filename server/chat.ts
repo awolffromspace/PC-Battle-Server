@@ -102,7 +102,7 @@ const probe: (url: string) => Promise<{width: number, height: number}> = ProbeMo
 
 const emojiRegex = /[\p{Emoji_Modifier_Base}\p{Emoji_Presentation}\uFE0F]/u;
 
-const parseEmoticons = require('./chat-plugins/emoticons').parseEmoticons; // Boilerplate
+// const parseEmoticons = require('./chat-plugins/emoticons').parseEmoticons; // Boilerplate
 
 class PatternTester {
 	// This class sounds like a RegExp

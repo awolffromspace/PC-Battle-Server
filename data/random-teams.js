@@ -1418,24 +1418,22 @@ class RandomTeams {
 	 * @param {boolean=} isMonotype
 	 */
 	getPokemonPool(type, pokemon = [], isMonotype = false, formatID, teamGeneration, teamColor) {
-		const exclude = pokemon.map(p => toID(p.species));
 		const pokemonPool = [];
 		for (let id in this.dex.data.FormatsData) {
 			let template = this.dex.getTemplate(id);
-			if (exclude.includes(template.id)) continue;
 			if (isMonotype) {
 				let types = template.types;
 				if (template.battleOnly) types = this.dex.getTemplate(template.baseSpecies).types;
 				if (types.indexOf(type) < 0) continue;
 			} else if (formatID === 'gen8uberrandom') {
-				if (template.tier !== 'Uber') continue;
+				if (template.tier !== 'Uber' && template.tier !== 'OU' && template.tier !== 'BL') continue;
 			} else if (formatID === 'gen8ouuurandom') {
 				if (template.tier !== 'OU' && template.tier !== 'BL' && template.tier !== 'UU' && template.tier !== 'BL2') continue;
 			} else if (formatID === 'gen7runurandom') {
 				if (template.tier !== 'RU' && template.tier !== 'BL3' && template.tier !== 'NU' && template.tier !== 'BL4') continue;
 			} else if (formatID === 'gen7purandom') {
 				if (template.tier !== 'PU') continue;
-			} else if (formatID === 'gen8lcrandom') {
+			} else if (formatID === 'gen7lcrandom') {
 				if (template.tier !== 'LC') continue;
 			} else if (formatID === 'gen8generationalrandom') {
 				if (template.gen !== teamGeneration) continue;
@@ -1454,7 +1452,7 @@ class RandomTeams {
 			} else if (formatID === 'gen8alolarandom') {
 				if (template.gen !== 7) continue;
 			} else if (formatID === 'gen8galarrandom') {
-				if (template.gen !== 7) continue;
+				if (template.gen !== 8) continue;
 			} else if (formatID === 'gen8colorrandom') {
 				let colors = template.color;
 				if (colors.indexOf(teamColor) < 0) continue;
@@ -1565,7 +1563,7 @@ class RandomTeams {
 
 				if (restrict) {
 					// Limit two Pokemon per tier, three for Monotype
-					if (formatID !== 'gen8uberrandom' && formatID !== 'gen8ouuurandom' && formatID !== 'gen7runurandom' && formatID !== 'gen7purandom' && formatID !== 'gen8lcrandom') {
+					if (formatID !== 'gen8uberrandom' && formatID !== 'gen8ouuurandom' && formatID !== 'gen7runurandom' && formatID !== 'gen7purandom' && formatID !== 'gen7lcrandom') {
 						if (!tierCount[tier]) {
 							if (tier === 'LC' || tier === 'LC Uber' || tier === 'NFE') {
 								tierCount['LC'] = 2;
@@ -1598,7 +1596,7 @@ class RandomTeams {
 
 				let set = this.randomSet(template, teamDetails, pokemon.length === 5, this.format.gameType !== 'singles');
 
-				if (formatID === 'gen8lcrandom') {
+				if (formatID === 'gen7lcrandom') {
 					set.level = 5;
 				} else if (formatID === 'gen8metronome3v3random' || formatID === 'gen8metronome6v6random') {
 					set.moves = ['Metronome'];
