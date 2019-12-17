@@ -55,6 +55,7 @@ export const commands: ChatCommands = {
 	},
 	roomsettingshelp: [`/roomsettings - Shows current room settings with buttons to change them (if you can).`],
 
+	mc: 'modchat',
 	modchat(target, room, user) {
 		if (!target) {
 			const modchatSetting = (room.modchat || "OFF");
@@ -1013,16 +1014,6 @@ export const commands: ChatCommands = {
 		}
 		const normalizedTarget = ' ' + target.toLowerCase().replace(/[^a-z0-9]+/g, ' ').trim() + ' ';
 
-		if (normalizedTarget.includes(' welcome ')) {
-			return this.errorReply(`Error: Room description must not contain the word "welcome".`);
-		}
-		if (normalizedTarget.slice(0, 9) === ' discuss ') {
-			return this.errorReply(`Error: Room description must not start with the word "discuss".`);
-		}
-		if (normalizedTarget.slice(0, 12) === ' talk about ' || normalizedTarget.slice(0, 17) === ' talk here about ') {
-			return this.errorReply(`Error: Room description must not start with the phrase "talk about".`);
-		}
-
 		room.desc = target;
 		this.sendReply(`(The room description is now: ${target})`);
 
@@ -1040,7 +1031,7 @@ export const commands: ChatCommands = {
 		if (!target) {
 			if (!this.runBroadcast()) return;
 			if (!room.introMessage) return this.sendReply("This room does not have an introduction set.");
-			this.sendReply('|raw|<div class="infobox infobox-limited">' + room.introMessage.replace(/\n/g, '') + '</div>');
+			this.sendReply('|raw|<div class="infobox">' + room.introMessage.replace(/\n/g, '') + '</div>');
 			if (!this.broadcasting && user.can('declare', null, room) && cmd !== 'topic') {
 				this.sendReply('Source:');
 				const code = Chat.escapeHTML(room.introMessage).replace(/\n/g, '<br />');
@@ -1061,7 +1052,7 @@ export const commands: ChatCommands = {
 
 		room.introMessage = target.replace(/\r/g, '');
 		this.sendReply("(The room introduction has been changed to:)");
-		this.sendReply(`|raw|<div class="infobox infobox-limited">${room.introMessage.replace(/\n/g, '')}</div>`);
+		this.sendReply(`|raw|<div class="infobox">${room.introMessage.replace(/\n/g, '')}</div>`);
 
 		this.privateModAction(`(${user.name} changed the roomintro.)`);
 		this.modlog('ROOMINTRO');

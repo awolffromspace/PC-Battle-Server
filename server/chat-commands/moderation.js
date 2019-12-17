@@ -33,10 +33,6 @@ exports.commands = {
 		let name = this.targetUsername;
 		let userid = toID(name);
 
-		if (!Users.isUsernameKnown(userid)) {
-			return this.errorReply(`User '${this.targetUsername}' is offline and unrecognized, and so can't be promoted.`);
-		}
-
 		if (!this.can('makeroom')) return false;
 
 		if (!room.auth) room.auth = room.chatRoomData.auth = {};
@@ -599,18 +595,6 @@ exports.commands = {
 			if (targetUser.locked && !week) {
 				return this.privateModAction(`(${name} would be locked by ${user.name} but was already locked.)`);
 			}
-
-			if (targetUser.trusted) {
-				if (cmd === 'forcelock') {
-					let from = targetUser.distrust();
-					Monitor.log(`[CrisisMonitor] ${name} was locked by ${user.name} and demoted from ${from.join(", ")}.`);
-					this.globalModlog("CRISISDEMOTE", targetUser, ` from ${from.join(", ")}`);
-				} else {
-					return this.sendReply(`${name} is a trusted user. If you are sure you would like to lock them use /forcelock.`);
-				}
-			} else if (cmd === 'forcelock') {
-				return this.errorReply(`Use /lock; ${name} is not a trusted user.`);
-			}
 		} else {
 			name = this.targetUsername;
 			userid = toID(this.targetUsername);
@@ -797,18 +781,6 @@ exports.commands = {
 		if (!this.can('ban', targetUser)) return false;
 		let name = targetUser.getLastName();
 		let userid = targetUser.getLastId();
-
-		if (targetUser.trusted) {
-			if (cmd === 'forceglobalban') {
-				let from = targetUser.distrust();
-				Monitor.log(`[CrisisMonitor] ${name} was globally banned by ${user.name} and demoted from ${from.join(", ")}.`);
-				this.globalModlog("CRISISDEMOTE", targetUser, ` from ${from.join(", ")}`);
-			} else {
-				return this.sendReply(`${name} is a trusted user. If you are sure you would like to ban them use /forceglobalban.`);
-			}
-		} else if (cmd === 'forceglobalban') {
-			return this.errorReply(`Use /globalban; ${name} is not a trusted user.`);
-		}
 
 		const roomauth = Rooms.global.destroyPersonalRooms(userid);
 		if (roomauth.length) Monitor.log(`[CrisisMonitor] Globally banned user ${name} has public roomauth (${roomauth.join(', ')}), and should probably be demoted.`);
@@ -1181,15 +1153,13 @@ exports.commands = {
 
 	htmldeclare(target, room, user) {
 		if (!target) return this.parse('/help htmldeclare');
-		if (!this.can('gdeclare', null, room)) return false;
+		if (!this.can('declare', null, room)) return false;
 		if (!this.canTalk()) return;
-		target = this.canHTML(target);
-		if (!target) return;
 
 		for (let u in room.users) {
 			if (Users.get(u).connected) Users.get(u).sendTo(room, `|notify|${room.title} announcement!|${Chat.stripHTML(target)}`);
 		}
-		this.add(`|raw|<div class="broadcast-blue"><b>${target}</b></div>`);
+		this.add(`|raw|<b>${target}</b>`);
 		this.modlog(`HTMLDECLARE`, null, target);
 	},
 	htmldeclarehelp: [`/htmldeclare [message] - Anonymously announces a message using safe HTML. Requires: ~`],
@@ -1198,8 +1168,6 @@ exports.commands = {
 	globaldeclare(target, room, user) {
 		if (!target) return this.parse('/help globaldeclare');
 		if (!this.can('gdeclare')) return false;
-		target = this.canHTML(target);
-		if (!target) return;
 
 		for (const u of Users.users.values()) {
 			if (u.connected) u.send(`|pm|~|${u.group}${u.name}|/raw <div class="broadcast-blue"><b>${target}</b></div>`);
