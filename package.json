@@ -8,10 +8,10 @@
     "sockjs": "0.3.19",
     "sucrase": "^3.10.1",
     "dem-feels": "^1.8.1",
-    "moment": "2.19.3",
+    "moment": "^2.24.0",
     "nef": "^1.1.0",
     "nef-fs": "^1.0.0",
-    "request": "2.74.0"
+    "request": "2.88.0"
   },
   "optionalDependencies": {
     "cloud-env": "^0.2.3",
