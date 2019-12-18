@@ -942,7 +942,7 @@ export class Tournament extends Rooms.RoomGame {
 		if (!player.pendingChallenge) return;
 
 		let lobbyTour = false;
-		if (this.room.id === 'lobby') {
+		if (this.room.roomid == 'lobby') {
 			lobbyTour = true;
 		}
 		const room = Rooms.createBattle(this.fullFormat, {
@@ -1095,9 +1095,6 @@ export class Tournament extends Rooms.RoomGame {
 			bracketData: this.getBracketData(),
 		};
 		this.room.add(`|tournament|end|${JSON.stringify(update)}`);
-		this.isEnded = true;
-		if (this.autoDisqualifyTimer) clearTimeout(this.autoDisqualifyTimer);
-
 		// Boilerplate start
 		//
 		// Tournament Winnings
@@ -1136,11 +1133,6 @@ export class Tournament extends Rooms.RoomGame {
 			}
 		}
 		// Boilerplate end
-		delete exports.tournaments[this.room.id];
-		this.room.game = null;
-		for (const player of this.players) {
-			player.unlinkUser();
-		}
 		this.remove();
 	}
 }
