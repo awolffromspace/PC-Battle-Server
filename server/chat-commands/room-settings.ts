@@ -799,7 +799,11 @@ export const commands: ChatCommands = {
 		`/deletegroupchat - Deletes the current room, if it's a groupchat. Requires: ★ # & ~`,
 	],
 
-	async rename(target, room) {
+	rename() {
+		this.errorReply("Did you mean /renameroom?");
+	},
+
+	async renameroom(target, room) {
 		if (!this.can('declare')) return;
 		if (room.minorActivity || room.game || room.tour) {
 			return this.errorReply("Cannot rename room when there's a tour/game/poll/announcement running.");
@@ -810,6 +814,7 @@ export const commands: ChatCommands = {
 		const oldTitle = room.title;
 		const roomid = toID(target) as RoomID;
 		const roomtitle = target;
+		if (!roomid.length) return this.errorReply("The new room needs a title.");
 		// `,` is a delimiter used by a lot of /commands
 		// `|` and `[` are delimiters used by the protocol
 		// `-` has special meaning in roomids
@@ -834,7 +839,7 @@ export const commands: ChatCommands = {
 		Rooms.global.notifyRooms(toNotify, message);
 		room.add(Chat.html`|raw|<div class="broadcast-green">The room has been renamed to <b>${target}</b></div>`).update();
 	},
-	renamehelp: [`/rename [new title] - Renames the current room to [new title]. Requires & ~.`],
+	renamehelp: [`/renameroom [new title] - Renames the current room to [new title]. Requires & ~.`],
 
 	hideroom: 'privateroom',
 	hiddenroom: 'privateroom',
