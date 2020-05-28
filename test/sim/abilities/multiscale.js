@@ -14,27 +14,25 @@ describe('Multiscale', function () {
 		battle = common.createBattle();
 		battle.setPlayer('p1', {team: [{species: "Dragonite", ability: 'multiscale', moves: ['splash']}]});
 		battle.setPlayer('p2', {team: [{species: "Gyarados", ability: 'moxie', moves: ['incinerate']}]});
-		let damage, curhp;
-		let pokemon = battle.p1.active[0];
+		const pokemon = battle.p1.active[0];
 		battle.makeChoices('move splash', 'move incinerate');
-		damage = pokemon.maxhp - pokemon.hp;
-		curhp = pokemon.hp;
+		const damage = pokemon.maxhp - pokemon.hp;
+		const curhp = pokemon.hp;
 		battle.resetRNG();
 		battle.makeChoices('move splash', 'move incinerate');
-		assert.strictEqual(damage, battle.modify(curhp - pokemon.hp, 0.5));
+		assert.equal(damage, battle.modify(curhp - pokemon.hp, 0.5));
 	});
 
 	it('should be suppressed by Mold Breaker', function () {
 		battle = common.createBattle();
 		battle.setPlayer('p1', {team: [{species: "Dragonite", ability: 'multiscale', moves: ['splash']}]});
 		battle.setPlayer('p2', {team: [{species: "Gyarados", ability: 'moldbreaker', moves: ['incinerate']}]});
-		let damage, curhp;
-		let pokemon = battle.p1.active[0];
+		const pokemon = battle.p1.active[0];
 		battle.makeChoices('move splash', 'move incinerate');
-		damage = pokemon.maxhp - pokemon.hp;
-		curhp = pokemon.hp;
+		const damage = pokemon.maxhp - pokemon.hp;
+		const curhp = pokemon.hp;
 		battle.resetRNG();
 		battle.makeChoices('move splash', 'move incinerate');
-		assert.strictEqual(curhp - pokemon.hp, damage);
+		assert.equal(curhp - pokemon.hp, damage);
 	});
 });

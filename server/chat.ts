@@ -23,10 +23,8 @@ To reload chat commands:
 
 */
 
-'use strict';
-
 export type PageHandler = (this: PageContext, query: string[], user: User, connection: Connection)
-	=> Promise<string | null | void> | string | null | void;
+=> Promise<string | null | void> | string | null | void;
 export interface PageTable {
 	[k: string]: PageHandler | PageTable;
 }
@@ -93,14 +91,14 @@ const BROADCAST_TOKEN = '!';
 
 const TRANSLATION_DIRECTORY = 'translations/';
 
-import { FS } from '../lib/fs';
-import { formatText, linkRegex, stripFormatting } from './chat-formatter';
+import {FS} from '../lib/fs';
+import {formatText, linkRegex, stripFormatting} from './chat-formatter';
 
 // @ts-ignore no typedef available
 import ProbeModule = require('probe-image-size');
 const probe: (url: string) => Promise<{width: number, height: number}> = ProbeModule;
 
-const emojiRegex = /[\p{Emoji_Modifier_Base}\p{Emoji_Presentation}\uFE0F]/u;
+const EMOJI_REGEX = /[\p{Emoji_Modifier_Base}\p{Emoji_Presentation}\uFE0F]/u;
 
 // const parseEmoticons = require('./chat-plugins/emoticons').parseEmoticons; // Boilerplate
 
@@ -688,7 +686,7 @@ export class PageContext extends MessageContext {
 		this.title = 'Page';
 	}
 
-	can(permission: string, target: string | User | null = null, room: BasicChatRoom | null = null) {
+	can(permission: string, target: string | User | null = null, room: Room | null = null) {
 		if (!this.user.can(permission, target, room)) {
 			this.send(`<h2>Permission denied.</h2>`);
 			return false;
@@ -750,7 +748,6 @@ export class PageContext extends MessageContext {
 }
 
 export class CommandContext extends MessageContext {
-
 	message: string;
 	pmTarget: User | null;
 	room: Room;
@@ -767,8 +764,8 @@ export class CommandContext extends MessageContext {
 	inputUsername: string;
 	constructor(
 		options:
-			{message: string, room: Room, user: User, connection: Connection} &
-			Partial<{pmTarget: User | null, cmd: string, cmdToken: string, target: string, fullCmd: string}>
+		{message: string, room: Room, user: User, connection: Connection} &
+		Partial<{pmTarget: User | null, cmd: string, cmdToken: string, target: string, fullCmd: string}>
 	) {
 		super(options.user, options.room && options.room.language ? options.room.language : options.user.language);
 
@@ -826,7 +823,7 @@ export class CommandContext extends MessageContext {
 			}
 			if (this.cmdToken) {
 				// To guard against command typos, show an error message
-				if (this.cmdToken === BROADCAST_TOKEN) {
+				if (this.shouldBroadcast()) {
 					if (/[a-z0-9]/.test(this.cmd.charAt(0))) {
 						return this.errorReply(`The command "${this.cmdToken}${this.fullCmd}" does not exist.`);
 					}
@@ -1005,32 +1002,32 @@ export class CommandContext extends MessageContext {
 		if (!room.filterStretching && !room.filterCaps && !room.filterEmojis) return true;
 		if (user.can('bypassall')) return true;
 
-		if (room.filterStretching && user.name.match(/(.+?)\1{5,}/i)) {
+		if (room.filterStretching && /(.+?)\1{5,}/i.test(user.name)) {
 			return this.errorReply(`Your username contains too much stretching, which this room doesn't allow.`);
 		}
-		if (room.filterCaps && user.name.match(/[A-Z\s]{6,}/)) {
+		if (room.filterCaps && /[A-Z\s]{6,}/.test(user.name)) {
 			return this.errorReply(`Your username contains too many capital letters, which this room doesn't allow.`);
 		}
-		if (room.filterEmojis && user.name.match(emojiRegex)) {
+		if (room.filterEmojis && EMOJI_REGEX.test(user.name)) {
 			return this.errorReply(`Your username contains emojis, which this room doesn't allow.`);
 		}
 		// Removes extra spaces and null characters
 		message = message.trim().replace(/[ \u0000\u200B-\u200F]+/g, ' ');
 
-		if (room.filterStretching && message.match(/(.+?)\1{7,}/i)) {
+		if (room.filterStretching && /(.+?)\1{7,}/i.test(message)) {
 			return this.errorReply(`Your message contains too much stretching, which this room doesn't allow.`);
 		}
-		if (room.filterCaps && message.match(/[A-Z\s]{18,}/)) {
+		if (room.filterCaps && /[A-Z\s]{18,}/.test(message)) {
 			return this.errorReply(`Your message contains too many capital letters, which this room doesn't allow.`);
 		}
-		if (room.filterEmojis && message.match(emojiRegex)) {
+		if (room.filterEmojis && EMOJI_REGEX.test(message)) {
 			return this.errorReply(`Your message contains emojis, which this room doesn't allow.`);
 		}
 
 		return true;
 	}
 
-	checkSlowchat(room: BasicChatRoom | null | undefined, user: User) {
+	checkSlowchat(room: Room | null | undefined, user: User) {
 		if (!room || !room.slowchat) return true;
 		if (user.can('broadcast', null, room)) return true;
 		const lastActiveSeconds = (Date.now() - user.lastMessageTime) / 1000;
@@ -1201,15 +1198,18 @@ export class CommandContext extends MessageContext {
 	statusfilter(status: string) {
 		return Chat.statusfilter(status, this.user);
 	}
-	can(permission: string, target: string | User | null = null, room: BasicChatRoom | null = null) {
+	can(permission: string, target: string | User | null = null, room: Room | null = null) {
 		if (!this.user.can(permission, target, room)) {
 			this.errorReply(this.cmdToken + this.fullCmd + " - Access denied.");
 			return false;
 		}
 		return true;
 	}
+	shouldBroadcast() {
+		return this.cmdToken === BROADCAST_TOKEN;
+	}
 	canBroadcast(ignoreCooldown?: boolean, suppressMessage?: string | null) {
-		if (!this.broadcasting && this.cmdToken === BROADCAST_TOKEN) {
+		if (!this.broadcasting && this.shouldBroadcast()) {
 			if (this.room instanceof Rooms.GlobalRoom) {
 				this.errorReply(`You have no one to broadcast this to.`);
 				this.errorReply(`To see it for yourself, use: /${this.message.substr(1)}`);
@@ -1227,7 +1227,6 @@ export class CommandContext extends MessageContext {
 			if (!ignoreCooldown && this.room && this.room.lastBroadcast === broadcastMessage &&
 				this.room.lastBroadcastTime >= Date.now() - BROADCAST_COOLDOWN &&
 				!this.user.can('bypassall')) {
-
 				this.errorReply("You can't broadcast this because it was just broadcasted.");
 				return false;
 			}
@@ -1236,13 +1235,13 @@ export class CommandContext extends MessageContext {
 			if (!message) return false;
 
 			// canTalk will only return true with no message
-			this.message = message as string;
+			this.message = message;
 			this.broadcastMessage = broadcastMessage;
 		}
 		return true;
 	}
 	runBroadcast(ignoreCooldown = false, suppressMessage: string | null = null) {
-		if (this.broadcasting || this.cmdToken !== BROADCAST_TOKEN) {
+		if (this.broadcasting || !this.shouldBroadcast()) {
 			// Already being broadcast, or the user doesn't intend to broadcast.
 			return true;
 		}
@@ -1266,6 +1265,8 @@ export class CommandContext extends MessageContext {
 
 		return true;
 	}
+	/* The sucrase transformation of optional chaining is too expensive to be used in a hot function like this. */
+	/* eslint-disable @typescript-eslint/prefer-optional-chain */
 	canTalk(message: string, room?: GameRoom | ChatRoom | null, targetUser?: User | null): string | null;
 	canTalk(message?: null, room?: GameRoom | ChatRoom | null, targetUser?: User | null): true | null;
 	canTalk(message: string | null = null, room: GameRoom | ChatRoom | null = null, targetUser: User | null = null) {
@@ -1304,15 +1305,25 @@ export class CommandContext extends MessageContext {
 				}
 				if (room.modchat && !user.authAtLeast(room.modchat, room)) {
 					if (room.modchat === 'autoconfirmed') {
-						this.errorReply(this.tr(`Because moderated chat is set, your account must be at least one week old and you must have won at least one ladder game to speak in this room.`));
+						this.errorReply(
+							this.tr(
+								`Because moderated chat is set, your account must be at least one week old and you must have won at least one ladder game to speak in this room.`
+							)
+						);
 						return null;
 					}
 					if (room.modchat === 'trusted') {
-						this.errorReply(this.tr(`Because moderated chat is set, your account must be staff in a public room or have a global rank to speak in this room.`));
+						this.errorReply(
+							this.tr(
+								`Because moderated chat is set, your account must be staff in a public room or have a global rank to speak in this room.`
+							)
+						);
 						return null;
 					}
 					const groupName = Config.groups[room.modchat] && Config.groups[room.modchat].name || room.modchat;
-					this.errorReply(this.tr `Because moderated chat is set, you must be of rank ${groupName} or higher to speak in this room.`);
+					this.errorReply(
+						this.tr `Because moderated chat is set, you must be of rank ${groupName} or higher to speak in this room.`
+					);
 					return null;
 				}
 				if (!(user.id in room.users)) {
@@ -1320,8 +1331,9 @@ export class CommandContext extends MessageContext {
 					return null;
 				}
 			}
-			// TODO: translate these messages. Currently there isn't much of a point since languages are room-dependent, and these PM-related messages aren't
-			// attached to any rooms. If we ever get to letting users set their own language these messages should also be translated. - Asheviere
+			// TODO: translate these messages. Currently there isn't much of a point since languages are room-dependent,
+			// and these PM-related messages aren't attached to any rooms. If we ever get to letting users set their
+			// own language these messages should also be translated. - Asheviere
 			if (targetUser) {
 				if (lockType && !targetUser.can('lock')) {
 					this.errorReply(`You are ${lockType} and can only private message members of the global moderation team. ${lockExpiration}`);
@@ -1334,7 +1346,6 @@ export class CommandContext extends MessageContext {
 				}
 				if (Config.pmmodchat && !user.authAtLeast(Config.pmmodchat) &&
 					!targetUser.canPromote(user.group, Config.pmmodchat)) {
-
 					const groupName = Config.groups[Config.pmmodchat] && Config.groups[Config.pmmodchat].name || Config.pmmodchat;
 					this.errorReply(`On this server, you must be of rank ${groupName} or higher to PM users.`);
 					return null;
@@ -1342,7 +1353,6 @@ export class CommandContext extends MessageContext {
 				if (targetUser.blockPMs &&
 					(targetUser.blockPMs === true || !user.authAtLeast(targetUser.blockPMs)) &&
 					!user.can('lock')) {
-
 					Chat.maybeNotifyBlocked('pm', targetUser, user);
 					if (!targetUser.can('lock')) {
 						this.errorReply(`This user is blocking private messages right now.`);
@@ -1353,8 +1363,8 @@ export class CommandContext extends MessageContext {
 						return null;
 					}
 				}
-				if (user.blockPMs && (user.blockPMs === true
-					|| !targetUser.authAtLeast(user.blockPMs)) && !targetUser.can('lock')) {
+				if (user.blockPMs && (user.blockPMs === true ||
+					!targetUser.authAtLeast(user.blockPMs)) && !targetUser.can('lock')) {
 					this.errorReply(`You are blocking private messages right now.`);
 					return null;
 				}
@@ -1375,7 +1385,7 @@ export class CommandContext extends MessageContext {
 		}
 
 		// remove zalgo
-		// tslint:disable-next-line: max-line-length
+		// eslint-disable-next-line max-len
 		message = message.replace(/[\u0300-\u036f\u0483-\u0489\u0610-\u0615\u064B-\u065F\u0670\u06D6-\u06DC\u06DF-\u06ED\u0E31\u0E34-\u0E3A\u0E47-\u0E4E]{3,}/g, '');
 		if (/[\u115f\u1160\u239b-\u23b9]/.test(message)) {
 			this.errorReply(this.tr("Your message contains banned characters."));
@@ -1384,18 +1394,19 @@ export class CommandContext extends MessageContext {
 
 		// If the corresponding config option is set, non-AC users cannot send links, except to staff.
 		if (Config.restrictLinks && !user.autoconfirmed) {
+			// eslint-disable-next-line @typescript-eslint/prefer-regexp-exec
 			const links = message.match(Chat.linkRegex);
 			const allLinksWhitelisted = !links || links.every(link => {
 				link = link.toLowerCase();
 				const domainMatches = /^(?:http:\/\/|https:\/\/)?(?:[^/]*\.)?([^/.]*\.[^/.]*)\.?($|\/|:)/.exec(link);
-				const domain = domainMatches && domainMatches[1];
+				const domain = domainMatches?.[1];
 				const hostMatches = /^(?:http:\/\/|https:\/\/)?([^/]*[^/.])\.?($|\/|:)/.exec(link);
-				let host = hostMatches && hostMatches[1];
-				if (host && host.startsWith('www.')) host = host.slice(4);
+				let host = hostMatches?.[1];
+				if (host?.startsWith('www.')) host = host.slice(4);
 				if (!domain || !host) return null;
 				return LINK_WHITELIST.includes(host) || LINK_WHITELIST.includes(`*.${domain}`);
 			});
-			if (!allLinksWhitelisted && !(targetUser && targetUser.can('lock') || (room && room.isHelp))) {
+			if (!allLinksWhitelisted && !(targetUser?.can('lock') || room?.isHelp)) {
 				this.errorReply("Your account must be autoconfirmed to send links to other users, except for global staff.");
 				return null;
 			}
@@ -1406,8 +1417,7 @@ export class CommandContext extends MessageContext {
 		}
 
 		if (!this.checkSlowchat(room, user)) {
-			// @ts-ignore ~ The truthiness of room and room.slowchat are evaluated in checkSlowchat
-			this.errorReply(this.tr `This room has slow-chat enabled. You can only talk once every ${room.slowchat} seconds.`);
+			this.errorReply(this.tr `This room has slow-chat enabled. You can only talk once every ${room!.slowchat} seconds.`);
 			return null;
 		}
 
@@ -1432,8 +1442,10 @@ export class CommandContext extends MessageContext {
 
 		if (room) {
 			const normalized = message.trim();
-			if (!user.can('bypassall') && (['help', 'lobby'].includes(room.roomid)) && (normalized === user.lastMessage) &&
-					((Date.now() - user.lastMessageTime) < MESSAGE_COOLDOWN)) {
+			if (
+				!user.can('bypassall') && (['help', 'lobby'].includes(room.roomid)) && (normalized === user.lastMessage) &&
+				((Date.now() - user.lastMessageTime) < MESSAGE_COOLDOWN)
+			) {
 				this.errorReply(this.tr("You can't send the same message again so soon."));
 				return null;
 			}
@@ -1441,9 +1453,9 @@ export class CommandContext extends MessageContext {
 			user.lastMessageTime = Date.now();
 		}
 
-		if (room && room.highTraffic &&
-			toID(message).replace(/[^a-z]+/, '').length < 2
-			&& !user.can('broadcast', null, room)) {
+		if (room?.highTraffic &&
+			toID(message).replace(/[^a-z]+/, '').length < 2 &&
+			!user.can('broadcast', null, room)) {
 			this.errorReply(
 				this.tr('Due to this room being a high traffic room, your message must contain at least two letters.')
 			);
@@ -1456,13 +1468,14 @@ export class CommandContext extends MessageContext {
 
 		return message;
 	}
-	canEmbedURI(uri: string, isRelative = false) {
+	/* eslint-enable @typescript-eslint/prefer-optional-chain */
+	canEmbedURI(uri: string, autofix?: boolean) {
 		if (uri.startsWith('https://')) return uri;
 		if (uri.startsWith('//')) return uri;
 		if (uri.startsWith('data:')) return uri;
 		if (!uri.startsWith('http://')) {
-			if (/^[a-z]+:\/\//.test(uri) || isRelative) {
-				this.errorReply("URIs must begin with 'https://' or 'http://' or 'data:'");
+			if (/^[a-z]+:\/\//.test(uri)) {
+				this.errorReply("Image URLs must begin with 'https://' or 'http://' or 'data:'");
 				return null;
 			}
 		} else {
@@ -1475,89 +1488,113 @@ export class CommandContext extends MessageContext {
 		const secondLastDotIndex = domain.lastIndexOf('.', domain.length - 5);
 		if (secondLastDotIndex >= 0) domain = domain.slice(secondLastDotIndex + 1);
 
-		const approvedDomains = {
-			'imgur.com': 1,
-			'gyazo.com': 1,
-			'puu.sh': 1,
-			'rotmgtool.com': 1,
-			'pokemonshowdown.com': 1,
-			'nocookie.net': 1,
-			'blogspot.com': 1,
-			'imageshack.us': 1,
-			'deviantart.net': 1,
-			'd.pr': 1,
-			'pokefans.net': 1,
-		};
-		if (domain in approvedDomains) {
-			return '//' + uri;
+		const approvedDomains = [
+			'imgur.com',
+			'gyazo.com',
+			'puu.sh',
+			'rotmgtool.com',
+			'pokemonshowdown.com',
+			'nocookie.net',
+			'blogspot.com',
+			'imageshack.us',
+			'deviantart.net',
+			'd.pr',
+			'pokefans.net',
+		];
+		if (approvedDomains.includes(domain)) {
+			if (autofix) return `//${uri}`;
+			this.errorReply(`Please use HTTPS for image "${uri}"`);
+			return null;
 		}
 		if (domain === 'bit.ly') {
 			this.errorReply("Please don't use URL shorteners.");
 			return null;
 		}
 		// unknown URI, allow HTTP to be safe
-		return 'http://' + uri;
+		return uri;
 	}
 	canHTML(htmlContent: string | null) {
 		htmlContent = ('' + (htmlContent || '')).trim();
 		if (!htmlContent) return '';
-		const images = /<img\b[^<>]*/ig;
-		let match;
-		// tslint:disable-next-line: no-conditional-assignment tslint doesn't support allowing ((assignment))
-		while ((match = images.exec(htmlContent))) {
-			if (this.room.isPersonal && !this.user.can('announce')) {
-				this.errorReply("Images are not allowed in personal rooms.");
-				return null;
-			}
-			if (!/width=([0-9]+|"[0-9]+")/i.test(match[0]) || !/height=([0-9]+|"[0-9]+")/i.test(match[0])) {
-				// Width and height are required because most browsers insert the
-				// <img> element before width and height are known, and when the
-				// image is loaded, this changes the height of the chat area, which
-				// messes up autoscrolling.
-				this.errorReply('All images must have a width and height attribute');
-				return null;
-			}
-			const srcMatch = /src\s*=\s*"?([^ "]+)(\s*")?/i.exec(match[0]);
-			if (srcMatch) {
-				const uri = this.canEmbedURI(srcMatch[1], true);
-				if (!uri) return null;
-				htmlContent = `${htmlContent.slice(0, match.index + srcMatch.index)}src="${uri}"${htmlContent.slice(match.index + srcMatch.index + srcMatch[0].length)}`;
-				// lastIndex is inaccurate since html was changed
-				images.lastIndex = match.index + 11;
-			}
-		}
-		if ((this.room.isPersonal || this.room.isPrivate === true)
-		&& !this.user.can('lock') && htmlContent.replace(/\s*style\s*=\s*"?[^"]*"\s*>/g, '>').match(/<button[^>]/)) {
-			this.errorReply('You do not have permission to use scripted buttons in HTML.');
-			this.errorReply('If you just want to link to a room, you can do this: <a href="/roomid"><button>button contents</button></a>');
-			return null;
-		}
+
 		if (/>here.?</i.test(htmlContent) || /click here/i.test(htmlContent)) {
 			this.errorReply('Do not use "click here"');
 			return null;
 		}
 
 		// check for mismatched tags
-		// tslint:disable-next-line: max-line-length
-		const tags = htmlContent.toLowerCase().match(/<\/?(div|a|button|b|strong|em|i|u|center|font|marquee|blink|details|summary|code|table|td|tr|style|script)\b/g);
+		const tags = htmlContent.match(/<\/?[^<>]*/g);
 		if (tags) {
+			const ILLEGAL_TAGS = [
+				'script', 'head', 'body', 'html', 'canvas', 'base', 'meta', 'link',
+			];
+			const LEGAL_AUTOCLOSE_TAGS = [
+				// void elements (no-close tags)
+				'br', 'area', 'embed', 'hr', 'img', 'source', 'track', 'input', 'wbr', 'col',
+				// autoclose tags
+				'p', 'li', 'dt', 'dd', 'option', 'tr', 'th', 'td', 'thead', 'tbody', 'tfoot', 'colgroup',
+				// PS custom element
+				'psicon',
+			];
 			const stack = [];
 			for (const tag of tags) {
-				if (tag.charAt(1) === '/') {
+				const isClosingTag = tag.charAt(1) === '/';
+				const tagContent = tag.slice(isClosingTag ? 2 : 1).toLowerCase();
+				const tagNameEndIndex = tagContent.search(/[\s/]/);
+				const tagName = tagContent.slice(0, tagNameEndIndex >= 0 ? tagNameEndIndex : undefined);
+				if (isClosingTag) {
+					if (LEGAL_AUTOCLOSE_TAGS.includes(tagName)) continue;
 					if (!stack.length) {
-						this.errorReply("Extraneous </" + tag.substr(2) + "> without an opening tag.");
+						this.errorReply(`Extraneous </${tagName}> without an opening tag.`);
 						return null;
 					}
-					if (tag.substr(2) !== stack.pop()) {
-						this.errorReply("Missing </" + tag.substr(2) + "> or it's in the wrong place.");
+					const expectedTagName = stack.pop();
+					if (tagName !== expectedTagName) {
+						this.errorReply(`Extraneous </${tagName}> where </${expectedTagName}> was expected.`);
 						return null;
 					}
-				} else {
-					stack.push(tag.substr(1));
+					continue;
+				}
+
+				if (ILLEGAL_TAGS.includes(tagName) || !/^[a-z]+[0-9]?$/.test(tagName)) {
+					this.errorReply(`Illegal tag <${tagName}> can't be used here.`);
+					return null;
+				}
+				if (!LEGAL_AUTOCLOSE_TAGS.includes(tagName)) {
+					stack.push(tagName);
+				}
+
+				if (tagName === 'img') {
+					if (this.room.isPersonal && !this.user.can('announce')) {
+						this.errorReply(`Images are not allowed in personal rooms.`);
+						return null;
+					}
+					if (!/width=([0-9]+|"[0-9]+")/i.test(tagContent) || !/height=([0-9]+|"[0-9]+")/i.test(tagContent)) {
+						// Width and height are required because most browsers insert the
+						// <img> element before width and height are known, and when the
+						// image is loaded, this changes the height of the chat area, which
+						// messes up autoscrolling.
+						this.errorReply(`All images must have a width and height attribute`);
+						return null;
+					}
+					const srcMatch = /src\s*=\s*"?([^ "]+)(\s*")?/i.exec(tagContent);
+					if (srcMatch) {
+						if (!this.canEmbedURI(srcMatch[1])) return null;
+					}
+				}
+				if (tagName === 'button') {
+					if (
+						(this.room.isPersonal || this.room.isPrivate === true) &&
+						!this.user.can('lock') && /<button[^>]/.test(htmlContent.toLowerCase().replace(/\s*style\s*=\s*"?[^"]*"\s*>/g, '>'))
+					) {
+						this.errorReply(`You do not have permission to use scripted buttons (buttons with attributes other than style="...") in HTML.`);
+						this.errorReply(`If you just want to link to a room, you can do this: <a href="/roomid"><button>button contents</button></a>`);
+						return null;
+					}
 				}
 			}
 			if (stack.length) {
-				this.errorReply("Missing </" + stack.pop() + ">.");
+				this.errorReply(`Missing </${stack.pop()}>.`);
 				return null;
 			}
 		}
@@ -1655,7 +1692,7 @@ export const Chat = new class {
 			// \u2E80-\u32FF              CJK symbols
 			// \u3400-\u9FFF              CJK
 			// \uF900-\uFAFF\uFE00-\uFE6F CJK extended
-			// tslint:disable-next-line: max-line-length
+			// eslint-disable-next-line no-misleading-character-class, max-len
 			name = name.replace(/[^a-zA-Z0-9 /\\.~()<>^*%&=+$#_'?!"\u00A1-\u00BF\u00D7\u00F7\u02B9-\u0362\u2012-\u2027\u2030-\u205E\u2050-\u205F\u2190-\u23FA\u2500-\u2BD1\u2E80-\u32FF\u3400-\u9FFF\uF900-\uFAFF\uFE00-\uFE6F-]+/g, '');
 
 			// blacklist
@@ -1670,14 +1707,14 @@ export const Chat = new class {
 			if (name.includes('@') && name.includes('.')) return '';
 
 			// url
-			// tslint:disable-next-line: max-line-length
 			if (/[a-z0-9]\.(com|net|org|us|uk|co|gg|tk|ml|gq|ga|xxx|download|stream)\b/i.test(name)) name = name.replace(/\./g, '');
 
-			// Limit the amount of symbols allowed in usernames to 4 maximum, and disallow (R) and (C) from being used in the middle of names.
-			// tslint:disable-next-line: max-line-length
+			// Limit the amount of symbols allowed in usernames to 4 maximum, and
+			// disallow (R) and (C) from being used in the middle of names.
+			// eslint-disable-next-line max-len
 			const nameSymbols = name.replace(/[^\u00A1-\u00BF\u00D7\u00F7\u02B9-\u0362\u2012-\u2027\u2030-\u205E\u2050-\u205F\u2090-\u23FA\u2500-\u2BD1]+/g, '');
 			// \u00ae\u00a9 (R) (C)
-			// tslint:disable-next-line: max-line-length
+			// eslint-disable-next-line no-misleading-character-class, max-len
 			if (nameSymbols.length > 4 || /[^a-z0-9][a-z0-9][^a-z0-9]/.test(name.toLowerCase() + ' ') || /[\u00ae\u00a9].*[a-zA-Z0-9]/.test(name)) name = name.replace(/[\u00A1-\u00BF\u00D7\u00F7\u02B9-\u0362\u2012-\u2027\u2030-\u205E\u2050-\u205F\u2190-\u23FA\u2500-\u2BD1\u2E80-\u32FF\u3400-\u9FFF\uF900-\uFAFF\uFE00-\uFE6F]+/g, '').replace(/[^A-Za-z0-9]{2,}/g, ' ').trim();
 		}
 		name = name.replace(/^[^A-Za-z0-9]+/, ""); // remove symbols from start
@@ -1748,6 +1785,7 @@ export const Chat = new class {
 				interface TRStrings {
 					[k: string]: string;
 				}
+				// eslint-disable-next-line @typescript-eslint/no-var-requires
 				const content: {name: string, strings: TRStrings} = require(`../${TRANSLATION_DIRECTORY}${fname}`);
 				const id = fname.slice(0, -5);
 
@@ -1791,7 +1829,7 @@ export const Chat = new class {
 		let [translated, keyLabels, valLabels] = entry || ["", [], []];
 		if (!translated) translated = trString;
 
-		// Replace the gaps in the template string
+		// Replace the gaps in the species string
 		if (keys.length) {
 			let reconstructed = '';
 
@@ -1868,7 +1906,7 @@ export const Chat = new class {
 			for (const target of toUncache) {
 				if (require.cache[target]) {
 					// cachedModule
-					const children: {id: string}[] = require.cache[target].children;
+					const children: {id: string}[] = require.cache[target]!.children;
 					newuncache.push(
 						...(children
 							.filter(cachedModule => !cachedModule.id.endsWith('.node'))
@@ -1881,8 +1919,8 @@ export const Chat = new class {
 		} while (toUncache.length > 0);
 	}
 
-	uncacheDir(root: string) {
-		const absoluteRoot = FS(root).path;
+	uncacheDir(root: string, followSymlink?: boolean) {
+		const absoluteRoot = followSymlink ? FS(root).realpathSync() : FS(root).path;
 		for (const key in require.cache) {
 			if (key.startsWith(absoluteRoot)) {
 				delete require.cache[key];
@@ -2005,7 +2043,7 @@ export const Chat = new class {
 	}
 
 	/**
-	 * Template string tag function for escaping HTML
+	 * Species string tag function for escaping HTML
 	 */
 	html(strings: TemplateStringsArray, ...args: any) {
 		let buf = strings[0];
@@ -2125,8 +2163,8 @@ export const Chat = new class {
 		const roundingBoundaries = [6, 15, 12, 30, 30];
 		const unitNames = ["second", "minute", "hour", "day", "month", "year"];
 		const positiveIndex = parts.findIndex(elem => elem > 0);
-		const precision = (options && options.precision ? options.precision : parts.length);
-		if (options && options.hhmmss) {
+		const precision = (options?.precision ? options.precision : parts.length);
+		if (options?.hhmmss) {
 			const str = parts.slice(positiveIndex).map(value => value < 10 ? "0" + value : "" + value).join(":");
 			return str.length === 2 ? "00:" + str : str;
 		}
@@ -2172,54 +2210,54 @@ export const Chat = new class {
 		return htmlContent;
 	}
 
-	getDataPokemonHTML(template: Template, gen = 7, tier = '') {
-		if (typeof template === 'string') template = Object.assign({}, Dex.getTemplate(template));
+	getDataPokemonHTML(species: Species, gen = 7, tier = '') {
+		if (typeof species === 'string') species = Dex.deepClone(Dex.getSpecies(species));
 		let buf = '<li class="result">';
-		buf += '<span class="col numcol">' + (tier || template.tier) + '</span> ';
-		buf += `<span class="col iconcol"><psicon pokemon="${template.id}"/></span> `;
-		buf += `<span class="col pokemonnamecol" style="white-space:nowrap"><a href="https://${Config.routes.dex}/pokemon/${template.id}" target="_blank">${template.species}</a></span> `;
+		buf += '<span class="col numcol">' + (tier || species.tier) + '</span> ';
+		buf += `<span class="col iconcol"><psicon pokemon="${species.id}"/></span> `;
+		buf += `<span class="col pokemonnamecol" style="white-space:nowrap"><a href="https://${Config.routes.dex}/pokemon/${species.id}" target="_blank">${species.name}</a></span> `;
 		buf += '<span class="col typecol">';
-		if (template.types) {
-			for (const type of template.types) {
+		if (species.types) {
+			for (const type of species.types) {
 				buf += `<img src="https://${Config.routes.client}/sprites/types/${type}.png" alt="${type}" height="14" width="32">`;
 			}
 		}
 		buf += '</span> ';
 		if (gen >= 3) {
 			buf += '<span style="float:left;min-height:26px">';
-			if (template.abilities['1'] && (gen >= 4 || Dex.getAbility(template.abilities['1']).gen === 3)) {
-				buf += '<span class="col twoabilitycol">' + template.abilities['0'] + '<br />' + template.abilities['1'] + '</span>';
+			if (species.abilities['1'] && (gen >= 4 || Dex.getAbility(species.abilities['1']).gen === 3)) {
+				buf += '<span class="col twoabilitycol">' + species.abilities['0'] + '<br />' + species.abilities['1'] + '</span>';
 			} else {
-				buf += '<span class="col abilitycol">' + template.abilities['0'] + '</span>';
+				buf += '<span class="col abilitycol">' + species.abilities['0'] + '</span>';
 			}
-			if (template.abilities['H'] && template.abilities['S']) {
-				buf += '<span class="col twoabilitycol' + (template.unreleasedHidden ? ' unreleasedhacol' : '') + '"><em>' + template.abilities['H'] + '<br />(' + template.abilities['S'] + ')</em></span>';
-			} else if (template.abilities['H']) {
-				buf += '<span class="col abilitycol' + (template.unreleasedHidden ? ' unreleasedhacol' : '') + '"><em>' + template.abilities['H'] + '</em></span>';
-			} else if (template.abilities['S']) {
+			if (species.abilities['H'] && species.abilities['S']) {
+				buf += '<span class="col twoabilitycol' + (species.unreleasedHidden ? ' unreleasedhacol' : '') + '"><em>' + species.abilities['H'] + '<br />(' + species.abilities['S'] + ')</em></span>';
+			} else if (species.abilities['H']) {
+				buf += '<span class="col abilitycol' + (species.unreleasedHidden ? ' unreleasedhacol' : '') + '"><em>' + species.abilities['H'] + '</em></span>';
+			} else if (species.abilities['S']) {
 				// special case for Zygarde
-				buf += '<span class="col abilitycol"><em>(' + template.abilities['S'] + ')</em></span>';
+				buf += '<span class="col abilitycol"><em>(' + species.abilities['S'] + ')</em></span>';
 			} else {
 				buf += '<span class="col abilitycol"></span>';
 			}
 			buf += '</span>';
 		}
 		let bst = 0;
-		for (const baseStat of Object.values(template.baseStats)) {
+		for (const baseStat of Object.values(species.baseStats)) {
 			bst += baseStat;
 		}
 		buf += '<span style="float:left;min-height:26px">';
-		buf += '<span class="col statcol"><em>HP</em><br />' + template.baseStats.hp + '</span> ';
-		buf += '<span class="col statcol"><em>Atk</em><br />' + template.baseStats.atk + '</span> ';
-		buf += '<span class="col statcol"><em>Def</em><br />' + template.baseStats.def + '</span> ';
+		buf += '<span class="col statcol"><em>HP</em><br />' + species.baseStats.hp + '</span> ';
+		buf += '<span class="col statcol"><em>Atk</em><br />' + species.baseStats.atk + '</span> ';
+		buf += '<span class="col statcol"><em>Def</em><br />' + species.baseStats.def + '</span> ';
 		if (gen <= 1) {
-			bst -= template.baseStats.spd;
-			buf += '<span class="col statcol"><em>Spc</em><br />' + template.baseStats.spa + '</span> ';
+			bst -= species.baseStats.spd;
+			buf += '<span class="col statcol"><em>Spc</em><br />' + species.baseStats.spa + '</span> ';
 		} else {
-			buf += '<span class="col statcol"><em>SpA</em><br />' + template.baseStats.spa + '</span> ';
-			buf += '<span class="col statcol"><em>SpD</em><br />' + template.baseStats.spd + '</span> ';
+			buf += '<span class="col statcol"><em>SpA</em><br />' + species.baseStats.spa + '</span> ';
+			buf += '<span class="col statcol"><em>SpD</em><br />' + species.baseStats.spd + '</span> ';
 		}
-		buf += '<span class="col statcol"><em>Spe</em><br />' + template.baseStats.spe + '</span> ';
+		buf += '<span class="col statcol"><em>Spe</em><br />' + species.baseStats.spe + '</span> ';
 		buf += '<span class="col bstcol"><em>BST<br />' + bst + '</em></span> ';
 		buf += '</span>';
 		buf += '</li>';
@@ -2233,8 +2271,9 @@ export const Chat = new class {
 		const encodedMoveType = encodeURIComponent(move.type);
 		buf += `<span class="col typecol"><img src="//${Config.routes.client}/sprites/types/${encodedMoveType}.png" alt="${move.type}" width="32" height="14">`;
 		buf += `<img src="//${Config.routes.client}/sprites/categories/${move.category}.png" alt="${move.category}" width="32" height="14"></span> `;
-		// tslint:disable-next-line: max-line-length
-		if (move.basePower) buf += `<span class="col labelcol"><em>Power</em><br>${typeof move.basePower === 'number' ? move.basePower : '—'}</span> `;
+		if (move.basePower) {
+			buf += `<span class="col labelcol"><em>Power</em><br>${typeof move.basePower === 'number' ? move.basePower : '—'}</span> `;
+		}
 		buf += `<span class="col widelabelcol"><em>Accuracy</em><br>${typeof move.accuracy === 'number' ? (move.accuracy + '%') : '—'}</span> `;
 		const basePP = move.pp || 1;
 		const pp = Math.floor(move.noPPBoosts ? basePP : basePP * 8 / 5);
@@ -2326,6 +2365,21 @@ export const Chat = new class {
 	}
 
 	/**
+	 * Normalize a message for the purposes of applying chat filters.
+	 *
+	 * Not used by PS itself, but feel free to use it in your own chat filters.
+	 */
+	normalize(message: string) {
+		message = message.replace(/'/g, '').replace(/[^A-Za-z0-9]+/g, ' ').trim();
+		if (!/[A-Za-z][A-Za-z]/.test(message)) {
+			message = message.replace(/ */g, '');
+		} else if (!message.includes(' ')) {
+			message = message.replace(/([A-Z])/g, ' $1').trim();
+		}
+		return ' ' + message.toLowerCase() + ' ';
+	}
+
+	/**
 	 * Generates dimensions to fit an image at url into a maximum size of maxWidth x maxHeight,
 	 * preserving aspect ratio.
 	 */
@@ -2352,12 +2406,12 @@ export const Chat = new class {
 		const options = 'or change it in the <button name="openOptions" class="subtle">Options</button> menu in the upper right.';
 		if (blocked === 'pm') {
 			if (!targetUser.blockPMsNotified) {
-				targetUser.send(`${prefix}The user '${user.name}' attempted to PM you but was blocked. To enable PMs, use /unblockpms ${options}`);
+				targetUser.send(`${prefix}The user '${this.escapeHTML(user.name)}' attempted to PM you but was blocked. To enable PMs, use /unblockpms ${options}`);
 				targetUser.blockPMsNotified = true;
 			}
 		} else if (blocked === 'challenge') {
 			if (!targetUser.blockChallengesNotified) {
-				targetUser.send(`${prefix}The user '${user.name}' attempted to challenge you to a battle but was blocked. To enable challenges, use /unblockchallenges ${options}`);
+				targetUser.send(`${prefix}The user '${this.escapeHTML(user.name)}' attempted to challenge you to a battle but was blocked. To enable challenges, use /unblockchallenges ${options}`);
 				targetUser.blockChallengesNotified = true;
 			}
 		}

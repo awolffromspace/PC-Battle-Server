@@ -1,6 +1,6 @@
 'use strict';
 
-const assert = require('assert');
+const assert = require('assert').strict;
 
 const {User} = require('../users-utils');
 
@@ -22,14 +22,14 @@ describe('Simulator abstraction layer features', function () {
 
 			it('should not get players out of sync in rated battles on rename', function () {
 				// Regression test for 47263c8749
-				let packedTeam = 'Weavile||lifeorb||swordsdance,knockoff,iceshard,iciclecrash|Jolly|,252,,,4,252|||||';
+				const packedTeam = 'Weavile||lifeorb||swordsdance,knockoff,iceshard,iciclecrash|Jolly|,252,,,4,252|||||';
 				p1 = new User();
 				p2 = new User();
-				p1.forceRename("Missingno."); // Don't do this at home
+				p1.forceRename("MissingNo."); // Don't do this at home
 				room = Rooms.createBattle('', {p1, p2, p1team: packedTeam, p2team: packedTeam, allowRenames: false});
 				p1.resetName();
 				for (const player of room.battle.players) {
-					assert.strictEqual(player, room.battle.playerTable[toID(player.name)]);
+					assert.equal(player, room.battle.playerTable[toID(player.name)]);
 				}
 			});
 		});

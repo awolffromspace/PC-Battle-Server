@@ -1,6 +1,6 @@
 'use strict';
 
-const assert = require('assert');
+const assert = require('assert').strict;
 
 global.Ladders = require('../../.server-dist/ladders').Ladders;
 const {Connection, User} = require('../users-utils');
@@ -8,7 +8,7 @@ const {Connection, User} = require('../users-utils');
 describe('Matchmaker', function () {
 	const FORMATID = 'gen7ou';
 	const addSearch = (player, rating = 1000, formatid = FORMATID) => {
-		let search = new Ladders.BattleReady(player.id, formatid, player.team, rating);
+		const search = new Ladders.BattleReady(player.id, formatid, player.team, rating);
 		Ladders(formatid).addSearch(search, player);
 		return search;
 	};
@@ -44,51 +44,51 @@ describe('Matchmaker', function () {
 	});
 
 	it('should add a search', function () {
-		let s1 = addSearch(this.p1);
+		const s1 = addSearch(this.p1);
 		assert.ok(Ladders.searches.has(FORMATID));
 
-		let formatSearches = Ladders.searches.get(FORMATID);
+		const formatSearches = Ladders.searches.get(FORMATID);
 		assert.ok(formatSearches instanceof Map);
-		assert.strictEqual(formatSearches.size, 1);
-		assert.strictEqual(s1.userid, this.p1.id);
-		assert.strictEqual(s1.team, this.p1.team);
-		assert.strictEqual(s1.rating, 1000);
+		assert.equal(formatSearches.size, 1);
+		assert.equal(s1.userid, this.p1.id);
+		assert.equal(s1.team, this.p1.team);
+		assert.equal(s1.rating, 1000);
 	});
 
 	it('should matchmake users when appropriate', function () {
 		addSearch(this.p1);
 		addSearch(this.p2);
-		assert.strictEqual(Ladders.searches.get(FORMATID).size, 0);
+		assert.equal(Ladders.searches.get(FORMATID).size, 0);
 	});
 
 	it('should matchmake users within a reasonable rating range', function () {
 		addSearch(this.p1);
 		addSearch(this.p2, 2000);
-		assert.strictEqual(Ladders.searches.get(FORMATID).size, 2);
+		assert.equal(Ladders.searches.get(FORMATID).size, 2);
 	});
 
 	it('should cancel searches', function () {
 		addSearch(this.p1);
 		Ladders(FORMATID).cancelSearch(this.p1);
 		Ladders.cancelSearches(this.p2);
-		assert.strictEqual(Ladders.searches.get(FORMATID).size, 0);
+		assert.equal(Ladders.searches.get(FORMATID).size, 0);
 	});
 
 	it('should periodically matchmake users when appropriate', function () {
 		addSearch(this.p1);
-		let s2 = addSearch(this.p2, 2000);
-		assert.strictEqual(Ladders.searches.get(FORMATID).size, 2);
+		const s2 = addSearch(this.p2, 2000);
+		assert.equal(Ladders.searches.get(FORMATID).size, 2);
 
 		s2.rating = 1000;
 		Ladders.Ladder.periodicMatch();
-		assert.strictEqual(Ladders.searches.get(FORMATID).size, 0);
+		assert.equal(Ladders.searches.get(FORMATID).size, 0);
 	});
 
 	it('should create a new battle room after matchmaking', function () {
-		assert.strictEqual(this.p1.games.size, 0);
+		assert.equal(this.p1.games.size, 0);
 		addSearch(this.p1);
 		addSearch(this.p2);
-		assert.strictEqual(this.p1.games.size, 1);
+		assert.equal(this.p1.games.size, 1);
 		for (const roomid of this.p1.games) {
 			assert.ok(Rooms.get(roomid).battle);
 		}
@@ -97,13 +97,13 @@ describe('Matchmaker', function () {
 	it('should cancel search on disconnect', function () {
 		addSearch(this.p1);
 		this.p1.onDisconnect(this.p1.connections[0]);
-		assert.strictEqual(Ladders.searches.get(FORMATID).size, 0);
+		assert.equal(Ladders.searches.get(FORMATID).size, 0);
 	});
 
 	it('should cancel search on merge', function () {
 		addSearch(this.p1);
 		this.p2.merge(this.p1);
-		assert.strictEqual(Ladders.searches.get(FORMATID).size, 0);
+		assert.equal(Ladders.searches.get(FORMATID).size, 0);
 	});
 
 	describe('#startBattle', function () {
@@ -123,7 +123,7 @@ describe('Matchmaker', function () {
 			try {
 				room = Rooms.createBattle(FORMATID, {p1: this.p1, p2: this.p1, p1team: this.s1.team, p2team: this.s2.team, rated: 1000});
 			} catch (e) {}
-			assert.strictEqual(room, undefined);
+			assert.equal(room, undefined);
 		});
 
 		before(function () {
@@ -137,8 +137,8 @@ describe('Matchmaker', function () {
 		});
 
 		it('should prevent battles from starting if the server is in lockdown', function () {
-			let room = Rooms.createBattle(FORMATID, {p1: this.p1, p2: this.p2, p1team: this.s1.team, p2team: this.s2.team, rated: 1000});
-			assert.strictEqual(room, undefined);
+			const room = Rooms.createBattle(FORMATID, {p1: this.p1, p2: this.p2, p1team: this.s1.team, p2team: this.s2.team, rated: 1000});
+			assert.equal(room, undefined);
 		});
 	});
 });

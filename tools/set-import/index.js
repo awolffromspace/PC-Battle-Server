@@ -56,16 +56,24 @@ Chat.plural = function (num, plural = 's', singular = '') {
 	}
 	return (num !== 1 ? plural : singular);
 };
+// Sigh. Yay globals!
+global.toID = require('../../.sim-dist/dex').Dex.getId;
 
 const importer = require('./importer.js');
 
 const SETS = path.resolve(__dirname, 'sets');
 (async () => {
+	// Clean up old artifacts
+	for (const file of fs.readdirSync(SETS)) {
+		if (file.startsWith('gen') && file.endsWith('json')) {
+			fs.unlinkSync(path.join(SETS, file));
+		}
+	}
 	const imports = [];
-	for (let [i, generationData] of (await importer.importAll()).entries()) {
+	for (const [i, generationData] of (await importer.importAll()).entries()) {
 		fs.writeFileSync(path.resolve(SETS, `gen${i + 1}.json`), JSON.stringify(generationData));
 		imports.push(`gen${i + 1}`);
-		for (let format in generationData) {
+		for (const format in generationData) {
 			fs.writeFileSync(path.resolve(SETS, `${format}.json`), JSON.stringify(generationData[format]));
 			imports.push(format);
 		}
@@ -77,9 +85,9 @@ const SETS = path.resolve(__dirname, 'sets');
 			const current = require('./sets/package.json').version;
 			const [major, minor, patch] = current.split('.');
 			if (version === 'major' || version === 'breaking') {
-				version = `${Number(major) + 1}.${minor}.${patch}`;
+				version = `${Number(major) + 1}.0.0`;
 			} else if (version === 'minor' || version === 'monthly') {
-				version = `${major}.${Number(minor) + 1}.${patch}`;
+				version = `${major}.${Number(minor) + 1}.0`;
 			} else {
 				version = `${major}.${minor}.${Number(patch) + 1}`;
 			}
@@ -122,6 +130,7 @@ const SETS = path.resolve(__dirname, 'sets');
 		'	return Promise.resolve(require(path));',
 		'}',
 		'function forGen(gen) {',
+		// eslint-disable-next-line no-template-curly-in-string
 		'	return JSON[`gen${gen}`];',
 		'}',
 		'exports.forGen = forGen;',

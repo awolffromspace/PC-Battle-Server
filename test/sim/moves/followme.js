@@ -26,12 +26,12 @@ describe('Follow Me', function () {
 		]});
 		let hitCount = 0;
 		battle.onEvent('Damage', battle.format, function (damage, pokemon) {
-			if (pokemon.template.speciesid === 'clefable') {
+			if (pokemon.species.id === 'clefable') {
 				hitCount++;
 			}
 		});
 		battle.makeChoices('move followme, move calmmind, move calmmind', 'move lowkick 2, move lowkick 2, move lowkick 2');
-		assert.strictEqual(hitCount, 2);
+		assert.equal(hitCount, 2);
 	});
 
 	it('should not redirect self-targetting moves', function () {
@@ -41,12 +41,12 @@ describe('Follow Me', function () {
 			{species: 'Clefairy', ability: 'unaware', moves: ['softboiled']},
 		]});
 		battle.setPlayer('p2', {team: [
-			{species: 'Alakazam', ability: 'synchronize', moves: ['howl']},
-			{species: 'Kadabra', ability: 'synchronize', moves: ['howl']},
+			{species: 'Alakazam', ability: 'synchronize', moves: ['honeclaws']},
+			{species: 'Kadabra', ability: 'synchronize', moves: ['honeclaws']},
 		]});
-		battle.makeChoices('move followme, move softboiled', 'move howl, move howl');
-		assert.strictEqual(battle.p1.active[0].boosts['atk'], 0);
-		assert.strictEqual(battle.p2.active[0].boosts['atk'], 1);
-		assert.strictEqual(battle.p2.active[1].boosts['atk'], 1);
+		battle.makeChoices('move followme, move softboiled', 'move honeclaws, move honeclaws');
+		assert.equal(battle.p1.active[0].boosts['atk'], 0);
+		assert.equal(battle.p2.active[0].boosts['atk'], 1);
+		assert.equal(battle.p2.active[1].boosts['atk'], 1);
 	});
 });

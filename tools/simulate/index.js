@@ -42,6 +42,8 @@ const shell = cmd => child_process.execSync(cmd, {stdio: 'inherit', cwd: path.re
 shell('node build');
 
 const Dex = require('../../.sim-dist/dex').Dex;
+global.toID = require('../../.sim-dist/dex').Dex.getId;
+global.Config = {allowrequestingties: false};
 Dex.includeModData();
 
 const {ExhaustiveRunner} = require('../../.sim-dist/tools/exhaustive-runner');
@@ -134,7 +136,7 @@ case 'exhaustive':
 		(async () => {
 			let failures = 0;
 			do {
-				for (let format of formats) {
+				for (const format of formats) {
 					failures += await new ExhaustiveRunner({
 						format, cycles, prng, maxFailures, log: true, dual: argv.dual,
 					}).run();

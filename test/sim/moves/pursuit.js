@@ -51,10 +51,10 @@ describe(`Pursuit`, function () {
 			{species: "Alakazam", ability: 'unaware', moves: ['calmmind']},
 		]]);
 		battle.makeChoices('move Pursuit mega', 'auto');
-		let clefable = battle.p2.pokemon[0];
-		let hpBeforeSwitch = clefable.hp;
+		const clefable = battle.p2.pokemon[0];
+		const hpBeforeSwitch = clefable.hp;
 		battle.makeChoices('switch 2', 'switch 2');
-		assert.strictEqual(hpBeforeSwitch, clefable.hp);
+		assert.equal(hpBeforeSwitch, clefable.hp);
 	});
 
 	it(`should not double in power or activate before a switch if targeting an ally`, function () {
