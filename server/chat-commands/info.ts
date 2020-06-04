@@ -735,6 +735,9 @@ export const commands: ChatCommands = {
 						allAdjacent: "All Adjacent Pok\u00e9mon",
 						any: "Any Pok\u00e9mon",
 						all: "All Pok\u00e9mon",
+						scripted: "Chosen Automatically",
+						randomNormal: "Random Adjacent Opposing Pok\u00e9mon",
+						allies: "User and Allies",
 					};
 					details["Target"] = targetTypes[move.target] || "Unknown";
 
@@ -2461,6 +2464,7 @@ export const commands: ChatCommands = {
 
 	'!pi': true,
 	pi(target, room, user) {
+		if (!this.runBroadcast()) return false;
 		return this.sendReplyBox(
 			'Did you mean: 1. 3.1415926535897932384626... (Decimal)<br />' +
 			'2. 3.184809493B91866... (Duodecimal)<br />' +
