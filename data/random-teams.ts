@@ -1355,11 +1355,11 @@ export class RandomTeams {
 					if (!species.types.includes(type)) continue;
 				}
 			} else if (formatID === 'gen8uberrandom') {
-				if (template.tier !== 'Uber' && template.tier !== 'OU' && template.tier !== 'BL') continue;
+				if (template.tier !== 'Uber') continue;
 			} else if (formatID === 'gen8ouuurandom') {
-				if (template.tier !== 'OU' && template.tier !== 'BL' && template.tier !== 'UU' && template.tier !== 'BL2') continue;
+				if (template.tier !== 'OU' && template.tier !== 'UUBL' && template.tier !== 'UU' && template.tier !== 'RUBL') continue;
 			} else if (formatID === 'gen7runurandom') {
-				if (template.tier !== 'RU' && template.tier !== 'BL3' && template.tier !== 'NU' && template.tier !== 'BL4') continue;
+				if (template.tier !== 'RU' && template.tier !== 'NUBL' && template.tier !== 'NU' && template.tier !== 'PUBL') continue;
 			} else if (formatID === 'gen7purandom') {
 				if (template.tier !== 'PU') continue;
 			} else if (formatID === 'gen7lcrandom') {

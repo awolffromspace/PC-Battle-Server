@@ -1551,7 +1551,7 @@ export const commands: ChatCommands = {
 	'!staff': true,
 	staff(target, room, user) {
 		if (!this.runBroadcast()) return;
-		this.sendReplyBox(`<a href="https://www.pokecommunity.com/showthread.php?t=289012">Pok&eacute;Community Server Staff List</a>`);
+		this.sendReplyBox(`<a href="https://www.pokecommunity.com/showthread.php?t=434307">Pok&eacute;Community Server Staff List</a>`);
 	},
 
 	'!forums': true,

@@ -18,7 +18,7 @@ export const Formats: (FormatsData | {section: string, column?: number})[] = [
 
 		mod: 'gen8',
 		team: 'random',
-		ruleset: ['PotD', 'Species Clause', 'HP Percentage Mod', 'Cancel Mod', 'Sleep Clause Mod', 'Team Preview'],
+		ruleset: ['PotD', 'Obtainable', 'Species Clause', 'HP Percentage Mod', 'Cancel Mod', 'Sleep Clause Mod', 'Team Preview'],
 	},
 	{
 		name: "[Gen 8] Unrated Random",
@@ -27,7 +27,7 @@ export const Formats: (FormatsData | {section: string, column?: number})[] = [
 		team: 'random',
 		challengeShow: false,
 		rated: false,
-		ruleset: ['PotD', 'Species Clause', 'HP Percentage Mod', 'Cancel Mod', 'Sleep Clause Mod', 'Team Preview'],
+		ruleset: ['PotD', 'Obtainable', 'Species Clause', 'HP Percentage Mod', 'Cancel Mod', 'Sleep Clause Mod', 'Team Preview'],
 	},
 	{
 		name: "[Gen 8] Random (no PotD)",
@@ -35,7 +35,7 @@ export const Formats: (FormatsData | {section: string, column?: number})[] = [
 
 		mod: 'gen8',
 		team: 'random',
-		ruleset: ['Species Clause', 'HP Percentage Mod', 'Cancel Mod', 'Sleep Clause Mod', 'Team Preview'],
+		ruleset: ['Obtainable', 'Species Clause', 'HP Percentage Mod', 'Cancel Mod', 'Sleep Clause Mod', 'Team Preview'],
 	},
 	{
 		name: "[Gen 8] OU",
@@ -251,7 +251,7 @@ export const Formats: (FormatsData | {section: string, column?: number})[] = [
 		mod: 'gen8',
 		gameType: 'doubles',
 		team: 'random',
-		ruleset: ['PotD', 'Species Clause', 'HP Percentage Mod', 'Cancel Mod', 'Team Preview'],
+		ruleset: ['PotD', 'Obtainable', 'Species Clause', 'HP Percentage Mod', 'Cancel Mod', 'Team Preview'],
 	},
 	{
 		name: "[Gen 8] Doubles OU",
@@ -804,7 +804,7 @@ export const Formats: (FormatsData | {section: string, column?: number})[] = [
 
 		mod: 'gen8',
 		team: 'random',
-		ruleset: ['Same Type Clause', 'HP Percentage Mod', 'Cancel Mod', 'Sleep Clause Mod', 'Team Preview'],
+		ruleset: ['Obtainable', 'Same Type Clause', 'HP Percentage Mod', 'Cancel Mod', 'Sleep Clause Mod', 'Team Preview'],
 	},
 	{
 		name: "[Gen 8] Challenge Cup 1v1",
@@ -814,7 +814,7 @@ export const Formats: (FormatsData | {section: string, column?: number})[] = [
 		teamLength: {
 			battle: 1,
 		},
-		ruleset: ['HP Percentage Mod', 'Cancel Mod', 'Team Preview', 'Dynamax Clause'],
+		ruleset: ['Obtainable', 'HP Percentage Mod', 'Cancel Mod', 'Team Preview', 'Dynamax Clause'],
 	},
 	{
 		name: "[Gen 8] Challenge Cup 2v2",
@@ -825,7 +825,7 @@ export const Formats: (FormatsData | {section: string, column?: number})[] = [
 		teamLength: {
 			battle: 2,
 		},
-		ruleset: ['HP Percentage Mod', 'Cancel Mod', 'Team Preview', 'Dynamax Clause'],
+		ruleset: ['Obtainable', 'HP Percentage Mod', 'Cancel Mod', 'Team Preview', 'Dynamax Clause'],
 	},
 	{
 		name: "[Gen 8] Hackmons Cup",
@@ -833,7 +833,7 @@ export const Formats: (FormatsData | {section: string, column?: number})[] = [
 
 		mod: 'gen8',
 		team: 'randomHC',
-		ruleset: ['HP Percentage Mod', 'Cancel Mod', 'Team Preview'],
+		ruleset: ['Obtainable Formes', 'HP Percentage Mod', 'Cancel Mod', 'Team Preview'],
 	},
 	{
 		name: "[Gen 8] Doubles Hackmons Cup",
@@ -841,7 +841,7 @@ export const Formats: (FormatsData | {section: string, column?: number})[] = [
 		mod: 'gen8',
 		gameType: 'doubles',
 		team: 'randomHC',
-		ruleset: ['HP Percentage Mod', 'Cancel Mod', 'Team Preview'],
+		ruleset: ['Obtainable', 'HP Percentage Mod', 'Cancel Mod', 'Team Preview'],
 	},
 	{
 		name: "[Gen 8] CAP 1v1",
@@ -867,7 +867,7 @@ export const Formats: (FormatsData | {section: string, column?: number})[] = [
 
 		mod: 'gen7',
 		team: 'random',
-		ruleset: ['Sleep Clause Mod', 'HP Percentage Mod', 'Cancel Mod', 'Team Preview'],
+		ruleset: ['Obtainable', 'Sleep Clause Mod', 'HP Percentage Mod', 'Cancel Mod', 'Team Preview'],
 	},
 	{
 		name: "[Gen 7] Random Doubles Battle",
@@ -876,7 +876,7 @@ export const Formats: (FormatsData | {section: string, column?: number})[] = [
 		mod: 'gen7',
 		gameType: 'doubles',
 		team: 'random',
-		ruleset: ['HP Percentage Mod', 'Cancel Mod', 'Team Preview'],
+		ruleset: ['Obtainable', 'HP Percentage Mod', 'Cancel Mod', 'Team Preview'],
 	},
 	{
 		name: "[Gen 7] Battle Factory",
@@ -899,7 +899,7 @@ export const Formats: (FormatsData | {section: string, column?: number})[] = [
 			validate: [3, 6],
 			battle: 3,
 		},
-		ruleset: ['Obtainable', 'Standard GBU'],
+		ruleset: ['Obtainable', 'Standard GBU', 'Team Preview'],
 	},
 	{
 		name: "[Gen 7] Hackmons Cup",
@@ -918,7 +918,7 @@ export const Formats: (FormatsData | {section: string, column?: number})[] = [
 
 		mod: 'ssb',
 		team: 'randomStaffBros',
-		ruleset: ['HP Percentage Mod', 'Cancel Mod', 'Sleep Clause Mod'],
+		ruleset: ['HP Percentage Mod', 'Cancel Mod', 'Sleep Clause Mod', 'Team Preview'],
 		onBegin() {
 			this.add('raw|SUPER STAFF BROS <b>BRAWL</b>!!');
 			this.add('message', 'GET READY FOR THE NEXT BATTLE!');
@@ -955,7 +955,7 @@ export const Formats: (FormatsData | {section: string, column?: number})[] = [
 
 		mod: 'gen6',
 		team: 'random',
-		ruleset: ['Sleep Clause Mod', 'HP Percentage Mod', 'Cancel Mod', 'Team Preview'],
+		ruleset: ['Obtainable', 'Sleep Clause Mod', 'HP Percentage Mod', 'Cancel Mod', 'Team Preview'],
 	},
 	{
 		name: "[Gen 6] Battle Factory",
@@ -970,14 +970,14 @@ export const Formats: (FormatsData | {section: string, column?: number})[] = [
 
 		mod: 'gen5',
 		team: 'random',
-		ruleset: ['Sleep Clause Mod', 'HP Percentage Mod', 'Cancel Mod', 'Team Preview'],
+		ruleset: ['Obtainable', 'Sleep Clause Mod', 'HP Percentage Mod', 'Cancel Mod', 'Team Preview'],
 	},
 	{
 		name: "[Gen 4] Random",
 
 		mod: 'gen4',
 		team: 'random',
-		ruleset: ['Sleep Clause Mod', 'HP Percentage Mod', 'Cancel Mod'],
+		ruleset: ['Obtainable', 'Sleep Clause Mod', 'HP Percentage Mod', 'Cancel Mod'],
 	},
 	{
 		name: "[Gen 3] Random",
@@ -1005,7 +1005,7 @@ export const Formats: (FormatsData | {section: string, column?: number})[] = [
 
 		mod: 'gen1',
 		team: 'randomCC',
-		ruleset: ['HP Percentage Mod', 'Cancel Mod'],
+		ruleset: ['Obtainable', 'HP Percentage Mod', 'Cancel Mod'],
 	},
 	{
 		name: "[Gen 8] 1v1 Random",
