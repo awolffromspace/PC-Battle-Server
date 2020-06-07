@@ -1410,7 +1410,7 @@ export class RandomTeams {
 
 		// For Metronome
 		if (formatID === 'gen8metronome3v3random' || formatID === 'gen8metronome6v6random') {
-			let metronome = this.getMove('Metronome');
+			let metronome = this.dex.getMove('Metronome');
 			metronome.pp = 624.375;
 			metronome.noMetronome.push('imprison', 'taunt', 'torment');
 		}

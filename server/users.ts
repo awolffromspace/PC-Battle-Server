@@ -547,6 +547,11 @@ export class User extends Chat.MessageContext {
 			return this.customSymbol + this.name;
 		}
 		// Boilerplate end
+		if (this.statusType === 'busy') {
+			return this.group + this.name + "- busy";
+		} else if (this.statusType === 'idle') {
+			return this.group + this.name + "- idle";
+		}
 		return this.group + this.name;
 	}
 	getIdentityWithStatus(roomid: RoomID = '') {
