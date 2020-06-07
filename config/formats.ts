@@ -1012,7 +1012,7 @@ export const Formats: (FormatsData | {section: string, column?: number})[] = [
 
 		mod: 'gen8',
 		teamLength: {
-			battle: 1
+			battle: 1,
 		},
 		team: 'random',
 		ruleset: ['[Gen 8] Random (no PotD)'],
@@ -1032,26 +1032,26 @@ export const Formats: (FormatsData | {section: string, column?: number})[] = [
 		ruleset: ['[Gen 8] Random (no PotD)'],
 	},
 	{
-		name: "[Gen 7] RU/NU Random",
+		name: "[Gen 8] RU/NU Random",
 
-		mod: 'gen7',
+		mod: 'gen8',
 		team: 'random',
 		ruleset: ['[Gen 8] Random (no PotD)'],
 	},
 	{
-		name: "[Gen 7] PU Random",
+		name: "[Gen 8] PU Random",
 
-		mod: 'gen7',
+		mod: 'gen8',
 		team: 'random',
 		ruleset: ['[Gen 8] Random (no PotD)'],
 	},
-	/*{
-		name: "[Gen 7] LC Random",
+	{
+		name: "[Gen 8] LC Random",
 
-		mod: 'gen7',
+		mod: 'gen8',
 		team: 'random',
 		ruleset: ['[Gen 8] Random (no PotD)'],
-	},*/
+	},
 	{
 		name: "[Gen 8] Generational Random",
 
@@ -1154,13 +1154,13 @@ export const Formats: (FormatsData | {section: string, column?: number})[] = [
 		team: 'random',
 		ruleset: ['[Gen 8] Random (no PotD)'],
 	},
-	/*{
+	/* {
 		name: "[Gen 8] Orb Random",
 
 		mod: 'gen8',
 		team: 'random',
 		ruleset: ['[Gen 8] Random (no PotD)'],
-	},*/
+	}, */
 
 	// RoA Spotlight
 	///////////////////////////////////////////////////////////////////
