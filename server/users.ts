@@ -504,11 +504,6 @@ export class User extends Chat.MessageContext {
 			return this.customSymbol + this.name;
 		}
 		// Boilerplate end
-		if (this.statusType === 'busy') {
-			return this.group + this.name + "- busy";
-		} else if (this.statusType === 'idle') {
-			return this.group + this.name + "- idle";
-		}
 		return this.group + this.name;
 	}
 	getIdentityWithStatus(roomid: RoomID = '') {
@@ -1402,6 +1397,7 @@ export class User extends Chat.MessageContext {
 		this.statusType = type;
 		this.updateIdentity();
 		this.update('statusType');
+		this.name += " - away";
 	}
 	setUserMessage(message: string) {
 		if (message === this.userMessage) return;

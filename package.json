@@ -9,8 +9,7 @@
     "sucrase": "^3.13.0",
     "moment": "^2.24.0",
     "nef": "^1.1.0",
-    "nef-fs": "^1.0.0",
-    "request": "^2.88.0"
+    "nef-fs": "^1.0.0"
   },
   "optionalDependencies": {
     "cloud-env": "^0.2.3",

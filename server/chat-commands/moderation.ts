@@ -8,6 +8,7 @@
  *
  * @license MIT
  */
+import {Utils} from '../../lib/utils';
 
 /* eslint no-else-return: "error" */
 
@@ -52,6 +53,8 @@ export const commands: ChatCommands = {
 
 	'!roompromote': true,
 	roomdemote: 'roompromote',
+	forceroompromote: 'roompromote',
+	forceroomdemote: 'roompromote',
 	roompromote(target, room, user, connection, cmd) {
 		if (!room) {
 			// this command isn't marked as room-only because it's usable in PMs through /invite
@@ -60,8 +63,7 @@ export const commands: ChatCommands = {
 		if (!this.canTalk()) return;
 		if (!target) return this.parse('/help roompromote');
 
-		const force = target.startsWith('!!!');
-		if (force) target = target.slice(3);
+		const force = cmd.startsWith('force');
 		target = this.splitTarget(target, true);
 		const targetUser = this.targetUser;
 		const userid = toID(this.targetUsername);
@@ -87,8 +89,12 @@ export const commands: ChatCommands = {
 		}
 		if (!Config.groups[nextSymbol]) {
 			if (!force || !user.can('bypassall')) {
-				return this.errorReply(`Group '${nextSymbol}' does not exist.`);
-			} else if (nextSymbol.length !== 1) {
+				this.errorReply(`Group '${nextSymbol}' does not exist.`);
+				if (user.can('bypassall')) {
+					this.errorReply(`If you want to promote to a nonexistent group, use /forceroompromote`);
+				}
+				return;
+			} else if (!Users.Auth.isValidSymbol(nextSymbol)) {
 				// yes I know this excludes astral-plane characters and includes combining characters
 				return this.errorReply(`Admins can forcepromote to nonexistent groups only if they are one character long`);
 			}
@@ -169,6 +175,47 @@ export const commands: ChatCommands = {
 		`/roomdeauth [username] - Removes all room rank from the user. Requires: @ # &`,
 	],
 
+	'!authority': true,
+	auth: 'authority',
+	stafflist: 'authority',
+	globalauth: 'authority',
+	authlist: 'authority',
+	authority(target, room, user, connection) {
+		if (target && target !== '+') {
+			const targetRoom = Rooms.search(target);
+			const availableRoom = targetRoom?.checkModjoin(user);
+			if (targetRoom && availableRoom) return this.parse(`/roomauth1 ${target}`);
+			return this.parse(`/userauth ${target}`);
+		}
+		const showAll = !!target;
+		const rankLists: {[k: string]: string[]} = {};
+		for (const [id, symbol] of Users.globalAuth) {
+			if (symbol === ' ' || (symbol === '+' && !showAll)) continue;
+			if (!rankLists[symbol]) rankLists[symbol] = [];
+			rankLists[symbol].push(Users.globalAuth.usernames.get(id) || id);
+		}
+
+		const buffer = Utils.sortBy(
+			Object.entries(rankLists) as [GroupSymbol, string[]][],
+			([symbol]) => -Users.Auth.getGroup(symbol).rank
+		).map(
+			([symbol, names]) => (
+				`${(Config.groups[symbol] ? `**${Config.groups[symbol].name}s** (${symbol})` : symbol)}:\n` +
+				Utils.sortBy(names, name => toID(name)).join(", ")
+			)
+		);
+		if (!showAll) buffer.push(`(Use \`\`/auth +\`\` to show global voice users.)`);
+
+		if (!buffer.length) return connection.popup("This server has no global authority.");
+		connection.popup(buffer.join("\n\n"));
+	},
+	authhelp: [
+		`/auth - Show global staff for the server.`,
+		`/auth + - Show global staff for the server, including voices.`,
+		`/auth [room] - Show what roomauth a room has.`,
+		`/auth [user] - Show what global and roomauth a user has.`,
+	],
+
 	'!roomauth': true,
 	roomstaff: 'roomauth',
 	roomauth1: 'roomauth',
@@ -189,18 +236,17 @@ export const commands: ChatCommands = {
 			rankLists[rank].push(id);
 		}
 
-		const buffer = Object.keys(rankLists).sort(
-			(a, b) => (Config.groups[b] || {rank: 0}).rank - (Config.groups[a] || {rank: 0}).rank
-		).map(groupSymbol => {
-			let roomRankList: string[] = rankLists[groupSymbol].sort();
-			roomRankList = roomRankList.map(userid => {
-				const curUser = Users.get(userid);
-				const isAway = curUser?.statusType !== 'online';
-				return userid in targetRoom.users && !isAway ? `**${userid}**` : userid;
-			});
-			let group = Config.groups[groupSymbol] ? `${Config.groups[groupSymbol].name}s (${groupSymbol})` : groupSymbol;
-			if (groupSymbol === ' ') group = 'Whitelisted';
-			return `${group}:\n${roomRankList.join(", ")}`;
+		const buffer = Utils.sortBy(
+			Object.entries(rankLists) as [GroupSymbol, ID[]][],
+			([symbol]) => -Users.Auth.getGroup(symbol).rank
+		).map(([symbol, names]) => {
+			let group = Config.groups[symbol] ? `${Config.groups[symbol].name}s (${symbol})` : symbol;
+			if (symbol === ' ') group = 'Whitelisted';
+			return `${group}:\n` +
+				Utils.sortBy(names).map(userid => {
+					const isOnline = Users.get(userid)?.statusType === 'online';
+					return userid in targetRoom.users && isOnline ? `**${userid}**` : userid;
+				}).join(', ');
 		});
 
 		let curRoom = targetRoom;
@@ -236,7 +282,7 @@ export const commands: ChatCommands = {
 		const buffer = [];
 		let innerBuffer = [];
 		const group = Users.globalAuth.get(targetId);
-		if (group) {
+		if (group !== ' ' || Users.isTrusted(targetId)) {
 			buffer.push(`Global auth: ${group === ' ' ? 'trusted' : group}`);
 		}
 		for (const curRoom of Rooms.rooms.values()) {
@@ -552,7 +598,7 @@ export const commands: ChatCommands = {
 
 		if (targetUser.id in room.users || user.can('lock')) {
 			targetUser.popup(
-				`|modal||html|<p>${Chat.escapeHTML(user.name)} has banned you from the room ${room.roomid} ${(room.subRooms ? ` and its subrooms` : ``)}.</p>${(target ? `<p>Reason: ${Chat.escapeHTML(target)}</p>` : ``)}<p>To appeal the ban, PM the staff member that banned you${room.persist ? ` or a room owner. </p><p><button name="send" value="/roomauth ${room.roomid}">List Room Staff</button></p>` : `.</p>`}`
+				`|modal||html|<p>${Utils.escapeHTML(user.name)} has banned you from the room ${room.roomid} ${(room.subRooms ? ` and its subrooms` : ``)}.</p>${(target ? `<p>Reason: ${Utils.escapeHTML(target)}</p>` : ``)}<p>To appeal the ban, PM the staff member that banned you${room.persist ? ` or a room owner. </p><p><button name="send" value="/roomauth ${room.roomid}">List Room Staff</button></p>` : `.</p>`}`
 			);
 		}
 
@@ -1217,7 +1263,7 @@ export const commands: ChatCommands = {
 		for (const id in room.users) {
 			room.users[id].sendTo(room, `|notify|${room.title} announcement!|${target}`);
 		}
-		this.add(Chat.html`|raw|<div class="broadcast-blue"><b>${target}</b></div>`);
+		this.add(Utils.html`|raw|<div class="broadcast-blue"><b>${target}</b></div>`);
 		this.modlog('DECLARE', null, target);
 	},
 	declarehelp: [`/declare [message] - Anonymously announces a message. Requires: # * &`],
@@ -1230,7 +1276,7 @@ export const commands: ChatCommands = {
 		for (const u in room.users) {
 			Users.get(u)?.sendTo(
 				room,
-				`|notify|${room.title} announcement!|${Chat.stripHTML(target)}`
+				`|notify|${room.title} announcement!|${Utils.stripHTML(target)}`
 			);
 		}
 		this.add(`|raw|<b>${target}</b>`);
@@ -1244,7 +1290,7 @@ export const commands: ChatCommands = {
 		if (!this.can('gdeclare')) return false;
 
 		for (const u of Users.users.values()) {
-			if (u.connected) u.send(`|pm|~|${u.group}${u.name}|/raw <div class="broadcast-blue"><b>${target}</b></div>`);
+			if (u.connected) u.send(`|pm|&|${u.group}${u.name}|/raw <div class="broadcast-blue"><b>${target}</b></div>`);
 		}
 		this.modlog(`GLOBALDECLARE`, null, target);
 	},
@@ -1350,7 +1396,7 @@ export const commands: ChatCommands = {
 		const rankMessage = targetUser.getAccountStatusString();
 		Rooms.global.notifyRooms(
 			['staff'],
-			`|html|${roomMessage}` + Chat.html`<span class="username">${targetUser.name}</span> ${rankMessage} ${forceRenameMessage}`
+			`|html|${roomMessage}` + Utils.html`<span class="username">${targetUser.name}</span> ${rankMessage} ${forceRenameMessage}`
 		);
 
 		targetUser.resetName(true);
@@ -1443,7 +1489,7 @@ export const commands: ChatCommands = {
 		if (/^[0-9]+\s*(,|$)/.test(target)) {
 			if (hasLineCount) {
 				let lineCountString;
-				[lineCountString, target] = Chat.splitFirst(target, ',');
+				[lineCountString, target] = Utils.splitFirst(target, ',');
 				lineCount = parseInt(lineCountString);
 			} else if (!cmd.includes('force')) {
 				return this.errorReply(`Your reason was a number; use /hidelines if you wanted to clear a specific number of lines, or /forcehidetext if you really wanted your reason to be a number.`);
@@ -1545,7 +1591,7 @@ export const commands: ChatCommands = {
 
 		if (targetUser.id in room.users || user.can('lock')) {
 			targetUser.popup(
-				`|modal||html|<p>${Chat.escapeHTML(user.name)} has blacklisted you from the room ${room.roomid}${(room.subRooms ? ` and its subrooms` : '')}. Reason: ${Chat.escapeHTML(target)}</p>` +
+				`|modal||html|<p>${Utils.escapeHTML(user.name)} has blacklisted you from the room ${room.roomid}${(room.subRooms ? ` and its subrooms` : '')}. Reason: ${Utils.escapeHTML(target)}</p>` +
 				`<p>To appeal the ban, PM the staff member that blacklisted you${room.persist ? ` or a room owner. </p><p><button name="send" value="/roomauth ${room.roomid}">List Room Staff</button></p>` : `.</p>`}`
 			);
 		}
@@ -1787,7 +1833,7 @@ export const commands: ChatCommands = {
 		}
 
 		const soonExpiring = (cmd === 'expiringblacklists' || cmd === 'expiringbls');
-		let buf = Chat.html`Blacklist for ${room.title}${soonExpiring ? ` (expiring within 3 months)` : ''}:<br />`;
+		let buf = Utils.html`Blacklist for ${room.title}${soonExpiring ? ` (expiring within 3 months)` : ''}:<br />`;
 
 		for (const [userid, data] of blMap) {
 			const [expireTime, ...alts] = data;

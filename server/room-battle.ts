@@ -13,6 +13,7 @@
 
 import {execSync} from "child_process";
 import {FS} from "../lib/fs";
+import {Utils} from '../lib/utils';
 import {StreamProcessManager} from "../lib/process-manager";
 import {Repl} from "../lib/repl";
 import {BattleStream} from "../sim/battle-stream";
@@ -1186,7 +1187,7 @@ export class RoomBattleStream extends BattleStream {
 
 				if (result?.then) {
 					result.then((unwrappedResult: any) => {
-						unwrappedResult = Chat.stringify(unwrappedResult);
+						unwrappedResult = Utils.visualize(unwrappedResult);
 						battle.add('', 'Promise -> ' + unwrappedResult);
 						battle.sendUpdates();
 					}, (error: Error) => {
@@ -1194,7 +1195,7 @@ export class RoomBattleStream extends BattleStream {
 						battle.sendUpdates();
 					});
 				} else {
-					result = Chat.stringify(result);
+					result = Utils.visualize(result);
 					result = result.replace(/\n/g, '\n||');
 					battle.add('', '<<< ' + result);
 				}

@@ -6,31 +6,8 @@
 /*eslint no-restricted-modules: [0]*/
 
 let moment = require('moment');
-let request = require('request');
 
 exports.commands = {
-	regdate: function (target, room, user) {
-		if (!this.runBroadcast()) return;
-		if (!target || !toID(target)) return this.parse('/help regdate');
-		let username = toID(target);
-		request('http://pokemonshowdown.com/users/' + username, function (error, response, body) {
-			if (error && response.statusCode !== 200) {
-				this.sendReplyBox(Chat.escapeHTML(target) + " is not registered.");
-				return room.update();
-			}
-			let regdate = body.split('<small>')[1].split('</small>')[0].replace(/(<em>|<\/em>)/g, '');
-			if (regdate === '(Unregistered)') {
-				this.sendReplyBox(Chat.escapeHTML(target) + " is not registered.");
-			} else if (regdate === '(Account disabled)') {
-				this.sendReplyBox(Chat.escapeHTML(target) + "'s account is disabled.");
-			} else {
-				this.sendReplyBox(Chat.escapeHTML(target) + " was registered on " + regdate.slice(7) + ".");
-			}
-			room.update();
-		}.bind(this));
-	},
-	regdatehelp: ["/regdate - Please specify a valid username."],
-
 	seen: function (target, room, user) {
 		if (!this.runBroadcast()) return;
 		if (!target) return this.parse('/help seen');

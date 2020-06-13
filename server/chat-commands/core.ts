@@ -15,6 +15,7 @@
 
 
 /* eslint no-else-return: "error" */
+import {Utils} from '../../lib/utils';
 
 const avatarTable = new Set([
 	'aaron',
@@ -347,53 +348,13 @@ export const commands: ChatCommands = {
 		this.sendReplyBox(`Server version: <b>${Chat.packageData.version}</b>`);
 	},
 
-	'!authority': true,
-	auth: 'authority',
-	stafflist: 'authority',
-	globalauth: 'authority',
-	authlist: 'authority',
-	authority(target, room, user, connection) {
-		if (target && target !== '+') {
-			const targetRoom = Rooms.search(target);
-			const availableRoom = targetRoom?.checkModjoin(user);
-			if (targetRoom && availableRoom) return this.parse(`/roomauth1 ${target}`);
-			return this.parse(`/userauth ${target}`);
-		}
-		const showAll = !!target;
-		const rankLists: {[k: string]: string[]} = {};
-		for (const [id, symbol] of Users.globalAuth) {
-			if (symbol === ' ' || (symbol === '+' && !showAll)) continue;
-			if (!rankLists[symbol]) rankLists[symbol] = [];
-			rankLists[symbol].push(id);
-		}
-
-		const buffer = (Object.keys(rankLists) as GroupSymbol[]).sort(
-			(symbol1, symbol2) => Users.Auth.getGroup(symbol1).rank - Users.Auth.getGroup(symbol2).rank
-		).map(
-			symbol => (
-				`${(Config.groups[symbol] ? `**${Config.groups[symbol].name}s** (${symbol})` : symbol)}:\n` +
-				rankLists[symbol].sort((name1, name2) => toID(name1).localeCompare(toID(name2))).join(", ")
-			)
-		);
-		if (!showAll) buffer.push(`(Use \`\`/auth +\`\` to show global voice users.)`);
-
-		if (!buffer.length) return connection.popup("This server has no global authority.");
-		connection.popup(buffer.join("\n\n"));
-	},
-	authhelp: [
-		`/auth - Show global staff for the server.`,
-		`/auth + - Show global staff for the server, including voices.`,
-		`/auth [room] - Show what roomauth a room has.`,
-		`/auth [user] - Show what global and roomauth a user has.`,
-	],
-
 	userlist(target, room, user) {
 		const userList = [];
 
 		for (const id in room.users) {
 			const curUser = Users.get(room.users[id]);
 			if (!curUser || !curUser.named) continue;
-			userList.push(Chat.escapeHTML(curUser.getIdentity(room.roomid)));
+			userList.push(Utils.escapeHTML(curUser.getIdentity(room.roomid)));
 		}
 
 		let output = `There ${Chat.plural(userList, "are", "is")} <strong style="color:#24678d">${Chat.count(userList, "</strong> users")} in this room:<br />`;
@@ -750,7 +711,7 @@ export const commands: ChatCommands = {
 
 		return Ladders.visualizeAll(target).then(values => {
 			let buffer = `<div class="ladder"><table>`;
-			buffer += Chat.html`<tr><td colspan="8">User: <strong>${target}</strong></td></tr>`;
+			buffer += Utils.html`<tr><td colspan="8">User: <strong>${target}</strong></td></tr>`;
 
 			const ratings = values.join(``);
 			if (!ratings) {
@@ -792,7 +753,7 @@ export const commands: ChatCommands = {
 		if (!battle.inputLog) return this.errorReply('No input log found.');
 		if (Object.keys(battle.playerTable).length === battle.allowExtraction[targetUser.id].size) {
 			this.addModAction(`${targetUser.name} has extracted the battle input log.`);
-			const inputLog = battle.inputLog.map(Chat.escapeHTML).join(`<br />`);
+			const inputLog = battle.inputLog.map(Utils.escapeHTML).join(`<br />`);
 			targetUser.sendTo(
 				room,
 				`|html|<div class="chat"><code style="white-space: pre-wrap; overflow-wrap: break-word; display: block">${inputLog}</code></div>`,
@@ -815,7 +776,7 @@ export const commands: ChatCommands = {
 		if (user.can('forcewin')) {
 			if (!battle.inputLog) return this.errorReply('No input log found.');
 			this.addModAction(`${user.name} has extracted the battle input log.`);
-			const inputLog = battle.inputLog.map(Chat.escapeHTML).join(`<br />`);
+			const inputLog = battle.inputLog.map(Utils.escapeHTML).join(`<br />`);
 			user.sendTo(
 				room,
 				`|html|<div class="chat"><code style="white-space: pre-wrap; overflow-wrap: break-word; display: block">${inputLog}</code></div>`,
@@ -830,7 +791,7 @@ export const commands: ChatCommands = {
 				} else {
 					playerUser.sendTo(
 						room,
-						Chat.html`|html|${user.name} wants to extract the battle input log. <button name="send" value="/allowexportinputlog ${user.id}">Share your team and choices with "${user.name}"</button>`
+						Utils.html`|html|${user.name} wants to extract the battle input log. <button name="send" value="/allowexportinputlog ${user.id}">Share your team and choices with "${user.name}"</button>`
 					);
 				}
 			}
@@ -844,7 +805,7 @@ export const commands: ChatCommands = {
 				logExported = false;
 				playerUser.sendTo(
 					room,
-					Chat.html`|html|${user.name} wants to extract the battle input log. <button name="send" value="/allowexportinputlog ${user.id}">Share your team and choices with "${user.name}"</button>`,
+					Utils.html`|html|${user.name} wants to extract the battle input log. <button name="send" value="/allowexportinputlog ${user.id}">Share your team and choices with "${user.name}"</button>`,
 				);
 			}
 			if (logExported) return this.errorReply(`You already extracted the battle input log.`);
@@ -912,7 +873,7 @@ export const commands: ChatCommands = {
 			for (const otherPlayer of battle.players) {
 				if (otherPlayer !== player) {
 					otherPlayer.sendRoom(
-						Chat.html`|uhtml|offertie|<button class="button" name="send" value="/accepttie"><strong>Accept tie</strong></button> <button class="button" name="send" value="/rejecttie">Reject</button>`
+						Utils.html`|uhtml|offertie|<button class="button" name="send" value="/accepttie"><strong>Accept tie</strong></button> <button class="button" name="send" value="/rejecttie">Reject</button>`
 					);
 				} else {
 					player.wantsTie = true;
@@ -927,7 +888,7 @@ export const commands: ChatCommands = {
 			} else {
 				return this.errorReply("You have already agreed to a tie.");
 			}
-			player.sendRoom(Chat.html`|uhtmlchange|offertie|`);
+			player.sendRoom(Utils.html`|uhtmlchange|offertie|`);
 			this.add(`${user.name} accepted the tie.`);
 			if (battle.players.every(curPlayer => curPlayer.wantsTie)) {
 				if (battle.players.length > 2) {
@@ -952,7 +913,7 @@ export const commands: ChatCommands = {
 		}
 		if (player.wantsTie) player.wantsTie = false;
 		for (const otherPlayer of battle.players) {
-			otherPlayer.sendRoom(Chat.html`|uhtmlchange|offertie|`);
+			otherPlayer.sendRoom(Utils.html`|uhtmlchange|offertie|`);
 		}
 		return this.add(`${user.name} rejected the tie.`);
 	},
@@ -1595,6 +1556,7 @@ process.nextTick(() => {
 	// We might want to migrate most of this to a JSON schema of command attributes.
 	Chat.multiLinePattern.register(
 		'>>>? ', '/(?:room|staff)intro ', '/(?:staff)?topic ', '/(?:add|widen)datacenters ', '/bash ', '!code ', '/code ', '/modnote ', '/mn ',
+		'/eval', '!eval', '/evalbattle',
 		'/importinputlog '
 	);
 });

@@ -26,6 +26,7 @@ const LAST_BATTLE_WRITE_THROTTLE = 10;
 const RETRY_AFTER_LOGIN = null;
 
 import {FS} from '../lib/fs';
+import {Utils} from '../lib/utils';
 import {WriteStream} from '../lib/streams';
 import {GTSGiveaway, LotteryGiveaway, QuestionGiveaway} from './chat-plugins/wifi';
 import {QueuedHunt} from './chat-plugins/scavengers';
@@ -69,6 +70,7 @@ export interface RoomSettings {
 	auth: {[userid: string]: GroupSymbol};
 
 	readonly staffAutojoin?: string | boolean;
+	readonly autojoin?: boolean;
 	aliases?: string[];
 	banwords?: string[];
 	isPrivate?: boolean | 'hidden' | 'voice';
@@ -545,7 +547,7 @@ export class GlobalRoom extends BasicRoom {
 				}
 			}
 			this.chatRooms.push(room);
-			if (room.autojoin) this.autojoinList.push(id);
+			if (room.settings.autojoin) this.autojoinList.push(id);
 			if (room.settings.staffAutojoin) this.staffAutojoinList.push(id);
 		}
 		Rooms.lobby = Rooms.rooms.get('lobby') as ChatRoom;
@@ -939,7 +941,7 @@ export class GlobalRoom extends BasicRoom {
 		if (this.lockdown && err) return;
 		const devRoom = Rooms.get('development');
 		// @ts-ignore
-		const stack = (err ? Chat.escapeHTML(err.stack).split(`\n`).slice(0, 2).join(`<br />`) : ``);
+		const stack = (err ? Utils.escapeHTML(err.stack).split(`\n`).slice(0, 2).join(`<br />`) : ``);
 		for (const [id, curRoom] of Rooms.rooms) {
 			if (id === 'global') continue;
 			if (err) {
@@ -965,7 +967,7 @@ export class GlobalRoom extends BasicRoom {
 			}
 		}
 		for (const user of Users.users.values()) {
-			user.send(`|pm|~|${user.group}${user.name}|/raw <div class="broadcast-red"><b>The server is restarting soon.</b><br />Please finish your battles quickly. No new battles can be started until the server resets in a few minutes.</div>`);
+			user.send(`|pm|&|${user.group}${user.name}|/raw <div class="broadcast-red"><b>The server is restarting soon.</b><br />Please finish your battles quickly. No new battles can be started until the server resets in a few minutes.</div>`);
 		}
 
 		this.lockdown = true;
@@ -1021,7 +1023,7 @@ export class GlobalRoom extends BasicRoom {
 		}
 		this.lastReportedCrash = time;
 		// @ts-ignore
-		const stackLines = (err ? Chat.escapeHTML(err.stack).split(`\n`) : []);
+		const stackLines = (err ? Utils.escapeHTML(err.stack).split(`\n`) : []);
 		const stack = stackLines.slice(1).join(`<br />`);
 
 		let crashMessage = `|html|<div class="broadcast-red"><details class="readmore"><summary><b>${crasher} crashed:</b> ${stackLines[0]}</summary>${stack}</details></div>`;
@@ -1078,7 +1080,6 @@ export class GlobalRoom extends BasicRoom {
  */
 export class BasicChatRoom extends BasicRoom {
 	readonly log: Roomlog;
-	readonly autojoin: boolean;
 	/** Only available in groupchats */
 	readonly creationTime: number | null;
 	readonly type: 'chat' | 'battle';
@@ -1109,7 +1110,6 @@ export class BasicChatRoom extends BasicRoom {
 		}
 		this.log = Roomlogs.create(this, options);
 
-		this.autojoin = false;
 		this.creationTime = null;
 		this.type = 'chat';
 		this.banwordRegex = null;
@@ -1262,7 +1262,7 @@ export class BasicChatRoom extends BasicRoom {
 		this.roomlog(entry);
 	}
 	getIntroMessage(user: User) {
-		let message = Chat.html`\n|raw|<div class="infobox"> You joined ${this.title}`;
+		let message = Utils.html`\n|raw|<div class="infobox"> You joined ${this.title}`;
 		if (this.settings.modchat) {
 			message += ` [${this.settings.modchat} or higher to talk]`;
 		}

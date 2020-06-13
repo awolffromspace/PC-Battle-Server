@@ -4,12 +4,11 @@ module.exports = hashColor;
 
 function MD5(e) {
 	function t(e, t) {
-		const n, r, i, s, o;
-		i = e & 2147483648;
-		s = t & 2147483648;
-		n = e & 1073741824;
-		r = t & 1073741824;
-		o = (e & 1073741823) + (t & 1073741823);
+		const i = e & 2147483648;
+		const s = t & 2147483648;
+		const n = e & 1073741824;
+		const r = t & 1073741824;
+		const o = (e & 1073741823) + (t & 1073741823);
 		return n & r ? o ^ 2147483648 ^ i ^ s : n | r ? o & 1073741824 ? o ^ 3221225472 ^ i ^ s : o ^ 1073741824 ^ i ^ s : o ^ i ^ s;
 	}
 
@@ -45,7 +44,7 @@ function MD5(e) {
 		return t;
 	}
 	let u = [];
-	let a, f, l, c, h, p, d, v, e;
+	let a, f, l, c, h, p, d, v;
 	e = (function (e) {
 		for (let e = e.replace(/\r\n/g, "\n"), t = "", n = 0; n < e.length; n++) {
 			let r = e.charCodeAt(n);

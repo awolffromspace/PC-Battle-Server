@@ -12,6 +12,7 @@
 
 import * as child_process from 'child_process';
 import {FS} from '../../lib/fs';
+import {Utils} from '../../lib/utils';
 
 import * as ProcessManager from '../../lib/process-manager';
 
@@ -49,7 +50,7 @@ export const commands: ChatCommands = {
 		if (!this.can('addhtml', null, room)) return;
 		target = Chat.collapseLineBreaksHTML(target);
 		if (!user.can('addhtml')) {
-			target += Chat.html`<div style="float:right;color:#888;font-size:8pt">[${user.name}]</div><div style="clear:both"></div>`;
+			target += Utils.html`<div style="float:right;color:#888;font-size:8pt">[${user.name}]</div><div style="clear:both"></div>`;
 		}
 
 		return `/raw <div class="infobox">${target}</div>`;
@@ -67,7 +68,7 @@ export const commands: ChatCommands = {
 		if (!this.can('addhtml', null, room)) return;
 		html = Chat.collapseLineBreaksHTML(html);
 		if (!user.can('addhtml')) {
-			html += Chat.html`<div style="float:right;color:#888;font-size:8pt">[${user.name}]</div><div style="clear:both"></div>`;
+			html += Utils.html`<div style="float:right;color:#888;font-size:8pt">[${user.name}]</div><div style="clear:both"></div>`;
 		}
 
 		this.room.sendRankedUsers(`|html|<div class="infobox">${html}</div>`, rank as GroupSymbol);
@@ -87,7 +88,7 @@ export const commands: ChatCommands = {
 		if (!this.can('addhtml', null, room)) return;
 		html = Chat.collapseLineBreaksHTML(html);
 		if (!user.can('addhtml')) {
-			html += Chat.html`<div style="float:right;color:#888;font-size:8pt">[${user.name}]</div><div style="clear:both"></div>`;
+			html += Utils.html`<div style="float:right;color:#888;font-size:8pt">[${user.name}]</div><div style="clear:both"></div>`;
 		}
 
 		if (cmd === 'changeuhtml') {
@@ -116,7 +117,7 @@ export const commands: ChatCommands = {
 		if (!this.can('addhtml', null, room)) return;
 		html = Chat.collapseLineBreaksHTML(html);
 		if (!user.can('addhtml')) {
-			html += Chat.html`<div style="float:right;color:#888;font-size:8pt">[${user.name}]</div><div style="clear:both"></div>`;
+			html += Utils.html`<div style="float:right;color:#888;font-size:8pt">[${user.name}]</div><div style="clear:both"></div>`;
 		}
 
 		html = `|uhtml${(cmd === 'changerankuhtml' ? 'change' : '')}|${name}|${html}`;
@@ -252,6 +253,7 @@ export const commands: ChatCommands = {
 
 		let patch = target;
 		try {
+			Utils.clearRequireCache({exclude: ['/.lib-dist/process-manager']});
 			if (target === 'all') {
 				if (lock['all']) {
 					return this.errorReply(`Hot-patching all has been disabled by ${lock['all'].by} (${lock['all'].reason})`);
@@ -275,29 +277,19 @@ export const commands: ChatCommands = {
 
 				Chat.destroy();
 
-				const processManagers = require('../../lib/process-manager').processManagers;
+				const processManagers = ProcessManager.processManagers;
 				for (const manager of processManagers.slice()) {
 					if (
 						manager.filename.startsWith(FS('server/chat-plugins').path) ||
 						manager.filename.startsWith(FS('.server-dist/chat-plugins').path)
 					) {
-						manager.destroy();
+						void manager.destroy();
 					}
 				}
 
-				Chat.uncache('./.server-dist/chat');
-				Chat.uncacheDir('./server/chat-commands');
-				Chat.uncacheDir('./.server-dist/chat-commands');
-				Chat.uncacheDir('./server/chat-plugins');
-				Chat.uncacheDir('./.server-dist/chat-plugins');
-				if (await FS('./server/chat-plugins/private').exists()) {
-					Chat.uncacheDir('./server/chat-plugins/private', true);
-				}
-				Chat.uncacheDir('./translations');
 				global.Chat = require('../chat').Chat;
-
-				Chat.uncacheDir('./.server-dist/tournaments');
 				global.Tournaments = require('../tournaments').Tournaments;
+
 				this.sendReply("Chat commands have been hot-patched.");
 				Chat.loadPlugins();
 				this.sendReply("Chat plugins have been loaded.");
@@ -307,7 +299,6 @@ export const commands: ChatCommands = {
 				}
 				if (requiresForce(patch)) return this.errorReply(requiresForceMessage);
 
-				Chat.uncacheDir('./.server-dist/tournaments');
 				global.Tournaments = require('../tournaments').Tournaments;
 				Chat.loadPluginData(Tournaments);
 				this.sendReply("Tournaments have been hot-patched.");
@@ -324,10 +315,6 @@ export const commands: ChatCommands = {
 				}
 				if (requiresForce(patch)) return this.errorReply(requiresForceMessage);
 
-				// uncache the .sim-dist/dex.js dependency tree
-				Chat.uncacheDir('./.sim-dist');
-				Chat.uncacheDir('./.data-dist');
-				Chat.uncache('./.config-dist/formats');
 				// reload .sim-dist/dex.js
 				global.Dex = require('../../sim/dex').Dex;
 				// rebuild the formats list
@@ -343,7 +330,6 @@ export const commands: ChatCommands = {
 			} else if (target === 'loginserver') {
 				if (requiresForce(patch)) return this.errorReply(requiresForceMessage);
 				FS('config/custom.css').unwatch();
-				Chat.uncache('./.server-dist/loginserver');
 				global.LoginServer = require('../loginserver').LoginServer;
 				this.sendReply("The login server has been hot-patched. New login server requests will use the new code.");
 			} else if (target === 'learnsets' || target === 'validator') {
@@ -365,14 +351,12 @@ export const commands: ChatCommands = {
 				}
 				if (requiresForce(patch)) return this.errorReply(requiresForceMessage);
 
-				Chat.uncache('./.server-dist/punishments');
 				global.Punishments = require('../punishments').Punishments;
 				this.sendReply("Punishments have been hot-patched.");
 			} else if (target === 'dnsbl' || target === 'datacenters' || target === 'iptools') {
 				patch = 'dnsbl';
 				if (requiresForce(patch)) return this.errorReply(requiresForceMessage);
 
-				Chat.uncache('./.server-dist/ip-tools');
 				global.IPTools = require('../ip-tools').IPTools;
 				void IPTools.loadDatacenters();
 				this.sendReply("IPTools has been hot-patched.");
@@ -605,7 +589,7 @@ export const commands: ChatCommands = {
 			if (curRoom.roomid !== 'global') curRoom.addRaw(`<div class="broadcast-red">${innerHTML}</div>`).update();
 		}
 		for (const u of Users.users.values()) {
-			if (u.connected) u.send(`|pm|~|${u.group}${u.name}|/raw <div class="broadcast-red">${innerHTML}</div>`);
+			if (u.connected) u.send(`|pm|&|${u.group}${u.name}|/raw <div class="broadcast-red">${innerHTML}</div>`);
 		}
 	},
 
@@ -628,7 +612,7 @@ export const commands: ChatCommands = {
 			if (curRoom.roomid !== 'global') curRoom.addRaw(`<div class="broadcast-green">${innerHTML}</div>`).update();
 		}
 		for (const u of Users.users.values()) {
-			if (u.connected) u.send(`|pm|~|${u.group}${u.name}|/raw <div class="broadcast-green">${innerHTML}</div>`);
+			if (u.connected) u.send(`|pm|&|${u.group}${u.name}|/raw <div class="broadcast-green">${innerHTML}</div>`);
 		}
 	},
 
@@ -710,7 +694,7 @@ export const commands: ChatCommands = {
 				if (curRoom.roomid !== 'global') curRoom.addRaw(message).update();
 			}
 			for (const curUser of Users.users.values()) {
-				curUser.send(`|pm|~|${curUser.group}${curUser.name}|/raw ${message}`);
+				curUser.send(`|pm|&|${curUser.group}${curUser.name}|/raw ${message}`);
 			}
 		} else {
 			this.sendReply("Preparation for the server shutdown was canceled.");
@@ -955,9 +939,9 @@ export const commands: ChatCommands = {
 			/* eslint-enable no-eval, @typescript-eslint/no-unused-vars */
 
 			if (result?.then) {
-				result = `Promise -> ${Chat.stringify(await result)}`;
+				result = `Promise -> ${Utils.visualize(await result)}`;
 			} else {
-				result = Chat.stringify(result);
+				result = Utils.visualize(result);
 			}
 			result = result.replace(/\n/g, '\n||');
 			this.sendReply('||<< ' + result);
