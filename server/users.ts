@@ -1397,7 +1397,6 @@ export class User extends Chat.MessageContext {
 		this.statusType = type;
 		this.updateIdentity();
 		this.update('statusType');
-		this.name += " - away";
 	}
 	setUserMessage(message: string) {
 		if (message === this.userMessage) return;

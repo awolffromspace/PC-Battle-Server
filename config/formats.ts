@@ -1118,7 +1118,7 @@ export const Formats: (FormatsData | {section: string, column?: number})[] = [
 		team: 'random',
 		ruleset: ['[Gen 8] Random (no PotD)'],
 	},
-	{
+	/*{
 		name: "[Gen 8] Inverse Random",
 
 		mod: 'gen8',
@@ -1131,7 +1131,7 @@ export const Formats: (FormatsData | {section: string, column?: number})[] = [
 			if (move && !this.getImmunity(move, type)) return 1;
 			return -typeMod;
 		},
-	},
+	},*/
 	{
 		name: "[Gen 8] Metronome 3v3 Random",
 
