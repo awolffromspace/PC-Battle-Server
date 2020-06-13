@@ -1348,7 +1348,7 @@ export class RandomTeams {
 		for (const id in this.dex.data.FormatsData) {
 			let species = this.dex.getSpecies(id);
 			if (species.gen > this.gen) continue;
-			if (!species.randomBattleMoves) continue;
+			if (!species.randomBattleMoves && formatID !== 'gen8lcrandom') continue;
 			if (isMonotype) {
 				if (!species.types.includes(type)) continue;
 				if (species.battleOnly && typeof species.battleOnly === 'string') {
