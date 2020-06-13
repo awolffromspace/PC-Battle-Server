@@ -1125,7 +1125,7 @@ export const Formats: (FormatsData | {section: string, column?: number})[] = [
 		team: 'random',
 		ruleset: ['[Gen 8] Random (no PotD)'],
 		onNegateImmunity: false,
-		onEffectiveness: function (typeMod, target, type, move) {
+		onEffectiveness(typeMod, target, type, move) {
 			// The effectiveness of Freeze Dry on Water isn't reverted
 			if (move && move.id === 'freezedry' && type === 'Water') return;
 			if (move && !this.getImmunity(move, type)) return 1;
@@ -1138,7 +1138,7 @@ export const Formats: (FormatsData | {section: string, column?: number})[] = [
 		mod: 'gen8',
 		teamLength: {
 			validate: [3, 6],
-			battle: 3
+			battle: 3,
 		},
 		team: 'random',
 		ruleset: ['[Gen 8] Random (no PotD)'],

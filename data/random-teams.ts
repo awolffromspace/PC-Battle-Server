@@ -1356,35 +1356,35 @@ export class RandomTeams {
 					if (!species.types.includes(type)) continue;
 				}
 			} else if (formatID === 'gen8uberrandom') {
-				if (template.tier !== 'Uber') continue;
+				if (species.tier !== 'Uber') continue;
 			} else if (formatID === 'gen8ouuurandom') {
-				if (template.tier !== 'OU' && template.tier !== 'UUBL' && template.tier !== 'UU' && template.tier !== 'RUBL') continue;
+				if (species.tier !== 'OU' && species.tier !== 'UUBL' && species.tier !== 'UU' && species.tier !== 'RUBL') continue;
 			} else if (formatID === 'gen7runurandom') {
-				if (template.tier !== 'RU' && template.tier !== 'NUBL' && template.tier !== 'NU' && template.tier !== 'PUBL') continue;
+				if (species.tier !== 'RU' && species.tier !== 'NUBL' && species.tier !== 'NU' && species.tier !== 'PUBL') continue;
 			} else if (formatID === 'gen7purandom') {
-				if (template.tier !== 'PU') continue;
+				if (species.tier !== 'PU') continue;
 			} else if (formatID === 'gen7lcrandom') {
-				if (template.tier !== 'LC') continue;
+				if (species.tier !== 'LC') continue;
 			} else if (formatID === 'gen8generationalrandom') {
-				if (template.gen !== teamGeneration) continue;
+				if (species.gen !== teamGeneration) continue;
 			} else if (formatID === 'gen8kantorandom') {
-				if (template.gen !== 1) continue;
+				if (species.gen !== 1) continue;
 			} else if (formatID === 'gen8johtorandom') {
-				if (template.gen !== 2) continue;
+				if (species.gen !== 2) continue;
 			} else if (formatID === 'gen8hoennrandom') {
-				if (template.gen !== 3) continue;
+				if (species.gen !== 3) continue;
 			} else if (formatID === 'gen8sinnohrandom') {
-				if (template.gen !== 4) continue;
+				if (species.gen !== 4) continue;
 			} else if (formatID === 'gen8unovarandom') {
-				if (template.gen !== 5) continue;
+				if (species.gen !== 5) continue;
 			} else if (formatID === 'gen8kalosrandom') {
-				if (template.gen !== 6) continue;
+				if (species.gen !== 6) continue;
 			} else if (formatID === 'gen8alolarandom') {
-				if (template.gen !== 7) continue;
+				if (species.gen !== 7) continue;
 			} else if (formatID === 'gen8galarrandom') {
-				if (template.gen !== 8) continue;
+				if (species.gen !== 8) continue;
 			} else if (formatID === 'gen8colorrandom') {
-				let colors = template.color;
+				let colors = species.color;
 				if (colors.indexOf(teamColor) < 0) continue;
 			}
 			pokemonPool.push(id);
