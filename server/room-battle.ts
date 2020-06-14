@@ -53,7 +53,7 @@ const DISCONNECTION_BANK_TIME = 300;
 const TIMER_COOLDOWN = 20 * SECONDS;
 
 // Color the messages for battle point winnings
-const COLOR = '#36bbd9';
+const COLOR = '#d95b21';
 
 export class RoomBattlePlayer extends RoomGames.RoomGamePlayer {
 	readonly slot: SideID;

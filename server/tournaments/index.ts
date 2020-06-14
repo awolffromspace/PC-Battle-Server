@@ -20,7 +20,7 @@ const MAX_CUSTOM_NAME_LENGTH = 100;
 const TOURBAN_DURATION = 14 * 24 * 60 * 60 * 1000;
 const ALLOW_ALTS = false;
 let allowAlts = false;
-const COLOR = '#36bbd9'; // Color the messages for battle point winnings
+const COLOR = '#d95b21'; // Color the messages for battle point winnings
 
 Punishments.roomPunishmentTypes.set('TOURBAN', 'banned from tournaments');
 

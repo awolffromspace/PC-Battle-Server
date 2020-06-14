@@ -6,7 +6,7 @@ let moment = require('moment');
 
 let BR = '<br>';
 let SPACE = '&nbsp;';
-let profileColor = '#36bbd9';
+let profileColor = '#d95b21';
 let trainersprites = [1, 2, 101, 102, 169, 170, 265, 266, 168];
 
 /**
