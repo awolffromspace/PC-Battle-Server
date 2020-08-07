@@ -1623,13 +1623,13 @@ export const Formats: (FormatsData | {section: string, column?: number})[] = [
 		team: 'random',
 		ruleset: ['[Gen 8] Random (no PotD)'],
 	},
-	{
+	/*{
 		name: "[Gen 8] LC Random",
 
 		mod: 'gen8',
 		team: 'random',
 		ruleset: ['[Gen 8] Random (no PotD)'],
-	},
+	},*/
 	{
 		name: "[Gen 8] Generational Random",
 
