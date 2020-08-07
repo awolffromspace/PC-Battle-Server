@@ -114,11 +114,7 @@ const probe: (url: string) => Promise<{width: number, height: number}> = ProbeMo
 
 const EMOJI_REGEX = /[\p{Emoji_Modifier_Base}\p{Emoji_Presentation}\uFE0F]/u;
 
-// const parseEmoticons = require('./chat-plugins/emoticons').parseEmoticons; // Boilerplate
-
-const color = require('../config/color');
-
-exports.parseEmoticons = parseEmoticons;
+exports.parseEmoticons = parseEmoticons; // Boilerplate start
 
 const emotes = {
 	':4head:': 'http://cbc.pokecommunity.com/server/config/emoticons/4head.png',
@@ -547,7 +543,7 @@ function parseEmoticons(message, room, user, pm) {
 	if (pm) return "<div class='chat' style='display:inline'>" + "<em class='mine'>" + message + "</em></div>";
 
 	let style = "background:none;border:0;padding:0 5px 0 0;font-family:Verdana,Helvetica,Arial,sans-serif;font-size:9pt;cursor:pointer";
-	message = "<div class='chat'>" + "<small>" + group + "</small>" + "<button name='parseCommand' value='/user " + user.name + "' style='" + style + "'>" + "<b><font color='" + color(user.userid) + "'>" + user.name + ":</font></b>" + "</button><em class='mine'>" + message + "</em></div>";
+	message = "<div class='chat'>" + "<small>" + group + "</small>" + "<button name='parseCommand' value='/user " + user.name + "' style='" + style + "'>" + "<b>" + user.name + ":</b>" + "</button><em class='mine'>" + message + "</em></div>";
 
 	room.addRaw(message);
 
@@ -584,7 +580,7 @@ function create_table() {
 	);
 }
 
-let emotes_table = create_table();
+let emotes_table = create_table(); // Boilerplate end
 
 class PatternTester {
 	// This class sounds like a RegExp
