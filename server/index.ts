@@ -126,6 +126,8 @@ global.Punishments = Punishments;
 
 import {Rooms} from './rooms';
 global.Rooms = Rooms;
+// We initialize the global room here because roomlogs.ts needs the Rooms global
+Rooms.global = new Rooms.GlobalRoomState();
 
 // Boilerplate start
 global.Tells = require('../tells.js');
@@ -144,7 +146,7 @@ global.Tournaments = Tournaments;
 
 import {IPTools} from './ip-tools';
 global.IPTools = IPTools;
-void IPTools.loadDatacenters();
+void IPTools.loadHostsAndRanges();
 
 if (Config.crashguard) {
 	// graceful crash - allow current battles to finish before restarting

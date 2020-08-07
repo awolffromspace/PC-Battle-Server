@@ -167,9 +167,11 @@ Retired Staff
 
 Major Contributors
 
+- [Anubis, Lusamine] - Research (game mechanics), Sysadmin
 - Austin Couturier [Austin] - Development (damage calculator)
 - Kevin Lau [Ascriptmaster] - Development, Art (battle animations)
 - Konrad Borowski [xfix] - Development
+- Kris Johnson [Kris] - Development
 - Leonard Craft III [DaWoblefet] - Research (game mechanics)
 - Neil Rashbrook [urkerab] - Development
 - [peach] - Development
@@ -182,8 +184,8 @@ Major Contributors
 Contributors
 
 - Alexander B. [mathfreak231] - Development
-- [Anubis, Lusamine] - Research (game mechanics)
 - Andrew Goodsell [Zracknel] - Art (battle weather backdrops)
+- Annika L. [Annika] - Development
 - Avery Zimmer [Lyren, SolarisFox] - Development
 - Ben Davies [Morfent] - Development
 - Ben Frengley [TalkTakesTime] - Development
@@ -192,10 +194,10 @@ Contributors
 - Ian Clail [Layell] - Art (battle graphics, sprites)
 - Jacob McLemore [McLemore] - Development
 - Jeremy Piemonte [panpawn] - Development
-- Kris Johnson [Kris] - Development
 - Luke Harmon-Vellotti [moo, CheeseMuffin] - Development
+- Mia A. [mia-pi] - Development
 - Russell Jones [SadisticMystic] - Research (game mechanics)
-- Spandan Punwatkar [spandan]- Development
+- Spandan Punwatkar [Spandan]- Development
 - Waleed Hassan [jetou] - Development
 
 Special thanks
