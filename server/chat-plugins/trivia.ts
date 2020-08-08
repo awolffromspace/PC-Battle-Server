@@ -129,10 +129,6 @@ if (triviaData.questions.some(q => !('type' in q))) {
 	triviaData.questions = triviaData.questions.map(q => Object.assign(Object.create(null), q, {type: 'trivia'}));
 }
 
-function isTriviaRoom(room: Room) {
-	return room.roomid === 'trivia';
-}
-
 function getTriviaGame(room: Room | null) {
 	if (!room) {
 		throw new Chat.ErrorMessage(`This command can only be used in the Trivia room.`);
