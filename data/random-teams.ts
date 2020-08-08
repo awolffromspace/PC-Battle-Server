@@ -1525,23 +1525,16 @@ export class RandomTeams {
 				case 'Arceus': case 'Silvally':
 					if (this.randomChance(17, 18)) continue;
 					break;
-				case 'Castform':   
+				case 'Castform':
 					if (this.randomChance(2, 3)) continue;
 					break;
-				case 'Aegislash': case 'Basculin': case 'Cherrim': case 'Deoxys': case 'Floette': case 'Giratina': case 'Gourgeist':
-				case 'Pumpkaboo': case 'Groudon': case 'Hoopa': case 'Kyogre': case 'Kyurem': case 'Landorus': case 'Lycanroc':
-				case 'Meloetta': case 'Meowstic': case 'Necrozma': case 'Oricorio': case 'Rotom': case 'Shaymin': case 'Thundurus':
-				case 'Tornadus': case 'Wormadam':
+				case 'Aegislash': case 'Basculin': case 'Cherrim': case 'Giratina': case 'Gourgeist': case 'Groudon': case 'Kyogre': case 'Meloetta':
 					if (this.randomChance(1, 2)) continue;
 					break;
-				case 'Dugtrio': case 'Diglett': case 'Exeggutor': case 'Golem': case 'Graveler': case 'Geodude': case 'Greninja':
-				case 'Marowak': case 'Muk': case 'Grimer': case 'Ninetales': case 'Vulpix': case 'Persian': case 'Meowth':
-				case 'Raichu': case 'Sandslash': case 'Sandshrew': case 'Zygarde':
-					if (this.gen === 7 && this.randomChance(1, 2)) continue;
+				case 'Greninja':
+					if (this.gen >= 7 && this.randomChance(1, 2)) continue;
 					break;
-				case 'Corsola': case 'Darmanitan': case 'Darumaka': case 'Farfetch\'d': case 'Indeedee': case 'Linoone':
-				case 'Zigzagoon': case 'Meowth': case 'Mr. Mime': case 'Rapidash': case 'Ponyta': case 'Stunfisk': case 'Weezing':
-				case 'Yamask':
+				case 'Darmanitan':
 					if (species.gen === 8 && this.randomChance(1, 2)) continue;
 					break;
 				case 'Magearna': case 'Toxtricity': case 'Zacian': case 'Zamazenta':
@@ -1591,13 +1584,13 @@ export class RandomTeams {
 				// The Pokemon of the Day
 				if (!!potd && potd.exists && pokemon.length < 1) species = potd;
 
-				let set = this.randomSet(species, teamDetails, pokemon.length === 0, this.format.gameType !== 'singles');
+				const set = this.randomSet(species, teamDetails, pokemon.length === 0, this.format.gameType !== 'singles');
 
 				if (formatID === 'gen7lcrandom') {
 					set.level = 5;
 				} else if (formatID === 'gen8metronome3v3random' || formatID === 'gen8metronome6v6random') {
 					set.moves = ['Metronome'];
-					if (['Assault Vest'].indexOf(set.item) > -1) {
+					if (['Assault Vest'].includes(set.item) > -1) {
 						set.item = 'Leftovers';
 					}
 				}

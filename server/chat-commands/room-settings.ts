@@ -1248,7 +1248,6 @@ export const commands: ChatCommands = {
 		if (target.length > 80) {
 			return this.errorReply(`Error: Room description is too long (must be at most 80 characters).`);
 		}
-		const normalizedTarget = ' ' + target.toLowerCase().replace(/[^a-z0-9]+/g, ' ').trim() + ' ';
 
 		room.settings.desc = target;
 		this.sendReply(`(The room description is now: ${target})`);
