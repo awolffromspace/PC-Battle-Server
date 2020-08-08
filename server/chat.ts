@@ -405,7 +405,7 @@ function parseEmoticons(message, room, user, pm) {
 		if (match === ':ana:' || match === ':mercy:' || match === ':pikahug:' || match === ':tracer:') return typeof emote !== 'undefined' ?
 			'<img src="' + emote + '" title="' + match + '" width="35" height="33"/>' :
 			match;
-		if (match === ':bastion:' || match === ':dva:' || match === ':hanzo:' || match === ':junkrat:' || match === ':mccree:' || match === ':mei:' || match === ':orisa:' || match === ':pharah:' || match === ':reaper:' || match === ':reinhardt:' || match === ':roadhog:' || match === ':soldier76:' || match === ':sombra:' || match === ':torbjorn:' || match === ':winston:' || match === ':zarya:') return typeof emote != 'undefined' ?
+		if (match === ':bastion:' || match === ':dva:' || match === ':hanzo:' || match === ':junkrat:' || match === ':mccree:' || match === ':mei:' || match === ':orisa:' || match === ':pharah:' || match === ':reaper:' || match === ':reinhardt:' || match === ':roadhog:' || match === ':soldier76:' || match === ':sombra:' || match === ':torbjorn:' || match === ':winston:' || match === ':zarya:') return typeof emote !== 'undefined' ?
 			'<img src="' + emote + '" title="' + match + '" width="37" height="33"/>' :
 			match;
 		if (match === ':bed:') return typeof emote !== 'undefined' ?
@@ -531,7 +531,7 @@ function parseEmoticons(message, room, user, pm) {
 	});
 
 	// __italics__
-	message = message.replace(/\_\_([^< ](?:[^<]*?[^< ])?)\_\_(?![^<]*?<\/a)/g, '<i>$1</i>');
+	message = message.replace(/([^< ](?:[^<]*?[^< ])?)(?![^<]*?<\/a)/g, '<i>$1</i>');
 
 	// **bold**
 	message = message.replace(/\*\*([^< ](?:[^<]*?[^< ])?)\*\*/g, '<b>$1</b>');
