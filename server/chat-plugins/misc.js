@@ -7,7 +7,7 @@
 
 let moment = require('moment');
 
-export const commands: ChatCommands = {
+exports.commands = {
 	seen(target, room, user) {
 		if (!this.runBroadcast()) return;
 		if (!target) return this.parse('/help seen');

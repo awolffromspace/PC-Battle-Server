@@ -56,7 +56,7 @@ function generateCSS(name, icon) {
 	return css;
 }
 
-export const commands: ChatCommands = {
+exports.commands = {
 	customicon: 'icon',
 	icon(target, room, user) {
 		if (!this.can('pban')) return false;

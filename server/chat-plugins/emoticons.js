@@ -269,7 +269,7 @@ function create_table() {
 
 let emotes_table = create_table();
 
-export const commands: ChatCommands = {
+exports.commands = {
 	blockemote: 'blockemoticons',
 	blockemotes: 'blockemoticons',
 	blockemoticon: 'blockemoticons',

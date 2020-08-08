@@ -144,7 +144,7 @@ Profile.prototype.show = function (callback) {
 		'<br clear="all">';
 };
 
-export const commands: ChatCommands = {
+exports.commands = {
 	profile(target, room, user) {
 		if (!this.runBroadcast()) return;
 		if (target.length >= 19) return this.sendReply("Usernames are required to be less than 19 characters long.");

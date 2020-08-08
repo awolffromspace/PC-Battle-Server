@@ -1,6 +1,6 @@
 'use strict';
 
-export const commands: ChatCommands = {
+exports.commands = {
 	rk: 'kick',
 	roomkick: 'kick',
 	k: 'kick',

@@ -1,4 +1,4 @@
-export const commands: ChatCommands = {
+exports.commands = {
 	elimtour: 'etour',
 	etour(target, room, user) {
 		if (!target) return this.sendReply("Please provide a format.");
