@@ -7,8 +7,8 @@
 
 let moment = require('moment');
 
-exports.commands = {
-	seen: function (target, room, user) {
+export const commands: ChatCommands = {
+	seen(target, room, user) {
 		if (!this.runBroadcast()) return;
 		if (!target) return this.parse('/help seen');
 		let targetUser = Users.get(target);
@@ -20,7 +20,7 @@ exports.commands = {
 	},
 	seenhelp: ["/seen - Shows when the user last connected on the server."],
 
-	tell: function (target, room, user, connection) {
+	tell(target, room, user, connection) {
 		if (!target) return this.parse('/help tell');
 		target = this.splitTarget(target);
 		let targetUser = this.targetUser;
