@@ -1623,13 +1623,15 @@ export const Formats: (FormatsData | {section: string, column?: number})[] = [
 		team: 'random',
 		ruleset: ['[Gen 8] Random (no PotD)'],
 	},
-	/*{
-		name: "[Gen 8] LC Random",
-
-		mod: 'gen8',
-		team: 'random',
-		ruleset: ['[Gen 8] Random (no PotD)'],
-	},*/
+	/**
+	*{
+	*	name: "[Gen 8] LC Random",
+	*
+	*	mod: 'gen8',
+	*	team: 'random',
+	*	ruleset: ['[Gen 8] Random (no PotD)'],
+	*},
+	*/
 	{
 		name: "[Gen 8] Generational Random",
 
@@ -1700,20 +1702,22 @@ export const Formats: (FormatsData | {section: string, column?: number})[] = [
 		team: 'random',
 		ruleset: ['[Gen 8] Random (no PotD)'],
 	},
-	/*{
-		name: "[Gen 8] Inverse Random",
-
-		mod: 'gen8',
-		team: 'random',
-		ruleset: ['[Gen 8] Random (no PotD)'],
-		onNegateImmunity: false,
-		onEffectiveness(typeMod, target, type, move) {
-			// The effectiveness of Freeze Dry on Water isn't reverted
-			if (move && move.id === 'freezedry' && type === 'Water') return;
-			if (move && !this.getImmunity(move, type)) return 1;
-			return -typeMod;
-		},
-	},*/
+	/**
+	*{
+	*	name: "[Gen 8] Inverse Random",
+	*
+	*	mod: 'gen8',
+	*	team: 'random',
+	*	ruleset: ['[Gen 8] Random (no PotD)'],
+	*	onNegateImmunity: false,
+	*	onEffectiveness(typeMod, target, type, move) {
+	*		// The effectiveness of Freeze Dry on Water isn't reverted
+	*		if (move && move.id === 'freezedry' && type === 'Water') return;
+	*		if (move && !this.getImmunity(move, type)) return 1;
+	*		return -typeMod;
+	*	},
+	*},
+	*/
 	{
 		name: "[Gen 8] Metronome 3v3 Random",
 
@@ -1732,13 +1736,15 @@ export const Formats: (FormatsData | {section: string, column?: number})[] = [
 		team: 'random',
 		ruleset: ['[Gen 8] Random (no PotD)'],
 	},
-	/* {
-		name: "[Gen 8] Orb Random",
-
-		mod: 'gen8',
-		team: 'random',
-		ruleset: ['[Gen 8] Random (no PotD)'],
-	}, */
+	/**
+	*{
+	*	name: "[Gen 8] Orb Random",
+	*
+	*	mod: 'gen8',
+	*	team: 'random',
+	*	ruleset: ['[Gen 8] Random (no PotD)'],
+	*},
+	*/
 
 	// RoA Spotlight
 	///////////////////////////////////////////////////////////////////

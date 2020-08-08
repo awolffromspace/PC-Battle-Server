@@ -1452,8 +1452,7 @@ export class RandomTeams {
 			} else if (formatID === 'gen8galarrandom') {
 				if (species.gen !== 8) continue;
 			} else if (formatID === 'gen8colorrandom') {
-				let colors = species.color;
-				if (colors.indexOf(teamColor) < 0) continue;
+				if (species.color.includes(teamColor) < 0) continue;
 			}
 			pokemonPool.push(id);
 		}
@@ -1464,7 +1463,7 @@ export class RandomTeams {
 		const seed = this.prng.seed;
 		const ruleTable = this.dex.getRuleTable(this.format);
 		const pokemon = [];
-		let formatID = this.format.id;
+		const formatID = this.format.id;
 
 		// For Monotype
 		const isMonotype = ruleTable.has('sametypeclause');
@@ -1479,17 +1478,17 @@ export class RandomTeams {
 
 		// For Metronome
 		if (formatID === 'gen8metronome3v3random' || formatID === 'gen8metronome6v6random') {
-			let metronome = this.dex.getMove('Metronome');
+			const metronome = this.dex.getMove('Metronome');
 			metronome.pp = 624.375;
 			metronome.noMetronome.push('imprison', 'taunt', 'torment');
 		}
 
 		// For Generational
-		let teamGeneration = Math.floor(Math.random() * 7) + 1;
+		const teamGeneration = Math.floor(Math.random() * 7) + 1;
 
 		// For Color
-		let colorPool = ['Red', 'Blue', 'Yellow', 'Green', 'Black', 'Brown', 'Purple', 'Gray', 'White', 'Pink'];
-		let teamColor = colorPool[this.random(colorPool.length)];
+		const colorPool = ['Red', 'Blue', 'Yellow', 'Green', 'Black', 'Brown', 'Purple', 'Gray', 'White', 'Pink'];
+		const teamColor = colorPool[this.random(colorPool.length)];
 
 		const baseFormes: {[k: string]: number} = {};
 
@@ -1526,18 +1525,13 @@ export class RandomTeams {
 				case 'Arceus': case 'Silvally':
 					if (this.randomChance(17, 18)) continue;
 					break;
-				case 'Rotom':
-					if (this.randomChance(5, 6)) continue;
-					break;
-				case 'Deoxys': case 'Gourgeist': case 'Pumpkaboo': case 'Oricorio':
-					if (this.randomChance(3, 4)) continue;
-					break;
-				case 'Castform': case 'Kyurem': case 'Lycanroc': case 'Necrozma': case 'Wormadam':
+				case 'Castform':   
 					if (this.randomChance(2, 3)) continue;
 					break;
-				case 'Aegislash': case 'Basculin': case 'Cherrim': case 'Floette': case 'Giratina': case 'Gourgeist': case 'Pumpkaboo':
-				case 'Groudon': case 'Hoopa': case 'Landorus': case 'Kyogre': case 'Meloetta': case 'Meowstic': case 'Shaymin':
-				case 'Thundurus': case 'Tornadus':
+				case 'Aegislash': case 'Basculin': case 'Cherrim': case 'Deoxys': case 'Floette': case 'Giratina': case 'Gourgeist':
+				case 'Pumpkaboo': case 'Groudon': case 'Hoopa': case 'Kyogre': case 'Kyurem': case 'Landorus': case 'Lycanroc':
+				case 'Meloetta': case 'Meowstic': case 'Necrozma': case 'Oricorio': case 'Rotom': case 'Shaymin': case 'Thundurus':
+				case 'Tornadus': case 'Wormadam':
 					if (this.randomChance(1, 2)) continue;
 					break;
 				case 'Dugtrio': case 'Diglett': case 'Exeggutor': case 'Golem': case 'Graveler': case 'Geodude': case 'Greninja':
