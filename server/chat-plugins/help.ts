@@ -18,8 +18,9 @@ const MINIMUM_LENGTH = 6;
 export let helpData: PluginData;
 
 try {
-	helpData = JSON.parse(FS(PATH).readIfExistsSync() || "{}");
+	helpData = JSON.parse(FS(PATH).readSync());
 } catch (e) {
+	if (e.code !== 'ENOENT') throw e;
 	helpData = {
 		stats: {},
 		pairs: {},
@@ -37,7 +38,7 @@ const COMMON_TERMS = [
 ].map(item => new RegExp(item, "i"));
 
 /**
- * A message filtered by the Help filter.
+ * A message caught by the Help filter.
  */
 interface LoggedMessage {
 	/** Message that's matched by the Help filter. */
@@ -279,7 +280,7 @@ export const commands: ChatCommands = {
 				Answerer.disabled = true;
 			}
 			Answerer.writeState();
-			this.privateModAction(`(${user.name} ${Answerer.disabled ? 'disabled' : 'enabled'} the Help auto-response filter.)`);
+			this.privateModAction(`${user.name} ${Answerer.disabled ? 'disabled' : 'enabled'} the Help auto-response filter.`);
 			this.modlog(`HELPFILTER`, null, Answerer.disabled ? 'OFF' : 'ON');
 		},
 		forceadd: 'add',

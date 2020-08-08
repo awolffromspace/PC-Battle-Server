@@ -892,7 +892,7 @@ export abstract class BasicRoom {
 		Rooms.rooms.delete(this.roomid);
 	}
 	tr(strings: string | TemplateStringsArray, ...keys: any[]) {
-		return Chat.tr(this.settings.language || 'english', strings, keys);
+		return Chat.tr(this.settings.language || 'english', strings, ...keys);
 	}
 }
 
@@ -1005,8 +1005,8 @@ export class GlobalRoomState {
 		this.lastWrittenBattle = this.lastBattle;
 	}
 
-	modlog(message: string) {
-		void Rooms.Modlog.write('global', message);
+	modlog(message: string, overrideID?: string) {
+		void Rooms.Modlog.write('global', message, overrideID);
 	}
 
 	writeChatRoomData() {
@@ -1408,10 +1408,11 @@ export class GlobalRoomState {
 			return;
 		}
 		this.lastReportedCrash = time;
-		const stack = err.stack || err.message || err.name || '';
-		const stackLines = (err ? Utils.escapeHTML(stack).split(`\n`) : []);
 
-		let crashMessage = `|html|<div class="broadcast-red"><details class="readmore"><summary><b>${crasher} crashed:</b> ${stackLines[0]}</summary>${stack}</details></div>`;
+		const stack = (err && (err.stack || err.message || err.name)) || '';
+		const stackLines = Utils.escapeHTML(stack).split(`\n`);
+
+		let crashMessage = `|html|<div class="broadcast-red"><details class="readmore"><summary><b>${crasher} crashed:</b> ${stackLines[0]}</summary>${stackLines.slice(1).join('<br />')}</details></div>`;
 		let privateCrashMessage = null;
 
 		const upperStaffRoom = Rooms.get('upperstaff');

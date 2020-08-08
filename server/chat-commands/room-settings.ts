@@ -94,7 +94,7 @@ export const commands: ChatCommands = {
 			target = Users.PLAYER_SYMBOL;
 			/* falls through */
 		default:
-			if (!Users.Auth.isAuthLevel(target)) {
+			if (!Users.Auth.isAuthLevel(target) || ['‽', '!'].includes(target)) {
 				this.errorReply(`The rank '${target}' was unrecognized as a modchat level.`);
 				return this.parse('/help modchat');
 			}
@@ -204,7 +204,7 @@ export const commands: ChatCommands = {
 			this.add(`|raw|<div class="broadcast-red"><strong>Moderated join is set to autoconfirmed!</strong><br />Users must be rank autoconfirmed or invited with <code>/invite</code> to join</div>`);
 			this.addModAction(`${user.name} set modjoin to autoconfirmed.`);
 			this.modlog('MODJOIN', null, 'autoconfirmed');
-		} else if (Users.Auth.isAuthLevel(target)) {
+		} else if (Users.Auth.isAuthLevel(target) && !['‽', '!'].includes(target)) {
 			if (room.battle && !user.can('makeroom') && !'+%'.includes(target)) {
 				return this.errorReply(`/modjoin - Access denied from setting modjoin past % in battles.`);
 			}
@@ -293,9 +293,6 @@ export const commands: ChatCommands = {
 			if (!room) return this.requiresRoom();
 			let [perm, rank] = target.split(',').map(item => item.trim().toLowerCase());
 			if (rank === 'default') rank = '';
-			if (!room.auth.atLeast(user, '#')) {
-				return this.errorReply(`/permissions set - Access denied.`);
-			}
 			if (!room.persist) return this.errorReply(`This room does not allow customizing permissions.`);
 			if (!target || !perm) return this.parse(`/permissions help`);
 			if (rank && rank !== 'whitelist' && !Users.Auth.isValidSymbol(rank)) {
@@ -303,6 +300,9 @@ export const commands: ChatCommands = {
 			}
 			if (!Users.Auth.supportedRoomPermissions(room).includes(perm)) {
 				return this.errorReply(`${perm} is not a valid room permission.`);
+			}
+			if (!(room.auth.atLeast(user, '#') && Users.Auth.hasPermission(user, perm, null, room))) {
+				return this.errorReply(`/permissions set - Access denied.`);
 			}
 
 			const currentPermissions = room.settings.permissions || {};
@@ -321,7 +321,7 @@ export const commands: ChatCommands = {
 
 			if (!rank) rank = `default`;
 			this.modlog(`SETPERMISSION`, null, `${perm}: ${rank}`);
-			return this.privateModAction(`(${user.name} set the required rank for ${perm} to ${rank}.)`);
+			return this.privateModAction(`${user.name} set the required rank for ${perm} to ${rank}.`);
 		},
 		sethelp: [
 			`/permissions set [command], [rank symbol] - sets the required permission to use the command [command] to [rank]. Requires: # &`,
@@ -350,6 +350,12 @@ export const commands: ChatCommands = {
 			const permissionGroups = allPermissions.filter(perm => !perm.startsWith('/'));
 			const permissions = allPermissions.filter(perm => perm.startsWith('/') && !perm.includes(' '));
 			const subPermissions = allPermissions.filter(perm => perm.startsWith('/') && perm.includes(' '));
+			const subPermissionsByNamespace: {[k: string]: string[]} = {};
+			for (const perm of subPermissions) {
+				const [namespace] = perm.split(' ', 1);
+				if (!subPermissionsByNamespace[namespace]) subPermissionsByNamespace[namespace] = [];
+				subPermissionsByNamespace[namespace].push(perm);
+			}
 
 			let buffer = `<strong>Room permissions help:</strong><hr />`;
 			buffer += `<p><strong>Usage: </strong><br />`;
@@ -361,7 +367,10 @@ export const commands: ChatCommands = {
 			buffer += `<p><strong>Single-command permissions:</strong> (will affect one command)<br />`;
 			buffer += `<code>` + permissions.join(`</code> <code>`) + `</code></p>`;
 			buffer += `<p><details class="readmore"><summary><strong>Sub-commands:</strong> (will affect one sub-command, like /roomevents view)</summary>`;
-			buffer += `<code>` + subPermissions.join(`</code> <code>`) + `</code></details></p>`;
+			for (const subPerms of Object.values(subPermissionsByNamespace)) {
+				buffer += `<br /><code>` + subPerms.join(`</code> <code>`) + `</code><br />`;
+			}
+			buffer += `</details></p>`;
 			return this.sendReplyBox(buffer);
 		},
 	},
