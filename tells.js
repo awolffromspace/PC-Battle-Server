@@ -15,7 +15,7 @@
 
 'use strict';
 
-let fs = require('fs');
+const fs = require('fs');
 
 let tells = {inbox: {}, outbox: {}};
 try {
@@ -26,13 +26,13 @@ try {
  * Purge expired messages from those stored
  * @param threshold	The age limit of an "old" tell, in ms
  */
-let pruneOld = exports.pruneOld = function (threshold) {
-	let now = Date.now();
-	let receivers = Object.keys(Tells.inbox);
+const pruneOld = exports.pruneOld = function (threshold) {
+	const now = Date.now();
+	const receivers = Object.keys(Tells.inbox);
 	for (let i = 0; i < receivers.length; i++) {
 		for (let n = 0; n < Tells.inbox[receivers[i]].length; n++) {
 			if ((now - Tells.inbox[receivers[i]][n].time) >= threshold) {
-				let ips = Object.keys(Tells.inbox[receivers[i]][n].ips);
+				const ips = Object.keys(Tells.inbox[receivers[i]][n].ips);
 				for (let ip = 0; ip < ips.length; ip++) {
 					if (Tells.outbox[ips[ip]]) Tells.outbox[ips[ip]]--;
 					if (Tells.outbox[ips[ip]] <= 0) delete Tells.outbox[ips[ip]];
@@ -55,7 +55,7 @@ exports.outbox = tells.outbox || {};
 exports.writeTells = (function () {
 	let writing = false;
 	let writePending = false; // whether or not a new write is pending
-	let finishWriting = function () {
+	const finishWriting = function () {
 		writing = false;
 		if (writePending) {
 			writePending = false;
@@ -68,7 +68,7 @@ exports.writeTells = (function () {
 			return;
 		}
 		writing = true;
-		let data = JSON.stringify({inbox: Tells.inbox, outbox: Tells.outbox});
+		const data = JSON.stringify({inbox: Tells.inbox, outbox: Tells.outbox});
 		fs.writeFile('config/tells.json.0', data, function () {
 			// rename is atomic on POSIX, but will throw an error on Windows
 			fs.rename('config/tells.json.0', 'config/tells.json', function (err) {
@@ -90,14 +90,14 @@ exports.writeTells = (function () {
  */
 exports.sendTell = function (userid, user) {
 	let buffer = '|raw|';
-	let tellsToSend = Tells.inbox[userid];
+	const tellsToSend = Tells.inbox[userid];
 	for (let i = 0; i < tellsToSend.length; i++) {
-		let ips = Object.keys(tellsToSend[i].ips);
+		const ips = Object.keys(tellsToSend[i].ips);
 		for (let ip = 0; ip < ips.length; ip++) {
 			if (Tells.outbox[ips[ip]]) Tells.outbox[ips[ip]]--;
 			if (Tells.outbox[ips[ip]] <= 0) delete Tells.outbox[ips[ip]];
 		}
-		let timeStr = Tells.getTellTime(tellsToSend[i].time);
+		const timeStr = Tells.getTellTime(tellsToSend[i].time);
 		buffer += '<div class="chat"><font color="gray">[' + timeStr + ' ago]</font> <b>' + tellsToSend[i].sender + ':</b> ' + Chat.escapeHTML(tellsToSend[i].msg.replace(/\|/g, '&#124;')) + '</div>';
 	}
 	user.send(buffer);
@@ -116,7 +116,7 @@ exports.sendTell = function (userid, user) {
  */
 exports.addTell = function (sender, receiver, msg) {
 	if (Tells.inbox[receiver] && Tells.inbox[receiver].length >= 5) return false;
-	let ips = Object.keys(sender.ips);
+	const ips = Object.keys(sender.ips);
 	for (let i = 0; i < ips.length; i++) {
 		if (!Tells.outbox[ips[i]]) {
 			Tells.outbox[ips[i]] = 1;
@@ -126,7 +126,7 @@ exports.addTell = function (sender, receiver, msg) {
 		}
 	}
 	if (!Tells.inbox[receiver]) Tells.inbox[receiver] = [];
-	let newTell = {
+	const newTell = {
 		'sender': sender.name,
 		time: Date.now(),
 		'msg': msg,
@@ -145,8 +145,8 @@ exports.addTell = function (sender, receiver, msg) {
 exports.getTellTime = function (time) {
 	time = Date.now() - time;
 	time = Math.round(time / 1000); // rounds to nearest second
-	let seconds = time % 60;
-	let times = [];
+	const seconds = time % 60;
+	const times = [];
 	if (seconds) times.push(String(seconds) + (seconds === 1 ? ' second' : ' seconds'));
 	let minutes, hours, days;
 	if (time >= 60) {
@@ -169,4 +169,4 @@ exports.getTellTime = function (time) {
 
 // clear old messages every two hours
 exports.pruneOldTimer = setInterval(pruneOld, 1000 * 60 * 60 * 2,
-        Config.tellsexpiryage || 1000 * 60 * 60 * 24 * 7);
+	Config.tellsexpiryage || 1000 * 60 * 60 * 24 * 7);

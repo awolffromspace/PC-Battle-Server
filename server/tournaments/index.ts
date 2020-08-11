@@ -18,9 +18,8 @@ const AUTO_START_MINIMUM_TIMEOUT = 30 * 1000;
 const MAX_REASON_LENGTH = 300;
 const MAX_CUSTOM_NAME_LENGTH = 100;
 const TOURBAN_DURATION = 14 * 24 * 60 * 60 * 1000;
-const ALLOW_ALTS = false;
-let allowAlts = false;
 const COLOR = '#d95b21'; // Color the messages for battle point winnings
+let allowAlts = false;
 
 Punishments.roomPunishmentTypes.set('TOURBAN', 'banned from tournaments');
 
@@ -397,7 +396,7 @@ export class Tournament extends Rooms.RoomGame {
 		}
 
 		if (!allowAlts) {
-			for (let otherPlayer of this.players) {
+			for (const otherPlayer of this.players) {
 				if (!otherPlayer) continue;
 				const otherUser = Users.get(otherPlayer.id);
 				if (otherUser && otherUser.latestIp === user.latestIp) {
@@ -967,7 +966,7 @@ export class Tournament extends Rooms.RoomGame {
 		if (!player.pendingChallenge) return;
 
 		let lobbyTour = false;
-		if (this.room.roomid == 'lobby') {
+		if (this.room.roomid === 'lobby') {
 			lobbyTour = true;
 		}
 		const room = Rooms.createBattle(this.fullFormat, {
@@ -1066,10 +1065,15 @@ export class Tournament extends Rooms.RoomGame {
 		// Individual Tournament Battle Winnings
 		//
 
-		let tourSize = this.players.length;
-		let sizeRequiredToEarn = 3;
-		if (tourSize >= sizeRequiredToEarn && this.format !== 'gen71v1' && this.format !== 'gen7battlespotspecial15' && this.format !== 'gen72v2doubles' && this.format !== 'gen7metronomebattle' && this.format !== 'gen7challengecup1v1' && this.format !== 'gen7challengecup2v2' && this.format !== 'gen71v1randombattle' && this.format !== 'gen61v1' && this.format !== 'gen51v1') {
-				Db.money.set(winner, Db.money.get(winner, 0) + 1);
+		const tourSize = this.players.length;
+		const sizeRequiredToEarn = 3;
+		if (
+			tourSize >= sizeRequiredToEarn && this.format !== 'gen81v1' && this.format !== 'gen82v2doubles' && this.format !== 'gen8metronomebattle'
+			&& this.format !== 'gen8challengecup1v1' && this.format !== 'gen8challengecup2v2' && this.format !== 'gen8cap1v1'
+			&& this.format !== 'gen81v1random' && this.format !== 'gen71v1' && this.format !== 'gen61v1' && this.format !== 'gen51v1'
+			&& this.format !== 'gen41v1' && this.format !== 'gen31v1'
+		) {
+			Db.money.set(winner, Db.money.get(winner, 0) + 1);
 		}
 
 		p1.isBusy = false;
@@ -1124,14 +1128,15 @@ export class Tournament extends Rooms.RoomGame {
 			bracketData: this.getBracketData(),
 		};
 		this.room.add(`|tournament|end|${JSON.stringify(update)}`);
+
 		// Boilerplate start
 		//
 		// Tournament Winnings
 		//
 
-		let sizeRequiredToEarn = 3;
-		let currencyName = function (amount) {
-			let name = " Battle Point";
+		const sizeRequiredToEarn = 3;
+		const currencyName = function (amount) {
+			const name = " Battle Point";
 			return amount === 1 ? name : name + "s";
 		};
 		let data = this.generator.getResults().map(usersToNames).toString();
@@ -1145,13 +1150,13 @@ export class Tournament extends Rooms.RoomGame {
 			winner = data;
 		}
 
-		let wid = toID(winner);
-		let rid = toID(runnerUp);
-		let tourSize = this.players.length;
+		const wid = toID(winner);
+		const rid = toID(runnerUp);
+		const tourSize = this.players.length;
 
 		if (tourSize >= sizeRequiredToEarn) {
-			let firstMoney = Math.round(tourSize / 2);
-			let secondMoney = Math.round(firstMoney / 2);
+			const firstMoney = Math.round(tourSize / 2);
+			const secondMoney = Math.round(firstMoney / 2);
 
 			Db.money.set(wid, Db.money.get(wid, 0) + firstMoney);
 			this.room.add("|raw|<b><font color='" + COLOR + "'>" + Chat.escapeHTML(winner) + "</font> has won " + "<font color='" + COLOR + "'>" + firstMoney + "</font>" + currencyName(firstMoney) + " for winning the tournament!</b>");

@@ -1,3 +1,5 @@
+'use strict';
+
 exports.commands = {
 	elimtour: 'etour',
 	etour(target, room, user) {
@@ -84,9 +86,9 @@ exports.commands = {
 		room.disableLadderMessages = !room.disableLadderMessages;
 		this.sendReply("Disallowing ladder messages is set to " + room.disableLadderMessages + " in this room.");
 		if (room.disableLadderMessages) {
-			this.add('|raw|<div class=\"broadcast-blue\"><b>Ladder messages are disabled!</b><br>The "Battle!" button will no longer send messages in the Lobby.</div>');
+			this.add('|raw|<div class="broadcast-blue"><b>Ladder messages are disabled!</b><br>The "Battle!" button will no longer send messages in the Lobby.</div>');
 		} else {
-			this.add('|raw|<div class=\"broadcast-red\"><b>Ladder messages are enabled!</b><br>The "Battle!" button will send messages in the Lobby.</div>');
+			this.add('|raw|<div class="broadcast-red"><b>Ladder messages are enabled!</b><br>The "Battle!" button will send messages in the Lobby.</div>');
 		}
 	},
 	toggleladdermsghelp: ["/toggleladdermsg - Toggle ladder messages on or off."],
@@ -96,13 +98,11 @@ exports.commands = {
 	togglebattlemsg(target, room, user) {
 		if (!this.can('warn')) return false;
 		if (Config.reportbattles === true) {
-			setting = false;
-			Config.reportbattles = setting;
-			this.add('|raw|<div class=\"broadcast-blue\"><b>Battle messages are disabled!</b><br>Battles will no longer be reported in the Lobby.</div>');
+			Config.reportbattles = false;
+			this.add('|raw|<div class="broadcast-blue"><b>Battle messages are disabled!</b><br>Battles will no longer be reported in the Lobby.</div>');
 		} else {
-			setting = true;
-			Config.reportbattles = setting;
-			this.add('|raw|<div class=\"broadcast-red\"><b>Battle messages are enabled!</b><br>Battles will be reported in the Lobby.</div>');
+			Config.reportbattles = true;
+			this.add('|raw|<div class="broadcast-red"><b>Battle messages are enabled!</b><br>Battles will be reported in the Lobby.</div>');
 		}
 	},
 	togglebattlemsghelp: ["/togglebattlemsg - Toggle battle messages on or off."],
@@ -110,21 +110,21 @@ exports.commands = {
 	settitle(target, room, user) {
 		if (!target) return this.parse('/help givetitle');
 
-		let username = user.userid;
-		let title = target;
+		const username = user.userid;
+		const title = target;
 
 		Db.title.set(username, title);
 		this.sendReply("Your profile title is now " + title + ".");
 	},
 	settitlehelp: ["/settitle [title] - Set your profile title."],
-	
+
 	givetitle(target, room, user) {
 		if (!this.can('forcewin')) return false;
 		if (!target || target.indexOf(',') < 0) return this.parse('/help givetitle');
 
-		let parts = target.split(',');
-		let username = parts[0];
-		let title = parts[1];
+		const parts = target.split(',');
+		const username = parts[0];
+		const title = parts[1];
 
 		Db.title.set(toID(username), title);
 		this.sendReply(username + " was given the profile title " + title + ".");
@@ -135,7 +135,7 @@ exports.commands = {
 	plaintext(target, room, user) {
 		if (!target) return;
 		if (!this.runBroadcast()) return;
-		let originalVersion = target;
+		const originalVersion = target;
 		let newVersion = target;
 		newVersion = newVersion.replace(/[^a-zA-Z0-9]|\s+/g, "");
 		this.sendReplyBox(

@@ -5,9 +5,8 @@
 */
 'use strict';
 
-let color = require('../../config/color');
-let fs = require('fs');
-let path = require('path');
+const fs = require('fs');
+const path = require('path');
 let writeJSON = true;
 let Shop = {};
 const INACTIVE_END_TIME = 1 * 60 * 1000; // 1 minute
@@ -24,7 +23,7 @@ const INACTIVE_END_TIME = 1 * 60 * 1000; // 1 minute
  * @returns {String}
  */
 function currencyName(amount) {
-	let name = " buck";
+	const name = " buck";
 	return amount === 1 ? name : name + "s";
 }
 
@@ -35,7 +34,7 @@ function currencyName(amount) {
  * @return {String|Number}
  */
 function isMoney(money) {
-	let numMoney = Number(money);
+	const numMoney = Number(money);
 	if (isNaN(money)) return "Must be a number.";
 	if (String(money).includes('.')) return "Cannot contain a decimal.";
 	if (numMoney < 1) return "Cannot be less than one buck.";
@@ -49,9 +48,9 @@ function isMoney(money) {
  */
 function logMoney(message) {
 	if (!message) return;
-	let file = path.join(__dirname, '../logs/money.txt');
-	let date = "[" + new Date().toUTCString() + "] ";
-	let msg = message + "\n";
+	const file = path.join(__dirname, '../logs/money.txt');
+	const date = "[" + new Date().toUTCString() + "] ";
+	const msg = message + "\n";
 	fs.appendFile(file, date + msg);
 }
 /*
@@ -72,7 +71,7 @@ function writeShop() {
 
 function shopDisplay() {
 	let output = '<div style="max-height:300px; width: 100%; overflow: scroll"><table style="border:2px solid #000000; border-radius: 5px; width: 100%;"><tr><th colspan="3" style="border: 2px solid #000000; border-radius: 5px">Server Shop</th></tr>';
-	for (let i in Shop) {
+	for (const i in Shop) {
 		if (!Shop[i]) continue;
 		output += '<tr><td style="border: 2px solid #000000; width: 20%; text-align: center"><button class="button" name="send" value="/Shop buy ' + Shop[i].id + '">' + Shop[i].name + '</button></td><td style="border: 2px solid #000000; width: 70%; text-align: center">' + Shop[i].desc + '</td><td style="border: 2px solid #000000; width: 10%; text-align: center">' + Shop[i].price + '</td></tr>';
 	}
@@ -82,7 +81,7 @@ function shopDisplay() {
 
 try {
 	fs.accessSync('config/Shop.json', fs.F_OK);
-	let raw = JSON.parse(fs.readFileSync('config/Shop.json', 'utf8'));
+	const raw = JSON.parse(fs.readFileSync('config/Shop.json', 'utf8'));
 	Shop = raw;
 } catch (e) {
 	fs.writeFile('config/Shop.json', "{}", function (err) {
@@ -134,7 +133,7 @@ class Dice {
 			delete this.room.dice;
 		}, INACTIVE_END_TIME);
 
-		this.startMessage = '<div class="infobox"><b style="font-size: 14pt; color: #24678d"><center><span style="color: ' + color(starter) + '">' + Chat.escapeHTML(starter) + '</span> has started a game of dice for <span style = "color: green">' + amount + '</span> ' + currencyName(amount) + '!</center></b><br>' +
+		this.startMessage = '<div class="infobox"><b style="font-size: 14pt; color: #24678d"><center>' + Chat.escapeHTML(starter) + ' has started a game of dice for <span style = "color: green">' + amount + '</span> ' + currencyName(amount) + '!</center></b><br>' +
 			'<center><img style="margin-right: 30px;" src = "http://i.imgur.com/eywnpqX.png" width="80" height="80">' +
 			'<img style="transform:rotateY(180deg); margin-left: 30px;" src="http://i.imgur.com/eywnpqX.png" width="80" height="80"><br>' +
 			'<button name="send" value="/joindice">Click to join!</button></center>';
@@ -148,7 +147,7 @@ class Dice {
 		//if (this.players.length && this.players[0].latestIp === user.latestIp) return self.errorReply("You have already joined this game of dice under the alt '" + this.players[0].name + "'.");
 
 		this.players.push(user);
-		this.room.add('|uhtmlchange|' + this.room.diceCount + '|' + this.startMessage + '<center><b><font color ="' + color(user.name) + '">' + Chat.escapeHTML(user.name) + '</font></b> has joined the game!</center></div>').update();
+		this.room.add('|uhtmlchange|' + this.room.diceCount + '|' + this.startMessage + '<center><b>' + Chat.escapeHTML(user.name) + '</b> has joined the game!</center></div>').update();
 		if (this.players.length === 2) this.play();
 	}
 
@@ -159,20 +158,20 @@ class Dice {
 	}
 
 	play() {
-		let p1 = this.players[0], p2 = this.players[1];
-		let money1 = Db.money.get(p1.userid, 0);
-		let money2 = Db.money.get(p2.userid, 0);
+		const p1 = this.players[0], p2 = this.players[1];
+		const money1 = Db.money.get(p1.userid, 0);
+		const money2 = Db.money.get(p2.userid, 0);
 
 		if (money1 < this.bet || money2 < this.bet) {
-			let user = (money1 < this.bet ? p1 : p2);
-			let other = (user === p1 ? p2 : p1);
+			const user = (money1 < this.bet ? p1 : p2);
+			const other = (user === p1 ? p2 : p1);
 			user.sendTo(this.room, 'You have been removed from this game of dice, as you do not have enough money.');
 			other.sendTo(this.room, user.name + ' has been removed from this game of dice, as they do not have enough money. Wait for another user to join.');
 			this.players.remove(user);
-			this.room.add('|uhtmlchange|' + this.room.diceCount + '|' + this.startMessage + '<center>' + this.players.map(user => "<b><font color='" + color(user.name) + "'>" + Chat.escapeHTML(user.name) + "</font></b>") + ' has joined the game!</center>').update();
+			this.room.add('|uhtmlchange|' + this.room.diceCount + '|' + this.startMessage + '<center>' + this.players.map(user => "<b>" + Chat.escapeHTML(user.name) + "</b>") + ' has joined the game!</center>').update();
 			return;
 		}
-		let players = this.players.map(user => "<b><font color='" + color(user.name) + "'>" + Chat.escapeHTML(user.name) + "</font></b>").join(' and ');
+		const players = this.players.map(user => "<b>" + Chat.escapeHTML(user.name) + "</b>").join(' and ');
 		this.room.add('|uhtmlchange|' + this.room.diceCount + '|' + this.startMessage + '<center>' + players + ' have joined the game!</center></div>').update();
 		let roll1, roll2;
 		do {
@@ -180,16 +179,17 @@ class Dice {
 			roll2 = Math.floor(Math.random() * 6);
 		} while (roll1 === roll2);
 		if (roll2 > roll1) this.players.reverse();
-		let winner = this.players[0], loser = this.players[1];
+		const winner = this.players[0], loser = this.players[1];
 
 		setTimeout(() => {
-			this.room.add('|uhtmlchange|' + this.room.diceCount + '|<div class="infobox"><center>' + players + ' have joined the game!<br /><br />' +
+			this.room.add(
+				'|uhtmlchange|' + this.room.diceCount + '|<div class="infobox"><center>' + players + ' have joined the game!<br /><br />' +
 				'The game has been started! Rolling the dice...<br />' +
 				'<img src = "' + diceImg(roll1) + '" align = "left" title = "' + Chat.escapeHTML(p1.name) + '\'s roll"><img src = "' + diceImg(roll2) + '" align = "right" title = "' + p2.name + '\'s roll"><br />' +
-				'<b><font color="' + color(p1.name) + '">' + Chat.escapeHTML(p1.name) + '</font></b> rolled ' + (roll1 + 1) + '!<br />' +
-				'<b><font color="' + color(p2.name) + '">' + Chat.escapeHTML(p2.name) + '</font></b> rolled ' + (roll2 + 1) + '!<br />' +
-				'<b><font color="' + color(winner.name) + '">' + Chat.escapeHTML(winner.name) + '</font></b> has won <b style="color:red">' + (this.bet) + '</b> ' + currencyName(this.bet) + '!<br />' +
-				'Better luck next time, <b><font color="' + color(loser.name) + '">' + Chat.escapeHTML(loser.name) + '</font></b>!'
+				'<b>' + Chat.escapeHTML(p1.name) + '</b> rolled ' + (roll1 + 1) + '!<br />' +
+				'<b>' + Chat.escapeHTML(p2.name) + '</b> rolled ' + (roll2 + 1) + '!<br />' +
+				'<b>' + Chat.escapeHTML(winner.name) + '</b> has won <b style="color:red">' + (this.bet) + '</b> ' + currencyName(this.bet) + '!<br />' +
+				'Better luck next time, <b>' + Chat.escapeHTML(loser.name) + '</b>!'
 			).update();
 			Db.money.set(winner.userid, Db.money.get(winner.userid) + this.bet);
 			Db.money.set(loser.userid, Db.money.get(loser.userid) - this.bet);
@@ -217,7 +217,7 @@ exports.commands = {
 		target = toID(target);
 		if (!target) target = user.name;
 		const amount = Db.money.get(toID(target), 0);
-		this.sendReplyBox("<font color=" + color(target) + "><b>" + Chat.escapeHTML(target) + "</b></font> has " + amount + currencyName(amount) + ".");
+		this.sendReplyBox("<b>" + Chat.escapeHTML(target) + "</b> has " + amount + currencyName(amount) + ".");
 	},
 	wallethelp: ["/wallet [user] - Shows the amount of money a user has."],
 

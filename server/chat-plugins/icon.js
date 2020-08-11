@@ -6,7 +6,7 @@
 
 let icons = {};
 const fs = require('fs');
-let http = require('http');
+const http = require('http');
 
 function load() {
 	fs.readFile('config/icons.json', 'utf8', function (err, file) {
@@ -21,19 +21,19 @@ function updateIcons() {
 
 	let newCss = '/* ICONS START */\n';
 
-	for (let name in icons) {
+	for (const name in icons) {
 		newCss += generateCSS(name, icons[name]);
 	}
 	newCss += '/* ICONS END */\n';
 
-	let file = fs.readFileSync('config/custom.css', 'utf8').split('\n');
+	const file = fs.readFileSync('config/custom.css', 'utf8').split('\n');
 	if (~file.indexOf('/* ICONS START */')) file.splice(file.indexOf('/* ICONS START */'), (file.indexOf('/* ICONS END */') - file.indexOf('/* ICONS START */')) + 1);
 	fs.writeFileSync('config/custom.css', file.join('\n') + newCss);
 	reloadCSS();
 }
 
 function reloadCSS() {
-	let options = {
+	const options = {
 		host: 'play.pokemonshowdown.com',
 		port: 80,
 		path: '/customcss.php?server=' + Config.serverid,
@@ -44,7 +44,7 @@ function reloadCSS() {
 
 function generateCSS(name, icon) {
 	let css = '';
-	let rooms = [];
+	const rooms = [];
 	name = toID(name);
 	Rooms.rooms.forEach((curRoom, id) => {
 		if (curRoom.id === 'global' || curRoom.type !== 'chat' || curRoom.isPersonal) return;
@@ -61,7 +61,7 @@ exports.commands = {
 	icon(target, room, user) {
 		if (!this.can('pban')) return false;
 		target = target.split(',');
-		for (let u in target) target[u] = target[u].trim();
+		for (const u in target) target[u] = target[u].trim();
 		if (!target[1]) return this.parse('/help icon');
 		if (toID(target[0]).length > 19) return this.errorReply("Usernames are not this long...");
 		if (target[1] === 'delete') {

@@ -5,16 +5,16 @@
 'use strict';
 /*eslint no-restricted-modules: [0]*/
 
-let moment = require('moment');
+const moment = require('moment');
 
 exports.commands = {
 	seen(target, room, user) {
 		if (!this.runBroadcast()) return;
 		if (!target) return this.parse('/help seen');
-		let targetUser = Users.get(target);
+		const targetUser = Users.get(target);
 		if (targetUser && targetUser.connected) return this.sendReplyBox(targetUser.name + " is <b>currently online</b>.");
 		target = Chat.escapeHTML(target);
-		let seen = Db.seen.get(toID(target));
+		const seen = Db.seen.get(toID(target));
 		if (!seen) return this.sendReplyBox(target + " has never been online on this server.");
 		this.sendReplyBox(target + " was last seen <b>" + moment(seen).fromNow() + "</b>.");
 	},
@@ -23,7 +23,7 @@ exports.commands = {
 	tell(target, room, user, connection) {
 		if (!target) return this.parse('/help tell');
 		target = this.splitTarget(target);
-		let targetUser = this.targetUser;
+		const targetUser = this.targetUser;
 		if (!target) {
 			this.sendReply("You forgot the comma.");
 			return this.parse('/help tell');
@@ -43,10 +43,10 @@ exports.commands = {
 				(!Config.tellrank ? "disabled" : "only available to users of rank " + Config.tellrank + " and above") + ".");
 		}
 
-		let userid = toID(this.targetUsername);
+		const userid = toID(this.targetUsername);
 		if (userid.length > 18) return this.popupReply("\"" + this.targetUsername + "\" is not a legal username.");
 
-		let sendSuccess = Tells.addTell(user, userid, target);
+		const sendSuccess = Tells.addTell(user, userid, target);
 		if (!sendSuccess) {
 			if (sendSuccess === false) {
 				return this.popupReply("User " + this.targetUsername + " has too many offline messages queued.");

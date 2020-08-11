@@ -1,12 +1,12 @@
 'use strict';
 /*eslint no-restricted-modules: [0]*/
 
-let moment = require('moment');
+const moment = require('moment');
 
-let BR = '<br>';
-let SPACE = '&nbsp;';
-let profileColor = '#d95b21';
-let trainersprites = [1, 2, 101, 102, 169, 170, 265, 266, 168];
+const BR = '<br>';
+const SPACE = '&nbsp;';
+const profileColor = '#d95b21';
+const trainersprites = [1, 2, 101, 102, 169, 170, 265, 266, 168];
 
 /**
  * Profile constructor.
@@ -85,7 +85,7 @@ function label(text) {
 }
 
 function currencyName(amount) {
-	let name = " Battle Point";
+	const name = " Battle Point";
 	return amount === 1 ? name : name + "s";
 }
 
@@ -94,24 +94,24 @@ Profile.prototype.avatar = function () {
 		if (typeof this.image === 'string') return img(this.url + ':' + Config.port + '/avatars/' + this.image);
 		return img('http://play.pokemonshowdown.com/sprites/trainers/' + this.image + '.png');
 	}
-	for (let name in Config.customAvatars) {
+	for (const name in Config.customAvatars) {
 		if (this.username === name) {
 			return img(this.url + ':' + Config.port + '/avatars/' + Config.customAvatars[name]);
 		}
 	}
-	let selectedSprite = trainersprites[Math.floor(Math.random() * trainersprites.length)];
+	const selectedSprite = trainersprites[Math.floor(Math.random() * trainersprites.length)];
 	return img('http://play.pokemonshowdown.com/sprites/trainers/' + selectedSprite + '.png');
 };
 
 Profile.prototype.buttonAvatar = function () {
-	let css = 'border:none;background:none;padding:0;float:left;';
+	const css = 'border:none;background:none;padding:0;float:left;';
 	return '<button style="' + css + '" name="parseCommand" value="/user ' + this.username + '">' + this.avatar() + "</button>";
 };
 
 Profile.prototype.group = function () {
 	if (this.isOnline && this.user.group === ' ') return label('Group') + 'Regular User';
 	if (this.isOnline) return label('Group') + Config.groups[this.user.group].name;
-	for (let name in Users.usergroups) {
+	for (const name in Users.usergroups) {
 		if (toID(this.username) === name) {
 			return label('Group') + Config.groups[Users.usergroups[name].charAt(0)].name;
 		}
@@ -134,7 +134,7 @@ Profile.prototype.seen = function (timeAgo) {
 };
 
 Profile.prototype.show = function (callback) {
-	let userid = toID(this.username);
+	const userid = toID(this.username);
 
 	return this.buttonAvatar() +
 		SPACE + this.name() + BR +
@@ -148,7 +148,7 @@ exports.commands = {
 	profile(target, room, user) {
 		if (!this.runBroadcast()) return;
 		if (target.length >= 19) return this.sendReply("Usernames are required to be less than 19 characters long.");
-		let targetUser = this.targetUserOrSelf(target);
+		const targetUser = this.targetUserOrSelf(target);
 		let profile;
 		if (!targetUser) {
 			profile = new Profile(false, target);

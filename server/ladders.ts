@@ -454,7 +454,10 @@ class Ladder extends LadderStore {
 		// Ladder Search Messages
 		//
 
-		if (!user.locked && !Rooms.lobby.isMuted(user) && !Rooms.lobby.disableLadderMessages && (((Date.now() - user.lastLadderTime) > SEARCH_COOLDOWN) && user.lastLadderFormat !== this.formatid)) {
+		if (
+			!user.locked && !Rooms.lobby.isMuted(user) && !Rooms.lobby.disableLadderMessages && (((Date.now() - user.lastLadderTime) > SEARCH_COOLDOWN)
+			&& user.lastLadderFormat !== this.formatid)
+		) {
 			if (Rooms.lobby) {
 				Rooms.lobby
 					.add('|c|' + user.group + user.name + '|/me is searching for a ' + Dex.getFormat(this.formatid).name + ' battle!')
@@ -471,7 +474,6 @@ class Ladder extends LadderStore {
 	 * Verifies whether or not a match made between two users is valid. Returns
 	 */
 	matchmakingOK(search1: BattleReady, search2: BattleReady, user1: User, user2: User) {
-		const formatid = toID(this.formatid);
 		if (!user1 || !user2) {
 			// This should never happen.
 			Monitor.crashlog(new Error(`Matched user ${user1 ? search2.userid : search1.userid} not found`), "The matchmaker");
