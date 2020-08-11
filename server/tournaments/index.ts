@@ -476,7 +476,7 @@ export class Tournament extends Rooms.RoomGame {
 			return;
 		}
 		if (!allowAlts) {
-			for (let otherPlayer of this.players) {
+			for (const otherPlayer of this.players) {
 				if (!otherPlayer) continue;
 				const otherUser = Users.get(otherPlayer.id);
 				if (otherUser && otherUser.latestIp === replacementUser.latestIp) {
@@ -1068,10 +1068,11 @@ export class Tournament extends Rooms.RoomGame {
 		const tourSize = this.players.length;
 		const sizeRequiredToEarn = 3;
 		if (
-			tourSize >= sizeRequiredToEarn && this.format !== 'gen81v1' && this.format !== 'gen82v2doubles' && this.format !== 'gen8metronomebattle'
-			&& this.format !== 'gen8challengecup1v1' && this.format !== 'gen8challengecup2v2' && this.format !== 'gen8cap1v1'
-			&& this.format !== 'gen81v1random' && this.format !== 'gen71v1' && this.format !== 'gen61v1' && this.format !== 'gen51v1'
-			&& this.format !== 'gen41v1' && this.format !== 'gen31v1'
+			tourSize >= sizeRequiredToEarn && this.format !== 'gen81v1' && this.format !== 'gen82v2doubles' &&
+			this.format !== 'gen8metronomebattle' && this.format !== 'gen8challengecup1v1' &&
+			this.format !== 'gen8challengecup2v2' && this.format !== 'gen8cap1v1' && this.format !== 'gen81v1random' &&
+			this.format !== 'gen71v1' && this.format !== 'gen61v1' && this.format !== 'gen51v1' &&
+			this.format !== 'gen41v1' && this.format !== 'gen31v1'
 		) {
 			Db.money.set(winner, Db.money.get(winner, 0) + 1);
 		}

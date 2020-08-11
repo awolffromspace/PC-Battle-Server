@@ -455,8 +455,9 @@ class Ladder extends LadderStore {
 		//
 
 		if (
-			!user.locked && !Rooms.lobby.isMuted(user) && !Rooms.lobby.disableLadderMessages && (((Date.now() - user.lastLadderTime) > SEARCH_COOLDOWN)
-			&& user.lastLadderFormat !== this.formatid)
+			!user.locked && !Rooms.lobby.isMuted(user) && !Rooms.lobby.disableLadderMessages &&
+			(((Date.now() - user.lastLadderTime) > SEARCH_COOLDOWN) &&
+			user.lastLadderFormat !== this.formatid)
 		) {
 			if (Rooms.lobby) {
 				Rooms.lobby

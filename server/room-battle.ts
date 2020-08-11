@@ -828,16 +828,16 @@ export class RoomBattle extends RoomGames.RoomGame {
 			//
 
 			if (
-				tourSize >= sizeRequiredToEarn && this.format !== 'gen81v1' && this.format !== 'gen82v2doubles' && this.format !== 'gen8metronomebattle'
-				&& this.format !== 'gen8challengecup1v1' && this.format !== 'gen8challengecup2v2' && this.format !== 'gen8cap1v1'
-				&& this.format !== 'gen81v1random' && this.format !== 'gen71v1' && this.format !== 'gen61v1' && this.format !== 'gen51v1'
-				&& this.format !== 'gen41v1' && this.format !== 'gen31v1'
+				this.format !== 'gen81v1' && this.format !== 'gen82v2doubles' && this.format !== 'gen8metronomebattle' &&
+				this.format !== 'gen8challengecup1v1' && this.format !== 'gen8challengecup2v2' && this.format !== 'gen8cap1v1' &&
+				this.format !== 'gen81v1random' && this.format !== 'gen71v1' && this.format !== 'gen61v1' &&
+				this.format !== 'gen51v1' && this.format !== 'gen41v1' && this.format !== 'gen31v1'
 			) {
 				Db.money.set(winner, Db.money.get(winner, 0) + 1);
 				this.room.add("|raw|<b><font color='" + COLOR + "'>" + Chat.escapeHTML(winner) + "</font> has won " + "<font color='" + COLOR + "'>1</font> Battle Point for winning the rated battle!</b>");
 			}
 		} else if (this.room.tour) {
-				this.room.add("|raw|<b><font color='" + COLOR + "'>" + Chat.escapeHTML(winner) + "</font> has won " + "<font color='" + COLOR + "'>1</font> Battle Point for winning the tournament battle!</b>");
+			this.room.add("|raw|<b><font color='" + COLOR + "'>" + Chat.escapeHTML(winner) + "</font> has won " + "<font color='" + COLOR + "'>1</font> Battle Point for winning the tournament battle!</b>");
 		} else if (Config.logchallenges) {
 			if (winnerid === p1id) {
 				p1score = 1;
