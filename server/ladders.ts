@@ -17,7 +17,7 @@ const SECONDS = 1000;
 const PERIODIC_MATCH_INTERVAL = 60 * SECONDS;
 const SEARCH_COOLDOWN = 3 * 60 * 1000;
 
-type ChallengeType = import('./room-battle').ChallengeType;
+import type {ChallengeType} from './room-battle';
 
 /**
  * This represents a user's search for a battle under a format.
