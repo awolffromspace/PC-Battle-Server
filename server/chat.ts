@@ -113,8 +113,7 @@ const probe: (url: string) => Promise<{width: number, height: number}> = ProbeMo
 
 const EMOJI_REGEX = /[\p{Emoji_Modifier_Base}\p{Emoji_Presentation}\uFE0F]/u;
 
-exports.parseEmoticons = parseEmoticons; // Boilerplate start
-
+// Boilerplate start
 const emotes = {
 	':4head:': 'http://cbc.pokecommunity.com/server/config/emoticons/4head.png',
 	':absol:': 'http://cbc.pokecommunity.com/server/config/emoticons/absol.png',
@@ -381,7 +380,7 @@ function parseEmoticons(message, room, user, pm) {
 	let len = emotesKeys.length;
 
 	while (len--) {
-		if (message && message.includes(emotesKeys[len]) >= 0) {
+		if (message && message.includes(emotesKeys[len])) {
 			match = true;
 			break;
 		}
@@ -549,7 +548,8 @@ function parseEmoticons(message, room, user, pm) {
 	room.update();
 
 	return true;
-} // Boilerplate end
+}
+// Boilerplate end
 
 class PatternTester {
 	// This class sounds like a RegExp

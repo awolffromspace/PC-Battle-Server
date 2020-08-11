@@ -405,7 +405,7 @@ exports.tellsexpiryage = 1000 * 60 * 60 * 24 * 7;
  * to send offline messages.
  */
 exports.tellrank = ' ';
-// Boilerplater end
+// Boilerplate end
 
 /**
  * autolockdown - whether or not to automatically kill the server when it is
@@ -1154,7 +1154,7 @@ exports.grouplist = [
 		symbol: ' ',
 		ipself: true,
 		broadcast: true,
-		alts: '~u',
+		alts: '&u',
 	},
 	{
 		name: 'Locked',
