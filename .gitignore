@@ -1,4 +1,5 @@
 /config/avatars/*
+!/config/avatars/README.md
 /config/config.js
 /logs/*
 /test/modlogs
