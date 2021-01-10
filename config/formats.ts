@@ -1424,7 +1424,7 @@ export const Formats: FormatList = [
 		ruleset: ['Species Clause', 'Team Preview', 'HP Percentage Mod', 'Cancel Mod', 'Sleep Clause Mod', 'Dynamax Clause'],
 	},
 	{
-		name: "[Gen 7] Random Battle",
+		name: "[Gen 7] Random",
 		desc: `Randomized teams of level-balanced Pok&eacute;mon with sets that are generated to be competitively viable.`,
 		threads: [
 			`&bullet; <a href="https://www.smogon.com/forums/threads/3591157/">Sets and Suggestions</a>`,
@@ -1436,7 +1436,7 @@ export const Formats: FormatList = [
 		ruleset: ['Obtainable', 'Sleep Clause Mod', 'HP Percentage Mod', 'Cancel Mod', 'Team Preview'],
 	},
 	{
-		name: "[Gen 7] Random Doubles Battle",
+		name: "[Gen 7] Random Doubles",
 		threads: [`&bullet; <a href="https://www.smogon.com/forums/threads/3601525/">Sets and Suggestions</a>`],
 
 		mod: 'gen7',
@@ -1476,14 +1476,14 @@ export const Formats: FormatList = [
 		ruleset: ['HP Percentage Mod', 'Cancel Mod', 'Team Preview'],
 	},
 	{
-		name: "[Gen 7 Let's Go] Random Battle",
+		name: "[Gen 7 Let's Go] Random",
 
 		mod: 'letsgo',
 		team: 'random',
 		ruleset: ['Obtainable', 'Allow AVs', 'HP Percentage Mod', 'Cancel Mod', 'Sleep Clause Mod', 'Team Preview'],
 	},
 	{
-		name: "[Gen 6] Random Battle",
+		name: "[Gen 6] Random",
 
 		mod: 'gen6',
 		team: 'random',
@@ -1498,35 +1498,35 @@ export const Formats: FormatList = [
 		ruleset: ['Obtainable', 'Sleep Clause Mod', 'Team Preview', 'HP Percentage Mod', 'Cancel Mod', 'Mega Rayquaza Clause'],
 	},
 	{
-		name: "[Gen 5] Random Battle",
+		name: "[Gen 5] Random",
 
 		mod: 'gen5',
 		team: 'random',
 		ruleset: ['Obtainable', 'Sleep Clause Mod', 'HP Percentage Mod', 'Cancel Mod', 'Team Preview'],
 	},
 	{
-		name: "[Gen 4] Random Battle",
+		name: "[Gen 4] Random",
 
 		mod: 'gen4',
 		team: 'random',
 		ruleset: ['Obtainable', 'Sleep Clause Mod', 'HP Percentage Mod', 'Cancel Mod'],
 	},
 	{
-		name: "[Gen 3] Random Battle",
+		name: "[Gen 3] Random",
 
 		mod: 'gen3',
 		team: 'random',
 		ruleset: ['Standard'],
 	},
 	{
-		name: "[Gen 2] Random Battle",
+		name: "[Gen 2] Random",
 
 		mod: 'gen2',
 		team: 'random',
 		ruleset: ['Standard'],
 	},
 	{
-		name: "[Gen 1] Random Battle",
+		name: "[Gen 1] Random",
 
 		mod: 'gen1',
 		team: 'random',
