@@ -1156,6 +1156,12 @@ exports.grouplist = [
 		roomonly: true,
 	},
 	{
+		symbol: '^',
+		id: "prizewinner",
+		name: "Prize Winner",
+		roomonly: true,
+	},
+	{
 		symbol: 'whitelist',
 		id: "whitelist",
 		name: "Whitelist",
