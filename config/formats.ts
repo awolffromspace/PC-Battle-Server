@@ -37,6 +37,13 @@ export const Formats: FormatList = [
 		ruleset: ['PotD', 'Obtainable', 'Species Clause', 'HP Percentage Mod', 'Cancel Mod', 'Sleep Clause Mod', 'Team Preview'],
 	},
 	{
+		name: "[Gen 8] Random (no PotD)",
+
+		mod: 'gen8',
+		team: 'random',
+		ruleset: ['Obtainable', 'Species Clause', 'HP Percentage Mod', 'Cancel Mod', 'Sleep Clause Mod', 'Team Preview'],
+	},
+	{
 		name: "[Gen 8] Unrated Random",
 
 		mod: 'gen8',
