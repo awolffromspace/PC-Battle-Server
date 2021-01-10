@@ -1,6 +1,6 @@
 // Note: These are the rules that formats use
 // The list of formats is stored in config/formats.js
-export const Formats: {[k: string]: FormatsData} = {
+export const Formats: {[k: string]: FormatData} = {
 
 	// Rulesets
 	///////////////////////////////////////////////////////////////////
@@ -35,7 +35,7 @@ export const Formats: {[k: string]: FormatsData} = {
 			'Victini', 'Reshiram', 'Zekrom', 'Kyurem', 'Keldeo', 'Meloetta', 'Genesect',
 			'Xerneas', 'Yveltal', 'Zygarde', 'Diancie', 'Hoopa', 'Volcanion',
 			'Cosmog', 'Cosmoem', 'Solgaleo', 'Lunala', 'Necrozma', 'Magearna', 'Marshadow', 'Zeraora',
-			'Meltan', 'Melmetal', 'Zacian', 'Zamazenta', 'Eternatus', 'Zarude',
+			'Meltan', 'Melmetal', 'Zacian', 'Zamazenta', 'Eternatus', 'Zarude', 'Calyrex',
 		],
 		onValidateSet(set, format) {
 			if (this.gen < 7 && this.toID(set.item) === 'souldew') {
@@ -56,10 +56,29 @@ export const Formats: {[k: string]: FormatsData} = {
 			'Victini', 'Keldeo', 'Meloetta', 'Genesect',
 			'Diancie', 'Hoopa', 'Volcanion',
 			'Magearna', 'Marshadow', 'Zeraora',
+			'Zarude',
 		],
 		onValidateSet(set, format) {
 			if (this.gen < 7 && this.toID(set.item) === 'souldew') {
 				return [`${set.name || set.species} has Soul Dew, which is banned in ${format.name}.`];
+			}
+		},
+		onValidateTeam(team) {
+			const legends = [
+				'Mewtwo',
+				'Lugia', 'Ho-Oh',
+				'Kyogre', 'Groudon', 'Rayquaza',
+				'Dialga', 'Palkia', 'Giratina',
+				'Reshiram', 'Zekrom', 'Kyurem',
+				'Xerneas', 'Yveltal', 'Zygarde',
+				'Cosmog', 'Cosmoem', 'Solgaleo', 'Lunala', 'Necrozma',
+				'Zacian', 'Zamazenta', 'Eternatus', 'Calyrex',
+			];
+			let n = 0;
+			for (const set of team) {
+				const baseSpecies = this.dex.getSpecies(set.species).baseSpecies;
+				if (legends.includes(baseSpecies)) n++;
+				if (n > 2) return [`You can only use up to two restricted legendary Pok\u00E9mon.`];
 			}
 		},
 	},
@@ -117,6 +136,7 @@ export const Formats: {[k: string]: FormatsData} = {
 			let kyuremCount = 0;
 			let necrozmaDMCount = 0;
 			let necrozmaDWCount = 0;
+			let calyrexCount = 0;
 			for (const set of team) {
 				if (set.species === 'Kyurem-White' || set.species === 'Kyurem-Black') {
 					if (kyuremCount > 0) {
@@ -144,6 +164,15 @@ export const Formats: {[k: string]: FormatsData} = {
 						];
 					}
 					necrozmaDWCount++;
+				}
+				if (set.species === 'Calyrex-Ice' || set.species === 'Calyrex-Shadow') {
+					if (calyrexCount > 0) {
+						return [
+							`You cannot have more than one Calyrex-Ice/Calyrex-Shadow.`,
+							`(It's untradeable and you can only make one with the Reins of Unity.)`,
+						];
+					}
+					calyrexCount++;
 				}
 			}
 			return [];
@@ -290,6 +319,20 @@ export const Formats: {[k: string]: FormatsData} = {
 			}
 		},
 	},
+	crowntundrapokedex: {
+		effectType: 'ValidatorRule',
+		name: 'Crown Tundra Pokedex',
+		desc: "Only allows Pok&eacute;mon native to the Crown Tundra in the Galar Region (Sw/Sh DLC2)",
+		onValidateSet(set, format) {
+			const tundraDex = [
+				"Nidoran-F", "Nidorina", "Nidoqueen", "Nidoran-M", "Nidorino", "Nidoking", "Clefairy", "Clefable", "Zubat", "Golbat", "Ponyta", "Rapidash", "Mr. Mime", "Jynx", "Electabuzz", "Magmar", "Magikarp", "Gyarados", "Lapras", "Eevee", "Vaporeon", "Jolteon", "Flareon", "Omanyte", "Omastar", "Kabuto", "Kabutops", "Aerodactyl", "Snorlax", "Articuno", "Zapdos", "Moltres", "Dratini", "Dragonair", "Dragonite", "Crobat", "Cleffa", "Espeon", "Umbreon", "Shuckle", "Sneasel", "Swinub", "Piloswine", "Delibird", "Smoochum", "Elekid", "Magby", "Larvitar", "Pupitar", "Tyranitar", "Zigzagoon", "Linoone", "Sableye", "Mawile", "Aron", "Lairon", "Aggron", "Swablu", "Altaria", "Barboach", "Whiscash", "Baltoy", "Claydol", "Lileep", "Cradily", "Anorith", "Armaldo", "Feebas", "Milotic", "Absol", "Snorunt", "Glalie", "Spheal", "Sealeo", "Walrein", "Relicanth", "Bagon", "Shelgon", "Salamence", "Beldum", "Metang", "Metagross", "Regirock", "Regice", "Registeel", "Bronzor", "Bronzong", "Spiritomb", "Gible", "Gabite", "Garchomp", "Munchlax", "Riolu", "Lucario", "Snover", "Abomasnow", "Weavile", "Electivire", "Magmortar", "Leafeon", "Glaceon", "Mamoswine", "Froslass", "Audino", "Timburr", "Gurdurr", "Conkeldurr", "Cottonee", "Whimsicott", "Basculin", "Darumaka", "Darmanitan", "Tirtouga", "Carracosta", "Archen", "Archeops", "Gothita", "Gothorita", "Gothitelle", "Solosis", "Duosion", "Reuniclus", "Vanillite", "Vanillish", "Vanilluxe", "Karrablast", "Escavalier", "Joltik", "Galvantula", "Ferroseed", "Ferrothorn", "Litwick", "Lampent", "Chandelure", "Cubchoo", "Beartic", "Cryogonal", "Shelmet", "Accelgor", "Druddigon", "Golett", "Golurk", "Heatmor", "Durant", "Deino", "Zweilous", "Hydreigon", "Cobalion", "Terrakion", "Virizion", "Tyrunt", "Tyrantrum", "Amaura", "Aurorus", "Sylveon", "Carbink", "Phantump", "Trevenant", "Bergmite", "Avalugg", "Noibat", "Noivern", "Dewpider", "Araquanid", "Mimikyu", "Dhelmise", "Skwovet", "Greedent", "Rookidee", "Corvisquire", "Corviknight", "Gossifleur", "Eldegoss", "Wooloo", "Dubwool", "Yamper", "Boltund", "Rolycoly", "Carkol", "Coalossal", "Sizzlipede", "Centiskorch", "Sinistea", "Polteageist", "Hatenna", "Hattrem", "Hatterene", "Impidimp", "Morgrem", "Grimmsnarl", "Obstagoon", "Mr. Rime", "Pincurchin", "Snom", "Frosmoth", "Stonjourner", "Eiscue", "Indeedee", "Morpeko", "Cufant", "Copperajah", "Dreepy", "Drakloak", "Dragapult", "Regieleki", "Regidrago", "Glastrier", "Spectrier",
+			];
+			const species = this.dex.getSpecies(set.species || set.name);
+			if (!tundraDex.includes(species.baseSpecies) && !tundraDex.includes(species.name)) {
+				return [`${species.baseSpecies} is not in the Crown Tundra Pokédex.`];
+			}
+		},
+	},
 	potd: {
 		effectType: 'Rule',
 		name: 'PotD',
@@ -307,8 +350,8 @@ export const Formats: {[k: string]: FormatsData} = {
 			this.add('clearpoke');
 			for (const pokemon of this.getAllPokemon()) {
 				const details = pokemon.details.replace(', shiny', '')
-					.replace(/(Arceus|Gourgeist|Genesect|Pumpkaboo|Silvally|Urshifu)(-[a-zA-Z?-]+)?/g, '$1-*');
-				this.add('poke', pokemon.side.id, details, this.gen < 8 && pokemon.item ? 'item' : '');
+					.replace(/(Arceus|Gourgeist|Pumpkaboo|Silvally|Urshifu)(-[a-zA-Z?-]+)?/g, '$1-*');
+				this.add('poke', pokemon.side.id, details, '');
 			}
 		},
 		onTeamPreview() {
@@ -325,8 +368,7 @@ export const Formats: {[k: string]: FormatsData} = {
 			}
 		},
 		onStart() {
-			// @ts-ignore
-			if (this.format.gameType === 'singles') this.format.teamLength = {battle: 1};
+			if (this.format.gameType === 'singles') (this.format as any).teamLength = {battle: 1};
 		},
 	},
 	twovstwo: {
@@ -339,8 +381,7 @@ export const Formats: {[k: string]: FormatsData} = {
 			}
 		},
 		onStart() {
-			// @ts-ignore
-			if (this.format.gameType !== 'triples') this.format.teamLength = {battle: 2};
+			if (this.format.gameType !== 'triples') (this.format as any).teamLength = {battle: 2};
 		},
 	},
 	littlecup: {
@@ -804,6 +845,16 @@ export const Formats: {[k: string]: FormatsData} = {
 			this.add('rule', 'Switch Priority Clause Mod: Faster Pokémon switch first');
 		},
 	},
+	desyncclausemod: {
+		effectType: 'Rule',
+		name: 'Desync Clause Mod',
+		desc: 'If a desync would happen, the move fails instead. This rule currently covers Psywave and Counter.',
+		onBegin() {
+			this.add('rule', 'Desync Clause Mod: Desyncs changed to move failure.');
+		},
+		// Hardcoded in gen1/moves.ts
+		// Can't be disabled (no precedent for how else to handle desyncs)
+	},
 	freezeclausemod: {
 		effectType: 'Rule',
 		name: 'Freeze Clause Mod',
@@ -844,7 +895,7 @@ export const Formats: {[k: string]: FormatsData} = {
 				}
 				if (this.gen >= 7) {
 					const item = this.dex.getItem(set.item);
-					if (item.megaStone && species.name === item.megaEvolves) {
+					if (item.megaStone && species.baseSpecies === item.megaEvolves) {
 						species = this.dex.getSpecies(item.megaStone);
 						typeTable = typeTable.filter(type => species.types.includes(type));
 					}
@@ -885,19 +936,6 @@ export const Formats: {[k: string]: FormatsData} = {
 				pokemon.canDynamax = false;
 			}
 			this.add('rule', 'Dynamax Clause: You cannot dynamax');
-		},
-	},
-	dynamaxubersclause: {
-		effectType: 'Rule',
-		name: 'Dynamax Ubers Clause',
-		desc: "Prevents Pok&eacute;mon on the Ubers dynamax banlist from dynamaxing",
-		onBegin() {
-			for (const pokemon of this.getAllPokemon()) {
-				if (this.ruleTable.isRestrictedSpecies(pokemon.species)) {
-					pokemon.canDynamax = false;
-				}
-			}
-			this.add('html', 'Ubers Dynamax Clause: Pokémon on the <a href="https://www.smogon.com/dex/ss/formats/uber/">Ubers Dynamax Banlist</a> cannot Dynamax.');
 		},
 	},
 	arceusevlimit: {
@@ -949,7 +987,7 @@ export const Formats: {[k: string]: FormatsData} = {
 		effectType: 'ValidatorRule',
 		name: 'STABmons Move Legality',
 		desc: "Allows Pok&eacute;mon to use any move that they or a previous evolution/out-of-battle forme share a type with",
-		checkLearnset(move, species, setSources, set) {
+		checkCanLearn(move, species, setSources, set) {
 			const nonstandard = move.isNonstandard === 'Past' && !this.ruleTable.has('standardnatdex');
 			if (!nonstandard && !move.isZ && !move.isMax && !this.ruleTable.isRestricted(`move:${move.id}`)) {
 				const dex = this.dex;
@@ -965,7 +1003,7 @@ export const Formats: {[k: string]: FormatsData} = {
 								if (prevo.evos.includes(formeName)) continue;
 							}
 							const forme = dex.getSpecies(formeName);
-							if (forme.changesFrom === originalForme.name) {
+							if (forme.changesFrom === originalForme.name && !forme.battleOnly) {
 								types = types.concat(forme.types);
 							}
 						}
@@ -982,7 +1020,26 @@ export const Formats: {[k: string]: FormatsData} = {
 				}
 				if (types.includes(move.type)) return null;
 			}
-			return this.checkLearnset(move, species, setSources, set);
+			return this.checkCanLearn(move, species, setSources, set);
+		},
+	},
+	alphabetcupmovelegality: {
+		effectType: 'ValidatorRule',
+		name: 'Alphabet Cup Move Legality',
+		desc: "Allows Pok&eacute;mon to use any move that shares the same first letter as their name or a previous evolution's name.",
+		checkCanLearn(move, species, setSources, set) {
+			const nonstandard = move.isNonstandard === 'Past' && !this.ruleTable.has('standardnatdex');
+			if (!nonstandard && !move.isZ && !move.isMax && !this.ruleTable.isRestricted(`move:${move.id}`)) {
+				const letters = [species.id[0]];
+				let prevo = species.prevo;
+				while (prevo) {
+					const prevoSpecies = this.dex.getSpecies(prevo);
+					letters.push(prevoSpecies.id[0]);
+					prevo = prevoSpecies.prevo;
+				}
+				if (letters.includes(move.id[0])) return null;
+			}
+			return this.checkCanLearn(move, species, setSources, set);
 		},
 	},
 	allowtradeback: {
@@ -995,7 +1052,7 @@ export const Formats: {[k: string]: FormatsData} = {
 		effectType: 'ValidatorRule',
 		name: 'Allow AVs',
 		desc: "Tells formats with the 'letsgo' mod to take Awakening Values into consideration when calculating stats",
-		// Implemented in mods/letsgo/rulesets.js
+		// implemented in TeamValidator#validateStats
 	},
 	nfeclause: {
 		effectType: 'ValidatorRule',
@@ -1014,6 +1071,12 @@ export const Formats: {[k: string]: FormatsData} = {
 		name: 'Mimic Glitch',
 		desc: "Allows any Pokemon with access to Assist, Copycat, Metronome, Mimic, or Transform to gain access to almost any other move.",
 		// Implemented in sim/team-validator.ts
+	},
+	overflowstatmod: {
+		effectType: 'Rule',
+		name: 'Overflow Stat Mod',
+		desc: "Caps stats at 654 after a positive nature, or 655 after a negative nature",
+		// Implemented in sim/battle.ts
 	},
 	formeclause: {
 		effectType: 'ValidatorRule',
@@ -1054,11 +1117,11 @@ export const Formats: {[k: string]: FormatsData} = {
 		},
 		onModifySpecies(species) {
 			const newSpecies = this.dex.deepClone(species);
-			const stats: StatName[] = ['hp', 'atk', 'def', 'spa', 'spd', 'spe'];
-			const bst = stats.map(stat => newSpecies.baseStats[stat]).reduce((x, y) => x + y);
-			if (bst <= 350) {
-				for (const stat of stats) {
+			if (newSpecies.bst <= 350) {
+				newSpecies.bst = 0;
+				for (const stat in newSpecies.baseStats) {
 					newSpecies.baseStats[stat] = this.clampIntRange(newSpecies.baseStats[stat] * 2, 1, 255);
+					newSpecies.bst += newSpecies.baseStats[stat];
 				}
 			}
 			return newSpecies;
@@ -1069,12 +1132,12 @@ export const Formats: {[k: string]: FormatsData} = {
 		name: 'Flipped Mod',
 		desc: "Every Pok&eacute;mon's stats are reversed. HP becomes Spe, Atk becomes Sp. Def, Def becomes Sp. Atk, and vice versa.",
 		onBegin() {
-			this.add('rule', 'Pokemon have their stats flipped (HP becomes Spe, vice versa).');
+			this.add('rule', 'Flipped Mod: Pokemon have their stats flipped (HP becomes Spe, vice versa).');
 		},
 		onModifySpecies(species) {
 			const newSpecies = this.dex.deepClone(species);
 			const reversedNums = Object.values(newSpecies.baseStats).reverse();
-			for (const [i, statName] of Object.keys(newSpecies).entries()) {
+			for (const [i, statName] of Object.keys(newSpecies.baseStats).entries()) {
 				newSpecies.baseStats[statName] = reversedNums[i];
 			}
 			return newSpecies;
@@ -1089,11 +1152,13 @@ export const Formats: {[k: string]: FormatsData} = {
 		},
 		onModifySpecies(species) {
 			const newSpecies = this.dex.deepClone(species);
-			const stats: StatName[] = ['atk', 'def', 'spa', 'spd', 'spe'];
-			const pst: number = stats.map(stat => newSpecies.baseStats[stat]).reduce((x, y) => x + y);
+			const bstWithoutHp: number = newSpecies.bst - newSpecies.baseStats['hp'];
 			const scale = 600 - newSpecies.baseStats['hp'];
-			for (const stat of stats) {
-				newSpecies.baseStats[stat] = this.clampIntRange(newSpecies.baseStats[stat] * scale / pst, 1, 255);
+			newSpecies.bst = newSpecies.baseStats['hp'];
+			for (const stat in newSpecies.baseStats) {
+				if (stat === 'hp') continue;
+				newSpecies.baseStats[stat] = this.clampIntRange(newSpecies.baseStats[stat] * scale / bstWithoutHp, 1, 255);
+				newSpecies.bst += newSpecies.baseStats[stat];
 			}
 			return newSpecies;
 		},

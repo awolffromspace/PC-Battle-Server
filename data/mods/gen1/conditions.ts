@@ -8,7 +8,7 @@
  * under certain conditions and re-applied under other conditions.
  */
 
-export const Conditions: {[k: string]: ModdedConditionData} = {
+export const Conditions: {[id: string]: ModdedConditionData} = {
 	brn: {
 		name: 'brn',
 		effectType: 'Status',
@@ -138,8 +138,8 @@ export const Conditions: {[k: string]: ModdedConditionData} = {
 		},
 		onBeforeMovePriority: 3,
 		onBeforeMove(pokemon, target) {
-			pokemon.volatiles.confusion.time--;
-			if (!pokemon.volatiles.confusion.time) {
+			pokemon.volatiles['confusion'].time--;
+			if (!pokemon.volatiles['confusion'].time) {
 				pokemon.removeVolatile('confusion');
 				return;
 			}
@@ -228,6 +228,11 @@ export const Conditions: {[k: string]: ModdedConditionData} = {
 		durationCallback() {
 			return this.random(3, 5);
 		},
+		onEnd(target) {
+			// Confusion begins even if already confused
+			delete target.volatiles['confusion'];
+			target.addVolatile('confusion');
+		},
 	},
 	stall: {
 		name: 'stall',
@@ -249,8 +254,7 @@ export const Conditions: {[k: string]: ModdedConditionData} = {
 			return this.randomChance(1, counter);
 		},
 		onRestart() {
-			// @ts-ignore
-			if (this.effectData.counter < this.effect.counterMax) {
+			if (this.effectData.counter < (this.effect as Condition).counterMax!) {
 				this.effectData.counter *= 2;
 			}
 			this.effectData.duration = 2;

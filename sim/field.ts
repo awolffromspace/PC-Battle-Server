@@ -105,7 +105,7 @@ export class Field {
 	suppressingWeather() {
 		for (const side of this.battle.sides) {
 			for (const pokemon of side.active) {
-				if (pokemon && !pokemon.ignoringAbility() && pokemon.getAbility().suppressWeather) {
+				if (pokemon && !pokemon.fainted && !pokemon.ignoringAbility() && pokemon.getAbility().suppressWeather) {
 					return true;
 				}
 			}
@@ -229,7 +229,6 @@ export class Field {
 		// deallocate ourself
 
 		// get rid of some possibly-circular references
-		// @ts-ignore - readonly
-		this.battle = null!;
+		(this as any).battle = null!;
 	}
 }

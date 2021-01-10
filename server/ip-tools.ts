@@ -44,6 +44,12 @@ export const IPTools = new class {
 
 	readonly connectionTestCache = new Map<string, boolean>();
 
+	// eslint-disable-next-line max-len
+	readonly ipRegex = /\b(25[0-5]|2[0-4][0-9]|1[0-9][0-9]|[1-9]?[0-9])\.(25[0-5]|2[0-4][0-9]|1[0-9][0-9]|[1-9]?[0-9])\.(25[0-5]|2[0-4][0-9]|1[0-9][0-9]|[1-9]?[0-9])\.(25[0-5]|2[0-4][0-9]|1[0-9][0-9]|[1-9]?[0-9])\b/;
+	// eslint-disable-next-line max-len
+	readonly ipRangeRegex = /^(25[0-5]|2[0-4][0-9]|1[0-9][0-9]|[1-9]?[0-9])(\.(25[0-5]|2[0-4][0-9]|1[0-9][0-9]|[1-9]?[0-9]|\*)){0,2}\.(25[0-5]|2[0-4][0-9]|1[0-9][0-9]|[1-9]?[0-9]|\*)$/;
+	readonly hostRegex = /^.+\..{2,}$/;
+
 	async lookup(ip: string) {
 		// known TypeScript bug
 		// https://github.com/microsoft/TypeScript/issues/33752
@@ -146,6 +152,13 @@ export const IPTools = new class {
 	}
 	stringToRange(range: string): AddressRange | null {
 		if (!range) return null;
+		if (range.endsWith('*')) {
+			const [a, b, c] = range.replace('*', '').split('.');
+			return {
+				minIP: IPTools.ipToNumber(`${a || '0'}.${b || '0'}.${c || '0'}.0`),
+				maxIP: IPTools.ipToNumber(`${a || '255'}.${b || '255'}.${c || '255'}.255`),
+			};
+		}
 		const index = range.indexOf('-');
 		if (index <= 0) {
 			return range.includes('/') ? IPTools.getCidrRange(range) : {
@@ -164,7 +177,10 @@ export const IPTools = new class {
 		const aParts = a.split('.');
 		const bParts = b.split('.');
 		while (diff === 0) {
-			diff = (parseInt(aParts[i]) || 0) - (parseInt(bParts[i]) || 0);
+			const aPart = parseInt(aParts[i]);
+			const bPart = parseInt(bParts[i]);
+			if (isNaN(aPart) || isNaN(bPart)) throw new Error("Invalid IP passed to IPTools.ipSort.");
+			diff = aPart - bPart;
 			i++;
 		}
 		return diff;
@@ -204,7 +220,7 @@ export const IPTools = new class {
 	/**
 	 * Proxy and host management functions
 	 */
-	ranges: AddressRange[] = [];
+	ranges: (AddressRange & {host: string})[] = [];
 	singleIPOpenProxies: Set<string> = new Set();
 	proxyHosts: Set<string> = new Set();
 	residentialHosts: Set<string> = new Set();
@@ -362,7 +378,7 @@ export const IPTools = new class {
 					if (sortedRanges[iMin + 1]?.minIP <= insertion.maxIP) {
 						throw new Error("You can only widen one address range at a time.");
 					}
-					return true;
+					return iMin;
 				}
 				throw new Error(
 					`Too wide: ${IPTools.numberToIP(insertion.minIP)}-${IPTools.numberToIP(insertion.maxIP)} (${insertion.host})\n` +
@@ -417,7 +433,7 @@ export const IPTools = new class {
 		}
 	}
 
-	addRange(range: AddressRange) {
+	addRange(range: AddressRange & {host: string}) {
 		if (IPTools.getRange(range.minIP, range.maxIP)) {
 			IPTools.removeRange(range.minIP, range.maxIP);
 		}
@@ -544,6 +560,11 @@ export const IPTools = new class {
 		if (Punishments.sharedIps.has(ip)) {
 			return 'shared';
 		}
+		if (this.singleIPOpenProxies.has(ip)) {
+			// single-IP open proxies
+			return 'proxy';
+		}
+
 		if (/^he\.net(\?|)\/proxy$/.test(host)) {
 			// Known to only be VPN services
 			if (['74.82.60.', '72.52.87.', '65.49.126.'].some(range => ip.startsWith(range))) {
@@ -574,10 +595,6 @@ export const IPTools = new class {
 			// OVH
 			return 'proxy';
 		}
-		if (this.singleIPOpenProxies.has(ip)) {
-			// single-IP open proxies
-			return 'proxy';
-		}
 
 		if (host.endsWith('/unknown')) {
 			// rdns entry doesn't exist, and IP doesn't respond to a probe on port 80
@@ -589,7 +606,7 @@ export const IPTools = new class {
 	}
 };
 
-const telstraRange: AddressRange = {
+const telstraRange: AddressRange & {host: string} = {
 	minIP: IPTools.ipToNumber("101.160.0.0"),
 	maxIP: IPTools.ipToNumber("101.191.255.255"),
 	host: 'telstra.net?/res',

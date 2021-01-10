@@ -52,9 +52,6 @@ const DISCONNECTION_BANK_TIME = 300;
 // time after a player disabling the timer before they can re-enable it
 const TIMER_COOLDOWN = 20 * SECONDS;
 
-// Color the messages for battle point winnings
-const COLOR = '#d95b21';
-
 export class RoomBattlePlayer extends RoomGames.RoomGamePlayer {
 	readonly slot: SideID;
 	readonly channelIndex: ChannelIndex;
@@ -206,7 +203,7 @@ export class RoomBattleTimer {
 			if (timerSettings[k] === undefined) delete timerSettings[k];
 		}
 
-		this.settings = Object.assign({
+		this.settings = {
 			dcTimer: !isChallenge,
 			dcTimerBank: isChallenge,
 			starting: isChallenge ? STARTING_TIME_CHALLENGE : STARTING_TIME,
@@ -216,7 +213,8 @@ export class RoomBattleTimer {
 			maxFirstTurn: isChallenge ? MAX_TURN_TIME_CHALLENGE : MAX_TURN_TIME,
 			timeoutAutoChoose: false,
 			accelerate: !timerSettings,
-		}, timerSettings);
+			...timerSettings,
+		};
 		if (this.settings.maxPerTurn <= 0) this.settings.maxPerTurn = Infinity;
 
 		for (const player of this.battle.players) {
@@ -480,12 +478,14 @@ export class RoomBattle extends RoomGames.RoomGame {
 	ended: boolean;
 	active: boolean;
 	replaySaved: boolean;
+	forcePublic: string | null = null;
 	playerTable: {[userid: string]: RoomBattlePlayer};
 	players: RoomBattlePlayer[];
 	p1: RoomBattlePlayer;
 	p2: RoomBattlePlayer;
 	p3: RoomBattlePlayer;
 	p4: RoomBattlePlayer;
+	inviteOnlySetter: ID | null;
 	logData: AnyObject | null;
 	endType: string;
 	/**
@@ -528,6 +528,7 @@ export class RoomBattle extends RoomGames.RoomGame {
 		this.p2 = null!;
 		this.p3 = null!;
 		this.p4 = null!;
+		this.inviteOnlySetter = null!;
 
 		// data to be logged
 		this.allowExtraction = {};
@@ -705,11 +706,10 @@ export class RoomBattle extends RoomGames.RoomGame {
 	}
 
 	async listen() {
-		let next;
 		let disconnected = false;
 		try {
-			// tslint:disable-next-line: no-conditional-assignment
-			while ((next = await this.stream.read())) {
+			for await (const next of this.stream) {
+				if (!this.room) return; // room deleted in the middle of simulation
 				this.receive(next.split('\n'));
 			}
 		} catch (err) {
@@ -822,22 +822,6 @@ export class RoomBattle extends RoomGames.RoomGame {
 			}
 			const [score, p1rating, p2rating] = await Ladders(this.ladder).updateRating(p1name, p2name, p1score, this.room);
 			void this.logBattle(score, p1rating, p2rating);
-
-			//
-			// Battle Point Winnings
-			//
-
-			if (
-				this.format !== 'gen81v1' && this.format !== 'gen82v2doubles' && this.format !== 'gen8metronomebattle' &&
-				this.format !== 'gen8challengecup1v1' && this.format !== 'gen8challengecup2v2' && this.format !== 'gen8cap1v1' &&
-				this.format !== 'gen81v1random' && this.format !== 'gen71v1' && this.format !== 'gen61v1' &&
-				this.format !== 'gen51v1' && this.format !== 'gen41v1' && this.format !== 'gen31v1'
-			) {
-				Db.money.set(winner, Db.money.get(winner, 0) + 1);
-				this.room.add("|raw|<b><font color='" + COLOR + "'>" + Chat.escapeHTML(winner) + "</font> has won " + "<font color='" + COLOR + "'>1</font> Battle Point for winning the rated battle!</b>");
-			}
-		} else if (this.room.tour) {
-			this.room.add("|raw|<b><font color='" + COLOR + "'>" + Chat.escapeHTML(winner) + "</font> has won " + "<font color='" + COLOR + "'>1</font> Battle Point for winning the tournament battle!</b>");
 		} else if (Config.logchallenges) {
 			if (winnerid === p1id) {
 				p1score = 1;
@@ -866,7 +850,7 @@ export class RoomBattle extends RoomGames.RoomGame {
 		// If the room's replay was hidden, disable users from joining after the game is over
 		if (this.room.hideReplay) {
 			this.room.settings.modjoin = '%';
-			this.room.settings.isPrivate = 'hidden';
+			this.room.setPrivate('hidden');
 		}
 		this.room.update();
 	}
@@ -1044,17 +1028,14 @@ export class RoomBattle extends RoomGames.RoomGame {
 			void this.stream.write(`>player ${slot} ${JSON.stringify(options)}`);
 		}
 
-		if (user) this.room.auth.set(player.id, Users.PLAYER_SYMBOL);
+		if (user) {
+			this.room.auth.set(player.id, Users.PLAYER_SYMBOL);
+			if (this.rated && !this.forcePublic) {
+				this.forcePublic = user.battlesForcedPublic();
+			}
+		}
 		if (user?.inRooms.has(this.roomid)) this.onConnect(user);
 		return player;
-	}
-
-	forcedPublic() {
-		if (!this.rated) return;
-		for (const player of this.players) {
-			const user = player.getUser();
-			if (user?.forcedPublic) return user.forcedPublic;
-		}
 	}
 
 	makePlayer(user: User) {
@@ -1108,6 +1089,14 @@ export class RoomBattle extends RoomGames.RoomGame {
 			this.room.title = `${this.p1.name} vs. ${this.p2.name}`;
 		}
 		this.room.send(`|title|${this.room.title}`);
+		const suspectTest = Chat.plugins['suspect-tests']?.suspectTests[this.format];
+		if (suspectTest) {
+			const format = Dex.getFormat(this.format);
+			this.room.add(
+				`|html|<div class="broadcast-blue"><strong>${format.name} is currently suspecting ${suspectTest.suspect}! ` +
+				`For information on how to participate check out the <a href="${suspectTest.url}">suspect thread</a>.</strong></div>`
+			).update();
+		}
 	}
 
 	clearPlayers() {
@@ -1281,24 +1270,17 @@ export class RoomBattleStream extends BattleStream {
  * Process manager
  *********************************************************/
 
-export const PM = new StreamProcessManager(module, () => {
-	return new RoomBattleStream();
-});
+export const PM = new StreamProcessManager(module, () => new RoomBattleStream());
 
 if (!PM.isParentProcess) {
 	// This is a child process!
-	// tslint:disable-next-line: no-var-requires
 	global.Config = require('./config-loader').Config;
-	// tslint:disable-next-line: no-var-requires
 	global.Chat = require('./chat').Chat;
-	// tslint:disable-next-line: no-var-requires
 	global.Dex = require('../sim/dex').Dex;
-	// @ts-ignore ???
 	global.Monitor = {
-		crashlog(error: Error, source = 'A simulator process', details: {} | null = null) {
+		crashlog(error: Error, source = 'A simulator process', details: AnyObject | null = null) {
 			const repr = JSON.stringify([error.name, error.message, source, details]);
-			// @ts-ignore
-			process.send(`THROW\n@!!@${repr}\n${error.stack}`);
+			process.send!(`THROW\n@!!@${repr}\n${error.stack}`);
 		},
 	};
 	global.__version = {head: ''};
@@ -1320,9 +1302,7 @@ if (!PM.isParentProcess) {
 			Monitor.crashlog(err, 'A simulator process');
 		});
 		process.on('unhandledRejection', err => {
-			if (err instanceof Error) {
-				Monitor.crashlog(err, 'A simulator process Promise');
-			}
+			Monitor.crashlog(err as any || {}, 'A simulator process Promise');
 		});
 	}
 

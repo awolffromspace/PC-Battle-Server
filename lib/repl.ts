@@ -14,7 +14,7 @@ import * as path from 'path';
 import * as repl from 'repl';
 import {crashlogger} from './crashlogger';
 
-export const Repl = new class ReplSingleton {
+export const Repl = new class {
 	/**
 	 * Contains the pathnames of all active REPL sockets.
 	 */
@@ -78,11 +78,11 @@ export const Repl = new class ReplSingleton {
 			repl.start({
 				input: socket,
 				output: socket,
-				eval(cmd: string, context: any, unusedFilename: string, callback: Function): any {
+				eval(cmd, context, unusedFilename, callback) {
 					try {
 						return callback(null, evalFunction(cmd));
 					} catch (e) {
-						return callback(e);
+						return callback(e, undefined);
 					}
 				},
 			}).on('exit', () => socket.end());

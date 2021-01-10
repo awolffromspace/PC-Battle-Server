@@ -8,10 +8,9 @@
  * @license MIT
  */
 
-// eslint-disable-next-line no-undef
-const LadderStore: typeof LadderStoreT = (typeof Config === 'object' && Config.remoteladder ?
-	require('./ladders-remote') :
-	require('./ladders-local')).LadderStore;
+const LadderStore: typeof import('./ladders-remote').LadderStore = (
+	typeof Config === 'object' && Config.remoteladder ? require('./ladders-remote') : require('./ladders-local')
+).LadderStore;
 
 const SECONDS = 1000;
 const PERIODIC_MATCH_INTERVAL = 60 * SECONDS;
@@ -114,23 +113,30 @@ class Ladder extends LadderStore {
 			return null;
 		}
 
+		let rating = 0;
+		let valResult;
+		let removeNicknames = !!(user.locked || user.namelocked);
+
+
 		const regex = /(?:^|])([^|]*)\|([^|]*)\|/g;
 		let match = regex.exec(team);
 		let unownWord = '';
 		while (match) {
-			let nickname = match[1];
+			const nickname = match[1];
 			const speciesid = toID(match[2] || match[1]);
 			if (speciesid.length <= 6 && speciesid.startsWith('unown')) {
 				unownWord += speciesid.charAt(5) || 'a';
 			}
 			if (nickname) {
-				nickname = Chat.nicknamefilter(nickname, user);
-				if (!nickname || nickname !== match[1]) {
+				const filtered = Chat.nicknamefilter(nickname, user);
+				if (typeof filtered === 'string' && (!filtered || filtered !== match[1])) {
 					connection.popup(
 						`Your team was rejected for the following reason:\n\n` +
 						`- Your Pokémon has a banned nickname: ${match[1]}`
 					);
 					return null;
+				} else if (filtered === false) {
+					removeNicknames = true;
 				}
 			}
 			match = regex.exec(team);
@@ -146,12 +152,10 @@ class Ladder extends LadderStore {
 			}
 		}
 
-		let rating = 0;
-		let valResult;
 		if (isRated && !Ladders.disabled) {
 			const uid = user.id;
 			[valResult, rating] = await Promise.all([
-				TeamValidatorAsync.get(this.formatid).validateTeam(team, {removeNicknames: !!(user.locked || user.namelocked)}),
+				TeamValidatorAsync.get(this.formatid).validateTeam(team, {removeNicknames}),
 				this.getRating(uid),
 			]);
 			if (uid !== user.id) {
@@ -165,7 +169,7 @@ class Ladder extends LadderStore {
 				rating = 1;
 			}
 			const validator = TeamValidatorAsync.get(this.formatid);
-			valResult = await validator.validateTeam(team, {removeNicknames: !!(user.locked || user.namelocked)});
+			valResult = await validator.validateTeam(team, {removeNicknames});
 		}
 
 		if (valResult.charAt(0) !== '1') {
@@ -245,7 +249,7 @@ class Ladder extends LadderStore {
 			Chat.maybeNotifyBlocked('challenge', targetUser, user);
 			return false;
 		}
-		if (Date.now() < user.lastChallenge + 10 * SECONDS) {
+		if (Date.now() < user.lastChallenge + 10 * SECONDS && !Config.nothrottle) {
 			// 10 seconds ago, probable misclick
 			connection.popup(`You challenged less than 10 seconds after your last challenge! It's cancelled in case it's a misclick.`);
 			return false;
@@ -450,10 +454,7 @@ class Ladder extends LadderStore {
 		if (oldUserid !== user.id) return;
 		if (!search) return;
 
-		//
-		// Ladder Search Messages
-		//
-
+		// Ladder search messages
 		if (
 			!user.locked && !Rooms.lobby.isMuted(user) && !Rooms.lobby.disableLadderMessages &&
 			(((Date.now() - user.lastLadderTime) > SEARCH_COOLDOWN) &&
@@ -484,7 +485,7 @@ class Ladder extends LadderStore {
 		// users must be different
 		if (user1 === user2) return false;
 
-		if (Config.fakeladder) {
+		if (Config.noipchecks) {
 			user1.lastMatch = user2.id;
 			user2.lastMatch = user1.id;
 			return true;

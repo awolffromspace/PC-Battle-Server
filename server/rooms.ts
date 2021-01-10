@@ -15,6 +15,8 @@
  * @license MIT
  */
 
+const ALPHABET = '0123456789abcdefghijklmnopqrstuvwxyz'.split('');
+
 const TIMEOUT_EMPTY_DEALLOCATE = 10 * 60 * 1000;
 const TIMEOUT_INACTIVE_DEALLOCATE = 40 * 60 * 1000;
 const REPORT_USER_STATS_INTERVAL = 10 * 60 * 1000;
@@ -32,11 +34,13 @@ import {WriteStream} from '../lib/streams';
 import {GTSGiveaway, LotteryGiveaway, QuestionGiveaway} from './chat-plugins/wifi';
 import {QueuedHunt} from './chat-plugins/scavengers';
 import {ScavengerGameTemplate} from './chat-plugins/scavenger-games';
+import {RepeatedPhrase} from './chat-plugins/repeats';
 import {PM as RoomBattlePM, RoomBattle, RoomBattlePlayer, RoomBattleTimer} from "./room-battle";
 import {RoomGame, RoomGamePlayer} from './room-game';
 import {Roomlogs} from './roomlogs';
 import * as crypto from 'crypto';
 import {RoomAuth} from './user-groups';
+import {MODLOG_PATH, MODLOG_DB_PATH, mainModlog, PartialModlogEntry} from './modlog';
 
 /*********************************************************
  * the Room object.
@@ -56,6 +60,13 @@ interface ChatRoomTable {
 	subRooms?: string[];
 }
 
+interface ShowRequest {
+	name: string;
+	link: string;
+	comment: string;
+	dimensions?: [number, number, boolean];
+}
+
 interface BattleRoomTable {
 	p1?: string;
 	p2?: string;
@@ -71,7 +82,6 @@ export interface RoomSettings {
 	auth: {[userid: string]: GroupSymbol};
 	creationTime: number;
 
-	readonly staffAutojoin?: string | boolean;
 	readonly autojoin?: boolean;
 	aliases?: string[];
 	banwords?: string[];
@@ -79,7 +89,7 @@ export interface RoomSettings {
 	modjoin?: AuthLevel | true | null;
 	modchat?: AuthLevel | null;
 	staffRoom?: boolean;
-	language?: string | false;
+	language?: ID | false;
 	slowchat?: number | false;
 	events?: {[k: string]: RoomEvent | RoomEventAlias | RoomEventCategory};
 	filterStretching?: boolean;
@@ -90,8 +100,6 @@ export interface RoomSettings {
 	unoDisabled?: boolean;
 	blackjackDisabled?: boolean;
 	hangmanDisabled?: boolean;
-	toursEnabled?: '%' | boolean;
-	tourAnnouncements?: boolean;
 	gameNumber?: number;
 	highTraffic?: boolean;
 	isOfficial?: boolean;
@@ -103,8 +111,11 @@ export interface RoomSettings {
 	rulesLink?: string | null;
 	dataCommandTierDisplay?: 'tiers' | 'doubles tiers' | 'numbers';
 	requestShowEnabled?: boolean | null;
-	showEnabled?: GroupSymbol | true;
 	permissions?: {[k: string]: GroupSymbol};
+	minorActivity?: PollData | AnnouncementData;
+	minorActivityQueue?: (PollData | AnnouncementData)[];
+	repeats?: RepeatedPhrase[];
+	tournaments?: TournamentRoomSettings;
 
 	scavSettings?: AnyObject;
 	scavQueue?: QueuedHunt[];
@@ -117,14 +128,19 @@ export interface RoomSettings {
 	noAutoTruncate?: boolean;
 	isMultichannel?: boolean;
 }
+
+export type MessageHandler = (room: BasicRoom, message: string) => void;
 export type Room = GameRoom | ChatRoom;
-import type {Poll} from './chat-plugins/poll';
-import type {Announcement} from './chat-plugins/announcements';
+
+import type {Announcement, AnnouncementData} from './chat-plugins/announcements';
+import type {Poll, PollData} from './chat-plugins/poll';
+import type {AutoResponder} from './chat-plugins/responder';
 import type {RoomEvent, RoomEventAlias, RoomEventCategory} from './chat-plugins/room-events';
-import type {Tournament} from './tournaments/index';
+import type {Tournament, TournamentRoomSettings} from './tournaments/index';
 
 export abstract class BasicRoom {
-	roomid: RoomID;
+	/** to rename use room.rename */
+	readonly roomid: RoomID;
 	title: string;
 	readonly type: 'chat' | 'battle';
 	readonly users: UserTable;
@@ -135,10 +151,13 @@ export abstract class BasicRoom {
 	 */
 	readonly log: Roomlog;
 	/**
-	 * The room's current RoomGame, if it exists. Each room can only have 0 or 1
+	 * The room's current RoomGame, if it exists. Each room can have 0 to 2
 	 * `RoomGame`s, and `this.game.room === this`.
+	 * Rooms may also have an additional game in `this.subGame`.
+	 * However, `subGame`s do not update `user.game`.
 	 */
 	game: RoomGame | null;
+	subGame: RoomGame | null;
 	/**
 	 * The room's current battle. Battles are a type of RoomGame, so in battle
 	 * rooms (which can only be `GameRoom`s), `this.battle === this.game`.
@@ -153,8 +172,10 @@ export abstract class BasicRoom {
 	tour: Tournament | null;
 
 	auth: RoomAuth;
-	parent: Room | null;
-	subRooms: Map<string, Room> | null;
+	/** use `setParent` to set this */
+	readonly parent: Room | null;
+	/** use `subroom.setParent` to set this, or `clearSubRooms` to clear it */
+	readonly subRooms: ReadonlyMap<string, Room> | null;
 
 	readonly muteQueue: MuteEntry[];
 	userCount: number;
@@ -171,6 +192,7 @@ export abstract class BasicRoom {
 	scavLeaderboard: AnyObject;
 	giveaway?: QuestionGiveaway | LotteryGiveaway | null;
 	gtsga?: GTSGiveaway | null;
+	responder?: AutoResponder | null;
 	privacySetter?: Set<ID> | null;
 	hideReplay: boolean;
 
@@ -179,12 +201,19 @@ export abstract class BasicRoom {
 	reportJoinsInterval: NodeJS.Timer | null;
 
 	minorActivity: Poll | Announcement | null;
-	minorActivityQueue: Poll[] | null;
+	minorActivityQueue: PollData[] | null;
 	banwordRegex: RegExp | true | null;
 	logUserStatsInterval: NodeJS.Timer | null;
 	expireTimer: NodeJS.Timer | null;
 	userList: string;
-	pendingApprovals: Map<string, {name: string, link: string, comment: string}> | null;
+	pendingApprovals: Map<string, ShowRequest> | null;
+
+	messagesSent: number;
+	/**
+	 * These handlers will be invoked every n messages.
+	 * handler:number-of-messages map
+	 */
+	nthMessageHandlers: Map<MessageHandler, number>;
 
 	constructor(roomid: RoomID, title?: string, options: Partial<RoomSettings> = {}) {
 		this.users = Object.create(null);
@@ -193,6 +222,7 @@ export abstract class BasicRoom {
 
 		this.battle = null;
 		this.game = null;
+		this.subGame = null;
 		this.tour = null;
 
 		this.roomid = roomid;
@@ -247,13 +277,7 @@ export abstract class BasicRoom {
 		this.minorActivity = null;
 		this.minorActivityQueue = null;
 		if (options.parentid) {
-			const parent = Rooms.get(options.parentid);
-
-			if (parent) {
-				if (!parent.subRooms) parent.subRooms = new Map();
-				parent.subRooms.set(this.roomid, this as ChatRoom);
-				this.parent = parent;
-			}
+			this.setParent(Rooms.get(options.parentid) || null);
 		}
 
 		this.subRooms = null;
@@ -275,6 +299,8 @@ export abstract class BasicRoom {
 			this.userList = this.getUserList();
 		}
 		this.pendingApprovals = null;
+		this.messagesSent = 0;
+		this.nthMessageHandlers = new Map();
 		this.tour = null;
 		this.game = null;
 		this.battle = null;
@@ -330,9 +356,12 @@ export abstract class BasicRoom {
 		this.log.roomlog(message);
 		return this;
 	}
-	modlog(message: string) {
+	/**
+	 * Writes an entry to the modlog for that room, and the global modlog if entry.isGlobal is true.
+	 */
+	modlog(entry: PartialModlogEntry) {
 		const override = this.tour ? `${this.roomid} tournament: ${this.tour.roomid}` : undefined;
-		this.log.modlog(message, override);
+		this.log.modlog(entry, override);
 		return this;
 	}
 	uhtmlchange(name: string, message: string) {
@@ -464,7 +493,10 @@ export abstract class BasicRoom {
 		return null;
 	}
 	saveSettings() {
-		if (!this.persist) return null;
+		if (!this.persist) return;
+
+		if (!Rooms.global) return; // during initialization
+
 		Rooms.global.writeChatRoomData();
 	}
 	checkModjoin(user: User) {
@@ -514,7 +546,7 @@ export abstract class BasicRoom {
 		user.updateIdentity();
 
 		if (!(this.settings.isPrivate === true || this.settings.isPersonal)) {
-			Punishments.monitorRoomPunishments(user);
+			void Punishments.monitorRoomPunishments(user);
 		}
 
 		return userid;
@@ -624,35 +656,48 @@ export abstract class BasicRoom {
 		}
 		message += `</div>`;
 		if (this.settings.introMessage) {
-			message += `\n|raw|<div class="infobox infobox-roomintro">` +
+			message += `\n|raw|<div class="infobox infobox-roomintro"><div ${(!this.settings.isOfficial ? 'class="infobox-limited"' : '')}>` +
 				this.settings.introMessage.replace(/\n/g, '') +
-				`</div>`;
+				`</div></div>`;
 		}
-		if (this.settings.staffMessage && user.can('mute', null, this)) {
+		const staffIntro = this.getStaffIntroMessage(user);
+		if (staffIntro) message += `\n${staffIntro}`;
+		return message;
+	}
+	getStaffIntroMessage(user: User) {
+		if (!user.can('mute', null, this)) return ``;
+		let message = ``;
+		if (this.settings.staffMessage) {
 			message += `\n|raw|<div class="infobox">(Staff intro:)<br /><div>` +
 				this.settings.staffMessage.replace(/\n/g, '') +
 				`</div>`;
 		}
-		if (this.pendingApprovals?.size && user.can('mute', null, this)) {
+		if (this.pendingApprovals?.size) {
 			message += `\n|raw|<div class="infobox">`;
-			message += `<details><summary>(Pending media requests: ${this.pendingApprovals.size})</summary>`;
+			message += `<details open><summary>(Pending media requests: ${this.pendingApprovals.size})</summary>`;
 			for (const [userid, entry] of this.pendingApprovals) {
 				message += `<div class="infobox">`;
 				message += `<strong>Requester ID:</strong> ${userid}<br />`;
-				message += `<strong>Link:</strong> <a href="${entry.link}">${entry.link}</a><br />`;
+				if (entry.dimensions) {
+					const [width, height, resized] = entry.dimensions;
+					message += `<strong>Link:</strong><br /> <img src="${entry.link}" width="${width}" height="${height}"><br />`;
+					if (resized) message += `(Resized)<br />`;
+				} else {
+					message += `<strong>Link:</strong><br /> <a href="${entry.link}"">Link</a><br />`;
+				}
 				message += `<strong>Comment:</strong> ${entry.comment ? entry.comment : 'None.'}<br />`;
 				message += `<button class="button" name="send" value="/approveshow ${userid}">Approve</button>` +
 				`<button class="button" name="send" value="/denyshow ${userid}">Deny</button></div>`;
-				message += `</div><hr />`;
+				message += `<hr />`;
 			}
 			message += `</details></div>`;
 		}
-		return message;
+		return message ? `|raw|${message}` : ``;
 	}
 	getSubRooms(includeSecret = false) {
 		if (!this.subRooms) return [];
 		return [...this.subRooms.values()].filter(
-			room => !room.settings.isPrivate || includeSecret
+			room => includeSecret ? true : !room.settings.isPrivate && !room.settings.isPersonal
 		);
 	}
 	validateTitle(newTitle: string, newID?: string) {
@@ -669,26 +714,100 @@ export abstract class BasicRoom {
 		if (newID.length > MAX_CHATROOM_ID_LENGTH) throw new Chat.ErrorMessage("The given room title is too long.");
 		if (Rooms.search(newTitle)) throw new Chat.ErrorMessage(`The room '${newTitle}' already exists.`);
 	}
+	setParent(room: Room | null) {
+		if (this.parent === room) return;
 
-	getReplayData() {
-		if (!this.roomid.endsWith('pw')) return {id: this.roomid.slice(7)};
-		const end = this.roomid.length - 2;
-		const lastHyphen = this.roomid.lastIndexOf('-', end);
-		return {id: this.roomid.slice(7, lastHyphen), password: this.roomid.slice(lastHyphen, end)};
+		if (this.parent) {
+			(this as any).parent.subRooms.delete(this.roomid);
+			if (!this.parent.subRooms!.size) {
+				(this as any).parent.subRooms = null;
+			}
+		}
+		(this as any).parent = room;
+		if (room) {
+			if (!room.subRooms) {
+				(room as any).subRooms = new Map();
+			}
+			(room as any).subRooms.set(this.roomid, this);
+			this.settings.parentid = room.roomid;
+		} else {
+			delete this.settings.parentid;
+		}
+
+		this.saveSettings();
+
+		for (const userid in this.users) {
+			this.users[userid].updateIdentity(this.roomid);
+		}
+	}
+	clearSubRooms() {
+		if (!this.subRooms) return;
+		for (const room of this.subRooms.values()) {
+			(room as any).parent = null;
+		}
+		(this as any).subRooms = null;
+
+		// this doesn't update parentid or subroom user symbols because it's
+		// intended to be used for cleanup only
+	}
+	setPrivate(privacy: boolean | 'voice' | 'hidden') {
+		this.settings.isPrivate = privacy;
+		this.saveSettings();
+
+		if (privacy) {
+			for (const user of Object.values(this.users)) {
+				if (!user.named) {
+					user.leaveRoom(this.roomid);
+					user.popup(`The room <<${this.roomid}>> has been made private; you must log in to be in private rooms.`);
+				}
+			}
+		}
+
+		if (this.battle) {
+			if (privacy) {
+				if (this.roomid.endsWith('pw')) return true;
+
+				// This is the same password generation approach as genPassword in the client replays.lib.php
+				// but obviously will not match given mt_rand there uses a different RNG and seed.
+				let password = '';
+				for (let i = 0; i < 31; i++) password += ALPHABET[Math.floor(Math.random() * ALPHABET.length)];
+
+				this.rename(this.title, `${this.roomid}-${password}pw` as RoomID, true);
+			} else {
+				if (!this.roomid.endsWith('pw')) return true;
+
+				const lastDashIndex = this.roomid.lastIndexOf('-');
+				if (lastDashIndex < 0) throw new Error(`invalid battle ID ${this.roomid}`);
+
+				this.rename(this.title, this.roomid.slice(0, lastDashIndex) as RoomID);
+			}
+		}
+	}
+
+	/**
+	 * Displays a warning popup to all users in the room.
+	 * Returns a list of all the user IDs that were warned.
+	 */
+	warnParticipants(message: string) {
+		const warned = Object.values(this.users);
+		for (const user of warned) {
+			user.popup(`|modal|${message}`);
+		}
+		return warned;
 	}
 
 	/**
 	 * @param newID Add this param if the roomid is different from `toID(newTitle)`
 	 * @param noAlias Set this param to true to not redirect aliases and the room's old name to its new name.
 	 */
-	async rename(newTitle: string, newID?: RoomID, noAlias?: boolean) {
+	rename(newTitle: string, newID?: RoomID, noAlias?: boolean) {
 		if (!newID) newID = toID(newTitle) as RoomID;
 		this.validateTitle(newTitle, newID);
 		if (this.type === 'chat' && this.game) {
 			throw new Chat.ErrorMessage(`Please finish your game (${this.game.title}) before renaming ${this.roomid}.`);
 		}
 		const oldID = this.roomid;
-		this.roomid = newID;
+		(this as any).roomid = newID;
 		this.title = newTitle;
 		Rooms.rooms.delete(oldID);
 		Rooms.rooms.set(newID, this as Room);
@@ -720,6 +839,9 @@ export abstract class BasicRoom {
 			}
 			this.settings.aliases = undefined;
 		}
+
+		this.game?.renameRoom(newID);
+
 		this.saveSettings();
 
 		for (const user of Object.values(this.users)) {
@@ -728,20 +850,20 @@ export abstract class BasicRoom {
 		}
 
 		if (this.parent && this.parent.subRooms) {
-			this.parent.subRooms.delete(oldID);
-			this.parent.subRooms.set(newID, this as ChatRoom);
+			(this as any).parent.subRooms.delete(oldID);
+			(this as any).parent.subRooms.set(newID, this as ChatRoom);
 		}
-
 		if (this.subRooms) {
 			for (const subRoom of this.subRooms.values()) {
-				subRoom.parent = this as ChatRoom;
+				(subRoom as any).parent = this as ChatRoom;
+				subRoom.settings.parentid = newID;
 			}
 		}
 
 		this.settings.title = newTitle;
 		this.saveSettings();
 
-		return this.log.rename(newID);
+		void this.log.rename(newID);
 	}
 
 	onConnect(user: User, connection: Connection) {
@@ -760,6 +882,9 @@ export abstract class BasicRoom {
 		if (user.named) {
 			this.reportJoin('j', user.getIdentityWithStatus(this.roomid), user);
 		}
+
+		const staffIntro = this.getStaffIntroMessage(user);
+		if (staffIntro) this.sendUser(user, staffIntro);
 
 		this.users[user.id] = user;
 		this.userCount++;
@@ -782,12 +907,8 @@ export abstract class BasicRoom {
 		this.users[user.id] = user;
 		if (joining) {
 			this.reportJoin('j', user.getIdentityWithStatus(this.roomid), user);
-			if (this.settings.staffMessage && user.can('mute', null, this)) {
-				this.sendUser(
-					user,
-					`|raw|<div class="infobox">(Staff intro:)<br /><div>${this.settings.staffMessage.replace(/\n/g, '')}</div></div>`
-				);
-			}
+			const staffIntro = this.getStaffIntroMessage(user);
+			if (staffIntro) this.sendUser(user, staffIntro);
 		} else if (!user.named) {
 			this.reportJoin('l', oldid, user);
 		} else {
@@ -842,10 +963,8 @@ export abstract class BasicRoom {
 			delete this.users[i];
 		}
 
-		if (this.parent && this.parent.subRooms) {
-			this.parent.subRooms.delete(this.roomid);
-			if (!this.parent.subRooms.size) this.parent.subRooms = null;
-		}
+		this.setParent(null);
+		this.clearSubRooms();
 
 		Rooms.global.deregisterChatRoom(this.roomid);
 		Rooms.global.delistChatRoom(this.roomid);
@@ -886,11 +1005,11 @@ export abstract class BasicRoom {
 
 		void this.log.destroy(true);
 
-		// get rid of some possibly-circular references
 		Rooms.rooms.delete(this.roomid);
+		if (this.roomid === 'lobby') Rooms.lobby = null;
 	}
 	tr(strings: string | TemplateStringsArray, ...keys: any[]) {
-		return Chat.tr(this.settings.language || 'english', strings, ...keys);
+		return Chat.tr(this.settings.language || 'english' as ID, strings, ...keys);
 	}
 }
 
@@ -902,9 +1021,9 @@ export class GlobalRoomState {
 	 */
 	readonly autojoinList: RoomID[];
 	/**
-	 * Rooms that staff autojoin upon connecting
+	 * Rooms that users autojoin upon logging in
 	 */
-	readonly staffAutojoinList: RoomID[];
+	readonly modjoinedAutojoinList: RoomID[];
 	readonly ladderIpLog: WriteStream;
 	readonly reportUserStatsInterval: NodeJS.Timeout;
 	lockdown: boolean | 'pre' | 'ddos';
@@ -934,20 +1053,27 @@ export class GlobalRoomState {
 				title: 'Staff',
 				auth: {},
 				creationTime: Date.now(),
-				isPrivate: true,
-				staffRoom: true,
-				staffAutojoin: true,
+				isPrivate: 'hidden',
+				modjoin: '%',
+				autojoin: true,
 			}];
 		}
 
 		this.chatRooms = [];
 
 		this.autojoinList = [];
-		this.staffAutojoinList = [];
+		this.modjoinedAutojoinList = [];
 		for (const [i, settings] of this.settingsList.entries()) {
 			if (!settings || !settings.title) {
 				Monitor.warn(`ERROR: Room number ${i} has no data and could not be loaded.`);
 				continue;
+			}
+			if ((settings as any).staffAutojoin) {
+				// convert old staffAutojoin format
+				delete (settings as any).staffAutojoin;
+				(settings as any).autojoin = true;
+				if (!settings.modjoin) settings.modjoin = '%';
+				if (settings.isPrivate === true) settings.isPrivate = 'hidden';
 			}
 
 			// We're okay with assinging type `ID` to `RoomID` here
@@ -955,7 +1081,7 @@ export class GlobalRoomState {
 			// meaning, unlike in helptickets, groupchats, battles etc
 			// where they are used for shared modlogs and the like
 			const id = toID(settings.title) as RoomID;
-			Monitor.notice("NEW CHATROOM: " + id);
+			Monitor.notice("RESTORE CHATROOM: " + id);
 			const room = Rooms.createChatRoom(id, settings.title, settings);
 			if (room.settings.aliases) {
 				for (const alias of room.settings.aliases) {
@@ -964,8 +1090,13 @@ export class GlobalRoomState {
 			}
 
 			this.chatRooms.push(room);
-			if (room.settings.autojoin) this.autojoinList.push(id);
-			if (room.settings.staffAutojoin) this.staffAutojoinList.push(id);
+			if (room.settings.autojoin) {
+				if (room.settings.modjoin) {
+					this.modjoinedAutojoinList.push(id);
+				} else {
+					this.autojoinList.push(id);
+				}
+			}
 		}
 		Rooms.lobby = Rooms.rooms.get('lobby') as ChatRoom;
 
@@ -1003,8 +1134,8 @@ export class GlobalRoomState {
 		this.lastWrittenBattle = this.lastBattle;
 	}
 
-	modlog(message: string, overrideID?: string) {
-		void Rooms.Modlog.write('global', message, overrideID);
+	modlog(entry: PartialModlogEntry, overrideID?: string) {
+		void Rooms.Modlog.write('global', entry, overrideID);
 	}
 
 	writeChatRoomData() {
@@ -1012,7 +1143,7 @@ export class GlobalRoomState {
 			JSON.stringify(this.settingsList)
 				.replace(/\{"title":/g, '\n{"title":')
 				.replace(/\]$/, '\n]')
-		));
+		), {throttle: 5000});
 	}
 
 	writeNumRooms() {
@@ -1111,14 +1242,10 @@ export class GlobalRoomState {
 		return Config.rankList;
 	}
 
-	getBattles(/** "formatfilter, elofilter, usernamefilter */ filter: string) {
+	getBattles(/** formatfilter, elofilter, usernamefilter */ filter: string) {
 		const rooms: GameRoom[] = [];
-		let skipCount = 0;
 		const [formatFilter, eloFilterString, usernameFilter] = filter.split(',');
 		const eloFilter = +eloFilterString;
-		if (this.battleCount > 150 && !formatFilter && !eloFilter && !usernameFilter) {
-			skipCount = this.battleCount - 150;
-		}
 		for (const room of Rooms.rooms.values()) {
 			if (!room || !room.active || room.settings.isPrivate) continue;
 			if (room.type !== 'battle') continue;
@@ -1130,8 +1257,6 @@ export class GlobalRoomState {
 				if (!p1userid || !p2userid) continue;
 				if (!p1userid.startsWith(usernameFilter) && !p2userid.startsWith(usernameFilter)) continue;
 			}
-			if (skipCount && skipCount--) continue;
-
 			rooms.push(room);
 		}
 
@@ -1163,7 +1288,7 @@ export class GlobalRoomState {
 		for (const room of this.chatRooms) {
 			if (!room) continue;
 			if (room.parent) continue;
-			if (room.settings.isPrivate && !(room.settings.isPrivate === 'voice' && user.group !== ' ')) continue;
+			if (room.settings.isPrivate && !(room.settings.isPrivate === 'voice' && user.tempGroup !== ' ')) continue;
 			const roomData: ChatRoomTable = {
 				title: room.title,
 				desc: room.settings.desc || '',
@@ -1279,7 +1404,7 @@ export class GlobalRoomState {
 	}
 	autojoinRooms(user: User, connection: Connection) {
 		// we only autojoin regular rooms if the client requests it with /autojoin
-		// note that this restriction doesn't apply to staffAutojoin
+		// note that this restriction doesn't apply to modjoined autojoin rooms
 		let includesLobby = false;
 		for (const roomName of this.autojoinList) {
 			user.joinRoom(roomName, connection);
@@ -1289,19 +1414,14 @@ export class GlobalRoomState {
 	}
 	checkAutojoin(user: User, connection?: Connection) {
 		if (!user.named) return;
-		for (let [i, staffAutojoin] of this.staffAutojoinList.entries()) {
-			const room = Rooms.get(staffAutojoin);
+		for (let [i, roomid] of this.modjoinedAutojoinList.entries()) {
+			const room = Rooms.get(roomid);
 			if (!room) {
-				this.staffAutojoinList.splice(i, 1);
+				this.modjoinedAutojoinList.splice(i, 1);
 				i--;
 				continue;
 			}
-			if (room.settings.staffAutojoin === true && user.isStaff ||
-					typeof room.settings.staffAutojoin === 'string' && room.settings.staffAutojoin.includes(user.group) ||
-					room.auth.has(user.id)) {
-				// if staffAutojoin is true: autojoin if isStaff
-				// if staffAutojoin is String: autojoin if user.group in staffAutojoin
-				// if staffAutojoin is anything truthy: autojoin if user has any roomauth
+			if (room.checkModjoin(user)) {
 				user.joinRoom(room.roomid, connection);
 			}
 		}
@@ -1351,7 +1471,7 @@ export class GlobalRoomState {
 			}
 		}
 		for (const user of Users.users.values()) {
-			user.send(`|pm|&|${user.group}${user.name}|/raw <div class="broadcast-red"><b>The server is restarting soon.</b><br />Please finish your battles quickly. No new battles can be started until the server resets in a few minutes.</div>`);
+			user.send(`|pm|&|${user.tempGroup}${user.name}|/raw <div class="broadcast-red"><b>The server is restarting soon.</b><br />Please finish your battles quickly. No new battles can be started until the server resets in a few minutes.</div>`);
 		}
 
 		this.lockdown = true;
@@ -1457,7 +1577,9 @@ export class GlobalRoomState {
 				}
 
 				if (curRoom.auth.has(userid)) {
-					roomauth.push(`${curRoom.auth.get(userid)}${id}`);
+					let oldGroup = curRoom.auth.get(userid) as string;
+					if (oldGroup === ' ') oldGroup = 'whitelist in ';
+					roomauth.push(`${oldGroup}${id}`);
 				}
 			}
 		}
@@ -1468,17 +1590,9 @@ export class GlobalRoomState {
 export class ChatRoom extends BasicRoom {
 	// This is not actually used, this is just a fake class to keep
 	// TypeScript happy
-	battle: null;
-	active: false;
-	type: 'chat';
-	parent: ChatRoom | null;;
-	constructor() {
-		super('');
-		this.battle = null;
-		this.active = false;
-		this.type = 'chat';
-		this.parent = null;
-	}
+	battle = null;
+	active: false = false;
+	type: 'chat' = 'chat';
 }
 
 export class GameRoom extends BasicRoom {
@@ -1497,7 +1611,6 @@ export class GameRoom extends BasicRoom {
 	game: RoomGame;
 	modchatUser: string;
 	active: boolean;
-	parent: ChatRoom | null;
 	constructor(roomid: RoomID, title?: string, options: Partial<RoomSettings> & AnyObject = {}) {
 		options.noLogTimes = true;
 		options.noAutoTruncate = true;
@@ -1513,7 +1626,7 @@ export class GameRoom extends BasicRoom {
 		// console.log("NEW BATTLE");
 
 		this.tour = options.tour || null;
-		this.parent = options.parent || (this.tour && this.tour.room) || null;
+		this.setParent(options.parent || (this.tour && this.tour.room) || null);
 
 		this.p1 = options.p1 || null;
 		this.p2 = options.p2 || null;
@@ -1603,8 +1716,9 @@ export class GameRoom extends BasicRoom {
 		const datahash = crypto.createHash('md5').update(data.replace(/[^(\x20-\x7F)]+/g, '')).digest('hex');
 		let rating = 0;
 		if (battle.ended && this.rated) rating = this.rated;
+		const {id, password} = this.getReplayData();
 		const [success] = await LoginServer.request('prepreplay', {
-			id: this.roomid.substr(7),
+			id: id,
 			loghash: datahash,
 			p1: battle.p1.name,
 			p2: battle.p2.name,
@@ -1621,9 +1735,17 @@ export class GameRoom extends BasicRoom {
 		}
 		connection.send('|queryresponse|savereplay|' + JSON.stringify({
 			log: data,
-			id: this.roomid.substr(7),
+			id: id,
+			password: password,
 			silent: options === 'forpunishment' || options === 'silent',
 		}));
+	}
+
+	getReplayData() {
+		if (!this.roomid.endsWith('pw')) return {id: this.roomid.slice(7)};
+		const end = this.roomid.length - 2;
+		const lastHyphen = this.roomid.lastIndexOf('-', end);
+		return {id: this.roomid.slice(7, lastHyphen), password: this.roomid.slice(lastHyphen + 1, end)};
 	}
 }
 
@@ -1633,7 +1755,9 @@ function getRoom(roomid?: string | BasicRoom) {
 }
 
 export const Rooms = {
-	Modlog: require('./modlog').modlog,
+	MODLOG_PATH,
+	MODLOG_DB_PATH,
+	Modlog: mainModlog,
 	/**
 	 * The main roomid:Room table. Please do not hold a reference to a
 	 * room long-term; just store the roomid and grab it from here (with
@@ -1740,13 +1864,12 @@ export const Rooms = {
 		}
 
 		if (privacySetter.size) {
-			const prefix = battle.forcedPublic();
-			if (prefix) {
-				room.settings.isPrivate = false;
+			if (battle.forcePublic) {
+				room.setPrivate(false);
 				room.settings.modjoin = null;
-				room.add(`|raw|<div class="broadcast-blue"><strong>This battle is required to be public due to a player having a name prefixed by '${prefix}'.</div>`);
-			} else if (!options.tour || (room.tour && room.tour.modjoin)) {
-				room.settings.isPrivate = 'hidden';
+				room.add(`|raw|<div class="broadcast-blue"><strong>This battle is required to be public due to a player having a name starting with '${battle.forcePublic}'.</div>`);
+			} else if (!options.tour || (room.tour?.allowModjoin)) {
+				room.setPrivate('hidden');
 				if (inviteOnly) room.settings.modjoin = '%';
 				room.privacySetter = privacySetter;
 				if (inviteOnly) {
