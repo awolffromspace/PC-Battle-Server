@@ -1483,7 +1483,7 @@ export class RandomTeams {
 			} else if (formatID === 'gen8galarrandom') {
 				if (species.gen !== 8) continue;
 			} else if (formatID === 'gen8colorrandom') {
-				if (species.color.includes(teamColor) < 0) continue;
+				if (species.color !== teamColor) continue;
 			}
 			pokemonPool.push(id);
 		}
