@@ -1579,14 +1579,14 @@ export const Formats: FormatList = [
 		team: 'random',
 		ruleset: ['[Gen 8] Random (no PotD)'],
 	},
+	{
+		name: "[Gen 8] PU Random",
+
+		mod: 'gen8',
+		team: 'random',
+		ruleset: ['[Gen 8] Random (no PotD)'],
+	},
 	/**
-	*{
-	*	name: "[Gen 8] PU Random",
-	*
-	*	mod: 'gen8',
-	*	team: 'random',
-	*	ruleset: ['[Gen 8] Random (no PotD)'],
-	*},
 	*{
 	*	name: "[Gen 8] LC Random",
 	*

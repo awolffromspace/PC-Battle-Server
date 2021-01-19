@@ -1571,7 +1571,7 @@ export class RandomTeams {
 			const typeCombo = types.slice().sort().join();
 
 			// Limit one Pokemon per tier, two for Monotype
-			if (formatID !== 'gen8uberrandom' && formatID !== 'gen8ouuurandom' && formatID !== 'gen7runurandom' && formatID !== 'gen7purandom' && formatID !== 'gen7lcrandom') {
+			if (formatID !== 'gen8uberrandom' && formatID !== 'gen8ouuurandom' && formatID !== 'gen8runurandom' && formatID !== 'gen8purandom' && formatID !== 'gen7lcrandom') {
 				if ((tierCount[tier] >= (isMonotype ? 2 : 1)) && !this.randomChance(1, Math.pow(5, tierCount[tier]))) {
 					continue;
 				}
