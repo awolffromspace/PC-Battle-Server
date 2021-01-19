@@ -1653,11 +1653,9 @@ export const Moves: {[moveid: string]: MoveData} = {
 		flags: {contact: 1, protect: 1, mirror: 1},
 		onTryHit(pokemon) {
 			// will shatter screens through sub, before you hit
-			if (pokemon.runImmunity('Fighting')) {
-				pokemon.side.removeSideCondition('reflect');
-				pokemon.side.removeSideCondition('lightscreen');
-				pokemon.side.removeSideCondition('auroraveil');
-			}
+			pokemon.side.removeSideCondition('reflect');
+			pokemon.side.removeSideCondition('lightscreen');
+			pokemon.side.removeSideCondition('auroraveil');
 		},
 		secondary: null,
 		target: "normal",
@@ -13166,11 +13164,9 @@ export const Moves: {[moveid: string]: MoveData} = {
 		flags: {bite: 1, contact: 1, protect: 1, mirror: 1},
 		onTryHit(pokemon) {
 			// will shatter screens through sub, before you hit
-			if (pokemon.runImmunity('Psychic')) {
-				pokemon.side.removeSideCondition('reflect');
-				pokemon.side.removeSideCondition('lightscreen');
-				pokemon.side.removeSideCondition('auroraveil');
-			}
+			pokemon.side.removeSideCondition('reflect');
+			pokemon.side.removeSideCondition('lightscreen');
+			pokemon.side.removeSideCondition('auroraveil');
 		},
 		secondary: null,
 		target: "normal",
@@ -17132,6 +17128,7 @@ export const Moves: {[moveid: string]: MoveData} = {
 				target.volatiles['substitute'].hp -= damage;
 				source.lastDamage = damage;
 				if (target.volatiles['substitute'].hp <= 0) {
+					if (move.ohko) this.add('-ohko');
 					target.removeVolatile('substitute');
 				} else {
 					this.add('-activate', target, 'move: Substitute', '[damage]');
