@@ -1459,7 +1459,7 @@ export class RandomTeams {
 			} else if (formatID === 'gen8runurandom') {
 				if (species.tier !== 'RU' && species.tier !== 'NUBL' && species.tier !== 'NU' && species.tier !== 'PUBL') continue;
 			} else if (formatID === 'gen8purandom') {
-				if (species.tier !== 'PU') continue;
+				if (species.tier !== 'PU' && species.tier !== '(PU)') continue;
 			} else if (formatID === 'gen8lcrandom') {
 				if (species.tier !== 'LC') continue;
 			} else if (formatID === 'gen8generationalrandom') {
