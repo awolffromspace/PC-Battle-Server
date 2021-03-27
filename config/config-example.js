@@ -1042,6 +1042,7 @@ exports.grouplist = [
 		declare: true,
 		modchat: 'a',
 		gamemanagement: true,
+		forcewin: true,
 		tournaments: true,
 		joinbattle: true,
 	},

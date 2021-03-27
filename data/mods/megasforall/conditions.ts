@@ -1,3 +1,79 @@
+const longwhip: ConditionData = {
+	// this is a slot condition
+	onResidualOrder: 3,
+	onResidual(target) {
+		// unlike a future move, Long Whip activates each turn
+		this.effectData.target = this.effectData.side.active[this.effectData.position];
+		const data = this.effectData;
+		const move = this.dex.getMove(data.move);
+		if (data.target.fainted || data.target === data.source) {
+			this.hint(`${move.name} did not hit because the target is ${(data.fainted ? 'fainted' : 'the user')}.`);
+			return;
+		}
+
+		this.add('-message', `${(data.target.illusion ? data.target.illusion.name : data.target.name)} took the ${move.name} attack!`);
+		data.target.removeVolatile('Protect');
+		data.target.removeVolatile('Endure');
+
+		if (data.source.hasAbility('infiltrator') && this.gen >= 6) {
+			data.moveData.infiltrates = true;
+		}
+		if (data.source.hasAbility('normalize') && this.gen >= 6) {
+			data.moveData.type = 'Normal';
+		}
+		if (data.source.hasAbility('adaptability') && this.gen >= 6) {
+			data.moveData.stab = 2;
+		}
+		if (data.move.name === 'Triple Axel' || data.move.name === 'Triple Kick') {
+			data.moveData.longWhipBoost = 3 - data.duration;
+		}
+		data.moveData.accuracy = true;
+		data.moveData.isFutureMove = true;
+		data.move.multihit = null;
+
+		const hitMove = new this.dex.Move(data.moveData) as ActiveMove;
+		if (data.source.isActive) {
+			this.add('-anim', data.source, hitMove, data.target);
+		}
+		this.trySpreadMoveHit([data.target], data.source, hitMove);
+	},
+	onEnd(target) {
+		// unlike a future move, Long Whip activates each turn
+		this.effectData.target = this.effectData.side.active[this.effectData.position];
+		const data = this.effectData;
+		const move = this.dex.getMove(data.move);
+		if (data.target.fainted || data.target === data.source) {
+			this.hint(`${move.name} did not hit because the target is ${(data.fainted ? 'fainted' : 'the user')}.`);
+			return;
+		}
+
+		this.add('-message', `${(data.target.illusion ? data.target.illusion.name : data.target.name)} took the ${move.name} attack!`);
+		data.target.removeVolatile('Protect');
+		data.target.removeVolatile('Endure');
+
+		if (data.source.hasAbility('infiltrator') && this.gen >= 6) {
+			data.moveData.infiltrates = true;
+		}
+		if (data.source.hasAbility('normalize') && this.gen >= 6) {
+			data.moveData.type = 'Normal';
+		}
+		if (data.source.hasAbility('adaptability') && this.gen >= 6) {
+			data.moveData.stab = 2;
+		}
+		if (data.move.name === 'Triple Axel' || data.move.name === 'Triple Kick') {
+			data.moveData.longWhipBoost = 3 - data.duration;
+		}
+		data.moveData.accuracy = true;
+		data.moveData.isFutureMove = true;
+		data.move.multihit = null;
+
+		const hitMove = new this.dex.Move(data.moveData) as ActiveMove;
+		if (data.source.isActive) {
+			this.add('-anim', data.source, hitMove, data.target);
+		}
+		this.trySpreadMoveHit([data.target], data.source, hitMove);
+	},
+};
 export const Conditions: {[k: string]: ConditionData} = {
 	desertgales: {
 		name: 'Desert Gales',
@@ -36,7 +112,7 @@ export const Conditions: {[k: string]: ConditionData} = {
 			if (move.type === 'Rock' || move.type === 'Ground' || move.type === 'Steel') {
 				this.debug('Desert Gales boost');
 				this.add('-message', `${move.name} was powered up by the desert gales!`);
-				return this.chainModify([0x1333, 0x1000]);
+				return this.chainModify([4915, 4096]);
 			}
 		},
 		onResidual() {
@@ -46,6 +122,50 @@ export const Conditions: {[k: string]: ConditionData} = {
 		onEnd() {
 			this.add('-weather', 'none', '[silent]');
 			this.add('-message', `The desert gales subsided!`);
+		},
+	},
+	diamonddust: {
+		name: 'Diamond Dust',
+		effectType: 'Weather',
+		duration: 5,
+		durationCallback(source, effect) {
+			if (source?.hasItem('icyrock')) {
+				return 8;
+			}
+			return 5;
+		},
+		onStart(battle, source, effect) {
+			if (effect?.effectType === 'Ability') {
+				if (this.gen <= 5) this.effectData.duration = 0;
+				this.add('-ability', source, 'Diamond Dust');
+				this.add('-weather', 'Diamond Dust', '[silent]');
+				this.add('-message', `A cloud of diamond dust blew in!`);
+				this.add('-message', "All Rock-type damage, including Stealth Rock, will be nullified.");
+				this.add('-message', "Other weather-related moves and Abilities will behave as they do in hail.");
+			} else {
+				this.add('-weather', 'Diamond Dust', '[silent]');
+			}
+		},
+		onDamage(damage, target, source, effect) {
+			if (effect && effect.id === 'stealthrock') {
+				this.add('-message', `${target.name} was protected from Stealth Rock by the diamond dust!`);
+				return false;
+			}
+		},
+		onTryHit(target, source, move) {
+			if (move.type === 'Rock') {
+				this.add('-message', `${target.name} was protected from ${move.name} by the diamond dust!`);
+				this.add('-immune', target);
+				return null;
+			}
+		},
+		onResidual() {
+			this.add('-weather', 'Diamond Dust', '[upkeep]');
+			this.add('-message', `The air is sparkling with diamond dust!`);
+		},
+		onEnd() {
+			this.add('-weather', 'none', '[silent]');
+			this.add('-message', `The cloud of diamond dust blew away!`);
 		},
 	},
 	settle1: {
@@ -152,4 +272,9 @@ export const Conditions: {[k: string]: ConditionData} = {
 			}
 		},
 	},
+	longwhip1: longwhip,
+	longwhip2: longwhip,
+	longwhip3: longwhip,
+	longwhip4: longwhip,
+	longwhip5: longwhip,
 };

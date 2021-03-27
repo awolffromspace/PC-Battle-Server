@@ -138,6 +138,7 @@ export const Moves: {[k: string]: ModdedMoveData} = {
 	},
 	bite: {
 		inherit: true,
+		category: "Physical",
 		secondary: {
 			chance: 10,
 			volatileStatus: 'flinch',
@@ -580,7 +581,7 @@ export const Moves: {[k: string]: ModdedMoveData} = {
 		inherit: true,
 		onHit(pokemon) {
 			const foe = pokemon.side.foe.active[0];
-			if (!foe || !foe.lastMove || foe.lastMove.id === 'mirrormove') {
+			if (!foe?.lastMove || foe.lastMove.id === 'mirrormove') {
 				return false;
 			}
 			this.useMove(foe.lastMove.id, pokemon);
@@ -667,6 +668,7 @@ export const Moves: {[k: string]: ModdedMoveData} = {
 		inherit: true,
 		heal: null,
 		onHit(target) {
+			if (target.hp === target.maxhp) return false;
 			// Fail when health is 255 or 511 less than max
 			if (target.hp === (target.maxhp - 255) || target.hp === (target.maxhp - 511) || target.hp === target.maxhp) {
 				this.hint("In Gen 1, recovery moves fail if (user's maximum HP - user's current HP + 1) is divisible by 256.");
@@ -774,6 +776,7 @@ export const Moves: {[k: string]: ModdedMoveData} = {
 		inherit: true,
 		heal: null,
 		onHit(target) {
+			if (target.hp === target.maxhp) return false;
 			// Fail when health is 255 or 511 less than max
 			if (target.hp === (target.maxhp - 255) || target.hp === (target.maxhp - 511) || target.hp === target.maxhp) {
 				this.hint("In Gen 1, recovery moves fail if (user's maximum HP - user's current HP + 1) is divisible by 256.");
