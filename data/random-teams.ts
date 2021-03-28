@@ -43,7 +43,7 @@ const MixedSetup = [
 ];
 // Moves which boost Speed:
 const SpeedSetup = [
-	'agility', 'autotomize', 'flamecharge', 'rockpolish', 'shiftgear', 'dragondance',
+	'agility', 'autotomize', 'flamecharge', 'rockpolish', 'shiftgear',
 ];
 // Moves that shouldn't be the only STAB moves:
 const NoStab = [
